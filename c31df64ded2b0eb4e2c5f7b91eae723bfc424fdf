@@ -1,0 +1,113 @@
+---
+date: '2025-12-18'
+id: 20251218-use-hatchling-as-build-backend
+status: proposed
+title: Use Hatchling as Build Backend
+---
+
+# Use Hatchling as Build Backend
+
+## Context and Problem Statement
+We need a PEP 517-compatible build backend for our pyproject.toml-based Python project that:
+
+- Keeps package versioning DRY with a single source of truth in the package code (i.e., `__version__` in `src/package/__init__.py`).
+- Minimizes boilerplate in `pyproject.toml`.
+- Complies with modern PEPs for packaging metadata and build isolation (PEP 517/518/621).
+- Is actively maintained and fits into a modern tooling ecosystem.
+
+Current situation:
+- The project uses a src-layout and wants the canonical version defined in code.
+- We want to avoid verbose configuration or multiple places to update the version.
+- CI and local builds must be compatible with standard PEP 517 frontends (pip, build, hatch CLI, etc.).
+
+## Decision Drivers
+- Dynamic versioning: Single source of truth in `__init__.py` (`__version__`).
+- Clean `pyproject.toml`: Minimal boilerplate and clear configuration.
+- PEP compliance: Full compliance with PEP 517 (build backend), PEP 518 (build-system table), and PEP 621 (project metadata).
+- Active maintenance and ecosystem: Prefer tools that are maintained and part of an active ecosystem (Hatch family).
+- Compatibility: Should work with pip, build toolchains, and common CI setups.
+
+## Considered Options
+- setuptools
+  - Pros: Ubiquitous, very feature-rich, many projects already use it.
+  - Cons: Legacy code-paths and configuration; often verbose configuration in `setup.cfg`/`setup.py`; version management typically requires extra plugins or manual duplication.
+  - Dynamic versioning: Possible with plugins (e.g., setuptools_scm) but adds complexity and more moving parts.
+
+- Flit
+  - Pros: Very simple configuration and first-class pyproject.toml support; good for pure-Python libraries.
+  - Cons: Limited extensibility and custom build behavior; version extraction from code is less flexible compared to Hatchling.
+  - Dynamic versioning: Supports configuration, but less ergonomic for code-based single-source versions for certain layouts.
+
+- Hatchling (chosen)
+  - Pros: Modern build backend designed for pyproject.toml-first workflows; lightweight; built-in support for reading version from source via `tool.hatch.version`; integrates with the broader Hatch ecosystem; clean, minimal config.
+  - Cons: Another tool to adopt/learn (but small surface area).
+  - Dynamic versioning: Direct, first-class support for extracting `__version__` from a module file.
+
+## Decision Outcome
+Chosen option: Use Hatchling as the PEP 517 build backend with dynamic versioning configured to read the version from `src/package/__init__.py`.
+
+Justification:
+- Hatchling provides first-class, simple configuration for dynamic versioning (single source of truth) without requiring extra plugins.
+- It keeps `pyproject.toml` concise and aligns with PEP 517/518/621 modern packaging practices.
+- It is actively maintained and part of the Hatch ecosystem, which provides a consistent set of tools (versioning, publishing, virtual environments) if we need them in the future.
+- Minimal developer friction to read and maintain the version in code: no duplicated metadata between code and packaging config.
+
+Implementation (pyproject snippets and notes):
+- Add build-system requirement and build backend to `pyproject.toml` (example):
+  ```
+  [build-system]
+  requires = ["hatchling"]
+  build-backend = "hatchling.build"
+  ```
+  (The minimal required entry provided: `[build-system] requires = ['hatchling']` — add `build-backend = "hatchling.build"` to be explicit per PEP 517.)
+
+- Configure Hatchling to read version from the package `__init__.py`:
+  ```
+  [tool.hatch.version]
+  path = "src/package/__init__.py"
+  ```
+  - Ensure the target file exposes a parseable `__version__` variable, e.g.:
+    ```python
+    # src/package/__init__.py
+    __version__ = "1.2.3"
+    ```
+
+- Build and CI implications:
+  - Ensure the build environment (CI) installs the build backend as specified by `pyproject.toml` (PEP 517 build isolation will install hatchling).
+  - Tests and local workflows that relied on previous tooling should update any build or publish commands to use pip/build/hatch as appropriate. Example usage:
+    - `python -m build` (build will use PEP 517 and install hatchling automatically)
+    - `pip install .` (PEP 517 installs hatchling for the build)
+    - Optional: use `hatch build` if adopting Hatch CLI for convenience.
+
+## Consequences
+
+Good
+- Version is single-source-of-truth in code:
+  - `__version__` in `src/package/__init__.py` is authoritative.
+  - Avoids manual sync between code and packaging metadata.
+- Clean, minimal `pyproject.toml`:
+  - No verbose boilerplate; configuration is focused and declarative.
+- Modern PEP compliance:
+  - Works with PEP 517/518/621 flows; aligns the project with current packaging best practices.
+- Actively maintained ecosystem:
+  - Hatchling is part of the Hatch toolchain, enabling easier adoption of related tools if needed.
+
+Bad
+- New tool to learn:
+  - Developers and maintainers must learn Hatchling basics (configuration keys, how it extracts versions).
+  - Slight cognitive overhead compared to sticking with existing, familiar tooling.
+- Potential for subtle differences vs prior tooling:
+  - If migrating from a different backend, packaging edge-cases (custom build steps, data files) must be validated.
+- Dependency on external project:
+  - Build behavior depends on Hatchling and its release cadence; we should pin or test against known-good versions in CI.
+
+Neutral
+- Compatibility with PEP 517 frontends:
+  - Hatchling is compatible with pip, build, and other PEP 517 consumers; no lock-in to a specific installer.
+- Editable installs and tooling:
+  - Standard tools continue to work; details of editable/installable behavior are governed by PEP 517 frontends rather than by hatchling alone—no significant compatibility gain or loss.
+- Future changes:
+  - If we later change backends (setuptools/Flit) the pyproject layout can be adjusted; dynamic versioning will need reconfiguration if backend does not support the same mechanism.
+
+Summary
+- We adopt Hatchling as the PEP 517 backend and configure it to read `__version__` from `src/package/__init__.py`. This yields a modern, minimal, and maintainable build configuration that satisfies our decision drivers (dynamic versioning, clean pyproject, PEP compliance, and active maintenance), at the cost of a small learning curve and the usual dependency-on-an-external tool.
