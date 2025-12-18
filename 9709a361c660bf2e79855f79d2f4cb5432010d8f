@@ -1,7 +1,14 @@
 ---
 date: '2025-12-18'
 id: 20251218-use-ruff-mypy-and-bandit-for-code-quality
-status: proposed
+linked_commits:
+- 41f97b8
+status: accepted
+tags:
+- linting
+- quality
+- security
+- tooling
 title: Use Ruff Mypy and Bandit for Code Quality
 ---
 
