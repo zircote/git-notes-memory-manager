@@ -1,0 +1,152 @@
+---
+date: '2025-12-18'
+id: 20251218-use-github-actions-for-ci-cd
+status: proposed
+title: Use GitHub Actions for CI CD
+---
+
+# Use GitHub Actions for CI CD
+
+Status: Accepted
+Date: 2025-12-18
+Context: Python project hosted on GitHub requiring CI/CD including linting, static typing, security scanning, matrix testing, packaging, and artifact handling. Workflows must be maintainable, fast, and leverage GitHub-native features where possible.
+
+## Context and Problem Statement
+We need a continuous integration and deployment pipeline for a Python project hosted in a GitHub repository. The pipeline must:
+
+- Run quality checks: formatting, linter, static typing, basic security scanning.
+- Run tests across multiple Python versions (matrix testing).
+- Enforce minimum test coverage (80%).
+- Build distributable packages and validate them before release.
+- Provide artifacts from build jobs for downstream release steps.
+- Support automated dependency updates (Dependabot).
+- Be declarative, easy to maintain, and integrate with GitHub PRs and branch protections.
+
+Constraints and technical requirements:
+- The repo is hosted on GitHub (public / open-source).
+- Use of UV for fast dependency installation and packaging (uv build).
+- Workflows should be YAML-based to align with common GitHub practices.
+- Want to minimize operational overhead and external infrastructure.
+
+## Decision Drivers
+- Native GitHub integration (checks appear inline in PRs and branch protection rules).
+- Free usage for open-source repositories.
+- First-class GitHub Actions support for Python and matrix builds.
+- Good community/official actions for caching, artifact upload, and test reporting.
+- Declarative YAML workflows that are version-controlled in the repo.
+- Support for UV-based install/build workflows and easy cache management.
+- Ability to enforce coverage thresholds and fail builds on policy violations.
+
+## Considered Options
+- GitHub Actions (chosen)
+  - Pros: Native integration, free for public repos, YAML workflows, broad marketplace of actions, easy access to PR checks and branch protection.
+  - Cons: Ties CI to GitHub (vendor lock-in).
+- CircleCI
+  - Pros: Mature CI service with fast runners and advanced config options.
+  - Cons: External service requiring extra setup/integration; less seamless with GitHub branch protection (requires additional configuration); potential cost for private resources.
+- Jenkins
+  - Pros: Extremely flexible and self-hosted, full control over runners and environment.
+  - Cons: High operational overhead, plugin management, maintenance and security burden, not declarative by default.
+- GitLab CI
+  - Pros: Powerful CI tightly integrated with GitLab repositories.
+  - Cons: Requires migrating hosting to GitLab (or mirroring) which adds complexity and duplication; not native for GitHub-hosted repo.
+
+## Decision Outcome
+Chosen option: Use GitHub Actions for CI/CD with matrix testing.
+
+Justification (technical and practical):
+- Native GitHub integration simplifies PR checks, status checks, and branch protection enforcement without additional webhooks or external services.
+- Free for public repositories reduces cost and friction for open-source development.
+- GitHub Actions has mature community actions and official actions for common tasks:
+  - actions/setup-python for selecting Python versions (supports 3.12 and 3.13).
+  - actions/cache for caching virtualenvs, pip/uv caches to speed up runs.
+  - actions/upload-artifact for publishing build outputs.
+  - marketplace actions for coverage and security reporting.
+- YAML-based workflows stored in .github/workflows are version-controlled and reviewable in PRs.
+- Matrix testing of Python versions is native and straightforward (matrix: python: [3.12, 3.13]).
+- UV usage can be integrated into the workflow to speed dependency installation and to run uv build for packaging.
+- Coverage failures can be enforced at test-run time (pytest --cov and --cov-fail-under=80) and surfaced in PR checks.
+- Dependabot can create PRs that trigger the same Actions workflows to validate dependency updates automatically.
+
+Concrete pipeline design (high-level):
+- Workflows file(s): .github/workflows/ci.yml (or split into quality.yml, test.yml, build.yml)
+- Jobs:
+  - quality
+    - Runs on: ubuntu-latest
+    - Steps:
+      - checkout
+      - setup-python (use Python 3.13 by default)
+      - cache uv/pip/artifacts
+      - install uv (pip install uv or use preinstalled binary)
+      - ruff format check (ruff format --check or ruff check --fix with check)
+      - ruff check .
+      - mypy .
+      - bandit -r .
+    - Failure semantics: any step failing marks the job failing and blocks merges if used in branch protection.
+  - test (matrix)
+    - Runs on: ubuntu-latest
+    - Strategy: matrix.python: [3.12, 3.13]
+    - Steps:
+      - checkout
+      - setup-python (matrix.python)
+      - cache uv/pip for the specific Python-version + uv hash
+      - install dependencies via uv (uv install or uv sync)
+      - run pytest with coverage:
+        - pytest --junitxml=reports/junit.xml --cov=src --cov-report=xml --cov-report=term --cov-fail-under=80
+      - upload coverage report / test reports as artifacts
+      - optionally publish coverage to Codecov or use GitHub Checks annotation
+  - build
+    - Runs on: ubuntu-latest
+    - Steps:
+      - checkout
+      - setup-python (use build runner version)
+      - install uv
+      - uv build (creates wheel and sdist)
+      - twine check dist/* (validate packages)
+      - actions/upload-artifact for dist/*
+    - Intended for release pipeline or as a gated build step before publishing.
+
+- Supporting features:
+  - Dependabot configured to open dependency upgrade PRs; each PR triggers all relevant GitHub Actions workflows.
+  - Use actions/cache keyed by python-version + uv lockfile hash to make uv installs fast and deterministic.
+  - Use annotated failures (check annotations) and artifacts for debugging failing builds.
+
+## Consequences
+
+Good
+- Zero extra infrastructure setup: no separate CI service to configure or maintain.
+- Native GitHub PR integration: status checks, rich annotations, and branch protection work out-of-the-box.
+- Efficient matrix testing: straightforward declaration of Python versions in YAML.
+- Fast dependency installs when using UV + caching: significantly reduces CI runtime.
+- Declarative workflows: YAML files live with the code and are reviewable in PRs.
+- Access to large ecosystem of community and official actions (upload-artifact, cache, setup-python, codecov actions, etc.).
+- Dependabot integration is straightforward and will trigger the same validation workflows automatically.
+- Fine-grained control of job concurrency, required checks, and conditional steps (on: pull_request, on: push, tags, workflow_dispatch).
+
+Bad
+- Vendor lock-in to GitHub Actions APIs and workflow syntax (moving to another CI will require rewriting workflows).
+- Performance and concurrency limits bound by GitHub-hosted runners quotas for private repos (less an issue for public open-source).
+- Actions marketplace quality varies; need to vet third-party actions for security and maintenance.
+- If project later moves off GitHub, workflows must be reimplemented for a new CI system.
+
+Neutral
+- Migration path: workflows are pure YAML and job logic is portable conceptually (commands remain), so a migration is possible but will require effort to rewire to another CI provider.
+- Self-hosted runners are supported if required later (mitigates some vendor/scale concerns), but introduce ops overhead.
+- Using Dependabot and GitHub Actions together creates very tight integration for dependency checks; this is beneficial but ties two subsystems together in the GitHub ecosystem.
+
+Tags: ci, devops, automation, testing
+
+References / Implementation notes (examples)
+- Enforce coverage: pytest --cov=PACKAGE --cov-fail-under=80
+- Ruff checks:
+  - ruff format --check .
+  - ruff check .
+- Mypy:
+  - mypy src --ignore-missing-imports (adjust flags as project needs)
+- Bandit:
+  - bandit -r src -x tests
+- Packaging:
+  - uv build
+  - twine check dist/*
+
+This ADR recommends creating one or more GitHub Actions workflow files (.github/workflows/ci.yml, .github/workflows/build.yml) that implement the quality, test (matrix), and build jobs described above, with caching keys tied to Python version and uv lockfile hash, and with upload-artifact and coverage reporting integrated into the pipeline.
