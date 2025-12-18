@@ -2,6 +2,8 @@
 date: '2025-12-18'
 format: nygard
 id: 00000000-use-adrs
+linked_commits:
+- 41f97b8
 status: accepted
 tags:
 - documentation
