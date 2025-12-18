@@ -1,0 +1,173 @@
+---
+date: '2025-12-18'
+id: 20251218-use-ruff-mypy-and-bandit-for-code-quality
+status: proposed
+title: Use Ruff Mypy and Bandit for Code Quality
+---
+
+# Use Ruff Mypy and Bandit for Code Quality
+
+## 1. Context and Problem Statement
+We need a reproducible, fast, and maintainable code quality toolchain for a Python project that provides:
+- Formatting and linting (style, errors, best-practices)
+- Static type checking
+- Static application security testing (SAST)
+- Fast feedback in local development (IDE + pre-commit) and CI
+
+Constraints and specifics:
+- Target Python: 3.13
+- Prefer a single canonical configuration (pyproject.toml) when possible
+- CI runtime should be fast (shorter queues and runs)
+- Tooling should integrate well with IDEs and pre-commit
+- Security scanning should catch common Python vulnerabilities (e.g., insecure use of subprocess, eval, weak crypto patterns)
+
+Problem statement:
+Choose a combination of tools that satisfies the above constraints while minimizing configuration fragmentation and CI runtime.
+
+## 2. Decision Drivers
+- Speed of tooling in local development and CI (minimize iteration time)
+- Coverage: ability to check style, lint errors, type errors, and security issues
+- Maintainability: small number of tools and single config file (pyproject.toml)
+- IDE integration for developer productivity (code intelligence, type hints)
+- Configurability and rule expressiveness (ability to enable/disable rules easily)
+- Stability and maturity of tools (community adoption, active maintenance)
+- Ease of onboarding (clear defaults, minimal friction)
+
+## 3. Considered Options
+- Black + isort + flake8
+  - Pros:
+    - Widely used and well-understood
+    - Clear separation: formatting (Black), import ordering (isort), linting (flake8 + plugins)
+  - Cons:
+    - Multiple tools to configure (flaky overlaps and duplication)
+    - Usually slower than combined Rust-based tools
+    - flake8 plugin ecosystem sometimes causes complex config and slower CI
+
+- Ruff (chosen)
+  - Pros:
+    - Single Rust-based binary that does formatting (ruff format) and linting (ruff check)
+    - Extremely fast (orders of magnitude faster than Python-based linters)
+    - Can replace Black/isort/flake8 in many setups
+    - Configurable via pyproject.toml
+    - Supports numerous rule sets and autofixes
+  - Cons:
+    - Newer than the traditional stack → some teams may need to learn Ruff rules or differences
+    - Very aggressive autofixes could require review of changes (but this is manageable)
+
+- Pylint
+  - Pros:
+    - Very comprehensive and strict linter with many checks
+    - Fine-grained control over rules and messaging
+  - Cons:
+    - Slow on large codebases
+    - Verbose and requires substantial per-project tuning
+    - Integrates less cleanly into a single-tool setup for formatting (does not format)
+
+- Type checking options (considered separately)
+  - mypy (chosen): industry standard, strict mode available, strong IDE support
+  - pyright/pyright-check: faster in some cases, good for incremental checking, but mypy chosen for strict-mode maturity and ergonomics
+
+- Security scanning options (considered separately)
+  - Bandit (chosen): SAST for Python, well-known and straightforward to run
+  - Safety/pip-audit: dependency scanning for known vulnerable packages (considered for future add-on)
+
+## 4. Decision Outcome (Chosen option with justification)
+Chosen toolchain:
+- Ruff for formatting and linting
+- mypy for static type checking (strict mode enabled)
+- Bandit for security scanning
+
+Justification:
+- Ruff consolidates formatting and linting into a single, extremely fast tool, reducing CI time and configuration friction.
+- mypy is the industry standard for type checking, supports strict mode (enabling higher code quality), and integrates well with editors and CI.
+- Bandit provides focused SAST for Python and catches common code patterns that lead to vulnerabilities.
+- All three tools can be configured centrally in pyproject.toml (where supported), enabling a single source of truth for tool config and reducing fragmentation.
+- Pipeline ordering (format -> lint -> types -> security) gives the quickest developer feedback and avoids false negatives:
+  - ruff format (auto-fix style changes locally)
+  - ruff check (linting and remaining issues)
+  - mypy (type errors after code is formatted/normalized)
+  - bandit (security-focused checks last)
+
+Configuration (pyproject.toml excerpt)
+- Centralized configuration to be committed to repository root. Example configurations:
+
+```toml
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+# select rule sets and codes:
+# E/W/F = pycodestyle/pyflakes/flake8-family; I = isort-ish; B = bugbear; C4 = complexity; UP = pyupgrade; ARG = arg-specific; SIM = simplifications; S = security-ish
+select = ["E", "W", "F", "I", "B", "C4", "UP", "ARG", "SIM", "S"]
+# enable auto-fix where applicable; run `ruff format` to apply
+fix = true
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+# optionally, you can fine-tune mypy paths/ignore-missing-imports/etc:
+# follow_imports = "normal"
+# plugins = []
+
+[tool.bandit]
+# Bandit integration may use tool.bandit or a separate bandit.yml depending on your bandit version/setup.
+exclude = ["tests"]
+skips = ["B101"]  # skip assert check (B101) to avoid noisy warnings in test-only or validated patterns
+```
+
+Pipeline order (CI and pre-commit):
+- Local development:
+  - pre-commit runs: ruff (format & check), mypy (fast subset or daemon), maybe bandit as optional pre-commit hook (or run in CI)
+- CI:
+  1. ruff format (optional auto-apply in CI jobs or fail if changes required)
+  2. ruff check
+  3. mypy --config-file=pyproject.toml
+  4. bandit -r . -c pyproject.toml (or bandit -r . --exclude tests --skip B101)
+
+Integration notes:
+- Use ruff in place of Black/isort/flake8; verify rule parity and adjust select/ignore in pyproject.
+- Use pre-commit to run ruff and mypy locally (mypy can run in a faster incremental/daemon mode for IDE; CI runs full mypy).
+- Bandit typically runs in CI; running it locally is possible but optional to preserve dev speed.
+- Add pip-audit or safety as a separate CI job later to handle dependency vulnerability scanning.
+
+## 5. Consequences
+
+Good
+- Fast CI and local feedback:
+  - Ruff (Rust-based) is substantially faster than flake8/Black combos, reducing CI wall time and developer wait.
+- Consolidated tool surface:
+  - Single primary lint/format binary (ruff) reduces config complexity and avoids tool overlap.
+  - Primary configuration centralized in pyproject.toml where possible.
+- High-quality static checking:
+  - mypy strict mode enforces stronger typing guarantees and reduces runtime bugs.
+- Security coverage:
+  - Bandit adds a SAST layer to catch common insecure code patterns.
+- Better developer UX:
+  - Excellent IDE integration for mypy; ruff provides autofix capabilities and consistent style.
+- Extensible pipeline:
+  - Can add dependency scanning (pip-audit/safety) and SCA later without changing primary flow.
+
+Bad
+- Learning curve for Ruff:
+  - Teams familiar with Black/flake8/isort must learn Ruff’s rule set and mapping for any rule-name differences.
+  - Some specific flake8 plugin behaviors must be mapped to Ruff equivalents or left using legacy tools if not available.
+- Potential for subtle rule differences:
+  - Replacing multiple tools with one can expose differences in lint behavior; some rules may need explicit enable/disable tuning.
+- Bandit limitations:
+  - Bandit is good for common patterns but not a substitute for manual security review or dynamic analysis; may miss complex vulnerabilities.
+- mypy strict mode churn:
+  - Enabling strict may surface many pre-existing issues that must be addressed, increasing initial remediation effort.
+
+Neutral / Mitigations
+- Adding dependency scanning later:
+  - Plan to add pip-audit or Safety as a separate CI job for dependency vulnerability detection; this does not affect the chosen stack immediately.
+- Incremental rollout strategy:
+  - Enable strict mypy and a subset of Ruff rules incrementally to reduce onboarding friction.
+- Fallback to targeted tools when needed:
+  - If a specific check is missing in Ruff, the team may temporarily add a focused tool (e.g., bandit, a flake8 plugin) until Ruff gains parity.
+- Configuration portability:
+  - Some tools (Bandit) may require separate config files depending on versions; keep a small adapter doc in repository to avoid confusion.
+
+Tags: quality, tooling, security, linting
+
+Status: Accepted
+Date: 2025-12-18
