@@ -1,0 +1,111 @@
+---
+date: '2025-12-18'
+id: 20251218-use-python-313-as-minimum-version
+status: proposed
+title: Use Python 3.13 as Minimum Version
+---
+
+# Use Python 3.13 as Minimum Version
+
+Status: Accepted
+Date: 2025-12-18
+
+## Context and Problem Statement
+
+We are creating a new Python project, git-notes-memory-manager, in December 2025. We must choose a minimum supported Python version. The choice needs to balance:
+
+- access to modern language and typing features that improve code expressiveness and type safety,
+- performance improvements in recent CPython releases,
+- broad compatibility with the ecosystem (test runners, linters, type checkers, common libraries),
+- minimizing friction for contributors and users.
+
+A too-recent minimum (e.g., the latest 3.14) risks incompatibility with some third-party libraries or CI images; a too-old minimum (e.g., 3.12) misses useful language/typing improvements and some performance wins. This ADR documents the decision to require Python 3.13 as the project's minimum supported Python version.
+
+## Decision Drivers
+
+- Library ecosystem compatibility
+  - Ensure pytest, mypy, ruff, and other dev tooling have solid support.
+  - Maximize availability of third-party libraries (requests, sqlalchemy equivalents, etc.) across supported versions.
+- Access to modern typing features and ergonomics
+  - Use of built-in typing helpers (e.g., Self and TypeAlias availability as language-level conveniences).
+  - Cleaner typing and fewer imports from typing_extensions.
+- Performance improvements
+  - Take advantage of measurable CPython improvements introduced since 3.12 where practical.
+- Stability and contributor ergonomics
+  - Minimize friction for contributors using common Linux/Windows/macOS CI images and developer machines.
+- Future maintenance
+  - Keep upgrade path to 3.14 straightforward once the ecosystem fully stabilizes for that release.
+
+## Considered Options
+
+- Python 3.14 (latest)
+  - Pros
+    - Access to the newest language and runtime features as soon as available.
+    - Potential further performance gains and any new typing improvements.
+  - Cons
+    - At the time of decision, some critical dependencies and tooling have limited or no official support on 3.14.
+    - Some CI images and packaged system Python versions may lag, impairing contributor onboarding.
+    - Higher risk of encountering library incompatibilities and subtle runtime bugs in early-adoption scenarios.
+
+- Python 3.13 (chosen)
+  - Pros
+    - Stable release with broad ecosystem support for core tooling (pytest, mypy, ruff).
+    - Provides modern typing ergonomics (reduces need for typing_extensions for common constructs).
+    - Demonstrable performance improvements vs 3.12 while maintaining stability.
+    - Lower friction for contributors and CI.
+  - Cons
+    - Slightly older than bleeding edge (3.14), so newer features from 3.14 are unavailable until adoption.
+    - Users on older interpreters cannot install the package.
+
+- Python 3.12
+  - Pros
+    - Very stable and widely available across many systems and images.
+    - Maximum possible reach to users with older system Python.
+  - Cons
+    - Misses some typing ergonomics and runtime/optimizer improvements present in 3.13.
+    - Would require continued use of typing_extensions for features available natively in 3.13, increasing boilerplate.
+
+## Decision Outcome
+
+Chosen option: Use Python 3.13 as the minimum required version.
+
+Justification (technical):
+- Ecosystem compatibility: at decision time pytest, mypy, ruff and the project's essential dependencies are confirmed to support 3.13, reducing the risk of package incompatibilities in CI and on contributors' machines.
+- Typing ergonomics: adopting 3.13 allows using built-in modern typing conveniences (reducing reliance on typing_extensions for common constructs such as Self and TypeAlias), improving code readability and type-checking fidelity.
+- Performance: CPython 3.13 includes performance improvements relative to 3.12 that benefit runtime behavior of the project with no additional code changes.
+- Balance: 3.13 gives a pragmatic balance between stability and modern features. It minimizes contributor friction compared to 3.14 while enabling the project to adopt newer, safer language features not present in 3.12.
+
+Implementation notes (concrete technical actions):
+- pyproject.toml / setup.cfg: set python_requires = ">=3.13"
+- Package metadata classifiers: include "Programming Language :: Python :: 3.13" and continue to test on 3.13, 3.14 (nightly/stable) in CI.
+- CI: update GitHub Actions/test matrices to include 3.13 as minimum; include a job testing 3.14 or 3.14-dev to surface incompatibilities early.
+- Local development docs: mention minimum Python version in README and CONTRIBUTING and provide instructions for using pyenv / asdf / venv to set up Python 3.13.
+- Optional runtime check: add an import-time version check in the CLI entrypoint to present a clear error if run on an unsupported Python.
+- Use feature flags / conditional imports only when adopting APIs specific to versions >3.13; otherwise code can assume 3.13 is available.
+
+## Consequences
+
+Good
+- Access to modern language and typing features (reduces typing_extensions usage; clearer type signatures).
+- Better type-checking and developer ergonomics (mypy + ruff + builtin typing features).
+- Measurable runtime performance improvements vs 3.12 with little engineering cost.
+- Broad support from key dev tools (pytest, mypy, ruff), making CI and local dev flows straightforward.
+- Lower risk than pinning to 3.14 while enabling forward progress; ability to proactively test on 3.14 in CI.
+
+Bad
+- Incompatible for users whose runtime is older than 3.13:
+  - They cannot install or run released packages that declare python_requires >=3.13.
+  - Some downstream packagers or constrained environments (older Linux distros, device images) may require backports or containerization.
+- If any dependency unexpectedly drops support for 3.13 in a future release, we may need to pin or adjust dependency choices.
+- Small subset of contributors using only system Python older than 3.13 will need to install a newer interpreter to contribute.
+
+Neutral / Operational
+- We will need to update the minimum version in the future (e.g., to 3.14) once the ecosystem fully stabilizes; this is a normal maintenance task.
+- Testing matrix should include latest stable (3.14) and perhaps nightly to detect future regressions early; however, 3.13 remains the baseline.
+- Some code modules may include conditional logic or fallbacks if we later decide to use 3.14-specific APIs (these will be introduced intentionally, not by default).
+
+Appendix: Quick checklist for adoption
+- Add to pyproject.toml: requires-python = ">=3.13"
+- Update README / CONTRIBUTING with 3.13 as minimum and examples for configuring developer Python via pyenv/asdf.
+- Update CI workflows to validate on 3.13 and run an extra job for 3.14 (optional nightly).
+- Add runtime check (optional) to fail fast with helpful message when Python version < 3.13 is used.
