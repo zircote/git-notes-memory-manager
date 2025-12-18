@@ -1,0 +1,97 @@
+---
+date: '2025-12-18'
+id: 20251218-use-astral-uv-for-package-management
+status: proposed
+title: Use Astral UV for Package Management
+---
+
+# Use Astral UV for Package Management
+
+Status: Accepted
+Date: December 2025
+Deciders: Architecture team
+Tags: tooling, dependencies, build
+
+## Context and Problem Statement
+
+We are starting a new Python project (decision point: Dec 2025) and must choose a package manager. The project goals include fast CI / developer feedback loops, reproducible and auditable dependency resolution, and a modern developer experience. The package manager will be used for local development, CI builds, and release packaging workflows.
+
+Key constraints and requirements:
+- Speed: dependency resolution and install times must be fast to keep CI and iterative development responsive.
+- Reproducibility: native, deterministic lockfile support is required to ensure reproducible builds across machines and CI.
+- Usability: simple commands for adding/removing dependencies, running scripts/tasks, and syncing environments.
+- Ecosystem: alignment with tooling used across the org (we prefer tools with an active ecosystem and maintainers that produce other useful tools, e.g., Ruff).
+
+Decision: Use Astral UV as the package manager.
+
+## Decision Drivers
+
+- Speed: significantly faster dependency resolution and install times for both local dev and CI (target: large improvement over existing Python tooling).
+- Lockfile support: native, deterministic lockfile that ensures reproducible installs across environments.
+- Modern developer experience (DX): concise, natural commands for common workflows (add, sync, run).
+- Ecosystem alignment: Astral ecosystem familiarity and cross-tool benefits (same maintainers produce Ruff).
+- Compatibility: must be able to interoperate with pip ecosystems and fall back to pip when required.
+
+## Considered Options
+
+- pip
+  - Pros: Ubiquitous, present in all Python environments, minimal additional installation.
+  - Cons: Generally slower for dependency resolution and installation at scale; historically lacks a native, deterministic lockfile mechanism (relies on requirements.txt/constraints that are not automatically generated or resolved).
+
+- Poetry
+  - Pros: Built-in lockfile, integrated packaging tooling and pyproject.toml-first approach.
+  - Cons: Slower than modern Rust-based managers in resolution and install; more complex mental model and toolchain for some developers; slower CI times observed in comparable projects.
+
+- Astral UV (chosen)
+  - Pros (summary): Rust-based implementation providing 10–100x faster installs/resolution vs alternatives, native uv.lock for reproducible installs, pip-compatible behavior for package installation, simple and modern CLI commands (uv sync, uv add, uv run).
+  - Cons: Requires installing the UV binary/tooling in dev machines and CI images.
+
+## Decision Outcome
+
+Chosen option: Astral UV
+
+Justification:
+- Performance: Astral UV’s Rust implementation delivers orders-of-magnitude faster dependency resolution and installation, which directly reduces CI runtime and developer waiting time. Faster installs improve iteration speed and lower CI cost.
+- Reproducibility: UV provides a native lockfile (uv.lock) designed for deterministic installs across machines and CI; this meets our reproducibility requirement without ad-hoc requirements files or manual lockfile maintenance.
+- Developer Experience: UV exposes concise, task-oriented commands (uv sync, uv add, uv run) that map well to our common workflows and keep onboarding friction low.
+- Ecosystem fit: The Astral ecosystem aligns with other tooling we use (authors of Ruff), simplifying cross-tool integration and standardizing on modern Rust-backed Python infra.
+- Compatibility: UV is pip-compatible (can interoperate with pip workflows when needed), which reduces migration risk and allows fallback strategies.
+
+Operational decisions following this ADR:
+- CI images and developer setup scripts will install the UV binary as part of environment bootstrap.
+  - Installation methods will be standardized (e.g., via pipx or official prebuilt binaries) and documented in the repo README / CONTRIBUTING.
+- The repository will commit uv.lock to version control and treat it as authoritative for dependency resolution in CI.
+- A short migration guide will be provided for developers who currently use pip/virtualenv to switch to UV-based workflows.
+- A fallback procedure using pip (pip install -r requirements.txt or pip install .) will be documented for exceptional cases or emergency recovery.
+
+## Consequences
+
+Good
+- Faster CI and local installs:
+  - Significant reduction in time-to-ready for developer machines and CI jobs due to UV’s Rust-based resolver and installer.
+- Reproducible builds:
+  - uv.lock provides deterministic dependency resolution and should be committed to the repository to ensure consistent installs across environments.
+- Simple, modern commands:
+  - Common workflows are handled with straightforward commands:
+    - uv add <package> — add a dependency and update uv.lock
+    - uv sync — sync the environment to uv.lock
+    - uv run <script> — run defined scripts/tasks via uv
+- Better DX and maintainability:
+  - Improved developer satisfaction and faster onboarding; fewer CI reruns for dependency-related flakiness.
+- Ecosystem synergy:
+  - Using Astral tools aligns with other org tools (e.g., Ruff), simplifying maintenance and shared mental models.
+
+Bad
+- Extra installation step:
+  - Every developer workstation, CI image, and any automation that expects to run project commands must have UV installed.
+  - We must maintain installation instructions and ensure CI images are kept up to date with the UV binary to avoid "works on my machine" failures.
+- Operational overhead:
+  - Small initial ramp for document updates, CI changes, and developer training.
+  - Potential for transient issues if upstream UV releases breaking changes; we must pin UV versions in bootstrap scripts.
+
+Neutral
+- Pip fallback:
+  - We can use pip as a fallback for emergency or compatibility cases. This provides a safety valve but does not replace the benefits of uv.lock-managed installs.
+  - Interoperability means existing pip-based tooling (e.g., building binary wheels, publishing) continues to be usable where required; however, the primary workflow will be UV-managed.
+- Migration phased:
+  - The migration to UV can be phased: start by enabling UV in CI and documenting local setup, then optionally convert any automated scripts that currently call pip to use uv where appropriate.
