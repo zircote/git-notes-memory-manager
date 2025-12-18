@@ -1,7 +1,13 @@
 ---
 date: '2025-12-18'
 id: 20251218-use-hatchling-as-build-backend
-status: proposed
+linked_commits:
+- 41f97b8
+status: accepted
+tags:
+- build
+- packaging
+- tooling
 title: Use Hatchling as Build Backend
 ---
 
