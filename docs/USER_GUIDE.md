@@ -432,6 +432,145 @@ git fetch origin refs/notes/mem:refs/notes/mem
 
 ---
 
+## Hooks Integration
+
+The memory plugin includes hooks that integrate with Claude Code's hook system for automatic memory context injection and capture assistance.
+
+### Overview
+
+Three hooks are available:
+
+| Hook | Event | Purpose | Default |
+|------|-------|---------|---------|
+| SessionStart | Session begins | Inject project memories | Enabled |
+| UserPromptSubmit | User sends prompt | Detect capture signals | Disabled |
+| Stop | Session ends | Prompt for uncaptured content, sync index | Enabled |
+
+### SessionStart Hook
+
+Automatically injects relevant memories at the start of each Claude Code session.
+
+**What it does:**
+1. Detects the current project (from git repo, package.json, pyproject.toml)
+2. Identifies the active spec (from CLAUDE.md or docs/spec/active/)
+3. Builds context within a token budget
+4. Injects XML-formatted memory context
+
+**Context includes:**
+- Working memory: pending actions, recent decisions, active blockers
+- Semantic context: learnings and patterns relevant to the project
+- Available commands: quick reference for memory operations
+
+**Configuration:**
+
+```bash
+# Disable SessionStart hook
+export HOOK_SESSION_START_ENABLED=false
+
+# Budget modes: adaptive (default), fixed, full, minimal
+export HOOK_SESSION_START_BUDGET_MODE=adaptive
+
+# Fixed budget (when mode=fixed)
+export HOOK_SESSION_START_FIXED_BUDGET=1000
+
+# Maximum budget cap
+export HOOK_SESSION_START_MAX_BUDGET=3000
+```
+
+### UserPromptSubmit Hook
+
+Analyzes user prompts for capture-worthy content and suggests or auto-captures memories.
+
+**What it detects:**
+- **Decisions**: "I decided to use...", "we're going with..."
+- **Learnings**: "I learned that...", "TIL:", "turns out..."
+- **Blockers**: "blocked by...", "stuck on...", "can't because..."
+- **Progress**: "completed...", "finished...", "done with..."
+
+**Capture actions:**
+- **AUTO**: High-confidence signals (≥95%) are captured automatically
+- **SUGGEST**: Medium-confidence signals (70-95%) show suggestions
+- **SKIP**: Low-confidence or duplicate content is ignored
+
+**Configuration:**
+
+```bash
+# Enable signal detection (disabled by default)
+export HOOK_USER_PROMPT_ENABLED=true
+
+# Minimum confidence for suggestions (0.0-1.0)
+export HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE=0.7
+
+# Threshold for auto-capture (0.0-1.0)
+export HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD=0.95
+
+# Novelty threshold (how different from existing memories)
+export HOOK_CAPTURE_DETECTION_NOVELTY_THRESHOLD=0.3
+```
+
+### Stop Hook
+
+Performs session-end cleanup and memory assistance.
+
+**What it does:**
+1. Analyzes session transcript for uncaptured memorable content
+2. Prompts user with suggestions if valuable content found
+3. Synchronizes the memory search index
+
+**Configuration:**
+
+```bash
+# Disable Stop hook
+export HOOK_STOP_ENABLED=false
+
+# Disable uncaptured content prompts
+export HOOK_STOP_PROMPT_UNCAPTURED=false
+
+# Disable index sync on session end
+export HOOK_STOP_SYNC_INDEX=false
+```
+
+### Global Hook Configuration
+
+```bash
+# Master switch - disable all hooks
+export HOOK_ENABLED=false
+
+# Enable debug logging to stderr
+export HOOK_DEBUG=true
+
+# Hook timeout in seconds (default: 30)
+export HOOK_TIMEOUT=30
+```
+
+### Hook Installation
+
+The hooks are installed automatically when you configure the plugin in Claude Code. The hook scripts are in the `hooks/` directory:
+
+- `hooks/session_start.py` - SessionStart event handler
+- `hooks/user_prompt.py` - UserPromptSubmit event handler
+- `hooks/stop.py` - Stop event handler
+- `hooks/hooks.json` - Hook registration configuration
+
+### Troubleshooting Hooks
+
+**Hook not triggering:**
+1. Check if hooks are enabled: `echo $HOOK_ENABLED`
+2. Verify hook registration in `hooks/hooks.json`
+3. Enable debug mode: `export HOOK_DEBUG=true`
+
+**Slow session start:**
+1. Reduce budget: `export HOOK_SESSION_START_BUDGET_MODE=minimal`
+2. Check index size with `/memory status`
+3. Run incremental reindex: `/memory sync`
+
+**Too many capture suggestions:**
+1. Increase confidence threshold: `export HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE=0.8`
+2. Disable auto-capture: `export HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD=1.0`
+3. Disable hook entirely: `export HOOK_USER_PROMPT_ENABLED=false`
+
+---
+
 ## Next Steps
 
 - See [Developer Guide](DEVELOPER_GUIDE.md) for API reference

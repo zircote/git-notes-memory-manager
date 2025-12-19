@@ -197,8 +197,10 @@ def main() -> None:
 
     except json.JSONDecodeError as e:
         logger.error("Failed to parse hook input: %s", e)
+        print(json.dumps({"continue": True}))
     except Exception as e:
         logger.exception("SessionStart hook error: %s", e)
+        print(json.dumps({"continue": True}))
     finally:
         _cancel_timeout()
 

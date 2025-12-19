@@ -58,6 +58,16 @@ When used as a Claude Code plugin, the following commands are available:
 - `/memory verify` - Check index consistency
 - `/memory gc` - Garbage collect old memories
 
+### Hooks Integration
+
+The plugin includes hooks that integrate with Claude Code's hook system for automatic memory context:
+
+- **SessionStart**: Injects relevant project memories at session start
+- **UserPromptSubmit**: Detects capture-worthy content in user prompts (opt-in)
+- **Stop**: Prompts for uncaptured content and syncs the search index
+
+See [User Guide](docs/USER_GUIDE.md#hooks-integration) for configuration options.
+
 ## Development
 
 ```bash
@@ -84,7 +94,11 @@ Environment variables:
 | `MEMORY_PLUGIN_DATA_DIR` | Data directory path | `~/.local/share/memory-plugin/` |
 | `MEMORY_PLUGIN_GIT_NAMESPACE` | Git notes namespace | `refs/notes/mem` |
 | `MEMORY_PLUGIN_EMBEDDING_MODEL` | Embedding model name | `all-MiniLM-L6-v2` |
-| `MEMORY_PLUGIN_AUTO_CAPTURE` | Enable auto-capture hook | `false` |
+| `HOOK_ENABLED` | Master switch for hooks | `true` |
+| `HOOK_SESSION_START_ENABLED` | Enable SessionStart context injection | `true` |
+| `HOOK_USER_PROMPT_ENABLED` | Enable signal detection in prompts | `false` |
+| `HOOK_STOP_ENABLED` | Enable Stop hook processing | `true` |
+| `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
 
 ## Requirements
 

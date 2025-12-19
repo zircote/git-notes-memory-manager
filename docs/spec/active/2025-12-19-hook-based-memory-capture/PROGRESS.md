@@ -3,7 +3,7 @@ document_type: progress
 format_version: "1.0.0"
 project_id: SPEC-2025-12-19-001
 project_name: "Hook-Based Memory Capture"
-project_status: in-progress
+project_status: complete
 current_phase: 5
 implementation_started: 2025-12-19T00:00:00Z
 last_session: 2025-12-19T00:00:00Z
@@ -47,13 +47,13 @@ This document tracks implementation progress against the spec plan.
 | 4.3 | Enhance Stop Hook Handler | done | 2025-12-19 | 2025-12-19 | Created `hooks/stop_handler.py` |
 | 4.4 | Implement Capture Prompt | done | 2025-12-19 | 2025-12-19 | XML formatting in stop_handler |
 | 4.5 | Index Synchronization | done | 2025-12-19 | 2025-12-19 | SyncService integration in stop_handler |
-| 5.1 | Unit Tests - Hook Services | pending | | | XMLBuilder, ContextBuilder, etc. |
-| 5.2 | Unit Tests - Hook Handlers | pending | | | Hook script tests |
-| 5.3 | Integration Tests | pending | | | End-to-end flows |
-| 5.4 | Performance Tests | pending | | | Timing benchmarks |
-| 5.5 | Hook Script Testing | pending | | | Manual testing with fixtures |
-| 5.6 | Documentation Updates | pending | | | README, CLAUDE.md |
-| 5.7 | Update CHANGELOG | pending | | | Release notes |
+| 5.1 | Unit Tests - Hook Services | done | 2025-12-19 | 2025-12-19 | 51 tests covering all hook services |
+| 5.2 | Unit Tests - Hook Handlers | done | 2025-12-19 | 2025-12-19 | 43 tests covering all handlers |
+| 5.3 | Integration Tests | done | 2025-12-19 | 2025-12-19 | 21 tests covering end-to-end flows |
+| 5.4 | Performance Tests | done | 2025-12-19 | 2025-12-19 | 17 tests covering timing requirements |
+| 5.5 | Hook Script Testing | done | 2025-12-19 | 2025-12-19 | Manual testing complete, bug fix applied |
+| 5.6 | Documentation Updates | done | 2025-12-19 | 2025-12-19 | README, USER_GUIDE updated |
+| 5.7 | Update CHANGELOG | done | 2025-12-19 | 2025-12-19 | Added hooks feature to [Unreleased] |
 
 ---
 
@@ -65,7 +65,7 @@ This document tracks implementation progress against the spec plan.
 | 2 | SessionStart Context Injection | 100% | done |
 | 3 | Capture Signal Detection | 100% | done |
 | 4 | Stop Hook Enhancement | 100% | done |
-| 5 | Testing & Documentation | 0% | pending |
+| 5 | Testing & Documentation | 100% | done |
 
 ---
 
@@ -74,6 +74,8 @@ This document tracks implementation progress against the spec plan.
 | Date | Type | Task ID | Description | Resolution |
 |------|------|---------|-------------|------------|
 | 2025-12-19 | refinement | 2.4 | Handler renamed to `session_start_handler.py` | Clarifies two-layer architecture (wrapper script vs handler module) |
+| 2025-12-19 | bugfix | 1.3 | Budget tier allocations exceeded total when commands added | Fixed tiers: total ≥ working_memory + semantic_context + commands(100) |
+| 2025-12-19 | bugfix | 2.4 | session_start_handler.py missing JSON output on error paths | Added `print(json.dumps({"continue": True}))` to exception handlers |
 
 ---
 
@@ -175,3 +177,58 @@ This document tracks implementation progress against the spec plan.
   - `mypy` - No issues found in 13 source files
   - `pytest` - 910 tests passed
 - Ready for Phase 5: Testing & Documentation
+
+### 2025-12-19 - Task 5.4 Complete (Performance Tests)
+- **Task 5.4 completed**: 17 performance tests added
+- Created `tests/test_hooks_performance.py`:
+  - Signal detection throughput: <5ms per prompt (parametrized 10/50/100 iterations)
+  - Single prompt latency: <50ms per detection
+  - Long prompt handling: <100ms for 5000 char prompts
+  - XML generation performance: <0.1ms creation, <5ms for 100 elements, <2ms serialization
+  - Config loading: <1ms per load
+  - Project detection: <10ms per detection
+  - Capture decision: <1ms per decision (with novelty checks disabled)
+  - Session transcript analysis: <50ms for 100-message transcripts
+  - Full pipeline timing: <10ms per prompt through detection→decision pipeline
+  - Memory usage tests for detector and XML builder reuse
+- Fixed test compatibility:
+  - Used `check_novelty_enabled=False` to avoid database calls in performance tests
+  - Updated budget tier test values to match current implementation (300/100)
+- All 131 tests pass (51+43+20+17)
+- Quality gates: `ruff check` ✓, `mypy` ✓, `pytest` 131 passed ✓
+
+### 2025-12-19 - Task 5.5 Complete (Hook Script Testing)
+- **Task 5.5 completed**: Manual testing of all hook scripts
+- **Bug found and fixed**: `session_start_handler.py` error paths didn't output JSON
+  - Root cause: Exception handlers logged errors but didn't write to stdout
+  - Fix: Added `print(json.dumps({"continue": True}))` after each logger call
+  - This ensures hook contract is satisfied even on errors
+- Manual test results:
+  - `session_start.py`: Outputs valid JSON on all paths (empty input, invalid JSON, valid input)
+  - `user_prompt.py`: Signal detection working (detected decision signals)
+  - `stop.py`: Outputs sync stats and handles empty input gracefully
+- Edge cases verified:
+  - Empty stdin → `{"continue": true}`
+  - Invalid JSON → `{"continue": true}`
+  - `HOOK_ENABLED=false` → `{"continue": true}` (early exit)
+  - Valid input with signals → proper JSON with additionalContext
+- All 132 hook tests pass (51+43+21+17)
+- Quality gates: `ruff check` ✓, `mypy` ✓, `pytest` 132 passed ✓
+
+### 2025-12-19 - Phase 5 Complete (All Tasks Done)
+- **Task 5.6 completed**: Documentation Updates
+  - Updated README.md with hooks integration section
+  - Added hook environment variables to configuration table
+  - Updated USER_GUIDE.md with comprehensive hooks documentation (~150 lines)
+    - Overview table of three hooks with events, purposes, defaults
+    - Detailed configuration for SessionStart, UserPromptSubmit, Stop hooks
+    - Global hook configuration section
+    - Troubleshooting section for common issues
+- **Task 5.7 completed**: CHANGELOG Updates
+  - Added hooks feature to [Unreleased] section
+  - Documented all three hooks with feature details
+  - Listed new hook infrastructure components
+  - Documented all configuration environment variables
+  - Added testing metrics (132 tests, performance benchmarks)
+- **Project Status**: All 27 tasks across 5 phases complete
+- Quality gates: `ruff check` ✓, `mypy` ✓

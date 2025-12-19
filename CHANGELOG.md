@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Claude Code Hooks Integration
+- **SessionStart Hook**: Automatic context injection at session start
+  - Project and spec detection from git repo, pyproject.toml, package.json
+  - Adaptive token budget calculation (adaptive/fixed/full/minimal modes)
+  - Working memory injection: pending actions, recent decisions, active blockers
+  - Semantic context: relevant learnings and patterns for the project
+  - XML-formatted output for Claude Code additionalContext
+
+- **UserPromptSubmit Hook**: Capture signal detection (opt-in)
+  - Pattern-based detection for decisions, learnings, blockers, progress
+  - Confidence scoring with configurable thresholds
+  - AUTO capture for high-confidence signals (≥95%)
+  - SUGGEST action for medium-confidence signals (70-95%)
+  - Novelty checking to avoid duplicate captures
+
+- **Stop Hook**: Session-end processing
+  - Session transcript analysis for uncaptured memorable content
+  - Prompts for uncaptured decisions, learnings, blockers
+  - Automatic search index synchronization
+
+#### Hook Infrastructure
+- `HookConfig` dataclass with environment variable configuration
+- `XMLBuilder` for structured context serialization
+- `ContextBuilder` for memory context assembly
+- `ProjectDetector` for automatic project/spec identification
+- `SignalDetector` for capture-worthy content detection
+- `NoveltyChecker` for semantic similarity against existing memories
+- `CaptureDecider` for threshold-based capture decisions
+- `SessionAnalyzer` for transcript parsing and analysis
+
+#### Hook Configuration
+- Environment variables: HOOK_ENABLED, HOOK_SESSION_START_ENABLED, HOOK_USER_PROMPT_ENABLED, HOOK_STOP_ENABLED
+- Budget configuration: HOOK_SESSION_START_BUDGET_MODE, HOOK_SESSION_START_FIXED_BUDGET, HOOK_SESSION_START_MAX_BUDGET
+- Detection thresholds: HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE, HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD, HOOK_CAPTURE_DETECTION_NOVELTY_THRESHOLD
+- Debug mode: HOOK_DEBUG for stderr logging
+
+### Testing
+- 132 hook-specific tests (51 services + 43 handlers + 21 integration + 17 performance)
+- Performance benchmarks: <5ms signal detection, <50ms single prompt, <10ms full pipeline
+
+### Documentation
+- Hooks Integration section in User Guide
+- Configuration reference for all hook environment variables
+- Troubleshooting guide for common hook issues
+
 ## [0.1.0] - 2024-12-19
 
 ### Added
