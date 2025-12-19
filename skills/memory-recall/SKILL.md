@@ -2,6 +2,9 @@
 name: memory-recall
 description: This skill should be used when the user asks about "past decisions", "previous learnings", "what did we decide", "how did we solve", "remember when", or mentions topics that may have stored memories. Also triggers when working on tasks where historical context would be valuable, such as "working on authentication", "implementing the database", or encountering errors similar to previously resolved issues.
 version: 0.1.0
+allowed-tools:
+  - Bash
+  - Read
 ---
 
 # Memory Recall Skill
