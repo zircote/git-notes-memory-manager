@@ -1,6 +1,12 @@
 {
   "hooks": [
     {
+      "event": "SessionStart",
+      "script": "session_start.py",
+      "description": "Injects relevant memory context at session startup",
+      "enabled": true
+    },
+    {
       "event": "UserPromptSubmit",
       "script": "userpromptsubmit.py",
       "description": "Optional: Captures significant prompts as memories when marker is present",
