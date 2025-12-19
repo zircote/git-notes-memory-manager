@@ -53,6 +53,9 @@ __all__ = [
     "CaptureDecider",
     "CaptureDecision",
     "CaptureAction",
+    # Session Analysis
+    "SessionAnalyzer",
+    "TranscriptContent",
     # Project Detection
     "detect_project",
 ]
@@ -130,6 +133,16 @@ def __getattr__(name: str) -> object:
         from git_notes_memory.hooks.models import CaptureAction
 
         return CaptureAction
+
+    # Session Analysis
+    if name == "SessionAnalyzer":
+        from git_notes_memory.hooks.session_analyzer import SessionAnalyzer
+
+        return SessionAnalyzer
+    if name == "TranscriptContent":
+        from git_notes_memory.hooks.session_analyzer import TranscriptContent
+
+        return TranscriptContent
 
     # Project Detection
     if name == "detect_project":

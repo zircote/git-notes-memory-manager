@@ -4,7 +4,7 @@ format_version: "1.0.0"
 project_id: SPEC-2025-12-19-001
 project_name: "Hook-Based Memory Capture"
 project_status: in-progress
-current_phase: 4
+current_phase: 5
 implementation_started: 2025-12-19T00:00:00Z
 last_session: 2025-12-19T00:00:00Z
 last_updated: 2025-12-19T00:00:00Z
@@ -42,11 +42,11 @@ This document tracks implementation progress against the spec plan.
 | 3.4 | Create UserPromptSubmit Hook Handler | done | 2025-12-19 | 2025-12-19 | Created `hooks/user_prompt_handler.py` |
 | 3.5 | Format Capture Suggestions | done | 2025-12-19 | 2025-12-19 | XML formatter in handler via XMLBuilder |
 | 3.6 | Register UserPromptSubmit Hook | done | 2025-12-19 | 2025-12-19 | Updated hooks.json, created wrapper |
-| 4.1 | Implement Session Analyzer | pending | | | Transcript analysis |
-| 4.2 | Detect Uncaptured Memories | pending | | | Filter already-captured |
-| 4.3 | Enhance Stop Hook Handler | pending | | | Update hooks/stop.py |
-| 4.4 | Implement Capture Prompt | pending | | | Format uncaptured content prompt |
-| 4.5 | Index Synchronization | pending | | | Sync on session end |
+| 4.1 | Implement Session Analyzer | done | 2025-12-19 | 2025-12-19 | Created `hooks/session_analyzer.py` |
+| 4.2 | Detect Uncaptured Memories | done | 2025-12-19 | 2025-12-19 | Integrated in SessionAnalyzer with novelty filtering |
+| 4.3 | Enhance Stop Hook Handler | done | 2025-12-19 | 2025-12-19 | Created `hooks/stop_handler.py` |
+| 4.4 | Implement Capture Prompt | done | 2025-12-19 | 2025-12-19 | XML formatting in stop_handler |
+| 4.5 | Index Synchronization | done | 2025-12-19 | 2025-12-19 | SyncService integration in stop_handler |
 | 5.1 | Unit Tests - Hook Services | pending | | | XMLBuilder, ContextBuilder, etc. |
 | 5.2 | Unit Tests - Hook Handlers | pending | | | Hook script tests |
 | 5.3 | Integration Tests | pending | | | End-to-end flows |
@@ -64,7 +64,7 @@ This document tracks implementation progress against the spec plan.
 | 1 | Core Hook Infrastructure | 100% | done |
 | 2 | SessionStart Context Injection | 100% | done |
 | 3 | Capture Signal Detection | 100% | done |
-| 4 | Stop Hook Enhancement | 0% | pending |
+| 4 | Stop Hook Enhancement | 100% | done |
 | 5 | Testing & Documentation | 0% | pending |
 
 ---
@@ -151,3 +151,27 @@ This document tracks implementation progress against the spec plan.
   - `mypy` - No issues found in 11 source files
   - `pytest` - 910 tests passed
 - Ready for Phase 4: Stop Hook Enhancement
+
+### 2025-12-19 - Phase 4 Complete
+- **Phase 4 completed**: All 5 tasks done
+- Created `src/git_notes_memory/hooks/session_analyzer.py`:
+  - `SessionAnalyzer` class for parsing and analyzing session transcripts
+  - `TranscriptContent` frozen dataclass for parsed transcript data
+  - Pattern-based user message extraction from transcripts
+  - Novelty filtering to skip already-captured content
+  - Confidence-based ranking and result limiting
+- Created `src/git_notes_memory/hooks/stop_handler.py`:
+  - Full Stop hook handler with session analysis
+  - Uncaptured content detection via SessionAnalyzer integration
+  - XML-formatted output for uncaptured memories via XMLBuilder
+  - Index synchronization via SyncService.reindex(full=False)
+  - Configuration support: `stop_enabled`, `stop_prompt_uncaptured`, `stop_sync_index`
+  - Non-blocking error handling (exit 0 on all paths)
+- Updated `hooks/stop.py` wrapper script:
+  - Delegates to stop_handler module
+  - Graceful fallback if library not installed
+- All quality gates passed:
+  - `ruff check` - All checks passed
+  - `mypy` - No issues found in 13 source files
+  - `pytest` - 910 tests passed
+- Ready for Phase 5: Testing & Documentation

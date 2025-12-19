@@ -1,72 +1,49 @@
 #!/usr/bin/env python3
-"""Hook: Sync memory index on session end.
+"""Hook: Process session end with uncaptured content detection and index sync.
 
-This hook performs a lightweight incremental sync of the memory index
-when a Claude Code session ends. This ensures any memories captured
-during the session are properly indexed for future retrieval.
+This hook performs session-end tasks:
+1. Analyzes session transcript for uncaptured memorable content
+2. Prompts user to capture worthy content (if configured)
+3. Synchronizes the memory index
+
+Environment Variables:
+    HOOK_ENABLED: Master switch for hooks (default: true)
+    HOOK_STOP_ENABLED: Enable this hook (default: true)
+    HOOK_STOP_PROMPT_UNCAPTURED: Prompt for uncaptured content (default: true)
+    HOOK_STOP_SYNC_INDEX: Sync index on session end (default: true)
+    HOOK_DEBUG: Enable debug logging (default: false)
+
+Exit codes:
+    0 - Success (non-blocking)
 """
 
 from __future__ import annotations
 
-import json
 import sys
 
 
-def sync_index() -> dict:
-    """Perform incremental index sync.
+def main() -> None:
+    """Main hook entry point.
 
-    Returns dict with sync result.
+    Delegates to the stop_handler module for actual processing.
+    Falls back gracefully if the library is not installed.
     """
     try:
-        from git_notes_memory import get_sync_service
+        from git_notes_memory.hooks.stop_handler import main as handler_main
 
-        sync = get_sync_service()
-        stats = sync.incremental_sync()
-
-        return {
-            "success": True,
-            "stats": {
-                "scanned": stats.get("scanned", 0),
-                "added": stats.get("added", 0),
-                "updated": stats.get("updated", 0),
-            }
-        }
-
+        handler_main()
     except ImportError:
-        # Library not installed, skip silently
-        return {"success": True, "skipped": True}
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        # Library not installed, exit silently (non-blocking)
+        import json
 
+        print(json.dumps({"continue": True}))
+        sys.exit(0)
+    except Exception:
+        # Any unexpected error, exit silently (non-blocking)
+        import json
 
-def main() -> None:
-    """Main hook entry point."""
-    # Read hook input from stdin (may be empty for stop hook)
-    try:
-        input_data = json.load(sys.stdin)
-    except (json.JSONDecodeError, ValueError):
-        input_data = {}
-
-    # Perform sync
-    result = sync_index()
-
-    # Output result
-    output = {"continue": True}
-
-    if result.get("skipped"):
-        # Silently skip if library not installed
-        pass
-    elif result.get("success"):
-        stats = result.get("stats", {})
-        if stats.get("added", 0) > 0 or stats.get("updated", 0) > 0:
-            output["message"] = f"Memory index synced: +{stats.get('added', 0)} new, ~{stats.get('updated', 0)} updated"
-    else:
-        output["warning"] = f"Memory sync failed: {result.get('error', 'Unknown error')}"
-
-    print(json.dumps(output))
+        print(json.dumps({"continue": True}))
+        sys.exit(0)
 
 
 if __name__ == "__main__":
