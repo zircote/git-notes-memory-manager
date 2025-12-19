@@ -5,3 +5,11 @@ summary: Testing plugin functionality after bug fix
 ---
 
 Verified that git notes command syntax was corrected from --list to list. All 910 tests pass.
+
+---
+type: learnings
+timestamp: '2025-12-19T11:13:17.984437+00:00'
+summary: Test capture marker detection
+---
+
+Test capture marker detection
