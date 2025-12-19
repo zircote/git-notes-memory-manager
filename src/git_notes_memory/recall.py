@@ -109,6 +109,7 @@ class RecallService:
             from git_notes_memory.index import IndexService
 
             self._index_service = IndexService(self._index_path)
+            self._index_service.initialize()
         return self._index_service
 
     def _get_embedding(self) -> EmbeddingService:
