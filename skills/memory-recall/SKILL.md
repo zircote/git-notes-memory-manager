@@ -54,12 +54,12 @@ from git_notes_memory import get_recall_service
 recall = get_recall_service()
 results = recall.search(
     query='''$EXTRACTED_CONCEPTS''',
-    limit=5,
-    threshold=0.7  # Only high-relevance results
+    k=5,
+    min_similarity=0.7  # Only high-relevance results
 )
 
 for r in results:
-    print(f'{r.namespace}: {r.title or r.content[:50]} (score: {r.score:.2f})')
+    print(f'{r.namespace}: {r.summary} (score: {r.score:.2f})')
 "
 ```
 

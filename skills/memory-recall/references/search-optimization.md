@@ -2,53 +2,30 @@
 
 Advanced techniques for optimizing memory recall queries.
 
-## Query Expansion
+## Semantic vs Text Search
 
-Improve recall by expanding queries with related terms:
+The library provides two search modes:
 
 ```python
 from git_notes_memory import get_recall_service
-from git_notes_memory.search import get_optimizer
 
 recall = get_recall_service()
-optimizer = get_optimizer()
 
-# Original query
-query = "database connection"
+# Semantic search (vector similarity) - best for conceptual queries
+results = recall.search("authentication flow", k=10)
 
-# Expanded with related terms
-expanded = optimizer.expand_query(query)
-# Result: "database connection pool timeout postgres sql"
-
-results = recall.search(expanded, limit=10)
+# Text search (FTS5 keyword matching) - best for exact terms
+results = recall.search_text("JWT token", limit=10)
 ```
 
-## Hybrid Search Strategy
-
-Combine semantic and keyword search for best results:
-
-```python
-from git_notes_memory.search import get_optimizer
-
-optimizer = get_optimizer()
-
-# Hybrid search combines:
-# 1. Vector similarity (semantic meaning)
-# 2. BM25 keyword matching (exact terms)
-# 3. Recency weighting (newer memories preferred)
-
-results = optimizer.search(
-    query="authentication JWT tokens",
-    semantic_weight=0.6,  # 60% semantic
-    keyword_weight=0.3,   # 30% keyword
-    recency_weight=0.1,   # 10% recency
-    limit=10
-)
-```
+| Mode | Method | Best For |
+|------|--------|----------|
+| Semantic | `search()` | Conceptual queries, finding related ideas |
+| Text | `search_text()` | Exact terms, specific identifiers |
 
 ## Threshold Tuning
 
-Adjust relevance thresholds based on context:
+Adjust relevance thresholds based on context using `min_similarity`:
 
 | Scenario | Threshold | Rationale |
 |----------|-----------|-----------|
@@ -58,6 +35,20 @@ Adjust relevance thresholds based on context:
 | Troubleshooting | 0.55 | Include related issues |
 
 ```python
+# High precision for direct questions
+results = recall.search(
+    query="why did we choose PostgreSQL",
+    k=5,
+    min_similarity=0.8
+)
+
+# Broader search for exploration
+results = recall.search(
+    query="database",
+    k=10,
+    min_similarity=0.5
+)
+
 # Dynamic threshold based on query type
 def get_threshold(query_type):
     thresholds = {
@@ -77,22 +68,57 @@ Target specific memory types for faster, more relevant results:
 # For decision inquiries
 results = recall.search(
     query="why redis",
-    namespace="decisions",
-    limit=5
+    k=5,
+    namespace="decisions"
 )
 
 # For troubleshooting
 results = recall.search(
     query="timeout error",
-    namespace="learnings",
-    limit=10
+    k=10,
+    namespace="learnings"
 )
 
-# Multi-namespace search
+# For spec-specific context
 results = recall.search(
-    query="database",
+    query="authentication",
+    k=10,
+    namespace="decisions",
+    spec="my-project"
+)
+```
+
+## Multi-Namespace Search
+
+To search across multiple namespaces, query each and merge results:
+
+```python
+def search_multiple_namespaces(query, namespaces, k_per_ns=5):
+    """Search across multiple namespaces, merging results."""
+    all_results = []
+
+    for ns in namespaces:
+        results = recall.search(query=query, namespace=ns, k=k_per_ns)
+        all_results.extend(results)
+
+    # Sort by score (lower distance = better)
+    all_results.sort(key=lambda r: r.distance)
+
+    # Deduplicate by ID
+    seen = set()
+    unique = []
+    for r in all_results:
+        if r.id not in seen:
+            seen.add(r.id)
+            unique.append(r)
+
+    return unique
+
+# Example: search decisions and patterns together
+results = search_multiple_namespaces(
+    "database",
     namespaces=["decisions", "patterns"],
-    limit=10
+    k_per_ns=5
 )
 ```
 
@@ -110,7 +136,7 @@ def format_for_context(memories, max_chars=500):
             content = content[:max_chars] + "..."
         formatted.append({
             'type': m.namespace,
-            'summary': m.title or content[:50],
+            'summary': m.summary,
             'score': m.score,
             'content': content
         })
@@ -125,9 +151,10 @@ Cache frequent queries for faster recall:
 from functools import lru_cache
 
 @lru_cache(maxsize=100)
-def cached_search(query, namespace=None, limit=5):
+def cached_search(query, namespace=None, k=5):
     recall = get_recall_service()
-    return recall.search(query, namespace=namespace, limit=limit)
+    # Convert results to tuple for hashability
+    return tuple(recall.search(query, namespace=namespace, k=k))
 
 # Clear cache when new memories added
 def on_memory_captured():
@@ -142,6 +169,7 @@ Monitor search performance:
 import time
 
 def timed_search(query, **kwargs):
+    recall = get_recall_service()
     start = time.time()
     results = recall.search(query, **kwargs)
     duration = time.time() - start
@@ -157,7 +185,31 @@ def timed_search(query, **kwargs):
 ## Best Practices
 
 1. **Start specific, then broaden**: Begin with focused queries, expand if no results
-2. **Use namespace hints**: When query implies a type (e.g., "why" → decisions)
+2. **Use namespace hints**: When query implies a type (e.g., "why" -> decisions)
 3. **Limit results**: Surface 3-5 highly relevant memories, not all matches
 4. **Cache common queries**: Project-specific terms are queried repeatedly
 5. **Monitor relevance**: Track which recalled memories users actually reference
+6. **Use appropriate search mode**: Semantic for concepts, text for exact matches
+7. **Combine with hydration**: Use `recall_context()` for search + hydration in one call
+
+## Convenience Methods
+
+The RecallService provides convenience methods for common patterns:
+
+```python
+# Search and hydrate in one call
+from git_notes_memory.models import HydrationLevel
+
+hydrated = recall.recall_context(
+    query="error handling",
+    k=5,
+    hydration_level=HydrationLevel.FULL
+)
+
+# Find similar memories
+memory = recall.get("decisions:abc123:0")
+similar = recall.recall_similar(memory, k=3)
+
+# List recent memories
+recent = recall.list_recent(limit=10, namespace="learnings")
+```

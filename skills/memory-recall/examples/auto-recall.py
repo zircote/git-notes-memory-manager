@@ -106,7 +106,7 @@ def auto_recall(
     results = recall.search(
         query=query,
         namespace=namespace,
-        limit=limit * 2  # Get more, then filter by threshold
+        k=limit * 2  # Get more, then filter by threshold
     )
 
     # Step 4: Filter by threshold
@@ -128,8 +128,7 @@ def format_results(recall_result: dict) -> str:
     lines = [f"**Relevant Memories Found** ({len(recall_result['results'])} matches)\n"]
 
     for i, r in enumerate(recall_result['results'], 1):
-        summary = r.title or r.content[:50]
-        lines.append(f"{i}. **{r.namespace.title()}** ({r.score:.2f}): {summary}")
+        lines.append(f"{i}. **{r.namespace.title()}** ({r.score:.2f}): {r.summary}")
 
     lines.append("\n_Use `/memory:recall` for details or `/memory:search` for custom queries._")
 

@@ -44,7 +44,7 @@ def search_by_namespace(
     return recall.search(
         query=query,
         namespace=namespace,
-        limit=limit
+        k=limit
     )
 
 
@@ -88,7 +88,7 @@ def search_with_filters(
         # Multi-namespace search
         all_results = []
         for ns in filters.namespaces:
-            results = recall.search(query=query, namespace=ns, limit=limit)
+            results = recall.search(query=query, namespace=ns, k=limit)
             all_results.extend(results)
         # Sort by score and deduplicate
         seen_ids = set()
@@ -101,10 +101,10 @@ def search_with_filters(
         results = recall.search(
             query=query,
             namespace=filters.namespace,
-            limit=limit * 2  # Get more for filtering
+            k=limit * 2  # Get more for filtering
         )
     else:
-        results = recall.search(query=query, limit=limit * 2)
+        results = recall.search(query=query, k=limit * 2)
 
     # Apply additional filters
     filtered = []
@@ -113,11 +113,10 @@ def search_with_filters(
         if r.score < filters.min_score:
             continue
 
-        # Date filters
-        created = datetime.fromisoformat(r.created_at)
-        if filters.since and created < filters.since:
+        # Date filters (timestamp is already a datetime object)
+        if filters.since and r.timestamp < filters.since:
             continue
-        if filters.until and created > filters.until:
+        if filters.until and r.timestamp > filters.until:
             continue
 
         # Tag filter
@@ -184,7 +183,7 @@ def cross_namespace_search(
         results = recall.search(
             query=query,
             namespace=ns,
-            limit=limit_per_namespace
+            k=limit_per_namespace
         )
         if results:
             results_by_namespace[ns] = results
@@ -201,8 +200,7 @@ def format_cross_namespace_results(results: dict) -> str:
     for namespace, memories in results.items():
         lines.append(f"\n### {namespace.title()} ({len(memories)} found)")
         for i, m in enumerate(memories, 1):
-            summary = m.title or m.content[:50]
-            lines.append(f"  {i}. {summary} ({m.score:.2f})")
+            lines.append(f"  {i}. {m.summary} ({m.score:.2f})")
 
     return '\n'.join(lines)
 
@@ -213,13 +211,13 @@ if __name__ == '__main__':
     print("=== Decision Search ===")
     decisions = search_decisions("database")
     for d in decisions:
-        print(f"  - {d.title}: {d.score:.2f}")
+        print(f"  - {d.summary}: {d.score:.2f}")
 
     # Example 2: Search with date filter
     print("\n=== Recent Learnings (7 days) ===")
     recent = search_recent("error handling", days=7, namespace='learnings')
     for r in recent:
-        print(f"  - {r.title}: {r.created_at[:10]}")
+        print(f"  - {r.summary}: {r.timestamp.strftime('%Y-%m-%d')}")
 
     # Example 3: Cross-namespace search
     print("\n=== Cross-Namespace: Authentication ===")
@@ -234,4 +232,4 @@ if __name__ == '__main__':
     print("\n=== Tagged: API + Security ===")
     tagged = search_by_tags(['api', 'security'], limit=5)
     for t in tagged:
-        print(f"  - {t.namespace}: {t.title}")
+        print(f"  - {t.namespace}: {t.summary}")
