@@ -22,7 +22,8 @@ Check if `--verbose` flag is present.
 
 **Basic Status**:
 ```bash
-uv run python3 -c "
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 from git_notes_memory import get_sync_service
 from git_notes_memory.index import IndexService
 from git_notes_memory.config import get_embedding_model, get_index_path, get_data_path
@@ -61,11 +62,12 @@ print(f'| Data Directory | {get_data_path()} |')
 
 **Verbose Status**:
 ```bash
-uv run python3 -c "
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
+import subprocess
 from git_notes_memory import get_sync_service
 from git_notes_memory.index import IndexService
 from git_notes_memory.config import get_embedding_model, get_index_path, get_data_path, NAMESPACES
-import subprocess
 
 sync = get_sync_service()
 index_path = get_index_path()

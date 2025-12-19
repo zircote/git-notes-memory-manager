@@ -32,7 +32,8 @@ Use Bash to invoke the Python library:
 
 **Semantic Search** (default - vector similarity):
 ```bash
-uv run python3 -c "
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 from git_notes_memory import get_recall_service
 
 recall = get_recall_service()
@@ -58,7 +59,8 @@ else:
 
 **Text Search** (keyword/FTS matching):
 ```bash
-uv run python3 -c "
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 from git_notes_memory import get_recall_service
 
 recall = get_recall_service()

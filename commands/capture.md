@@ -43,7 +43,8 @@ If `$ARGUMENTS` is empty or very short (< 10 characters):
 Use Bash to invoke the Python library:
 
 ```bash
-uv run python3 -c "
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 from git_notes_memory import get_capture_service
 
 capture = get_capture_service()

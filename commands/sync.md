@@ -26,9 +26,10 @@ Use Bash to invoke the Python library based on mode:
 
 **Incremental Sync** (default):
 ```bash
-uv run python3 -c "
-from git_notes_memory import get_sync_service
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 import time
+from git_notes_memory import get_sync_service
 
 sync = get_sync_service()
 start = time.time()
@@ -45,9 +46,10 @@ print(f'| Duration | {duration:.2f}s |')
 
 **Full Reindex**:
 ```bash
-uv run python3 -c "
-from git_notes_memory import get_sync_service
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 import time
+from git_notes_memory import get_sync_service
 
 sync = get_sync_service()
 start = time.time()
@@ -64,7 +66,8 @@ print(f'| Duration | {duration:.2f}s |')
 
 **Verify Consistency**:
 ```bash
-uv run python3 -c "
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 from git_notes_memory import get_sync_service
 
 sync = get_sync_service()
@@ -87,7 +90,8 @@ else:
 
 **Repair**:
 ```bash
-uv run python3 -c "
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 from git_notes_memory import get_sync_service
 
 sync = get_sync_service()
@@ -113,7 +117,8 @@ else:
 
 If `--dry-run` is specified, show what would happen without making changes:
 ```bash
-uv run python3 -c "
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
 from git_notes_memory import get_sync_service
 
 sync = get_sync_service()

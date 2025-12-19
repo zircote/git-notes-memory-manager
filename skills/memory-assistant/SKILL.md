@@ -268,6 +268,61 @@ Capture memories without interrupting your flow:
 | `/memory:status` | System health | `/memory:status --verbose` |
 | `/memory:sync` | Index maintenance | `/memory:sync verify` |
 
+## Python API Reference
+
+When executing inline captures via bash, use these EXACT API signatures:
+
+### Capture API
+```python
+from git_notes_memory import get_capture_service
+
+capture = get_capture_service()
+result = capture.capture(
+    namespace='learnings',  # REQUIRED: one of decisions, learnings, blockers, progress, etc.
+    summary='Short description',  # REQUIRED: max 100 chars
+    content='Full content here',  # Optional: detailed content
+    tags=['tag1', 'tag2'],  # Optional: list of tags
+    spec='project-name',  # Optional: project/spec identifier
+)
+
+# Result attributes:
+if result.success:
+    print(f'Namespace: {result.memory.namespace}')  # NOT result.namespace
+    print(f'ID: {result.memory.id}')  # NOT result.memory_id
+    print(f'Summary: {result.memory.summary}')
+else:
+    print(f'Warning: {result.warning}')
+```
+
+### Recall API
+```python
+from git_notes_memory import get_recall_service
+
+recall = get_recall_service()
+results = recall.search(
+    query='search terms',  # REQUIRED
+    k=5,  # Optional: number of results (default 5)
+    namespace='learnings',  # Optional: filter by namespace (or None for all)
+    min_similarity=0.6,  # Optional: minimum similarity threshold
+)
+
+# Each result has:
+for r in results:
+    print(f'{r.namespace}: {r.summary}')
+    print(f'Score: {r.score}, Content: {r.content}')
+    print(f'Timestamp: {r.timestamp}')
+```
+
+### Bash Wrapper Pattern
+Always use this pattern when executing Python via bash:
+```bash
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
+from git_notes_memory import get_capture_service
+# ... your code here
+"
+```
+
 ## Best Practices
 
 ### When to Capture

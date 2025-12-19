@@ -14,9 +14,14 @@ The hook:
 from __future__ import annotations
 
 import json
-import os
 import sys
 from pathlib import Path
+
+# Bootstrap: Add plugin's src directory to sys.path for self-contained execution
+_plugin_root = Path(__file__).resolve().parent.parent
+_src_path = _plugin_root / "src"
+if _src_path.exists() and str(_src_path) not in sys.path:
+    sys.path.insert(0, str(_src_path))
 
 
 def get_memory_status() -> dict:
@@ -106,11 +111,11 @@ def build_context_message(status: dict) -> str:
 
 def main() -> None:
     """Main hook entry point."""
-    # Read hook input from stdin
+    # Read hook input from stdin (not used but must be consumed)
     try:
-        input_data = json.load(sys.stdin)
+        _input_data = json.load(sys.stdin)
     except (json.JSONDecodeError, ValueError):
-        input_data = {}
+        _input_data = {}  # noqa: F841
 
     # Get memory system status
     status = get_memory_status()
