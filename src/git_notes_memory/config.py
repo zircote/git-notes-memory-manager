@@ -69,6 +69,19 @@ __all__ = [
     "REVIEW_SEVERITIES",
     # Retrospective
     "RETROSPECTIVE_OUTCOMES",
+    # Hook Configuration
+    "HOOK_DEFAULT_TIMEOUT",
+    "HOOK_SESSION_START_TIMEOUT",
+    "HOOK_USER_PROMPT_TIMEOUT",
+    "HOOK_STOP_TIMEOUT",
+    "HOOK_BUDGET_SIMPLE",
+    "HOOK_BUDGET_MEDIUM",
+    "HOOK_BUDGET_COMPLEX",
+    "HOOK_BUDGET_FULL",
+    "HOOK_MIN_CONFIDENCE",
+    "HOOK_AUTO_THRESHOLD",
+    "HOOK_NOVELTY_THRESHOLD",
+    "HOOK_SIGNAL_NAMESPACES",
 ]
 
 
@@ -316,5 +329,39 @@ RETROSPECTIVE_OUTCOMES: frozenset[str] = frozenset(
         "partial",
         "failed",
         "abandoned",
+    }
+)
+
+
+# =============================================================================
+# Hook Configuration
+# =============================================================================
+
+# Default token budgets for context injection (PERF-004 requirement)
+HOOK_DEFAULT_TIMEOUT = 30  # Default hook timeout in seconds
+HOOK_SESSION_START_TIMEOUT = 5  # SessionStart hook timeout
+HOOK_USER_PROMPT_TIMEOUT = 2  # UserPromptSubmit hook timeout
+HOOK_STOP_TIMEOUT = 5  # Stop hook timeout
+
+# Token budget tiers (from architecture spec)
+HOOK_BUDGET_SIMPLE = 500  # Simple projects
+HOOK_BUDGET_MEDIUM = 1000  # Medium complexity projects
+HOOK_BUDGET_COMPLEX = 2000  # Complex projects
+HOOK_BUDGET_FULL = 3000  # Full/unlimited budget
+
+# Capture detection thresholds
+HOOK_MIN_CONFIDENCE = 0.7  # Minimum confidence for SUGGEST action
+HOOK_AUTO_THRESHOLD = 0.95  # Threshold for AUTO action
+HOOK_NOVELTY_THRESHOLD = 0.3  # Minimum novelty score
+
+# Hook namespaces for captured signals
+HOOK_SIGNAL_NAMESPACES: frozenset[str] = frozenset(
+    {
+        "decisions",
+        "learnings",
+        "blockers",
+        "solutions",  # Resolution signals map here
+        "preferences",
+        "notes",  # Explicit signals map here
     }
 )
