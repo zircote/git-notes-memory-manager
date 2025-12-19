@@ -99,13 +99,14 @@ class HookConfig:
     debug: bool = False
 
     # Budget tier thresholds (for adaptive mode)
+    # Note: total must >= working_memory + semantic_context + commands (default 100)
     budget_tiers: tuple[tuple[str, int, int, int], ...] = field(
         default=(
             # (complexity, total_budget, working_memory, semantic_context)
-            ("simple", 500, 350, 150),
-            ("medium", 1000, 600, 400),
-            ("complex", 2000, 1000, 1000),
-            ("full", 3000, 1500, 1500),
+            ("simple", 500, 300, 100),  # 300+100+100=500
+            ("medium", 1000, 500, 300),  # 500+300+100=900 (margin for commands)
+            ("complex", 2000, 900, 900),  # 900+900+100=1900 (margin)
+            ("full", 3000, 1400, 1400),  # 1400+1400+100=2900 (margin)
         )
     )
 
