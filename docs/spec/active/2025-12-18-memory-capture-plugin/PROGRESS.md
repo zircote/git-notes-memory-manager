@@ -13,10 +13,10 @@ status: in-progress
 | Metric | Value |
 |--------|-------|
 | Total Tasks | 24 |
-| Completed | 23 |
-| In Progress | 1 |
+| Completed | 24 |
+| In Progress | 0 |
 | Pending | 0 |
-| Progress | 96% |
+| Progress | 100% ✅ |
 
 ## Phase Progress
 
@@ -27,7 +27,7 @@ status: in-progress
 | Phase 3: Core Services | 4 | 4 | 100% |
 | Phase 4: Advanced Features | 3 | 3 | 100% |
 | Phase 5: Plugin Integration | 4 | 4 | 100% |
-| Phase 6: Polish & Release | 4 | 3 | 75% |
+| Phase 6: Polish & Release | 4 | 4 | 100% ✅ |
 
 ---
 
@@ -301,18 +301,17 @@ status: in-progress
   - [x] Examples provided
 
 ### Task 6.3: PyPI Release
-- **Status**: in-progress
+- **Status**: done
 - **Started**: 2025-12-19
-- **Completed**: -
+- **Completed**: 2025-12-19
 - **Description**: Publish to PyPI
-- **Notes**: Package built and verified locally. Requires PyPI token to complete.
+- **PyPI URL**: https://pypi.org/project/git-notes-memory/0.1.0/
 - **Build Artifacts**:
   - `dist/git_notes_memory-0.1.0.tar.gz` (64KB)
   - `dist/git_notes_memory-0.1.0-py3-none-any.whl` (73KB)
-- **Manual Steps Remaining**:
-  - `uv publish --token <PYPI_TOKEN>` or set `UV_PUBLISH_TOKEN` env var
+- **CI/CD**: GitHub Actions workflow `.github/workflows/publish.yml` triggers on tag push
 - **Acceptance Criteria**:
-  - [ ] Package installs from PyPI (pending: needs `uv publish`)
+  - [x] Package installs from PyPI (`pip install git-notes-memory`)
   - [x] Version number correct (0.1.0)
   - [x] Dependencies resolve (verified in isolated venv)
 
@@ -363,3 +362,4 @@ _None recorded yet._
 | 2025-12-19 | 6.2 | Documentation: Created USER_GUIDE.md (439 lines) with concepts, installation, Python library usage, Claude Code plugin commands, namespaces table, search tips, configuration, troubleshooting. Created DEVELOPER_GUIDE.md (701 lines) with full API reference for CaptureService, RecallService, SyncService, all models, exceptions, utilities. Created CHANGELOG.md (108 lines) in Keep a Changelog format. Updated README.md with documentation links. |
 | 2025-12-19 | 6.3 (partial) | PyPI Release: Built package with `uv build` (sdist 64KB, wheel 73KB). Verified installation in isolated venv - imports work, version correct (0.1.0), dependencies resolve. **Blocked**: PyPI token required for `uv publish`. |
 | 2025-12-19 | 6.4 | GitHub Release: Pushed branch and tag to remote. Created GitHub release v0.1.0 with wheel and sdist assets. Release URL: https://github.com/zircote/git-notes-memory-manager/releases/tag/v0.1.0. Can install via `pip install <wheel-url>`. |
+| 2025-12-19 | 6.3 | PyPI Release: Created `.github/workflows/publish.yml` for automated PyPI publishing on tag push. After making repo public, workflow succeeded (1m55s). **Package live at https://pypi.org/project/git-notes-memory/0.1.0/**. **PROJECT COMPLETE! 🎉** |
