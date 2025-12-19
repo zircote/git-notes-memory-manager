@@ -37,6 +37,7 @@ from typing import Any
 from git_notes_memory.config import HOOK_SESSION_START_TIMEOUT
 from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.context_builder import ContextBuilder
+from git_notes_memory.hooks.guidance_builder import GuidanceBuilder
 from git_notes_memory.hooks.project_detector import detect_project
 
 __all__ = ["main"]
@@ -182,18 +183,39 @@ def main() -> None:
             project_info.spec_id,
         )
 
-        # Build context
-        builder = ContextBuilder(config=config)
-        context = builder.build_context(
+        # Build response guidance if enabled
+        guidance_xml = ""
+        if config.session_start_include_guidance:
+            guidance_builder = GuidanceBuilder()
+            guidance_xml = guidance_builder.build_guidance(
+                config.session_start_guidance_detail.value
+            )
+            logger.debug(
+                "Built response guidance (%d chars, level=%s)",
+                len(guidance_xml),
+                config.session_start_guidance_detail.value,
+            )
+
+        # Build memory context
+        context_builder = ContextBuilder(config=config)
+        memory_context = context_builder.build_context(
             project=project_info.name,
             session_source=session_source,
             spec_id=project_info.spec_id,
         )
 
-        logger.debug("Built context (%d chars)", len(context))
+        logger.debug("Built memory context (%d chars)", len(memory_context))
+
+        # Combine guidance and memory context
+        if guidance_xml:
+            full_context = f"{guidance_xml}\n\n{memory_context}"
+        else:
+            full_context = memory_context
+
+        logger.debug("Total context (%d chars)", len(full_context))
 
         # Output result
-        _write_output(context)
+        _write_output(full_context)
 
     except json.JSONDecodeError as e:
         logger.error("Failed to parse hook input: %s", e)

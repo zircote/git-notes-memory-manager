@@ -11,6 +11,8 @@ Environment Variables:
     HOOK_SESSION_START_ENABLED: Enable SessionStart hook
     HOOK_SESSION_START_BUDGET_MODE: Token budget mode (adaptive/fixed/full)
     HOOK_SESSION_START_FIXED_BUDGET: Fixed budget amount
+    HOOK_SESSION_START_INCLUDE_GUIDANCE: Include response guidance in SessionStart
+    HOOK_SESSION_START_GUIDANCE_DETAIL: Guidance detail level (minimal/standard/detailed)
     HOOK_CAPTURE_DETECTION_ENABLED: Enable capture signal detection
     HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE: Minimum confidence for suggestions
     HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD: Confidence for auto-capture
@@ -18,6 +20,16 @@ Environment Variables:
     HOOK_USER_PROMPT_ENABLED: Enable UserPromptSubmit hook
     HOOK_STOP_ENABLED: Enable Stop hook
     HOOK_STOP_PROMPT_UNCAPTURED: Prompt for uncaptured content
+    HOOK_POST_TOOL_USE_ENABLED: Enable PostToolUse hook
+    HOOK_POST_TOOL_USE_MIN_SIMILARITY: Minimum similarity for memory recall
+    HOOK_POST_TOOL_USE_MAX_RESULTS: Maximum memories to inject
+    HOOK_POST_TOOL_USE_TIMEOUT: PostToolUse timeout in seconds
+    HOOK_PRE_COMPACT_ENABLED: Enable PreCompact hook
+    HOOK_PRE_COMPACT_AUTO_CAPTURE: Auto-capture without user prompt
+    HOOK_PRE_COMPACT_PROMPT_FIRST: Show suggestions before capturing (suggestion mode)
+    HOOK_PRE_COMPACT_MIN_CONFIDENCE: Minimum confidence for auto-capture
+    HOOK_PRE_COMPACT_MAX_CAPTURES: Maximum memories to auto-capture
+    HOOK_PRE_COMPACT_TIMEOUT: PreCompact timeout in seconds
     HOOK_TIMEOUT: Default hook timeout in seconds
 """
 
@@ -29,7 +41,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-__all__ = ["HookConfig", "BudgetMode", "load_hook_config"]
+__all__ = ["HookConfig", "BudgetMode", "GuidanceDetailLevel", "load_hook_config"]
 
 
 class BudgetMode(Enum):
@@ -47,6 +59,19 @@ class BudgetMode(Enum):
     MINIMAL = "minimal"
 
 
+class GuidanceDetailLevel(Enum):
+    """Detail level for response guidance injection.
+
+    - MINIMAL: Inline marker syntax only (~200 tokens)
+    - STANDARD: Syntax + capture patterns (~500 tokens)
+    - DETAILED: Full templates with examples (~1000 tokens)
+    """
+
+    MINIMAL = "minimal"
+    STANDARD = "standard"
+    DETAILED = "detailed"
+
+
 @dataclass(frozen=True)
 class HookConfig:
     """Configuration for hook handlers.
@@ -60,6 +85,8 @@ class HookConfig:
         session_start_budget_mode: Token budget allocation strategy.
         session_start_fixed_budget: Fixed budget when mode is FIXED.
         session_start_max_budget: Maximum budget cap.
+        session_start_include_guidance: Include response guidance in SessionStart.
+        session_start_guidance_detail: Guidance detail level (minimal/standard/detailed).
         capture_detection_enabled: Enable signal detection in prompts.
         capture_detection_min_confidence: Minimum confidence for SUGGEST.
         capture_detection_auto_threshold: Confidence for AUTO capture.
@@ -67,6 +94,17 @@ class HookConfig:
         stop_enabled: Enable Stop hook processing.
         stop_prompt_uncaptured: Prompt for uncaptured memorable content.
         stop_sync_index: Sync search index on session end.
+        post_tool_use_enabled: Enable PostToolUse hook for file-contextual memories.
+        post_tool_use_min_similarity: Minimum similarity for memory recall.
+        post_tool_use_max_results: Maximum memories to inject per tool use.
+        post_tool_use_timeout: PostToolUse hook timeout in seconds.
+        pre_compact_enabled: Enable PreCompact hook for memory preservation.
+        pre_compact_auto_capture: Auto-capture without user prompt.
+        pre_compact_prompt_first: Suggestion mode - show what would be captured via stderr
+            instead of auto-capturing. User can then manually capture if desired.
+        pre_compact_min_confidence: Minimum confidence for auto-capture.
+        pre_compact_max_captures: Maximum memories to auto-capture per event.
+        pre_compact_timeout: PreCompact hook timeout in seconds.
         timeout: Default timeout for hook operations (seconds).
         debug: Enable debug logging.
     """
@@ -79,6 +117,8 @@ class HookConfig:
     session_start_budget_mode: BudgetMode = BudgetMode.ADAPTIVE
     session_start_fixed_budget: int = 1000
     session_start_max_budget: int = 3000
+    session_start_include_guidance: bool = True
+    session_start_guidance_detail: GuidanceDetailLevel = GuidanceDetailLevel.STANDARD
 
     # Capture detection settings
     capture_detection_enabled: bool = False  # Disabled by default, opt-in
@@ -93,6 +133,22 @@ class HookConfig:
 
     # UserPromptSubmit hook settings
     user_prompt_enabled: bool = False  # Uses capture_detection_enabled by default
+
+    # PostToolUse hook settings
+    post_tool_use_enabled: bool = True
+    post_tool_use_min_similarity: float = 0.6
+    post_tool_use_max_results: int = 3
+    post_tool_use_timeout: int = 5
+
+    # PreCompact hook settings
+    pre_compact_enabled: bool = True
+    pre_compact_auto_capture: bool = True
+    pre_compact_prompt_first: bool = (
+        False  # Suggestion mode: show what would be captured
+    )
+    pre_compact_min_confidence: float = 0.85
+    pre_compact_max_captures: int = 3
+    pre_compact_timeout: int = 15
 
     # Performance settings
     timeout: int = 30
@@ -193,6 +249,26 @@ def _parse_budget_mode(value: str) -> BudgetMode:
         raise ValueError(msg) from None
 
 
+def _parse_guidance_detail(value: str) -> GuidanceDetailLevel:
+    """Parse guidance detail level from string.
+
+    Args:
+        value: Detail level string (case-insensitive).
+
+    Returns:
+        GuidanceDetailLevel enum value.
+
+    Raises:
+        ValueError: If level is not recognized.
+    """
+    try:
+        return GuidanceDetailLevel(value.lower())
+    except ValueError:
+        valid = [level.value for level in GuidanceDetailLevel]
+        msg = f"Invalid guidance detail level '{value}'. Valid: {valid}"
+        raise ValueError(msg) from None
+
+
 def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
     """Load hook configuration from environment variables.
 
@@ -242,6 +318,15 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
             env["HOOK_SESSION_START_MAX_BUDGET"],
             defaults.session_start_max_budget,
         )
+    if "HOOK_SESSION_START_INCLUDE_GUIDANCE" in env:
+        kwargs["session_start_include_guidance"] = _parse_bool(
+            env["HOOK_SESSION_START_INCLUDE_GUIDANCE"]
+        )
+    if "HOOK_SESSION_START_GUIDANCE_DETAIL" in env:
+        with contextlib.suppress(ValueError):
+            kwargs["session_start_guidance_detail"] = _parse_guidance_detail(
+                env["HOOK_SESSION_START_GUIDANCE_DETAIL"]
+            )
 
     # Capture detection settings
     if "HOOK_CAPTURE_DETECTION_ENABLED" in env:
@@ -277,6 +362,52 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
         )
     if "HOOK_STOP_SYNC_INDEX" in env:
         kwargs["stop_sync_index"] = _parse_bool(env["HOOK_STOP_SYNC_INDEX"])
+
+    # PostToolUse hook settings
+    if "HOOK_POST_TOOL_USE_ENABLED" in env:
+        kwargs["post_tool_use_enabled"] = _parse_bool(env["HOOK_POST_TOOL_USE_ENABLED"])
+    if "HOOK_POST_TOOL_USE_MIN_SIMILARITY" in env:
+        kwargs["post_tool_use_min_similarity"] = _parse_float(
+            env["HOOK_POST_TOOL_USE_MIN_SIMILARITY"],
+            defaults.post_tool_use_min_similarity,
+        )
+    if "HOOK_POST_TOOL_USE_MAX_RESULTS" in env:
+        kwargs["post_tool_use_max_results"] = _parse_int(
+            env["HOOK_POST_TOOL_USE_MAX_RESULTS"],
+            defaults.post_tool_use_max_results,
+        )
+    if "HOOK_POST_TOOL_USE_TIMEOUT" in env:
+        kwargs["post_tool_use_timeout"] = _parse_int(
+            env["HOOK_POST_TOOL_USE_TIMEOUT"],
+            defaults.post_tool_use_timeout,
+        )
+
+    # PreCompact hook settings
+    if "HOOK_PRE_COMPACT_ENABLED" in env:
+        kwargs["pre_compact_enabled"] = _parse_bool(env["HOOK_PRE_COMPACT_ENABLED"])
+    if "HOOK_PRE_COMPACT_AUTO_CAPTURE" in env:
+        kwargs["pre_compact_auto_capture"] = _parse_bool(
+            env["HOOK_PRE_COMPACT_AUTO_CAPTURE"]
+        )
+    if "HOOK_PRE_COMPACT_PROMPT_FIRST" in env:
+        kwargs["pre_compact_prompt_first"] = _parse_bool(
+            env["HOOK_PRE_COMPACT_PROMPT_FIRST"]
+        )
+    if "HOOK_PRE_COMPACT_MIN_CONFIDENCE" in env:
+        kwargs["pre_compact_min_confidence"] = _parse_float(
+            env["HOOK_PRE_COMPACT_MIN_CONFIDENCE"],
+            defaults.pre_compact_min_confidence,
+        )
+    if "HOOK_PRE_COMPACT_MAX_CAPTURES" in env:
+        kwargs["pre_compact_max_captures"] = _parse_int(
+            env["HOOK_PRE_COMPACT_MAX_CAPTURES"],
+            defaults.pre_compact_max_captures,
+        )
+    if "HOOK_PRE_COMPACT_TIMEOUT" in env:
+        kwargs["pre_compact_timeout"] = _parse_int(
+            env["HOOK_PRE_COMPACT_TIMEOUT"],
+            defaults.pre_compact_timeout,
+        )
 
     # Performance settings
     if "HOOK_TIMEOUT" in env:

@@ -39,7 +39,13 @@ from typing import Any
 from git_notes_memory.config import HOOK_USER_PROMPT_TIMEOUT
 from git_notes_memory.hooks.capture_decider import CaptureDecider
 from git_notes_memory.hooks.config_loader import load_hook_config
-from git_notes_memory.hooks.models import CaptureAction, SuggestedCapture
+from git_notes_memory.hooks.models import (
+    CaptureAction,
+    CaptureSignal,
+    SignalType,
+    SuggestedCapture,
+)
+from git_notes_memory.hooks.namespace_parser import NamespaceParser
 from git_notes_memory.hooks.signal_detector import SignalDetector
 
 __all__ = ["main"]
@@ -307,9 +313,38 @@ def main() -> None:
 
         prompt = input_data["prompt"]
 
-        # Detect signals in the prompt
-        detector = SignalDetector()
-        signals = detector.detect(prompt)
+        # Check for inline markers first (namespace-aware parsing)
+        namespace_parser = NamespaceParser()
+        parsed_marker = namespace_parser.parse(prompt)
+
+        signals: list[CaptureSignal] = []
+
+        if parsed_marker:
+            # Inline marker found - create a high-confidence EXPLICIT signal
+            # with the resolved namespace (explicit or auto-detected)
+            resolved_namespace = namespace_parser.resolve_namespace(parsed_marker)
+            logger.debug(
+                "Found inline marker: type=%s, namespace=%s (resolved: %s)",
+                parsed_marker.marker_type,
+                parsed_marker.namespace,
+                resolved_namespace,
+            )
+
+            # Create an explicit capture signal
+            signals = [
+                CaptureSignal(
+                    type=SignalType.EXPLICIT,
+                    match=prompt[:50],  # First 50 chars for context
+                    confidence=1.0,  # Inline markers are highest confidence
+                    context=parsed_marker.content,
+                    suggested_namespace=resolved_namespace,
+                    position=0,
+                )
+            ]
+        else:
+            # No inline marker - use standard signal detection
+            detector = SignalDetector()
+            signals = list(detector.detect(prompt))
 
         logger.debug("Detected %d signals in prompt", len(signals))
 

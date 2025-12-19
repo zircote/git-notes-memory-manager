@@ -202,6 +202,23 @@ class TestHookConfig:
         with pytest.raises(ValueError, match="Unknown complexity"):
             config.get_budget_tier("invalid")
 
+    def test_pre_compact_prompt_first_default(self) -> None:
+        """Test pre_compact_prompt_first defaults to False."""
+        config = HookConfig()
+        assert config.pre_compact_prompt_first is False
+
+    def test_load_config_pre_compact_prompt_first_enabled(self) -> None:
+        """Test loading pre_compact_prompt_first from environment."""
+        env = {"HOOK_PRE_COMPACT_PROMPT_FIRST": "true"}
+        config = load_hook_config(env)
+        assert config.pre_compact_prompt_first is True
+
+    def test_load_config_pre_compact_prompt_first_disabled(self) -> None:
+        """Test disabling pre_compact_prompt_first via environment."""
+        env = {"HOOK_PRE_COMPACT_PROMPT_FIRST": "false"}
+        config = load_hook_config(env)
+        assert config.pre_compact_prompt_first is False
+
 
 # =============================================================================
 # SignalType Tests
