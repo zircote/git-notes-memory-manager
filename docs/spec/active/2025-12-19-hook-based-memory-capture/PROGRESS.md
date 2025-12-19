@@ -4,7 +4,7 @@ format_version: "1.0.0"
 project_id: SPEC-2025-12-19-001
 project_name: "Hook-Based Memory Capture"
 project_status: in-progress
-current_phase: 3
+current_phase: 4
 implementation_started: 2025-12-19T00:00:00Z
 last_session: 2025-12-19T00:00:00Z
 last_updated: 2025-12-19T00:00:00Z
@@ -36,12 +36,12 @@ This document tracks implementation progress against the spec plan.
 | 2.3 | Implement Budget Calculator | done | 2025-12-19 | 2025-12-19 | Integrated into ContextBuilder with adaptive tiers |
 | 2.4 | Create SessionStart Hook Handler | done | 2025-12-19 | 2025-12-19 | Created `hooks/session_start_handler.py` |
 | 2.5 | Register SessionStart Hook | done | 2025-12-19 | 2025-12-19 | Created `hooks/session_start.py` wrapper, updated hooks.json |
-| 3.1 | Implement SignalDetector | pending | | | Pattern matching for signals |
-| 3.2 | Implement Novelty Checker | pending | | | Duplicate detection |
-| 3.3 | Implement CaptureDecider | pending | | | Decision logic |
-| 3.4 | Create UserPromptSubmit Hook Handler | pending | | | hooks/user_prompt.py |
-| 3.5 | Format Capture Suggestions | pending | | | XML suggestion format |
-| 3.6 | Register UserPromptSubmit Hook | pending | | | Update hooks.json |
+| 3.1 | Implement SignalDetector | done | 2025-12-19 | 2025-12-19 | Created `hooks/signal_detector.py` with pattern matching |
+| 3.2 | Implement Novelty Checker | done | 2025-12-19 | 2025-12-19 | Created `hooks/novelty_checker.py` with semantic similarity |
+| 3.3 | Implement CaptureDecider | done | 2025-12-19 | 2025-12-19 | Created `hooks/capture_decider.py` with threshold-based decision logic |
+| 3.4 | Create UserPromptSubmit Hook Handler | done | 2025-12-19 | 2025-12-19 | Created `hooks/user_prompt_handler.py` |
+| 3.5 | Format Capture Suggestions | done | 2025-12-19 | 2025-12-19 | XML formatter in handler via XMLBuilder |
+| 3.6 | Register UserPromptSubmit Hook | done | 2025-12-19 | 2025-12-19 | Updated hooks.json, created wrapper |
 | 4.1 | Implement Session Analyzer | pending | | | Transcript analysis |
 | 4.2 | Detect Uncaptured Memories | pending | | | Filter already-captured |
 | 4.3 | Enhance Stop Hook Handler | pending | | | Update hooks/stop.py |
@@ -63,7 +63,7 @@ This document tracks implementation progress against the spec plan.
 |-------|------|----------|--------|
 | 1 | Core Hook Infrastructure | 100% | done |
 | 2 | SessionStart Context Injection | 100% | done |
-| 3 | Capture Signal Detection | 0% | pending |
+| 3 | Capture Signal Detection | 100% | done |
 | 4 | Stop Hook Enhancement | 0% | pending |
 | 5 | Testing & Documentation | 0% | pending |
 
@@ -128,3 +128,26 @@ This document tracks implementation progress against the spec plan.
   - `mypy` - No issues found in 8 source files
   - `pytest` - 910 tests passed
 - Ready for Phase 3: Capture Signal Detection
+
+### 2025-12-19 - Phase 3 Complete
+- **Phase 3 completed**: All 6 tasks done
+- Created signal detection and capture decision pipeline:
+  - `signal_detector.py` - Pattern-based detection for decisions, learnings, blockers
+  - `novelty_checker.py` - Semantic similarity checking to avoid duplicates
+  - `capture_decider.py` - Threshold-based decision logic (AUTO/SUGGEST/SKIP)
+- Created `src/git_notes_memory/hooks/user_prompt_handler.py`:
+  - Full UserPromptSubmit handler with signal detection pipeline
+  - AUTO capture for high-confidence signals (≥0.95)
+  - SUGGEST for medium-confidence signals (0.7-0.95)
+  - XML-formatted suggestions for additionalContext injection
+  - Non-blocking error handling (exit 0 on all paths)
+- Created `hooks/user_prompt.py` wrapper script
+- Updated `hooks/hooks.json`:
+  - Changed UserPromptSubmit to use new signal-detecting handler
+  - Hook disabled by default (opt-in via HOOK_USER_PROMPT_ENABLED)
+- Added `user_prompt_enabled` to HookConfig with env var support
+- All quality gates passed:
+  - `ruff check` - All checks passed
+  - `mypy` - No issues found in 11 source files
+  - `pytest` - 910 tests passed
+- Ready for Phase 4: Stop Hook Enhancement

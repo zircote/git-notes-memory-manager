@@ -15,6 +15,7 @@ Environment Variables:
     HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE: Minimum confidence for suggestions
     HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD: Confidence for auto-capture
     HOOK_CAPTURE_DETECTION_NOVELTY_THRESHOLD: Novelty score threshold
+    HOOK_USER_PROMPT_ENABLED: Enable UserPromptSubmit hook
     HOOK_STOP_ENABLED: Enable Stop hook
     HOOK_STOP_PROMPT_UNCAPTURED: Prompt for uncaptured content
     HOOK_TIMEOUT: Default hook timeout in seconds
@@ -89,6 +90,9 @@ class HookConfig:
     stop_enabled: bool = True
     stop_prompt_uncaptured: bool = True
     stop_sync_index: bool = True
+
+    # UserPromptSubmit hook settings
+    user_prompt_enabled: bool = False  # Uses capture_detection_enabled by default
 
     # Performance settings
     timeout: int = 30
@@ -259,6 +263,12 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
         kwargs["capture_detection_novelty_threshold"] = _parse_float(
             env["HOOK_CAPTURE_DETECTION_NOVELTY_THRESHOLD"],
             defaults.capture_detection_novelty_threshold,
+        )
+
+    # UserPromptSubmit hook settings
+    if "HOOK_USER_PROMPT_ENABLED" in env:
+        kwargs["user_prompt_enabled"] = _parse_bool(
+            env["HOOK_USER_PROMPT_ENABLED"]
         )
 
     # Stop hook settings

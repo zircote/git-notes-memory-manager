@@ -8,8 +8,8 @@
     },
     {
       "event": "UserPromptSubmit",
-      "script": "userpromptsubmit.py",
-      "description": "Optional: Captures significant prompts as memories when marker is present",
+      "script": "user_prompt.py",
+      "description": "Detects memorable content (decisions, learnings, blockers) and suggests capture",
       "enabled": false
     },
     {
