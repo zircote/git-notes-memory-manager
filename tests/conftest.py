@@ -9,11 +9,49 @@ from __future__ import annotations
 import pytest
 
 
+def _close_index_connections() -> None:
+    """Close any open IndexService database connections.
+
+    This prevents ResourceWarning about unclosed sqlite3.Connection
+    objects when singletons are reset.
+    """
+    try:
+        from git_notes_memory import sync
+
+        svc = sync._sync_service
+        if svc is not None and hasattr(svc, "_index") and svc._index:
+            svc._index.close()
+    except (ImportError, AttributeError):
+        pass
+
+    try:
+        from git_notes_memory import capture
+
+        svc = capture._capture_service
+        if svc is not None and hasattr(svc, "_index") and svc._index:
+            svc._index.close()
+    except (ImportError, AttributeError):
+        pass
+
+    try:
+        from git_notes_memory import recall
+
+        svc = recall._recall_service
+        if svc is not None and hasattr(svc, "_index") and svc._index:
+            svc._index.close()
+    except (ImportError, AttributeError):
+        pass
+
+
 def _reset_all_singletons() -> None:
     """Reset all service singletons to None.
 
     This clears singleton state from all service modules.
+    First closes any open database connections to prevent resource warnings.
     """
+    # Close database connections first to prevent ResourceWarning
+    _close_index_connections()
+
     try:
         from git_notes_memory import sync
 
