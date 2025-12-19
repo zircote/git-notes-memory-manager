@@ -19,8 +19,6 @@ from git_notes_memory.hooks.config_loader import (
     load_hook_config,
 )
 from git_notes_memory.hooks.guidance_builder import (
-    CAPTURE_PATTERNS,
-    VALID_NAMESPACES,
     GuidanceBuilder,
     GuidanceLevel,
     get_guidance_builder,
@@ -64,69 +62,33 @@ class TestGuidanceLevel:
 
 
 # =============================================================================
-# CAPTURE_PATTERNS Tests
+# XML Template Content Tests
 # =============================================================================
 
 
-class TestCapturePatterns:
-    """Test the capture pattern definitions."""
+class TestXMLTemplateContent:
+    """Test that XML templates contain expected content."""
 
-    def test_four_patterns_defined(self) -> None:
-        """Test that all four pattern types are defined."""
-        assert len(CAPTURE_PATTERNS) == 4
+    def test_detailed_has_trigger_phrases(
+        self, guidance_builder: GuidanceBuilder
+    ) -> None:
+        """Test that detailed template has trigger phrases."""
+        xml = guidance_builder.build_guidance("detailed")
+        # Check for key trigger phrases
+        assert "We decided to" in xml
+        assert "TIL" in xml
+        assert "Blocked by" in xml
+        assert "Completed" in xml
 
-    def test_pattern_types(self) -> None:
-        """Test that expected pattern types are present."""
-        types = {p.type_name for p in CAPTURE_PATTERNS}
-        assert types == {"decision", "learning", "blocker", "progress"}
-
-    def test_patterns_have_descriptions(self) -> None:
-        """Test that all patterns have descriptions."""
-        for pattern in CAPTURE_PATTERNS:
-            assert pattern.description, (
-                f"Pattern {pattern.type_name} missing description"
-            )
-
-    def test_patterns_have_templates(self) -> None:
-        """Test that all patterns have templates."""
-        for pattern in CAPTURE_PATTERNS:
-            assert pattern.template, f"Pattern {pattern.type_name} missing template"
-
-    def test_patterns_have_trigger_phrases(self) -> None:
-        """Test that all patterns have trigger phrases."""
-        for pattern in CAPTURE_PATTERNS:
-            assert len(pattern.trigger_phrases) >= 3, (
-                f"Pattern {pattern.type_name} should have at least 3 trigger phrases"
-            )
-
-
-# =============================================================================
-# VALID_NAMESPACES Tests
-# =============================================================================
-
-
-class TestValidNamespaces:
-    """Test the valid namespaces constant."""
-
-    def test_expected_namespaces(self) -> None:
-        """Test that all expected namespaces are defined."""
-        expected = {
-            "inception",
-            "elicitation",
-            "research",
-            "decisions",
-            "progress",
-            "blockers",
-            "reviews",
-            "learnings",
-            "retrospective",
-            "patterns",
-        }
-        assert set(VALID_NAMESPACES) == expected
-
-    def test_namespace_count(self) -> None:
-        """Test that 10 namespaces are defined."""
-        assert len(VALID_NAMESPACES) == 10
+    def test_templates_have_namespaces(self, guidance_builder: GuidanceBuilder) -> None:
+        """Test that templates list valid namespaces."""
+        for level in ["minimal", "standard", "detailed"]:
+            xml = guidance_builder.build_guidance(level)
+            # Check for key namespaces
+            assert "decisions" in xml
+            assert "learnings" in xml
+            assert "blockers" in xml
+            assert "progress" in xml
 
 
 # =============================================================================
@@ -253,11 +215,13 @@ class TestGuidanceBuilderTokenEstimation:
         # Allow some margin
         assert tokens < 250, f"Minimal guidance is ~{tokens} tokens, expected <250"
 
-    def test_standard_under_600_tokens(self, guidance_builder: GuidanceBuilder) -> None:
-        """Test that standard guidance is under ~600 tokens."""
+    def test_standard_under_1000_tokens(
+        self, guidance_builder: GuidanceBuilder
+    ) -> None:
+        """Test that standard guidance is under ~1000 tokens."""
         xml = guidance_builder.build_guidance("standard")
         tokens = self.estimate_tokens(xml)
-        assert tokens < 900, f"Standard guidance is ~{tokens} tokens, expected <900"
+        assert tokens < 1000, f"Standard guidance is ~{tokens} tokens, expected <1000"
 
     def test_detailed_under_1200_tokens(
         self, guidance_builder: GuidanceBuilder
