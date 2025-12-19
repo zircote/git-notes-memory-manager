@@ -2,8 +2,15 @@
 
 Git-native, semantically-searchable memory storage for Claude Code.
 
+<!-- Badges -->
+[![CI](https://github.com/zircote/git-notes-memory-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/zircote/git-notes-memory-manager/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/git-notes-memory.svg)](https://pypi.org/project/git-notes-memory/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/git-notes-memory.svg)](https://pypi.org/project/git-notes-memory/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Coverage](https://img.shields.io/badge/coverage-93%25-brightgreen.svg)](https://github.com/zircote/git-notes-memory-manager)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet.svg)](https://claude.ai/code)
 
 ## Overview
 
