@@ -78,3 +78,6 @@ dmypy.json
 .cs-session-state.json
 .prompt-log.json
 .prompt-log-enabled
+
+# Memory plugin local index
+.memory/

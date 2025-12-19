@@ -21,6 +21,7 @@ Architecture:
 
 from __future__ import annotations
 
+import contextlib
 import sqlite3
 from contextlib import contextmanager
 from datetime import UTC, datetime
@@ -47,7 +48,7 @@ __all__ = [
 # =============================================================================
 
 # Schema version for migrations
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 # SQL statements for schema creation
 _CREATE_MEMORIES_TABLE = """
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS memories (
     summary TEXT NOT NULL,
     content TEXT NOT NULL,
     timestamp TEXT NOT NULL,
+    repo_path TEXT,
     spec TEXT,
     phase TEXT,
     tags TEXT,
@@ -74,7 +76,17 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_memories_commit ON memories(commit_sha)",
     "CREATE INDEX IF NOT EXISTS idx_memories_timestamp ON memories(timestamp)",
     "CREATE INDEX IF NOT EXISTS idx_memories_status ON memories(status)",
+    "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
 ]
+
+# Migration SQL for schema version upgrades
+_MIGRATIONS = {
+    2: [
+        # Add repo_path column for per-repository memory isolation
+        "ALTER TABLE memories ADD COLUMN repo_path TEXT",
+        "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
+    ],
+}
 
 _CREATE_VEC_TABLE = f"""
 CREATE VIRTUAL TABLE IF NOT EXISTS vec_memories USING vec0(
@@ -199,8 +211,48 @@ class IndexService:
                 "Install sqlite-vec: pip install sqlite-vec",
             ) from e
 
+    def _get_current_schema_version(self) -> int:
+        """Get the current schema version from the database.
+
+        Returns:
+            Current schema version, or 0 if metadata table doesn't exist.
+        """
+        if self._conn is None:
+            return 0
+
+        cursor = self._conn.cursor()
+        try:
+            cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
+            row = cursor.fetchone()
+            return int(row[0]) if row else 1  # Default to v1 for existing DBs
+        except sqlite3.OperationalError:
+            # Metadata table doesn't exist - new database
+            return 0
+
+    def _run_migrations(self, from_version: int, to_version: int) -> None:
+        """Run schema migrations from one version to another.
+
+        Args:
+            from_version: Current schema version.
+            to_version: Target schema version.
+        """
+        if self._conn is None:
+            return
+
+        cursor = self._conn.cursor()
+        for version in range(from_version + 1, to_version + 1):
+            if version in _MIGRATIONS:
+                for sql in _MIGRATIONS[version]:
+                    try:
+                        cursor.execute(sql)
+                    except sqlite3.OperationalError as e:
+                        # Column may already exist from a partial migration
+                        if "duplicate column" not in str(e).lower():
+                            raise
+        self._conn.commit()
+
     def _create_schema(self) -> None:
-        """Create database tables and indices."""
+        """Create database tables and indices, running migrations if needed."""
         if self._conn is None:
             raise MemoryIndexError(
                 "Database connection not established",
@@ -209,12 +261,16 @@ class IndexService:
 
         cursor = self._conn.cursor()
         try:
+            # Check current schema version before creating tables
+            current_version = self._get_current_schema_version()
+
             # Create memories table
             cursor.execute(_CREATE_MEMORIES_TABLE)
 
-            # Create indices
+            # Create indices (ignore if they already exist)
             for index_sql in _CREATE_INDICES:
-                cursor.execute(index_sql)
+                with contextlib.suppress(sqlite3.OperationalError):
+                    cursor.execute(index_sql)
 
             # Create vector table
             cursor.execute(_CREATE_VEC_TABLE)
@@ -222,15 +278,19 @@ class IndexService:
             # Create metadata table
             cursor.execute(_CREATE_METADATA_TABLE)
 
+            # Run migrations if needed
+            if 0 < current_version < SCHEMA_VERSION:
+                self._run_migrations(current_version, SCHEMA_VERSION)
+
             # Set schema version
             cursor.execute(
                 "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
                 ("schema_version", str(SCHEMA_VERSION)),
             )
 
-            # Set last sync to now
+            # Set last sync to now (only if not already set)
             cursor.execute(
-                "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
+                "INSERT OR IGNORE INTO metadata (key, value) VALUES (?, ?)",
                 ("last_sync", datetime.now(UTC).isoformat()),
             )
 
@@ -309,9 +369,9 @@ class IndexService:
                     """
                     INSERT INTO memories (
                         id, commit_sha, namespace, summary, content,
-                        timestamp, spec, phase, tags, status, relates_to,
+                        timestamp, repo_path, spec, phase, tags, status, relates_to,
                         created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         memory.id,
@@ -320,6 +380,7 @@ class IndexService:
                         memory.summary,
                         memory.content,
                         memory.timestamp.isoformat(),
+                        memory.repo_path,
                         memory.spec,
                         memory.phase,
                         ",".join(memory.tags) if memory.tags else None,

@@ -105,6 +105,7 @@ class Memory:
         summary: One-line summary (max 100 chars)
         content: Full markdown content of the note
         timestamp: When the memory was captured
+        repo_path: Absolute path to the git repository containing this memory
         spec: Specification slug this memory belongs to (may be None for global)
         phase: Lifecycle phase (planning, implementation, review, etc.)
         tags: Categorization tags
@@ -118,6 +119,7 @@ class Memory:
     summary: str
     content: str
     timestamp: datetime
+    repo_path: str | None = None
     spec: str | None = None
     phase: str | None = None
     tags: tuple[str, ...] = field(default_factory=tuple)

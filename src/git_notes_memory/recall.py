@@ -17,7 +17,7 @@ import logging
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from git_notes_memory.config import TOKENS_PER_CHAR, get_index_path
+from git_notes_memory.config import TOKENS_PER_CHAR, get_project_index_path
 from git_notes_memory.exceptions import RecallError
 from git_notes_memory.models import (
     CommitInfo,
@@ -89,7 +89,8 @@ class RecallService:
             git_ops: Optional pre-configured GitOps instance.
                 If not provided, one will be created lazily.
         """
-        self._index_path = index_path or get_index_path()
+        # Use project-specific index for per-repository isolation
+        self._index_path = index_path or get_project_index_path()
         self._index_service = index_service
         self._embedding_service = embedding_service
         self._git_ops = git_ops

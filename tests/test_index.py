@@ -153,7 +153,7 @@ class TestInitialization:
         cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
         row = cursor.fetchone()
         assert row is not None
-        assert row[0] == "1"
+        assert row[0] == "2"  # Schema v2 adds repo_path column
 
         service.close()
 

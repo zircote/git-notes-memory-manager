@@ -34,7 +34,7 @@ import signal
 import sys
 from typing import Any
 
-from git_notes_memory.config import HOOK_SESSION_START_TIMEOUT, get_index_path
+from git_notes_memory.config import HOOK_SESSION_START_TIMEOUT, get_project_index_path
 from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.context_builder import ContextBuilder
 from git_notes_memory.hooks.guidance_builder import GuidanceBuilder
@@ -125,7 +125,7 @@ def _get_memory_count() -> int:
         Number of memories indexed, or 0 if index doesn't exist.
     """
     try:
-        index_path = get_index_path()
+        index_path = get_project_index_path()
         if not index_path.exists():
             return 0
         index = IndexService(index_path)

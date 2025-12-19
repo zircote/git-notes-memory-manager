@@ -17,7 +17,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from git_notes_memory.config import NAMESPACES, get_data_path
+from git_notes_memory.config import NAMESPACES, get_project_index_path
 from git_notes_memory.exceptions import RecallError
 from git_notes_memory.models import Memory, NoteRecord, VerificationResult
 
@@ -74,11 +74,12 @@ class SyncService:
         self._note_parser = note_parser
 
     def _get_index(self) -> IndexService:
-        """Get or create IndexService instance."""
+        """Get or create IndexService instance using project-specific database."""
         if self._index is None:
             from git_notes_memory.index import IndexService
 
-            self._index = IndexService(get_data_path() / "index.db")
+            # Use project-specific index for per-repository isolation
+            self._index = IndexService(get_project_index_path(self.repo_path))
             self._index.initialize()
         return self._index
 

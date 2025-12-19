@@ -39,8 +39,12 @@ __all__ = [
     "INDEX_DB_NAME",
     "MODELS_DIR_NAME",
     "LOCK_FILE_NAME",
+    "MEMORY_DIR_NAME",
     "get_data_path",
     "get_index_path",
+    "get_project_index_path",
+    "get_project_identifier",
+    "get_project_memory_dir",
     "get_models_path",
     "get_lock_path",
     # Embedding Configuration
@@ -177,12 +181,94 @@ def get_data_path() -> Path:
 
 
 def get_index_path() -> Path:
-    """Get the path to the SQLite index database.
+    """Get the path to the global SQLite index database.
+
+    Note: For per-project isolation, use get_project_index_path() instead.
 
     Returns:
         Path to index.db file.
     """
     return get_data_path() / INDEX_DB_NAME
+
+
+MEMORY_DIR_NAME = ".memory"
+
+
+def get_project_identifier(repo_path: Path | str | None = None) -> str:
+    """Get a unique identifier for a repository.
+
+    Uses the repository's git remote URL if available, otherwise falls back
+    to the canonical path. The identifier is a short hash for filesystem safety.
+
+    Args:
+        repo_path: Path to the repository. If None, uses current directory.
+
+    Returns:
+        A short identifier string (e.g., "a1b2c3d4") unique to this repository.
+    """
+    import hashlib
+    import subprocess
+
+    if repo_path is None:
+        repo_path = Path.cwd()
+    else:
+        repo_path = Path(repo_path).resolve()
+
+    # Try to get the remote URL for a stable identifier across machines
+    try:
+        result = subprocess.run(  # noqa: S603
+            ["git", "-C", str(repo_path), "config", "--get", "remote.origin.url"],  # noqa: S607
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            identifier_source = result.stdout.strip()
+        else:
+            # Fall back to canonical path
+            identifier_source = str(repo_path)
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        identifier_source = str(repo_path)
+
+    # Create a short hash for filesystem-safe naming
+    hash_digest = hashlib.sha256(identifier_source.encode()).hexdigest()[:12]
+    return hash_digest
+
+
+def get_project_memory_dir(repo_path: Path | str | None = None) -> Path:
+    """Get the path to the project's .memory directory.
+
+    The .memory directory stores project-specific memory data including
+    the SQLite index. This directory should be added to .gitignore.
+
+    Args:
+        repo_path: Path to the repository. If None, uses current directory.
+
+    Returns:
+        Path to .memory/ directory in the repository root.
+    """
+    if repo_path is None:
+        repo_path = Path.cwd()
+    else:
+        repo_path = Path(repo_path).resolve()
+
+    return repo_path / MEMORY_DIR_NAME
+
+
+def get_project_index_path(repo_path: Path | str | None = None) -> Path:
+    """Get the path to a project-specific SQLite index database.
+
+    Each repository gets its own index database stored in <repo>/.memory/index.db.
+    This ensures sync/reindex operations only affect the current project.
+    The .memory directory should be added to .gitignore.
+
+    Args:
+        repo_path: Path to the repository. If None, uses current directory.
+
+    Returns:
+        Path to project-specific index.db file (e.g., <repo>/.memory/index.db).
+    """
+    return get_project_memory_dir(repo_path) / INDEX_DB_NAME
 
 
 def get_models_path() -> Path:
