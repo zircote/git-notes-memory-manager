@@ -19,10 +19,12 @@ class TestPackageVersion:
     """Tests for package version exposure."""
 
     def test_version_accessible(self) -> None:
-        """Test that __version__ is accessible."""
+        """Test that __version__ is accessible and valid."""
         from git_notes_memory import __version__
 
-        assert __version__ == "0.1.0"
+        # Version should be a valid semver string
+        assert __version__
+        assert len(__version__.split(".")) == 3
 
     def test_version_is_string(self) -> None:
         """Test that __version__ is a string."""

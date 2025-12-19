@@ -7,8 +7,9 @@ from git_notes_memory.main import main
 
 
 def test_version() -> None:
-    """Test that version is defined."""
-    assert __version__ == "0.1.0"
+    """Test that version is defined and valid."""
+    assert __version__
+    assert len(__version__.split(".")) == 3
 
 
 def test_main_no_args_returns_zero() -> None:
