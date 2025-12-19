@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""Hook: Inject memory capture context at session start.
+"""Hook: Inject memory context at session start.
 
 This hook runs at the start of each Claude Code session and injects
-context that reminds the user and assistant about memory capture markers.
+context that includes:
+1. Memory system status (index health, memory count)
+2. Relevant memories for the current project/spec
+3. Response guidance for memory capture markers
+4. Available namespaces and their purposes
 
-The hook:
-1. Provides memory system status (index health, memory count)
-2. Reminds about capture markers: [remember], [capture], @memory
-3. Lists available namespaces and their purposes
-4. Suggests relevant memories if spec context is available
+Environment Variables:
+    HOOK_ENABLED: Master switch for hooks (default: true)
+    HOOK_SESSION_START_ENABLED: Enable this hook (default: true)
+    HOOK_DEBUG: Enable debug logging (default: false)
+
+Exit codes:
+    0 - Success (non-blocking)
 """
 
 from __future__ import annotations
@@ -24,130 +30,24 @@ if _src_path.exists() and str(_src_path) not in sys.path:
     sys.path.insert(0, str(_src_path))
 
 
-def get_memory_status() -> dict:
-    """Get current memory system status.
-
-    Returns:
-        Dict with status information.
-    """
-    try:
-        from git_notes_memory.config import get_index_path
-        from git_notes_memory.index import IndexService
-
-        index_path = get_index_path()
-        if not index_path.exists():
-            return {
-                "initialized": False,
-                "total_memories": 0,
-                "message": "Memory index not initialized. Run `/memory:sync` to initialize.",
-            }
-
-        index = IndexService(index_path)
-        index.initialize()
-        stats = index.get_stats()
-        index.close()
-
-        return {
-            "initialized": True,
-            "total_memories": stats.total_memories,
-            "by_namespace": dict(stats.by_namespace) if stats.by_namespace else {},
-        }
-
-    except ImportError:
-        return {
-            "initialized": False,
-            "total_memories": 0,
-            "error": "git-notes-memory library not installed",
-        }
-    except Exception as e:
-        return {
-            "initialized": False,
-            "total_memories": 0,
-            "error": str(e),
-        }
-
-
-def build_context_message(status: dict) -> str:
-    """Build the context injection message.
-
-    Args:
-        status: Memory system status dict.
-
-    Returns:
-        Formatted context message for Claude.
-    """
-    lines = []
-
-    # Memory system status
-    if status.get("initialized"):
-        total = status.get("total_memories", 0)
-        lines.append(f"Memory system active: {total} memories indexed.")
-        if status.get("by_namespace"):
-            ns_summary = ", ".join(
-                f"{ns}: {count}" for ns, count in list(status["by_namespace"].items())[:5]
-            )
-            lines.append(f"Namespaces: {ns_summary}")
-    else:
-        lines.append("Memory system: not initialized.")
-        if status.get("error"):
-            lines.append(f"Note: {status['error']}")
-
-    lines.append("")
-    lines.append("MEMORY CAPTURE MARKERS:")
-    lines.append(
-        "When you discover important information worth preserving, prefix your response with:"
-    )
-    lines.append("- [remember] <content> - Captures as a 'learnings' memory")
-    lines.append("- [capture] <content> - Captures as a 'learnings' memory")
-    lines.append("- @memory <content> - Same as [capture]")
-    lines.append("")
-    lines.append(
-        "Examples of what to capture: decisions, learnings, blockers, "
-        "patterns, progress, and key insights."
-    )
-
-    return "\n".join(lines)
-
-
-def build_user_message(status: dict) -> str:
-    """Build a concise user-visible status message.
-
-    Args:
-        status: Memory system status dict.
-
-    Returns:
-        Short status message with emoji indicator.
-    """
-    if status.get("initialized"):
-        total = status.get("total_memories", 0)
-        return f"📚 Memory system: {total} memories indexed"
-    else:
-        return "📚 Memory system: not initialized"
-
-
 def main() -> None:
-    """Main hook entry point."""
-    # Read hook input from stdin (not used but must be consumed)
+    """Main hook entry point.
+
+    Delegates to the session_start_handler module for actual processing.
+    Falls back gracefully if the library is not installed.
+    """
     try:
-        _input_data = json.load(sys.stdin)
-    except (json.JSONDecodeError, ValueError):
-        _input_data = {}  # noqa: F841
+        from git_notes_memory.hooks.session_start_handler import main as handler_main
 
-    # Get memory system status
-    status = get_memory_status()
-
-    # Build context message (for Claude) and user message (visible)
-    context_message = build_context_message(status)
-    user_message = build_user_message(status)
-
-    # Output the context injection with user-visible message
-    output = {
-        "continue": True,
-        "additionalContext": context_message,
-        "message": user_message,
-    }
-
-    print(json.dumps(output))
+        handler_main()
+    except ImportError:
+        # Library not installed, exit silently (non-blocking)
+        print(json.dumps({"continue": True}))
+        sys.exit(0)
+    except Exception:
+        # Any unexpected error, exit silently (non-blocking)
+        print(json.dumps({"continue": True}))
+        sys.exit(0)
 
 
 if __name__ == "__main__":
