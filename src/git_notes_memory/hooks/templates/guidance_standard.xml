@@ -1,69 +1,53 @@
-<response_guidance level="standard">
-  <capture_patterns title="How to Structure Responses for Memory Capture">
-    <pattern type="decision">
-      <description>When making architectural or design decisions</description>
-      <trigger_phrases>
-        <phrase>We decided to...</phrase>
-        <phrase>The decision is to...</phrase>
-        <phrase>Going with X because...</phrase>
-        <phrase>After evaluating, we chose...</phrase>
-      </trigger_phrases>
-    </pattern>
-    <pattern type="learning">
-      <description>When discovering insights or TIL moments</description>
-      <trigger_phrases>
-        <phrase>TIL...</phrase>
-        <phrase>Discovered that...</phrase>
-        <phrase>Learned that...</phrase>
-        <phrase>Turns out...</phrase>
-        <phrase>Interesting finding...</phrase>
-      </trigger_phrases>
-    </pattern>
-    <pattern type="blocker">
-      <description>When encountering obstacles or issues</description>
-      <trigger_phrases>
-        <phrase>Blocked by...</phrase>
-        <phrase>Cannot proceed because...</phrase>
-        <phrase>Stuck on...</phrase>
-        <phrase>Issue discovered...</phrase>
-        <phrase>Problem found...</phrase>
-      </trigger_phrases>
-    </pattern>
-    <pattern type="progress">
-      <description>When completing milestones or deliverables</description>
-      <trigger_phrases>
-        <phrase>Completed...</phrase>
-        <phrase>Finished implementing...</phrase>
-        <phrase>Milestone reached...</phrase>
-        <phrase>Done with...</phrase>
-        <phrase>Successfully implemented...</phrase>
-      </trigger_phrases>
-    </pattern>
-  </capture_patterns>
+<session_operating_context level="standard">
+  <!-- SECTION 1: ACTIVE OPERATING BEHAVIORS (high priority) -->
+  <active_behaviors title="Memory Capture Behaviors">
+    <behavior trigger="making_decision">
+      When you make an architectural or design decision, immediately document it:
+      [remember:decisions] Why you chose this approach
+      This ensures decisions are preserved across session boundaries.
+    </behavior>
+    <behavior trigger="discovering_insight">
+      When you discover a pattern, learn something surprising, or have a TIL moment:
+      [remember:learnings] What you discovered and why it matters
+      Future sessions will reference these insights.
+    </behavior>
+    <behavior trigger="hitting_blocker">
+      When blocked on a problem or encountering an issue:
+      [remember:blockers] What blocks progress + what's needed to unblock
+      This helps track resolution across sessions.
+    </behavior>
+    <behavior trigger="completing_milestone">
+      When completing a significant milestone or deliverable:
+      [remember:progress] What was accomplished
+    </behavior>
+  </active_behaviors>
 
-  <inline_markers title="Quick Capture Markers">
-    <marker syntax="[remember] text" namespace="learnings" description="Quick capture to learnings"/>
-    <marker syntax="[remember:namespace] text" namespace="specified" description="Capture to specific namespace"/>
-    <marker syntax="[capture] text" namespace="auto-detect" description="Auto-detect namespace from content"/>
-    <marker syntax="[capture:decisions] text" namespace="decisions" description="Capture decision explicitly"/>
-    <marker syntax="@memory text" namespace="auto-detect" description="Alternative inline syntax"/>
-    <marker syntax="@memory:patterns text" namespace="patterns" description="Alternative with namespace"/>
-  </inline_markers>
+  <!-- SECTION 2: MEMORY RECALL BEHAVIORS (high priority) -->
+  <memory_recall_behaviors title="How to Surface Retrieved Memories">
+    <behavior priority="critical">
+      When memories appear in memory_context below, actively reference them when relevant.
+      Say: "Based on a previous decision..." or "You learned earlier that..."
+    </behavior>
+    <behavior priority="critical">
+      If past blockers match current issues, surface the resolution if available.
+      Reference by memory ID so users can look them up.
+    </behavior>
+    <behavior priority="high">
+      Don't just acknowledge memories exist - weave them into your response naturally.
+      Memories are prior context, not just data.
+    </behavior>
+  </memory_recall_behaviors>
 
-  <valid_namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective, inception, elicitation</valid_namespaces>
-
-  <memory_recall title="How to Use Retrieved Memories">
-    <instruction priority="high">When memories are provided in memory_context, actively reference them when relevant to the user's task</instruction>
-    <instruction priority="high">If past decisions or learnings apply to current work, mention them: "Based on a previous decision..." or "You learned earlier that..."</instruction>
-    <instruction>When blockers from memory_context match current issues, surface the resolution if available</instruction>
-    <instruction>Use memory IDs when referencing specific memories so users can look them up</instruction>
-  </memory_recall>
-
-  <best_practices title="Memory Capture Best Practices">
-    <practice>Use clear trigger phrases at the start of memorable content</practice>
-    <practice>Include rationale with decisions, not just the choice</practice>
-    <practice>Tag blockers with resolution status when solved</practice>
-    <practice>Keep summaries under 100 characters for better signal detection</practice>
-    <practice>Use namespace hints when content clearly belongs to a specific category</practice>
-  </best_practices>
-</response_guidance>
+  <!-- SECTION 3: REFERENCE (lower priority) -->
+  <reference title="Capture Syntax Reference">
+    <inline_markers>
+      <marker syntax="[remember] text" namespace="learnings"/>
+      <marker syntax="[remember:namespace] text" namespace="specified"/>
+      <marker syntax="[decision] text" namespace="decisions"/>
+      <marker syntax="[learned] text" namespace="learnings"/>
+      <marker syntax="[blocker] text" namespace="blockers"/>
+      <marker syntax="[progress] text" namespace="progress"/>
+    </inline_markers>
+    <valid_namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective</valid_namespaces>
+  </reference>
+</session_operating_context>
