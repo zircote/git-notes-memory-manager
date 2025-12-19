@@ -22,3 +22,29 @@ Explored git-notes-memory codebase structure:
 - Index is derived, can be rebuilt with reindex(full=True)
 - 10 namespaces: inception, elicitation, research, decisions, progress, blockers, reviews, learnings, retrospective, patterns
 - All models are frozen dataclasses for immutability
+
+---
+type: research
+timestamp: '2025-12-19T11:01:38.645456+00:00'
+summary: 'git-notes-memory test suite: 910 tests, 93.65% coverage'
+---
+
+Test suite analysis:
+
+**Coverage by Module**:
+- test_patterns.py: 135 tests (detection, classification, lifecycle)
+- test_lifecycle.py: 115 tests (status transitions, compression)
+- test_search.py: 100 tests (caching, expansion, reranking)
+- test_index.py: 91 tests (CRUD, vector search, statistics)
+- test_sync.py: 91 tests (reindex, consistency, repair)
+
+**Testing Patterns**:
+- Singleton reset via conftest.py autouse fixture
+- MagicMock for service isolation
+- Integration tests with real git repos (marked @pytest.mark.integration)
+- Slow tests marked with @pytest.mark.slow
+
+**Quality Gates**:
+- make quality runs: format → lint → typecheck → security → coverage
+- 80% minimum coverage enforced
+- mypy --strict for full type checking
