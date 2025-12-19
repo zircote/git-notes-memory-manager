@@ -43,8 +43,12 @@ __all__ = [
     "TokenBudget",
     # Signal Detection
     "SignalDetector",
+    "SIGNAL_PATTERNS",
     "CaptureSignal",
     "SignalType",
+    # Novelty Checking
+    "NoveltyChecker",
+    "NoveltyResult",
     # Capture Decision
     "CaptureDecider",
     "CaptureDecision",
@@ -90,6 +94,10 @@ def __getattr__(name: str) -> object:
         from git_notes_memory.hooks.signal_detector import SignalDetector
 
         return SignalDetector
+    if name == "SIGNAL_PATTERNS":
+        from git_notes_memory.hooks.signal_detector import SIGNAL_PATTERNS
+
+        return SIGNAL_PATTERNS
     if name == "CaptureSignal":
         from git_notes_memory.hooks.models import CaptureSignal
 
@@ -98,6 +106,16 @@ def __getattr__(name: str) -> object:
         from git_notes_memory.hooks.models import SignalType
 
         return SignalType
+
+    # Novelty Checking
+    if name == "NoveltyChecker":
+        from git_notes_memory.hooks.novelty_checker import NoveltyChecker
+
+        return NoveltyChecker
+    if name == "NoveltyResult":
+        from git_notes_memory.hooks.models import NoveltyResult
+
+        return NoveltyResult
 
     # Capture Decision
     if name == "CaptureDecider":

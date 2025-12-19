@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 __all__ = [
     "SignalType",
     "CaptureSignal",
+    "NoveltyResult",
     "CaptureAction",
     "CaptureDecision",
     "SuggestedCapture",
@@ -98,6 +99,32 @@ class CaptureSignal:
         """Validate confidence score is in valid range."""
         if not 0.0 <= self.confidence <= 1.0:
             msg = f"Confidence must be between 0.0 and 1.0, got {self.confidence}"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True)
+class NoveltyResult:
+    """Result of novelty checking for a capture signal.
+
+    Indicates whether detected content is novel (should be captured)
+    or a duplicate of existing memories.
+
+    Attributes:
+        novelty_score: Score from 0.0 (duplicate) to 1.0 (completely new).
+        is_novel: Whether the content passes the novelty threshold.
+        similar_memory_ids: IDs of similar existing memories.
+        highest_similarity: Highest similarity score found.
+    """
+
+    novelty_score: float
+    is_novel: bool
+    similar_memory_ids: list[str] = field(default_factory=list)
+    highest_similarity: float = 0.0
+
+    def __post_init__(self) -> None:
+        """Validate novelty score is in valid range."""
+        if not 0.0 <= self.novelty_score <= 1.0:
+            msg = f"Novelty score must be between 0.0 and 1.0, got {self.novelty_score}"
             raise ValueError(msg)
 
 
