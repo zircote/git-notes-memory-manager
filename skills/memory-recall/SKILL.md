@@ -10,7 +10,7 @@ Automatically recalls relevant memories from the git-backed memory system to pro
 
 ## Purpose
 
-This skill bridges the gap between conversations by surfacing relevant decisions, learnings, context, preferences, and patterns stored in the git notes memory system. It helps maintain continuity across sessions and prevents re-solving problems that have already been addressed.
+This skill bridges the gap between conversations by surfacing relevant decisions, learnings, context, and patterns stored in the git notes memory system. It helps maintain continuity across sessions and prevents re-solving problems that have already been addressed.
 
 ## When This Skill Activates
 
@@ -59,7 +59,7 @@ results = recall.search(
 )
 
 for r in results:
-    print(f'{r.namespace}: {r.summary} (score: {r.score:.2f})')
+    print(f'{r.memory.namespace}: {r.memory.summary} (score: {r.similarity:.2f})')
 "
 ```
 
@@ -70,9 +70,9 @@ Present memories in a non-intrusive summary:
 ```
 **Relevant Memories Found** (3 matches)
 
-1. **Decision** (0.92 relevance): Use PostgreSQL for JSONB support
-2. **Learning** (0.85 relevance): Connection pooling prevents timeouts
-3. **Context** (0.78 relevance): Database schema in migrations/
+1. **Decisions** (0.92 relevance): Use PostgreSQL for JSONB support
+2. **Learnings** (0.85 relevance): Connection pooling prevents timeouts
+3. **Progress** (0.78 relevance): Database schema in migrations/
 
 _Use `/memory:recall` for more details or `/memory:search` for custom queries._
 ```
@@ -89,12 +89,19 @@ The skill respects environment variables:
 
 ## Namespace Reference
 
+The memory system supports 10 namespaces:
+
 | Namespace | Contains | Example Query |
 |-----------|----------|---------------|
-| `decisions` | Architectural choices | "database selection", "auth approach" |
+| `inception` | Problem statements, scope, success criteria | "project goals", "what are we building" |
+| `elicitation` | Requirements clarifications, constraints | "requirements", "must support" |
+| `research` | External findings, technology evaluations | "compared options", "evaluated" |
+| `decisions` | Architectural and design decisions | "database selection", "auth approach" |
+| `progress` | Task completions, milestones | "completed phase", "finished" |
+| `blockers` | Obstacles and impediments | "stuck on", "blocked by" |
+| `reviews` | Code review findings | "code review", "security finding" |
 | `learnings` | Knowledge discoveries | "pytest fixtures", "async patterns" |
-| `context` | Project information | "file locations", "conventions" |
-| `preferences` | User preferences | "coding style", "tool choices" |
+| `retrospective` | Post-mortems and retrospectives | "project retrospective", "lessons learned" |
 | `patterns` | Recurring solutions | "error handling", "API patterns" |
 
 ## Non-Intrusive Design Principles
@@ -139,6 +146,7 @@ The skill:
 - `/memory:capture` - Store new memories
 - `/memory:recall` - Manual recall with options
 - `/memory:search` - Advanced search with filters
+- `/memory:sync` - Synchronize memory index
 - `/memory:status` - Check system health
 
 ## Additional Resources

@@ -36,7 +36,18 @@ git_notes_memory/
 ├── utils.py            # Utility functions
 ├── search.py           # SearchOptimizer
 ├── patterns.py         # PatternManager
-└── lifecycle.py        # LifecycleManager
+├── lifecycle.py        # LifecycleManager
+└── hooks/              # Hook handler modules
+    ├── session_start_handler.py
+    ├── user_prompt_handler.py
+    ├── stop_handler.py
+    └── services/       # Hook support services
+        ├── context_builder.py
+        ├── project_detector.py
+        ├── signal_detector.py
+        ├── novelty_checker.py
+        ├── capture_decider.py
+        └── session_analyzer.py
 ```
 
 ---
@@ -598,13 +609,13 @@ from git_notes_memory.config import (
     MAX_SUMMARY_CHARS,             # 100
     MAX_RECALL_LIMIT,              # 100
 
-    # Timeouts
-    SEARCH_TIMEOUT_MS,             # 5000
-    CAPTURE_TIMEOUT_MS,            # 30000
-    LOCK_TIMEOUT_SECONDS,          # 30
+    # Timeouts (in milliseconds unless noted)
+    SEARCH_TIMEOUT_MS,             # 500
+    CAPTURE_TIMEOUT_MS,            # 2000
+    LOCK_TIMEOUT_SECONDS,          # 5
 
     # Lifecycle
-    DECAY_HALF_LIFE_DAYS,          # 30.0
+    DECAY_HALF_LIFE_DAYS,          # 30
 )
 ```
 

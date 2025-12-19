@@ -2,6 +2,10 @@
 
 Git-native, semantically-searchable memory storage for Claude Code.
 
+<p align="center">
+  <img src="docs/_assets/infograph-git-notes-memory-project-memory.png" alt="Git Notes Memory Architecture" width="800"/>
+</p>
+
 <!-- Badges -->
 [![CI](https://github.com/zircote/git-notes-memory-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/zircote/git-notes-memory-manager/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/git-notes-memory.svg)](https://pypi.org/project/git-notes-memory/)
@@ -21,7 +25,7 @@ Git-native, semantically-searchable memory storage for Claude Code.
 - **Git-native storage**: Memories stored as git notes that sync with push/pull
 - **Semantic search**: Find relevant memories via sentence-transformer embeddings
 - **10 memory namespaces**: inception, elicitation, research, decisions, progress, blockers, reviews, learnings, retrospective, patterns
-- **Progressive hydration**: Load memory content incrementally (SUMMARY → FULL → FILES)
+- **Progressive hydration**: Load memory content incrementally (SUMMARY -> FULL -> FILES)
 - **Concurrent-safe**: File locking prevents corruption from parallel captures
 - **XDG-compliant**: Standard paths on all platforms
 
@@ -55,15 +59,15 @@ memories = recall.search("database choice", namespace="decisions", limit=5)
 
 ## Claude Code Plugin
 
-When used as a Claude Code plugin, the following commands are available:
+When used as a Claude Code plugin, the following slash commands are available:
 
-- `/remember <namespace> <summary>` - Capture a memory
-- `/recall <query>` - Search memories semantically
-- `/context <spec>` - Load all memories for a spec
-- `/memory status` - Show index statistics
-- `/memory reindex` - Rebuild the search index
-- `/memory verify` - Check index consistency
-- `/memory gc` - Garbage collect old memories
+| Command | Description |
+|---------|-------------|
+| `/memory:capture <namespace> <summary>` | Capture a memory |
+| `/memory:recall <query>` | Search memories semantically |
+| `/memory:search <query>` | Advanced search with filters |
+| `/memory:sync [full\|verify\|repair]` | Synchronize or repair the index |
+| `/memory:status [--verbose]` | Show index statistics |
 
 ### Hooks Integration
 
@@ -94,13 +98,19 @@ make quality
 
 ## Configuration
 
-Environment variables:
+Environment variables (see `.env.example` for all options):
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `MEMORY_PLUGIN_DATA_DIR` | Data directory path | `~/.local/share/memory-plugin/` |
 | `MEMORY_PLUGIN_GIT_NAMESPACE` | Git notes namespace | `refs/notes/mem` |
 | `MEMORY_PLUGIN_EMBEDDING_MODEL` | Embedding model name | `all-MiniLM-L6-v2` |
+| `MEMORY_PLUGIN_AUTO_CAPTURE` | Enable auto-capture hook | `false` |
+
+### Hook Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
 | `HOOK_ENABLED` | Master switch for hooks | `true` |
 | `HOOK_SESSION_START_ENABLED` | Enable SessionStart context injection | `true` |
 | `HOOK_USER_PROMPT_ENABLED` | Enable signal detection in prompts | `false` |
