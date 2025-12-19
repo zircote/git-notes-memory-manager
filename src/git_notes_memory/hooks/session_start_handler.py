@@ -34,11 +34,12 @@ import signal
 import sys
 from typing import Any
 
-from git_notes_memory.config import HOOK_SESSION_START_TIMEOUT
+from git_notes_memory.config import HOOK_SESSION_START_TIMEOUT, get_index_path
 from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.context_builder import ContextBuilder
 from git_notes_memory.hooks.guidance_builder import GuidanceBuilder
 from git_notes_memory.hooks.project_detector import detect_project
+from git_notes_memory.index import IndexService
 
 __all__ = ["main"]
 
@@ -117,18 +118,43 @@ def _validate_input(data: dict[str, Any]) -> bool:
     return all(field in data and data[field] for field in required_fields)
 
 
-def _write_output(context: str) -> None:
+def _get_memory_count() -> int:
+    """Get total memory count from index.
+
+    Returns:
+        Number of memories indexed, or 0 if index doesn't exist.
+    """
+    try:
+        index_path = get_index_path()
+        if not index_path.exists():
+            return 0
+        index = IndexService(index_path)
+        index.initialize()
+        stats = index.get_stats()
+        index.close()
+        return stats.total_memories
+    except Exception:
+        return 0
+
+
+def _write_output(context: str, memory_count: int = 0) -> None:
     """Write hook output to stdout.
 
     Args:
         context: XML context string to inject.
+        memory_count: Number of memories in the system.
     """
-    output = {
+    output: dict[str, Any] = {
         "hookSpecificOutput": {
             "hookEventName": "SessionStart",
             "additionalContext": context,
         }
     }
+    # Add user-visible status message
+    if memory_count > 0:
+        output["message"] = f"📚 Memory system: {memory_count} memories indexed"
+    else:
+        output["message"] = "📚 Memory system: initialized"
     print(json.dumps(output))
 
 
@@ -214,8 +240,11 @@ def main() -> None:
 
         logger.debug("Total context (%d chars)", len(full_context))
 
-        # Output result
-        _write_output(full_context)
+        # Get memory count for status message
+        memory_count = _get_memory_count()
+
+        # Output result with memory count
+        _write_output(full_context, memory_count=memory_count)
 
     except json.JSONDecodeError as e:
         logger.error("Failed to parse hook input: %s", e)

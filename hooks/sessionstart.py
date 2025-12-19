@@ -109,6 +109,22 @@ def build_context_message(status: dict) -> str:
     return "\n".join(lines)
 
 
+def build_user_message(status: dict) -> str:
+    """Build a concise user-visible status message.
+
+    Args:
+        status: Memory system status dict.
+
+    Returns:
+        Short status message with emoji indicator.
+    """
+    if status.get("initialized"):
+        total = status.get("total_memories", 0)
+        return f"📚 Memory system: {total} memories indexed"
+    else:
+        return "📚 Memory system: not initialized"
+
+
 def main() -> None:
     """Main hook entry point."""
     # Read hook input from stdin (not used but must be consumed)
@@ -120,13 +136,15 @@ def main() -> None:
     # Get memory system status
     status = get_memory_status()
 
-    # Build context message
+    # Build context message (for Claude) and user message (visible)
     context_message = build_context_message(status)
+    user_message = build_user_message(status)
 
-    # Output the context injection
+    # Output the context injection with user-visible message
     output = {
         "continue": True,
         "additionalContext": context_message,
+        "message": user_message,
     }
 
     print(json.dumps(output))

@@ -110,12 +110,14 @@ def main() -> None:
     # Capture the memory
     result = capture_memory(content)
 
-    # Output result (Claude Code will display any messages)
+    # Output result with visual indicator
     output = {"continue": True}
     if result.get("success"):
-        output["message"] = result.get("message", "Memory captured")
+        # Extract summary for display (first 50 chars of content)
+        summary = content[:50] + "..." if len(content) > 50 else content
+        output["message"] = f"💾 Captured to learnings: \"{summary}\""
     else:
-        output["warning"] = f"Failed to capture: {result.get('error', 'Unknown error')}"
+        output["warning"] = f"💾 Capture failed: {result.get('error', 'Unknown error')}"
 
     print(json.dumps(output))
 

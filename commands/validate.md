@@ -332,8 +332,39 @@ print("## 8. Cleanup")
 print("-" * 40)
 
 if test_memory_id:
-    test_pass("Test cleanup", f"Test memory {test_memory_id[:16]}... will persist")
-    log("To remove: git notes --ref=refs/notes/mem/learnings remove <commit>", 1)
+    try:
+        # Parse memory ID: {namespace}:{commit_sha}:{index}
+        parts = test_memory_id.split(":")
+        if len(parts) >= 2:
+            namespace = parts[0]
+            commit_sha = parts[1]
+
+            # Remove the git note
+            log(f"Removing test note from refs/notes/mem/{namespace}...", 1)
+            rm_result = subprocess.run(
+                ["git", "notes", f"--ref=refs/notes/mem/{namespace}", "remove", commit_sha],
+                capture_output=True, text=True
+            )
+
+            if rm_result.returncode == 0:
+                # Reindex to update SQLite index
+                sync_svc = get_sync_service()
+                sync_svc.reindex()
+
+                # Verify the test note is gone by searching for the marker
+                verify_results = recall.search(query=test_marker, k=5, namespace=namespace)
+                still_exists = any(test_marker in (r.content or '') for r in verify_results)
+
+                if not still_exists:
+                    test_pass("Test cleanup", f"Removed {test_memory_id[:20]}...")
+                else:
+                    test_warn("Test cleanup", "Note removed but still in index")
+            else:
+                test_warn("Test cleanup", f"git notes remove failed: {rm_result.stderr.strip()}")
+        else:
+            test_warn("Test cleanup", f"Invalid memory ID format: {test_memory_id}")
+    except Exception as e:
+        test_warn("Test cleanup", f"Cleanup failed: {e}")
 else:
     test_pass("Test cleanup", "No test memory to clean up")
 

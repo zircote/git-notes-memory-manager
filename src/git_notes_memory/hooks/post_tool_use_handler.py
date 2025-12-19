@@ -230,7 +230,7 @@ def _format_memories_xml(
     return builder.to_string()
 
 
-def _write_output(context: str | None = None) -> None:
+def _write_output(context: str | None = None, memory_count: int = 0) -> None:
     """Write hook output to stdout.
 
     Args:
@@ -243,6 +243,9 @@ def _write_output(context: str | None = None) -> None:
                 "additionalContext": context,
             }
         }
+        # Add user-visible message when memories are found
+        if memory_count > 0:
+            output["message"] = f"🔍 Found {memory_count} related memories"
     else:
         output = {"continue": True}
 
@@ -329,8 +332,8 @@ def main() -> None:
         # Format as XML
         context = _format_memories_xml(results, file_path)
 
-        # Output result
-        _write_output(context)
+        # Output result with memory count for user message
+        _write_output(context, memory_count=len(results))
 
     except json.JSONDecodeError as e:
         logger.error("Failed to parse hook input: %s", e)

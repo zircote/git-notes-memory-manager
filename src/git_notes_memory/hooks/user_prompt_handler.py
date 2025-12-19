@@ -258,7 +258,7 @@ def _write_output(
         # Report captured memories
         successful = [c for c in captured if c.get("success")]
         if successful:
-            output["message"] = f"Captured {len(successful)} memory(s) automatically"
+            output["message"] = f"💾 Captured {len(successful)} memory(s) automatically"
             output["hookSpecificOutput"] = {
                 "hookEventName": "UserPromptSubmit",
                 "capturedMemories": captured,

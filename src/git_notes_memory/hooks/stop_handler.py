@@ -256,7 +256,7 @@ def _write_output(
 
         # Add a message about uncaptured content
         output["message"] = (
-            f"Found {len(uncaptured)} potentially uncaptured memory(s) "
+            f"🛑 Found {len(uncaptured)} potentially uncaptured memory(s) "
             "from this session. Consider using /remember to capture them."
         )
 
@@ -267,7 +267,7 @@ def _write_output(
             hook_output["syncStats"] = stats
             indexed = stats.get("indexed", 0)
             if indexed > 0:
-                sync_msg = f"Index synced: {indexed} memories indexed"
+                sync_msg = f"📚 Index synced: {indexed} memories indexed"
                 if "message" in output:
                     output["message"] += f"\n{sync_msg}"
                 else:
