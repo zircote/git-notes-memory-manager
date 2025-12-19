@@ -1,0 +1,10 @@
+<response_guidance level="minimal">
+  <inline_markers title="Quick Capture Markers">
+    <marker syntax="[remember] text" description="Capture to learnings namespace"/>
+    <marker syntax="[remember:namespace] text" description="Capture to specified namespace"/>
+    <marker syntax="[capture] text" description="Auto-detect namespace from content"/>
+    <marker syntax="@memory text" description="Alternative capture syntax"/>
+    <marker syntax="@memory:namespace text" description="Alternative with namespace"/>
+  </inline_markers>
+  <namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective</namespaces>
+</response_guidance>

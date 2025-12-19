@@ -1,0 +1,69 @@
+<response_guidance level="standard">
+  <capture_patterns title="How to Structure Responses for Memory Capture">
+    <pattern type="decision">
+      <description>When making architectural or design decisions</description>
+      <trigger_phrases>
+        <phrase>We decided to...</phrase>
+        <phrase>The decision is to...</phrase>
+        <phrase>Going with X because...</phrase>
+        <phrase>After evaluating, we chose...</phrase>
+      </trigger_phrases>
+    </pattern>
+    <pattern type="learning">
+      <description>When discovering insights or TIL moments</description>
+      <trigger_phrases>
+        <phrase>TIL...</phrase>
+        <phrase>Discovered that...</phrase>
+        <phrase>Learned that...</phrase>
+        <phrase>Turns out...</phrase>
+        <phrase>Interesting finding...</phrase>
+      </trigger_phrases>
+    </pattern>
+    <pattern type="blocker">
+      <description>When encountering obstacles or issues</description>
+      <trigger_phrases>
+        <phrase>Blocked by...</phrase>
+        <phrase>Cannot proceed because...</phrase>
+        <phrase>Stuck on...</phrase>
+        <phrase>Issue discovered...</phrase>
+        <phrase>Problem found...</phrase>
+      </trigger_phrases>
+    </pattern>
+    <pattern type="progress">
+      <description>When completing milestones or deliverables</description>
+      <trigger_phrases>
+        <phrase>Completed...</phrase>
+        <phrase>Finished implementing...</phrase>
+        <phrase>Milestone reached...</phrase>
+        <phrase>Done with...</phrase>
+        <phrase>Successfully implemented...</phrase>
+      </trigger_phrases>
+    </pattern>
+  </capture_patterns>
+
+  <inline_markers title="Quick Capture Markers">
+    <marker syntax="[remember] text" namespace="learnings" description="Quick capture to learnings"/>
+    <marker syntax="[remember:namespace] text" namespace="specified" description="Capture to specific namespace"/>
+    <marker syntax="[capture] text" namespace="auto-detect" description="Auto-detect namespace from content"/>
+    <marker syntax="[capture:decisions] text" namespace="decisions" description="Capture decision explicitly"/>
+    <marker syntax="@memory text" namespace="auto-detect" description="Alternative inline syntax"/>
+    <marker syntax="@memory:patterns text" namespace="patterns" description="Alternative with namespace"/>
+  </inline_markers>
+
+  <valid_namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective, inception, elicitation</valid_namespaces>
+
+  <memory_recall title="How to Use Retrieved Memories">
+    <instruction priority="high">When memories are provided in memory_context, actively reference them when relevant to the user's task</instruction>
+    <instruction priority="high">If past decisions or learnings apply to current work, mention them: "Based on a previous decision..." or "You learned earlier that..."</instruction>
+    <instruction>When blockers from memory_context match current issues, surface the resolution if available</instruction>
+    <instruction>Use memory IDs when referencing specific memories so users can look them up</instruction>
+  </memory_recall>
+
+  <best_practices title="Memory Capture Best Practices">
+    <practice>Use clear trigger phrases at the start of memorable content</practice>
+    <practice>Include rationale with decisions, not just the choice</practice>
+    <practice>Tag blockers with resolution status when solved</practice>
+    <practice>Keep summaries under 100 characters for better signal detection</practice>
+    <practice>Use namespace hints when content clearly belongs to a specific category</practice>
+  </best_practices>
+</response_guidance>
