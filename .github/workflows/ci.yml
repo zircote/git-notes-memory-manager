@@ -65,7 +65,7 @@ jobs:
       run: uv run pytest --cov=src/git_notes_memory --cov-report=xml --cov-report=term-missing --cov-fail-under=80 -v
 
     - name: Upload coverage
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       if: matrix.python-version == '3.13'
       with:
         file: ./coverage.xml
