@@ -1,0 +1,105 @@
+<response_guidance level="detailed">
+  <capture_patterns title="How to Structure Responses for Memory Capture">
+    <pattern type="decision">
+      <description>When making architectural or design decisions</description>
+      <template><![CDATA[**Decision**: [One-line summary]
+**Context**: [Why this decision was needed]
+**Choice**: [What was chosen]
+**Rationale**: [Why this choice over alternatives]
+**Alternatives considered**: [Other options evaluated]]]></template>
+      <trigger_phrases>
+        <phrase>We decided to...</phrase>
+        <phrase>The decision is to...</phrase>
+        <phrase>Going with X because...</phrase>
+        <phrase>After evaluating, we chose...</phrase>
+      </trigger_phrases>
+    </pattern>
+    <pattern type="learning">
+      <description>When discovering insights or TIL moments</description>
+      <template><![CDATA[**Learning**: [One-line insight]
+**Context**: [How this was discovered]
+**Application**: [When/how to apply this]]]></template>
+      <trigger_phrases>
+        <phrase>TIL...</phrase>
+        <phrase>Discovered that...</phrase>
+        <phrase>Learned that...</phrase>
+        <phrase>Turns out...</phrase>
+        <phrase>Interesting finding...</phrase>
+      </trigger_phrases>
+    </pattern>
+    <pattern type="blocker">
+      <description>When encountering obstacles or issues</description>
+      <template><![CDATA[**Blocker**: [One-line issue]
+**Impact**: [What this blocks]
+**Status**: [investigating/blocked/resolved]
+**Resolution**: [If resolved, how]]]></template>
+      <trigger_phrases>
+        <phrase>Blocked by...</phrase>
+        <phrase>Cannot proceed because...</phrase>
+        <phrase>Stuck on...</phrase>
+        <phrase>Issue discovered...</phrase>
+        <phrase>Problem found...</phrase>
+      </trigger_phrases>
+    </pattern>
+    <pattern type="progress">
+      <description>When completing milestones or deliverables</description>
+      <template><![CDATA[**Completed**: [What was finished]
+**Deliverables**: [Concrete outputs]
+**Next**: [What comes next]]]></template>
+      <trigger_phrases>
+        <phrase>Completed...</phrase>
+        <phrase>Finished implementing...</phrase>
+        <phrase>Milestone reached...</phrase>
+        <phrase>Done with...</phrase>
+        <phrase>Successfully implemented...</phrase>
+      </trigger_phrases>
+    </pattern>
+  </capture_patterns>
+
+  <inline_markers title="Quick Capture Markers">
+    <marker syntax="[remember] text" namespace="learnings" description="Quick capture to learnings"/>
+    <marker syntax="[remember:namespace] text" namespace="specified" description="Capture to specific namespace"/>
+    <marker syntax="[capture] text" namespace="auto-detect" description="Auto-detect namespace from content"/>
+    <marker syntax="[capture:decisions] text" namespace="decisions" description="Capture decision explicitly"/>
+    <marker syntax="@memory text" namespace="auto-detect" description="Alternative inline syntax"/>
+    <marker syntax="@memory:patterns text" namespace="patterns" description="Alternative with namespace"/>
+  </inline_markers>
+
+  <valid_namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective, inception, elicitation</valid_namespaces>
+
+  <memory_recall title="How to Use Retrieved Memories">
+    <instruction priority="high">When memories are provided in memory_context, actively reference them when relevant to the user's task</instruction>
+    <instruction priority="high">If past decisions or learnings apply to current work, mention them: "Based on a previous decision..." or "You learned earlier that..."</instruction>
+    <instruction>When blockers from memory_context match current issues, surface the resolution if available</instruction>
+    <instruction>Use memory IDs when referencing specific memories so users can look them up</instruction>
+  </memory_recall>
+
+  <best_practices title="Memory Capture Best Practices">
+    <practice>Use clear trigger phrases at the start of memorable content</practice>
+    <practice>Include rationale with decisions, not just the choice</practice>
+    <practice>Tag blockers with resolution status when solved</practice>
+    <practice>Keep summaries under 100 characters for better signal detection</practice>
+    <practice>Use namespace hints when content clearly belongs to a specific category</practice>
+  </best_practices>
+
+  <examples title="Effective Capture Examples">
+    <example type="decision">
+      <input>We need to pick a database</input>
+      <output><![CDATA[**Decision**: Use PostgreSQL for persistence
+**Context**: Need ACID compliance and JSON support
+**Choice**: PostgreSQL 15 with JSONB columns
+**Rationale**: Team expertise, proven reliability, excellent JSON support
+**Alternatives considered**: MongoDB (no ACID), SQLite (scaling concerns)]]></output>
+    </example>
+    <example type="learning">
+      <input>Found a pytest quirk</input>
+      <output><![CDATA[**Learning**: pytest fixtures with scope="module" share state across tests
+**Context**: Discovered when tests failed intermittently due to shared mock state
+**Application**: Use scope="function" for mutable fixtures, module for readonly]]></output>
+    </example>
+    <example type="inline_marker">
+      <input>Quick insight during coding</input>
+      <output>[remember:patterns] Always use frozen dataclasses for immutable models to prevent accidental mutation</output>
+    </example>
+  </examples>
+</response_guidance>
