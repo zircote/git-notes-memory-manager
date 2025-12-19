@@ -1,0 +1,7 @@
+---
+type: learnings
+timestamp: '2025-12-19T10:53:20.730127+00:00'
+summary: Testing plugin functionality after bug fix
+---
+
+Verified that git notes command syntax was corrected from --list to list. All 910 tests pass.
