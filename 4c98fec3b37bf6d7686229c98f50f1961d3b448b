@@ -48,3 +48,32 @@ Test suite analysis:
 - make quality runs: format → lint → typecheck → security → coverage
 - 80% minimum coverage enforced
 - mypy --strict for full type checking
+
+---
+type: research
+timestamp: '2025-12-19T11:01:38.664391+00:00'
+summary: 'Claude Code plugin structure: 5 commands, 2 hooks, 1 skill'
+---
+
+Plugin integration points:
+
+**Commands** (./commands/):
+- /memory:capture - Store memories with namespace detection
+- /memory:recall - Semantic search with context extraction
+- /memory:search - Advanced filtering (semantic vs text)
+- /memory:status - System health and statistics
+- /memory:sync - Index synchronization modes
+
+**Hooks** (./hooks/):
+- Stop: Auto-sync index on session end (enabled)
+- UserPromptSubmit: Capture [remember]/[capture] markers (disabled by default)
+
+**Skill** (./skills/memory-recall/):
+- Auto-triggers on past decision/learning queries
+- Extracts concepts from conversation context
+- Configurable threshold (0.7 default) and limit (3 default)
+
+**Data Locations**:
+- Git notes: refs/notes/mem/{namespace}
+- SQLite index: ~/.local/share/memory-plugin/index.db
+- Model cache: ~/.local/share/memory-plugin/models/
