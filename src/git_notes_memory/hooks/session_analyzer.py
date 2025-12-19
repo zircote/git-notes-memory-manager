@@ -280,9 +280,7 @@ class SessionAnalyzer:
         # Filter by novelty
         if check_novelty and filtered:
             checker = self._get_novelty_checker()
-            filtered = [
-                s for s in filtered if checker.check_signal_novelty(s).is_novel
-            ]
+            filtered = [s for s in filtered if checker.check_signal_novelty(s).is_novel]
 
         # Sort and limit
         filtered.sort(key=lambda s: s.confidence, reverse=True)

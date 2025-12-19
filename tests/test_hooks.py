@@ -357,7 +357,9 @@ class TestSignalDetector:
         assert len(signals) >= 1
         # Context should include surrounding text
         decision_signal = next(s for s in signals if s.type == SignalType.DECISION)
-        assert "Redis" in decision_signal.context or "caching" in decision_signal.context
+        assert (
+            "Redis" in decision_signal.context or "caching" in decision_signal.context
+        )
 
     def test_confidence_scoring(self, signal_detector: SignalDetector) -> None:
         """Test that confidence scores are reasonable."""

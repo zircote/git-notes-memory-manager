@@ -79,7 +79,10 @@ def temp_transcript(tmp_path: Path) -> Path:
                 "messages": [
                     {"role": "user", "content": "I decided to use PostgreSQL"},
                     {"role": "assistant", "content": "Good choice!"},
-                    {"role": "user", "content": "I learned that indexes improve performance"},
+                    {
+                        "role": "user",
+                        "content": "I learned that indexes improve performance",
+                    },
                 ]
             }
         )
@@ -160,7 +163,10 @@ class TestSessionStartHandler:
         output = json.loads(captured.getvalue())
         assert "hookSpecificOutput" in output
         assert output["hookSpecificOutput"]["hookEventName"] == "SessionStart"
-        assert output["hookSpecificOutput"]["additionalContext"] == "<context>test</context>"
+        assert (
+            output["hookSpecificOutput"]["additionalContext"]
+            == "<context>test</context>"
+        )
 
     def test_setup_logging_debug(self) -> None:
         """Test debug logging setup configures correctly."""
@@ -327,7 +333,9 @@ class TestUserPromptHandler:
                 confidence=0.98,
             )
         ]
-        captured_memories = [{"success": True, "memory_id": "abc123", "summary": "Test"}]
+        captured_memories = [
+            {"success": True, "memory_id": "abc123", "summary": "Test"}
+        ]
 
         out = io.StringIO()
         with patch.object(sys, "stdout", out):
@@ -522,9 +530,7 @@ class TestWrapperScripts:
         import importlib.util
         from pathlib import Path as P
 
-        wrapper_path = (
-            P(__file__).parent.parent / "hooks" / "session_start.py"
-        )
+        wrapper_path = P(__file__).parent.parent / "hooks" / "session_start.py"
         if not wrapper_path.exists():
             pytest.skip("Wrapper script not found")
 
@@ -549,9 +555,7 @@ class TestWrapperScripts:
         import importlib.util
         from pathlib import Path as P
 
-        wrapper_path = (
-            P(__file__).parent.parent / "hooks" / "user_prompt.py"
-        )
+        wrapper_path = P(__file__).parent.parent / "hooks" / "user_prompt.py"
         if not wrapper_path.exists():
             pytest.skip("Wrapper script not found")
 
@@ -580,9 +584,7 @@ class TestWrapperScripts:
         import importlib.util
         from pathlib import Path as P
 
-        wrapper_path = (
-            P(__file__).parent.parent / "hooks" / "stop.py"
-        )
+        wrapper_path = P(__file__).parent.parent / "hooks" / "stop.py"
         if not wrapper_path.exists():
             pytest.skip("Wrapper script not found")
 
@@ -673,9 +675,7 @@ class TestConfigIntegration:
         config = load_hook_config()
         assert config.enabled is False
 
-    def test_user_prompt_respects_disabled_hook(
-        self, hook_env_disabled: None
-    ) -> None:
+    def test_user_prompt_respects_disabled_hook(self, hook_env_disabled: None) -> None:
         """Test UserPromptSubmit respects HOOK_ENABLED=false."""
         from git_notes_memory.hooks.config_loader import load_hook_config
 

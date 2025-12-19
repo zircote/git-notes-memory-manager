@@ -309,7 +309,9 @@ class TestSessionAnalyzerPerformance:
             if i % 2 == 0:
                 lines.append(json.dumps({"role": "user", "content": f"Message {i}"}))
             else:
-                lines.append(json.dumps({"role": "assistant", "content": f"Response {i}"}))
+                lines.append(
+                    json.dumps({"role": "assistant", "content": f"Response {i}"})
+                )
         transcript.write_text("\n".join(lines))
 
         analyzer = SessionAnalyzer()

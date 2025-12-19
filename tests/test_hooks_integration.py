@@ -102,11 +102,24 @@ def transcript_file(tmp_path: Path) -> Path:
     transcript = tmp_path / "transcript.jsonl"
     # Write JSONL format (one JSON object per line)
     lines = [
-        json.dumps({"role": "user", "content": "I decided to use PostgreSQL for the database"}),
-        json.dumps({"role": "assistant", "content": "Good choice for relational data!"}),
-        json.dumps({"role": "user", "content": "I learned that indexes improve query performance"}),
-        json.dumps({"role": "assistant", "content": "Yes, especially for large tables."}),
-        json.dumps({"role": "user", "content": "The API rate limit is blocking progress"}),
+        json.dumps(
+            {"role": "user", "content": "I decided to use PostgreSQL for the database"}
+        ),
+        json.dumps(
+            {"role": "assistant", "content": "Good choice for relational data!"}
+        ),
+        json.dumps(
+            {
+                "role": "user",
+                "content": "I learned that indexes improve query performance",
+            }
+        ),
+        json.dumps(
+            {"role": "assistant", "content": "Yes, especially for large tables."}
+        ),
+        json.dumps(
+            {"role": "user", "content": "The API rate limit is blocking progress"}
+        ),
     ]
     transcript.write_text("\n".join(lines))
     return transcript
@@ -151,9 +164,7 @@ class TestSessionStartIntegration:
         # requires proper database setup for full end-to-end testing.
         # Here we validate the project detection flow works correctly.
 
-    def test_full_flow_with_spec_id(
-        self, spec_project: Path, hook_env: None
-    ) -> None:
+    def test_full_flow_with_spec_id(self, spec_project: Path, hook_env: None) -> None:
         """Test SessionStart flow detects active spec."""
         from git_notes_memory.hooks.project_detector import detect_project
 
@@ -240,9 +251,7 @@ class TestUserPromptSubmitIntegration:
         from git_notes_memory.hooks.signal_detector import SignalDetector
 
         detector = SignalDetector()
-        signals = detector.detect(
-            "We are blocked by the external API being down"
-        )
+        signals = detector.detect("We are blocked by the external API being down")
 
         assert len(signals) >= 1
         assert any(s.type.value == "blocker" for s in signals)
@@ -253,7 +262,9 @@ class TestUserPromptSubmitIntegration:
 
         detector = SignalDetector()
         # Use a stronger trigger that matches pattern detection
-        signals = detector.detect("/remember: always use prepared statements for security")
+        signals = detector.detect(
+            "/remember: always use prepared statements for security"
+        )
 
         # The explicit signal might require specific patterns
         # If no explicit signal, at least verify no crash
@@ -416,9 +427,7 @@ class TestCrossComponentIntegration:
         assert config1.user_prompt_enabled == config2.user_prompt_enabled
         assert config1.stop_enabled == config2.stop_enabled
 
-    def test_signal_detector_and_analyzer_compatibility(
-        self, hook_env: None
-    ) -> None:
+    def test_signal_detector_and_analyzer_compatibility(self, hook_env: None) -> None:
         """Test SignalDetector and SessionAnalyzer produce compatible signals."""
         from git_notes_memory.hooks.models import CaptureSignal
         from git_notes_memory.hooks.signal_detector import SignalDetector

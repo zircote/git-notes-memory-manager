@@ -296,7 +296,9 @@ def main() -> None:
     try:
         # Read and validate input
         input_data = _read_input()
-        logger.debug("Received input with prompt: %s...", input_data.get("prompt", "")[:50])
+        logger.debug(
+            "Received input with prompt: %s...", input_data.get("prompt", "")[:50]
+        )
 
         if not _validate_input(input_data):
             logger.warning("Invalid hook input - missing prompt field")
@@ -320,7 +322,9 @@ def main() -> None:
         decider = CaptureDecider(config=config)
         decision = decider.decide(signals)
 
-        logger.debug("Capture decision: %s - %s", decision.action.value, decision.reason)
+        logger.debug(
+            "Capture decision: %s - %s", decision.action.value, decision.reason
+        )
 
         # Handle the decision
         captured: list[dict[str, Any]] = []

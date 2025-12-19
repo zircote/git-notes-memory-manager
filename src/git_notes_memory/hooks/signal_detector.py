@@ -47,7 +47,10 @@ SIGNAL_PATTERNS: dict[SignalType, list[tuple[str, float]]] = {
     ],
     SignalType.LEARNING: [
         # Strong learning signals
-        (r"(?i)\b(I|we)\s+(learned|realized|discovered|found out)\s+(that|about)?\b", 0.90),
+        (
+            r"(?i)\b(I|we)\s+(learned|realized|discovered|found out)\s+(that|about)?\b",
+            0.90,
+        ),
         (r"(?i)\bTIL\b", 0.95),  # Very strong explicit signal
         (r"(?i)\bturns out\b", 0.85),
         (r"(?i)\bkey (insight|takeaway|learning)[:\s]", 0.92),
@@ -136,7 +139,9 @@ class SignalDetector:
     """
 
     # Class-level compiled patterns cache
-    _compiled_patterns: ClassVar[dict[SignalType, list[tuple[re.Pattern[str], float]]]] = {}
+    _compiled_patterns: ClassVar[
+        dict[SignalType, list[tuple[re.Pattern[str], float]]]
+    ] = {}
 
     def __init__(
         self,
@@ -241,7 +246,9 @@ class SignalDetector:
         # Sort by position
         signals.sort(key=lambda s: s.position)
 
-        logger.debug("Detected %d signals in text of length %d", len(signals), len(text))
+        logger.debug(
+            "Detected %d signals in text of length %d", len(signals), len(text)
+        )
         return signals
 
     def _extract_context(self, text: str, start: int, end: int) -> str:

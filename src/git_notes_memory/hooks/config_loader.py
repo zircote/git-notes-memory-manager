@@ -226,9 +226,7 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
 
     # SessionStart settings
     if "HOOK_SESSION_START_ENABLED" in env:
-        kwargs["session_start_enabled"] = _parse_bool(
-            env["HOOK_SESSION_START_ENABLED"]
-        )
+        kwargs["session_start_enabled"] = _parse_bool(env["HOOK_SESSION_START_ENABLED"])
     if "HOOK_SESSION_START_BUDGET_MODE" in env:
         with contextlib.suppress(ValueError):
             kwargs["session_start_budget_mode"] = _parse_budget_mode(
@@ -268,9 +266,7 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
 
     # UserPromptSubmit hook settings
     if "HOOK_USER_PROMPT_ENABLED" in env:
-        kwargs["user_prompt_enabled"] = _parse_bool(
-            env["HOOK_USER_PROMPT_ENABLED"]
-        )
+        kwargs["user_prompt_enabled"] = _parse_bool(env["HOOK_USER_PROMPT_ENABLED"])
 
     # Stop hook settings
     if "HOOK_STOP_ENABLED" in env:

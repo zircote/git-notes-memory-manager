@@ -16,9 +16,8 @@ import io
 import json
 import os
 import sys
-import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -40,14 +39,12 @@ def temp_git_repo(tmp_path: Path) -> Generator[Path, None, None]:
     (git_dir / "HEAD").write_text("ref: refs/heads/main")
     # Include origin URL so git_repo name can be detected
     (git_dir / "config").write_text(
-        '[core]\n\trepositoryformatversion = 0\n'
+        "[core]\n\trepositoryformatversion = 0\n"
         '[remote "origin"]\n\turl = https://github.com/test-user/test-project.git\n'
     )
 
     # Create a basic project structure
-    (tmp_path / "pyproject.toml").write_text(
-        '[project]\nname = "test-project"\n'
-    )
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "test-project"\n')
     (tmp_path / "src").mkdir()
 
     yield tmp_path
@@ -179,7 +176,9 @@ class TestSessionStartIntegration:
         """Test SessionStart hook produces valid JSON output."""
         from git_notes_memory.hooks.session_start_handler import _write_output
 
-        context = "<memory_context project='test'><summary>Test</summary></memory_context>"
+        context = (
+            "<memory_context project='test'><summary>Test</summary></memory_context>"
+        )
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
@@ -319,7 +318,11 @@ class TestSignalDetectionIntegration:
         """Test that low-confidence signals result in SKIP action."""
         from git_notes_memory.hooks.capture_decider import CaptureDecider
         from git_notes_memory.hooks.config_loader import load_hook_config
-        from git_notes_memory.hooks.models import CaptureAction, CaptureSignal, SignalType
+        from git_notes_memory.hooks.models import (
+            CaptureAction,
+            CaptureSignal,
+            SignalType,
+        )
 
         # Create a low-confidence signal
         signals = [
@@ -448,12 +451,12 @@ class TestMultiHookInteraction:
         self, temp_git_repo: Path, hook_env_enabled: None
     ) -> None:
         """Test complete session flow from start to stop."""
+        from git_notes_memory.hooks.capture_decider import CaptureDecider
         from git_notes_memory.hooks.config_loader import load_hook_config
         from git_notes_memory.hooks.context_builder import ContextBuilder
         from git_notes_memory.hooks.models import CaptureAction
         from git_notes_memory.hooks.project_detector import detect_project
         from git_notes_memory.hooks.signal_detector import SignalDetector
-        from git_notes_memory.hooks.capture_decider import CaptureDecider
 
         # 1. Session Start - detect project and build context
         project_info = detect_project(str(temp_git_repo))
@@ -556,14 +559,14 @@ class TestErrorHandlingIntegration:
         result = _analyze_session(str(invalid))
         assert result == []
 
-    def test_all_hooks_output_continue_on_error(
-        self, hook_env_enabled: None
-    ) -> None:
+    def test_all_hooks_output_continue_on_error(self, hook_env_enabled: None) -> None:
         """Test that all hooks output continue:true even on errors."""
         # This verifies the non-blocking error handling pattern
 
         # SessionStart - outputs empty on error (no hookSpecificOutput)
-        from git_notes_memory.hooks.session_start_handler import _write_output as ss_write
+        from git_notes_memory.hooks.session_start_handler import (
+            _write_output as ss_write,
+        )
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
@@ -572,8 +575,8 @@ class TestErrorHandlingIntegration:
         # SessionStart doesn't have continue field but hookSpecificOutput
 
         # UserPromptSubmit - outputs continue:true
-        from git_notes_memory.hooks.user_prompt_handler import _write_output as up_write
         from git_notes_memory.hooks.models import CaptureAction
+        from git_notes_memory.hooks.user_prompt_handler import _write_output as up_write
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):

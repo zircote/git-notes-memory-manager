@@ -133,7 +133,9 @@ def _get_git_repo_name(git_root: Path) -> str | None:
         # Match patterns like:
         #   url = git@github.com:user/repo.git
         #   url = https://github.com/user/repo.git
-        match = re.search(r'url\s*=\s*.*[/:]([^/]+?)(?:\.git)?\s*$', content, re.MULTILINE)
+        match = re.search(
+            r"url\s*=\s*.*[/:]([^/]+?)(?:\.git)?\s*$", content, re.MULTILINE
+        )
         if match:
             return match.group(1)
     except OSError:
@@ -278,7 +280,7 @@ def _extract_spec_from_claude_md(claude_md_path: Path) -> str | None:
         patterns = [
             r'(?:spec_id|project_id):\s*["\']?(SPEC-\d{4}-\d{2}-\d{2}-\d+)["\']?',
             r'Active\s+Spec:\s*["\']?(SPEC-\d{4}-\d{2}-\d{2}-\d+)["\']?',
-            r'\b(SPEC-\d{4}-\d{2}-\d{2}-\d+)\b',  # Any SPEC-... pattern
+            r"\b(SPEC-\d{4}-\d{2}-\d{2}-\d+)\b",  # Any SPEC-... pattern
         ]
         for pattern in patterns:
             match = re.search(pattern, content, re.IGNORECASE)
