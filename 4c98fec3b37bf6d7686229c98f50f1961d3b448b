@@ -1,0 +1,24 @@
+---
+type: research
+timestamp: '2025-12-19T11:01:38.629290+00:00'
+summary: 'git-notes-memory architecture: 16 modules, service layer pattern'
+---
+
+Explored git-notes-memory codebase structure:
+
+**Core Services (Singleton Pattern)**:
+- CaptureService: Memory capture with fcntl file locking
+- RecallService: Semantic search via sqlite-vec KNN
+- SyncService: Index synchronization with git notes
+- IndexService: SQLite + sqlite-vec for vector search
+- EmbeddingService: Lazy-loaded sentence-transformers (all-MiniLM-L6-v2)
+
+**Data Flow**:
+- Capture: validate → lock → YAML serialize → git notes append → embed → index
+- Recall: embed query → KNN search → filter → hydrate (SUMMARY/FULL/FILES)
+
+**Key Design Decisions**:
+- Git notes as source of truth (refs/notes/mem/{namespace})
+- Index is derived, can be rebuilt with reindex(full=True)
+- 10 namespaces: inception, elicitation, research, decisions, progress, blockers, reviews, learnings, retrospective, patterns
+- All models are frozen dataclasses for immutability
