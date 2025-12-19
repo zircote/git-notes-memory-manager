@@ -1,10 +1,9 @@
-<response_guidance level="minimal">
-  <inline_markers title="Quick Capture Markers">
-    <marker syntax="[remember] text" description="Capture to learnings namespace"/>
-    <marker syntax="[remember:namespace] text" description="Capture to specified namespace"/>
-    <marker syntax="[capture] text" description="Auto-detect namespace from content"/>
-    <marker syntax="@memory text" description="Alternative capture syntax"/>
-    <marker syntax="@memory:namespace text" description="Alternative with namespace"/>
-  </inline_markers>
-  <namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective</namespaces>
-</response_guidance>
+<session_operating_context level="minimal">
+  <active_behaviors>
+    <behavior>When deciding: [decision] rationale</behavior>
+    <behavior>When learning: [learned] insight</behavior>
+    <behavior>When blocked: [blocker] issue</behavior>
+  </active_behaviors>
+  <memory_recall>Reference memories in memory_context when relevant to current task</memory_recall>
+  <namespaces>decisions, learnings, blockers, progress, patterns, research</namespaces>
+</session_operating_context>

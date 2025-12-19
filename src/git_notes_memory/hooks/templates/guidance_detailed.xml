@@ -1,105 +1,89 @@
-<response_guidance level="detailed">
-  <capture_patterns title="How to Structure Responses for Memory Capture">
-    <pattern type="decision">
-      <description>When making architectural or design decisions</description>
-      <template><![CDATA[**Decision**: [One-line summary]
-**Context**: [Why this decision was needed]
-**Choice**: [What was chosen]
-**Rationale**: [Why this choice over alternatives]
-**Alternatives considered**: [Other options evaluated]]]></template>
-      <trigger_phrases>
-        <phrase>We decided to...</phrase>
-        <phrase>The decision is to...</phrase>
-        <phrase>Going with X because...</phrase>
-        <phrase>After evaluating, we chose...</phrase>
-      </trigger_phrases>
-    </pattern>
-    <pattern type="learning">
-      <description>When discovering insights or TIL moments</description>
-      <template><![CDATA[**Learning**: [One-line insight]
-**Context**: [How this was discovered]
-**Application**: [When/how to apply this]]]></template>
-      <trigger_phrases>
-        <phrase>TIL...</phrase>
-        <phrase>Discovered that...</phrase>
-        <phrase>Learned that...</phrase>
-        <phrase>Turns out...</phrase>
-        <phrase>Interesting finding...</phrase>
-      </trigger_phrases>
-    </pattern>
-    <pattern type="blocker">
-      <description>When encountering obstacles or issues</description>
-      <template><![CDATA[**Blocker**: [One-line issue]
-**Impact**: [What this blocks]
-**Status**: [investigating/blocked/resolved]
-**Resolution**: [If resolved, how]]]></template>
-      <trigger_phrases>
-        <phrase>Blocked by...</phrase>
-        <phrase>Cannot proceed because...</phrase>
-        <phrase>Stuck on...</phrase>
-        <phrase>Issue discovered...</phrase>
-        <phrase>Problem found...</phrase>
-      </trigger_phrases>
-    </pattern>
-    <pattern type="progress">
-      <description>When completing milestones or deliverables</description>
-      <template><![CDATA[**Completed**: [What was finished]
-**Deliverables**: [Concrete outputs]
-**Next**: [What comes next]]]></template>
-      <trigger_phrases>
-        <phrase>Completed...</phrase>
-        <phrase>Finished implementing...</phrase>
-        <phrase>Milestone reached...</phrase>
-        <phrase>Done with...</phrase>
-        <phrase>Successfully implemented...</phrase>
-      </trigger_phrases>
-    </pattern>
-  </capture_patterns>
+<session_operating_context level="detailed">
+  <!-- SECTION 1: ACTIVE OPERATING BEHAVIORS (highest priority) -->
+  <active_behaviors title="Memory Capture Behaviors">
+    <behavior trigger="making_decision" priority="critical">
+      When you make an architectural or design decision, IMMEDIATELY document it.
+      Format: [decision] One-line summary: rationale
 
-  <inline_markers title="Quick Capture Markers">
-    <marker syntax="[remember] text" namespace="learnings" description="Quick capture to learnings"/>
-    <marker syntax="[remember:namespace] text" namespace="specified" description="Capture to specific namespace"/>
-    <marker syntax="[capture] text" namespace="auto-detect" description="Auto-detect namespace from content"/>
-    <marker syntax="[capture:decisions] text" namespace="decisions" description="Capture decision explicitly"/>
-    <marker syntax="@memory text" namespace="auto-detect" description="Alternative inline syntax"/>
-    <marker syntax="@memory:patterns text" namespace="patterns" description="Alternative with namespace"/>
-  </inline_markers>
+      This is not optional. Decisions made during implementation are easily lost
+      when context compacts. Capture them as they happen.
+    </behavior>
+    <behavior trigger="discovering_insight" priority="critical">
+      When you discover something surprising, learn a pattern, or have a TIL moment,
+      capture it immediately:
+      [learned] What you discovered and why it matters
 
-  <valid_namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective, inception, elicitation</valid_namespaces>
+      These insights are often forgotten by the next session.
+    </behavior>
+    <behavior trigger="hitting_blocker" priority="high">
+      When blocked on a problem or encountering an issue:
+      [blocker] What blocks progress + what's needed to unblock
 
-  <memory_recall title="How to Use Retrieved Memories">
-    <instruction priority="high">When memories are provided in memory_context, actively reference them when relevant to the user's task</instruction>
-    <instruction priority="high">If past decisions or learnings apply to current work, mention them: "Based on a previous decision..." or "You learned earlier that..."</instruction>
-    <instruction>When blockers from memory_context match current issues, surface the resolution if available</instruction>
-    <instruction>Use memory IDs when referencing specific memories so users can look them up</instruction>
-  </memory_recall>
+      When resolved, update: [learned] How the blocker was resolved
+    </behavior>
+    <behavior trigger="completing_milestone" priority="normal">
+      When completing significant work:
+      [progress] What was accomplished
+    </behavior>
+  </active_behaviors>
 
-  <best_practices title="Memory Capture Best Practices">
-    <practice>Use clear trigger phrases at the start of memorable content</practice>
-    <practice>Include rationale with decisions, not just the choice</practice>
-    <practice>Tag blockers with resolution status when solved</practice>
-    <practice>Keep summaries under 100 characters for better signal detection</practice>
-    <practice>Use namespace hints when content clearly belongs to a specific category</practice>
-  </best_practices>
+  <!-- SECTION 2: MEMORY RECALL BEHAVIORS (highest priority) -->
+  <memory_recall_behaviors title="How to Surface Retrieved Memories">
+    <behavior priority="critical">
+      When memories appear in memory_context below, ACTIVELY reference them.
+      Don't just silently read them - weave them into your response:
+      "Based on a previous decision to use PostgreSQL..."
+      "You learned earlier that pytest fixtures with module scope share state..."
+    </behavior>
+    <behavior priority="critical">
+      If past blockers match current issues, surface the resolution.
+      Say: "This looks similar to a previous blocker (memory ID) which was resolved by..."
+    </behavior>
+    <behavior priority="high">
+      Memories are prior context, not just data. Use them like you would
+      remember a conversation - naturally reference relevant parts.
+    </behavior>
+  </memory_recall_behaviors>
 
-  <examples title="Effective Capture Examples">
-    <example type="decision">
-      <input>We need to pick a database</input>
-      <output><![CDATA[**Decision**: Use PostgreSQL for persistence
-**Context**: Need ACID compliance and JSON support
-**Choice**: PostgreSQL 15 with JSONB columns
-**Rationale**: Team expertise, proven reliability, excellent JSON support
-**Alternatives considered**: MongoDB (no ACID), SQLite (scaling concerns)]]></output>
+  <!-- SECTION 3: EXAMPLES (show the behavior in action) -->
+  <examples title="Capture in Action">
+    <example context="During architecture discussion">
+      Claude output:
+      "We'll use JWT tokens for authentication because they're stateless and scale well.
+      [decision] Using JWT for auth: stateless, scales to multiple servers, team has experience"
     </example>
-    <example type="learning">
-      <input>Found a pytest quirk</input>
-      <output><![CDATA[**Learning**: pytest fixtures with scope="module" share state across tests
-**Context**: Discovered when tests failed intermittently due to shared mock state
-**Application**: Use scope="function" for mutable fixtures, module for readonly]]></output>
+    <example context="After discovering a pattern">
+      Claude output:
+      "Interesting - the tests were flaky because of shared fixture state.
+      [learned] pytest module-scoped fixtures share state across tests - use function scope for mutable fixtures"
     </example>
-    <example type="inline_marker">
-      <input>Quick insight during coding</input>
-      <output>[remember:patterns] Always use frozen dataclasses for immutable models to prevent accidental mutation</output>
+    <example context="When hitting an issue">
+      Claude output:
+      "Can't proceed with the migration - the schema has circular dependencies.
+      [blocker] Schema migration blocked by circular FK dependencies between users and organizations tables"
     </example>
   </examples>
-</response_guidance>
+
+  <!-- SECTION 4: REFERENCE (lower priority) -->
+  <reference title="Capture Syntax Reference">
+    <inline_markers>
+      <marker syntax="[decision] text" namespace="decisions"/>
+      <marker syntax="[learned] text" namespace="learnings"/>
+      <marker syntax="[blocker] text" namespace="blockers"/>
+      <marker syntax="[progress] text" namespace="progress"/>
+      <marker syntax="[remember] text" namespace="learnings"/>
+      <marker syntax="[remember:namespace] text" namespace="specified"/>
+    </inline_markers>
+    <valid_namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective</valid_namespaces>
+
+    <structured_templates title="For Detailed Captures">
+      <template type="decision"><![CDATA[**Decision**: [One-line summary]
+**Context**: [Why this decision was needed]
+**Choice**: [What was chosen]
+**Rationale**: [Why this choice over alternatives]]]></template>
+      <template type="learning"><![CDATA[**Learning**: [One-line insight]
+**Context**: [How this was discovered]
+**Application**: [When/how to apply this]]]></template>
+    </structured_templates>
+  </reference>
+</session_operating_context>
