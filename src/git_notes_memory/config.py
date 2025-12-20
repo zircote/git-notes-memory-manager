@@ -241,6 +241,7 @@ def get_project_identifier(repo_path: Path | str | None = None) -> str:
             if match:
                 identifier_source = match.group(1).strip()
         except OSError:
+            # Git config file may not exist; fall back to path-based ID
             pass
 
     # Fall back to canonical path if git config not available

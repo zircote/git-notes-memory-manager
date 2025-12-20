@@ -409,7 +409,7 @@ class TestNoveltyChecking:
             check_novelty_enabled=False,  # Disabled at instance level
         )
         signal = make_signal(confidence=0.98)
-        decision = decider.decide([signal], check_novelty=True)
+        decider.decide([signal], check_novelty=True)
 
         # Should check novelty because per-call override
         mock_novelty_checker.check_signal_novelty.assert_called_once()

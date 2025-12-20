@@ -576,7 +576,6 @@ class TestSignalDeduplication:
         text = "I decided to proceed with the plan"
         signals = detector.detect(text)
         # Should be deduplicated - no overlapping positions
-        positions = [s.position for s in signals]
         # Check for reasonable deduplication (not too many signals)
         assert len(signals) <= 5  # Reasonable upper bound
 
