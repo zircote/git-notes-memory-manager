@@ -38,10 +38,11 @@ def main() -> None:
 
         print(json.dumps({"continue": True}))
         sys.exit(0)
-    except Exception:
-        # Any unexpected error, exit silently (non-blocking)
+    except Exception as e:
+        # Log error for debugging, but exit gracefully (non-blocking)
         import json
 
+        print(f"[memory-hook] UserPromptSubmit error: {e}", file=sys.stderr)
         print(json.dumps({"continue": True}))
         sys.exit(0)
 

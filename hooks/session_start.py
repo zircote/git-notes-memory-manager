@@ -35,8 +35,9 @@ def main() -> None:
     except ImportError:
         # Library not installed, exit silently (non-blocking)
         sys.exit(0)
-    except Exception:
-        # Any unexpected error, exit silently (non-blocking)
+    except Exception as e:
+        # Log error for debugging, but exit gracefully (non-blocking)
+        print(f"[memory-hook] SessionStart error: {e}", file=sys.stderr)
         sys.exit(0)
 
 

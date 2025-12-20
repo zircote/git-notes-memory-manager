@@ -40,13 +40,15 @@ def main() -> None:
         from git_notes_memory.hooks.session_start_handler import main as handler_main
 
         handler_main()
-    except ImportError:
-        # Library not installed, exit silently (non-blocking)
+    except ImportError as e:
+        # Library not installed - graceful degradation
         print(json.dumps({"continue": True}))
+        print(f"[memory-hook] SessionStart unavailable: {e}", file=sys.stderr)
         sys.exit(0)
-    except Exception:
-        # Any unexpected error, exit silently (non-blocking)
+    except Exception as e:
+        # Any unexpected error - fail gracefully with logging
         print(json.dumps({"continue": True}))
+        print(f"[memory-hook] SessionStart error: {e}", file=sys.stderr)
         sys.exit(0)
 
 
