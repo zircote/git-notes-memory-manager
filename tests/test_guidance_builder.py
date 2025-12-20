@@ -74,8 +74,8 @@ class TestXMLTemplateContent:
     ) -> None:
         """Test that detailed template has behavioral examples."""
         xml = guidance_builder.build_guidance("detailed")
-        # Check for example contexts showing behavior in action
-        assert "architecture discussion" in xml
+        # Check for examples showing correct vs incorrect behavior
+        assert "Correct behavior" in xml
         assert "[decision]" in xml
         assert "[learned]" in xml
         assert "[blocker]" in xml
@@ -102,37 +102,35 @@ class TestGuidanceBuilder:
     def test_build_minimal(self, guidance_builder: GuidanceBuilder) -> None:
         """Test minimal guidance generation."""
         xml = guidance_builder.build_guidance("minimal")
-        assert '<session_operating_context level="minimal">' in xml
-        assert "<active_behaviors>" in xml
-        assert "<memory_recall>" in xml
-        assert "<namespaces>" in xml
-        # Minimal should be concise
-        assert "<template>" not in xml
-        assert "<examples>" not in xml
+        assert '<session_behavior_protocol level="minimal">' in xml
+        assert "<mandatory_rules>" in xml
+        assert "REQUIRED" in xml
+        # Minimal should be concise - no detailed examples
+        assert "Correct behavior" not in xml
+        assert "Incorrect behavior" not in xml
 
     def test_build_standard(self, guidance_builder: GuidanceBuilder) -> None:
         """Test standard guidance generation."""
         xml = guidance_builder.build_guidance("standard")
-        assert '<session_operating_context level="standard">' in xml
-        assert "<active_behaviors" in xml
-        assert "<memory_recall_behaviors" in xml
-        assert "<inline_markers" in xml
-        # Standard should have behavior triggers
-        assert 'trigger="making_decision"' in xml
-        # Standard should NOT have detailed templates
-        assert "<template>" not in xml
+        assert '<session_behavior_protocol level="standard">' in xml
+        assert "<mandatory_rules>" in xml
+        assert "<marker_reference>" in xml
+        # Standard should have rules
+        assert "Rule 1" in xml
+        assert "Rule 2" in xml
+        assert "Rule 3" in xml
 
     def test_build_detailed(self, guidance_builder: GuidanceBuilder) -> None:
         """Test detailed guidance generation."""
         xml = guidance_builder.build_guidance("detailed")
-        assert '<session_operating_context level="detailed">' in xml
-        assert "<active_behaviors" in xml
-        assert "<memory_recall_behaviors" in xml
-        assert "<examples" in xml
-        # Detailed SHOULD have structured templates (with type attribute)
-        assert "<template type=" in xml
-        # Detailed should have priority markers
-        assert 'priority="critical"' in xml
+        assert '<session_behavior_protocol level="detailed">' in xml
+        assert "<mandatory_rules>" in xml
+        assert "<marker_reference>" in xml
+        # Detailed SHOULD have examples
+        assert "Correct behavior" in xml
+        assert "Incorrect behavior" in xml
+        # Detailed should have enforcement sections
+        assert "Enforcement" in xml
 
     def test_invalid_detail_level(self, guidance_builder: GuidanceBuilder) -> None:
         """Test that invalid detail level raises ValueError."""
@@ -161,9 +159,9 @@ class TestGuidanceBuilder:
         for level in ["minimal", "standard", "detailed"]:
             xml = guidance_builder.build_guidance(level)
             # All levels should have core capture markers
-            assert "[decision]" in xml or "[remember" in xml
-            assert "[learned]" in xml or "[remember" in xml
-            assert "[blocker]" in xml or "blocker" in xml
+            assert "[decision]" in xml
+            assert "[learned]" in xml
+            assert "[blocker]" in xml
 
 
 class TestGuidanceBuilderXMLStructure:
@@ -174,39 +172,34 @@ class TestGuidanceBuilderXMLStructure:
         xml = guidance_builder.build_guidance("minimal")
         # Should parse without error (S314 safe: parsing our own generated XML)
         root = ET.fromstring(xml)  # noqa: S314
-        assert root.tag == "session_operating_context"
+        assert root.tag == "session_behavior_protocol"
         assert root.attrib.get("level") == "minimal"
 
     def test_standard_is_valid_xml(self, guidance_builder: GuidanceBuilder) -> None:
         """Test that standard output is valid XML."""
         xml = guidance_builder.build_guidance("standard")
         root = ET.fromstring(xml)  # noqa: S314
-        assert root.tag == "session_operating_context"
+        assert root.tag == "session_behavior_protocol"
         assert root.attrib.get("level") == "standard"
 
     def test_detailed_is_valid_xml(self, guidance_builder: GuidanceBuilder) -> None:
         """Test that detailed output is valid XML."""
         xml = guidance_builder.build_guidance("detailed")
         root = ET.fromstring(xml)  # noqa: S314
-        assert root.tag == "session_operating_context"
+        assert root.tag == "session_behavior_protocol"
         assert root.attrib.get("level") == "detailed"
 
-    def test_detailed_has_behavior_triggers(
+    def test_detailed_has_mandatory_rules(
         self, guidance_builder: GuidanceBuilder
     ) -> None:
-        """Test that detailed guidance has all behavior triggers."""
+        """Test that detailed guidance has mandatory_rules element."""
         xml = guidance_builder.build_guidance("detailed")
         root = ET.fromstring(xml)  # noqa: S314
-        behaviors = root.find("active_behaviors")
-        assert behaviors is not None
-        triggers = {b.attrib.get("trigger") for b in behaviors.findall("behavior")}
-        expected = {
-            "making_decision",
-            "discovering_insight",
-            "hitting_blocker",
-            "completing_milestone",
-        }
-        assert triggers == expected
+        rules = root.find("mandatory_rules")
+        assert rules is not None
+        # Rules should contain the markdown content
+        assert rules.text is not None
+        assert "MUST" in rules.text
 
 
 class TestGuidanceBuilderTokenEstimation:
@@ -258,7 +251,7 @@ class TestGetGuidanceBuilder:
         """Test that factory-created builder produces valid output."""
         builder = get_guidance_builder()
         xml = builder.build_guidance("minimal")
-        assert "<session_operating_context" in xml
+        assert "<session_behavior_protocol" in xml
 
 
 # =============================================================================
@@ -338,11 +331,9 @@ class TestEdgeCases:
     def test_special_chars_in_templates_escaped(
         self, guidance_builder: GuidanceBuilder
     ) -> None:
-        """Test that special XML chars in templates are escaped."""
+        """Test that templates with special chars are still valid XML via CDATA."""
         xml = guidance_builder.build_guidance("detailed")
-        # Templates contain ** which should be preserved
-        # But < and > should be escaped to &lt; and &gt;
-        # The template text contains brackets that get escaped
+        # Templates contain markdown with special chars wrapped in CDATA
         # Let's verify the XML is still valid (S314 safe: parsing our own generated XML)
         root = ET.fromstring(xml)  # noqa: S314
         assert root is not None
