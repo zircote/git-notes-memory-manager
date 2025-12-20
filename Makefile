@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test test-cov lint typecheck security coverage format format-check clean build quality bump bump-patch bump-minor bump-major bump-dry version
+.PHONY: help install install-dev test test-cov lint typecheck security coverage format format-check clean build quality bump bump-patch bump-minor bump-major bump-dry version release release-patch release-minor release-major publish
 
 .DEFAULT_GOAL := help
 
@@ -21,8 +21,11 @@ help:  ## Show this help message
 	@echo 'Build:'
 	@grep -E '^(build|clean):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 	@echo ''
+	@echo 'Version:'
+	@grep -E '^(version|bump|bump-patch|bump-minor|bump-major|bump-dry):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@echo ''
 	@echo 'Release:'
-	@grep -E '^(bump|bump-patch|bump-minor|bump-major|bump-dry|version):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^(release|release-patch|release-minor|release-major|publish):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 	@echo ''
 
 install:  ## Install package
@@ -123,3 +126,63 @@ bump-dry:  ## Show what would be bumped (dry run)
 	@echo "Dry run - showing what would change for patch bump:"
 	@echo ""
 	uv run bump-my-version bump patch --dry-run --verbose --allow-dirty
+
+# =============================================================================
+# Release Workflow
+# =============================================================================
+
+release: release-patch  ## Release (alias for release-patch)
+
+release-patch:  ## Release patch version (quality → bump → push → build)
+	@echo "Starting patch release..."
+	@echo ""
+	@$(MAKE) quality
+	@echo ""
+	@echo "Quality checks passed. Bumping version..."
+	uv run bump-my-version bump patch
+	@echo ""
+	@echo "Pushing to remote..."
+	git push && git push --tags
+	@echo ""
+	@echo "Building package..."
+	@$(MAKE) build
+	@echo ""
+	@echo "✓ Release complete! Version: $$(uv run bump-my-version show current_version)"
+
+release-minor:  ## Release minor version (quality → bump → push → build)
+	@echo "Starting minor release..."
+	@echo ""
+	@$(MAKE) quality
+	@echo ""
+	@echo "Quality checks passed. Bumping version..."
+	uv run bump-my-version bump minor
+	@echo ""
+	@echo "Pushing to remote..."
+	git push && git push --tags
+	@echo ""
+	@echo "Building package..."
+	@$(MAKE) build
+	@echo ""
+	@echo "✓ Release complete! Version: $$(uv run bump-my-version show current_version)"
+
+release-major:  ## Release major version (quality → bump → push → build)
+	@echo "Starting major release..."
+	@echo ""
+	@$(MAKE) quality
+	@echo ""
+	@echo "Quality checks passed. Bumping version..."
+	uv run bump-my-version bump major
+	@echo ""
+	@echo "Pushing to remote..."
+	git push && git push --tags
+	@echo ""
+	@echo "Building package..."
+	@$(MAKE) build
+	@echo ""
+	@echo "✓ Release complete! Version: $$(uv run bump-my-version show current_version)"
+
+publish:  ## Publish to PyPI (requires PYPI_TOKEN)
+	@echo "Publishing to PyPI..."
+	uv run twine upload dist/*
+	@echo ""
+	@echo "✓ Published to PyPI"
