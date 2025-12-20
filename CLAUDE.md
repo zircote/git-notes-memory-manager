@@ -35,6 +35,13 @@ make format     # Auto-fix formatting
 make lint       # Ruff linting
 make typecheck  # mypy strict mode
 make security   # bandit security scan
+
+# Version management
+make version    # Show current version
+make bump       # Bump patch version (0.3.1 → 0.3.2)
+make bump-minor # Bump minor version (0.3.1 → 0.4.0)
+make bump-major # Bump major version (0.3.1 → 1.0.0)
+make bump-dry   # Preview version bump changes
 ```
 
 ## Architecture
@@ -101,6 +108,25 @@ tags: [database, architecture]
 | `models.py` | Frozen dataclasses for all domain objects |
 | `sync.py` | Index synchronization with git notes |
 
+### Hooks Subsystem
+
+The `hooks/` module provides Claude Code hook handlers:
+
+| Handler | Hook Event | Purpose |
+|---------|------------|---------|
+| `session_start_handler.py` | SessionStart | Injects memory context and response guidance |
+| `user_prompt_handler.py` | UserPromptSubmit | Detects capture markers (`[decision]`, `[learned]`, etc.) |
+| `post_tool_use_handler.py` | PostToolUse | Surfaces related memories after file operations |
+| `pre_compact_handler.py` | PreCompact | Auto-captures content before context compaction |
+| `stop_handler.py` | Stop | Session analysis and index sync |
+
+Supporting modules:
+- `context_builder.py` - Builds XML memory context with token budgeting
+- `guidance_builder.py` - Loads response guidance templates from `templates/`
+- `signal_detector.py` - Pattern matching for capture markers
+- `config_loader.py` - Environment-based hook configuration
+- `namespace_styles.py` - ANSI colors and emojis for namespace display
+
 ### Models
 
 All models are immutable (`@dataclass(frozen=True)`):
@@ -111,9 +137,9 @@ All models are immutable (`@dataclass(frozen=True)`):
 
 ### Claude Code Plugin Integration
 
-The `.claude-plugin/` directory defines:
-- Commands: `/capture`, `/recall`, `/search`, `/sync`, `/status`
-- Hooks: `Stop` (sync index on session end)
+The `plugin.json` and hooks in `hooks/` directory define the plugin:
+- Commands: `/memory:capture`, `/memory:recall`, `/memory:search`, `/memory:sync`, `/memory:status`
+- Hooks: SessionStart, UserPromptSubmit, PostToolUse, PreCompact, Stop
 - Skills: `memory-recall` for semantic search
 
 ## Code Conventions
@@ -140,8 +166,24 @@ def capture_service(tmp_path, monkeypatch):
 
 ## Environment Variables
 
+### Core Configuration
+
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `MEMORY_PLUGIN_DATA_DIR` | Data/index directory | `~/.local/share/memory-plugin/` |
 | `MEMORY_PLUGIN_GIT_NAMESPACE` | Git notes ref prefix | `refs/notes/mem` |
 | `MEMORY_PLUGIN_EMBEDDING_MODEL` | Embedding model | `all-MiniLM-L6-v2` |
+
+### Hook Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `HOOK_ENABLED` | Master switch for all hooks | `true` |
+| `HOOK_SESSION_START_ENABLED` | Enable SessionStart context injection | `true` |
+| `HOOK_USER_PROMPT_ENABLED` | Enable capture marker detection | `false` |
+| `HOOK_POST_TOOL_USE_ENABLED` | Enable file-contextual memory injection | `true` |
+| `HOOK_PRE_COMPACT_ENABLED` | Enable auto-capture before compaction | `true` |
+| `HOOK_STOP_ENABLED` | Enable Stop hook processing | `true` |
+| `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
+| `HOOK_SESSION_START_INCLUDE_GUIDANCE` | Include response guidance templates | `true` |
+| `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance level: minimal/standard/detailed | `standard` |
