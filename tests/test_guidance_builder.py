@@ -74,9 +74,9 @@ class TestTemplateContent:
         xml = guidance_builder.build_guidance("detailed")
         # Check for examples showing correct vs incorrect behavior
         assert "Correct behavior" in xml
-        assert "[decision]" in xml
-        assert "[learned]" in xml
-        assert "[blocker]" in xml
+        assert "decision]" in xml  # Marker with emoji prefix
+        assert "learned]" in xml
+        assert "blocker]" in xml
 
     def test_templates_have_namespaces(self, guidance_builder: GuidanceBuilder) -> None:
         """Test that templates list valid namespaces."""
@@ -153,13 +153,13 @@ class TestGuidanceBuilder:
     def test_contains_inline_marker_syntax(
         self, guidance_builder: GuidanceBuilder
     ) -> None:
-        """Test that all levels contain inline marker syntax."""
+        """Test that all levels contain inline marker syntax with emojis."""
         for level in ["minimal", "standard", "detailed"]:
             xml = guidance_builder.build_guidance(level)
-            # All levels should have core capture markers
-            assert "[decision]" in xml
-            assert "[learned]" in xml
-            assert "[blocker]" in xml
+            # All levels should have core capture markers (with emoji prefixes)
+            assert "decision]" in xml
+            assert "learned]" in xml
+            assert "blocker]" in xml
 
 
 class TestGuidanceBuilderStructure:
