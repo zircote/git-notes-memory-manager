@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test test-cov lint typecheck security coverage format format-check clean build quality
+.PHONY: help install install-dev test test-cov lint typecheck security coverage format format-check clean build quality bump bump-patch bump-minor bump-major bump-dry version
 
 .DEFAULT_GOAL := help
 
@@ -20,6 +20,9 @@ help:  ## Show this help message
 	@echo ''
 	@echo 'Build:'
 	@grep -E '^(build|clean):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@echo ''
+	@echo 'Release:'
+	@grep -E '^(bump|bump-patch|bump-minor|bump-major|bump-dry|version):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 	@echo ''
 
 install:  ## Install package
@@ -85,3 +88,38 @@ build:  ## Build distribution packages
 clean:  ## Clean build artifacts
 	rm -rf build/ dist/ *.egg-info .pytest_cache .mypy_cache .ruff_cache htmlcov/ .coverage
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+
+# =============================================================================
+# Release / Version Bumping
+# =============================================================================
+
+version:  ## Show current version
+	@uv run bump-my-version show current_version
+
+bump: bump-patch  ## Bump version (alias for bump-patch)
+
+bump-patch:  ## Bump patch version (0.3.0 → 0.3.1)
+	@echo "Bumping patch version..."
+	uv run bump-my-version bump patch
+	@echo ""
+	@echo "✓ Version bumped. Don't forget to push with tags:"
+	@echo "  git push && git push --tags"
+
+bump-minor:  ## Bump minor version (0.3.0 → 0.4.0)
+	@echo "Bumping minor version..."
+	uv run bump-my-version bump minor
+	@echo ""
+	@echo "✓ Version bumped. Don't forget to push with tags:"
+	@echo "  git push && git push --tags"
+
+bump-major:  ## Bump major version (0.3.0 → 1.0.0)
+	@echo "Bumping major version..."
+	uv run bump-my-version bump major
+	@echo ""
+	@echo "✓ Version bumped. Don't forget to push with tags:"
+	@echo "  git push && git push --tags"
+
+bump-dry:  ## Show what would be bumped (dry run)
+	@echo "Dry run - showing what would change for patch bump:"
+	@echo ""
+	uv run bump-my-version bump patch --dry-run --verbose --allow-dirty

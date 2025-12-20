@@ -40,6 +40,7 @@ dev = [
     "pip-audit>=2.9.0",
     "build>=1.0.0",
     "types-PyYAML>=6.0.0",
+    "bump-my-version>=1.1.0",
 ]
 
 [project.urls]
@@ -63,6 +64,7 @@ dev = [
     "pip-audit>=2.9.0",
     "build>=1.0.0",
     "types-PyYAML>=6.0.0",
+    "bump-my-version>=1.1.0",
 ]
 
 # Hatch build configuration
@@ -174,3 +176,30 @@ fail_under = 80
 [tool.bandit]
 exclude_dirs = ["tests", ".venv", "venv"]
 skips = ["B101"]  # assert_used OK in tests
+
+# bump-my-version - Version Management
+[tool.bumpversion]
+current_version = "0.3.0"
+commit = true
+tag = true
+tag_name = "v{new_version}"
+tag_message = "Release v{new_version}"
+message = "chore(release): bump version {current_version} → {new_version}"
+allow_dirty = false
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+
+[[tool.bumpversion.files]]
+filename = "src/git_notes_memory/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "plugin.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = ".claude-plugin/marketplace.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
