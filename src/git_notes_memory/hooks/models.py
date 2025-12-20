@@ -12,12 +12,17 @@ All models are frozen dataclasses for immutability.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from git_notes_memory.models import Memory
+
+
+def _utc_now() -> datetime:
+    """Return current UTC time as timezone-aware datetime."""
+    return datetime.now(timezone.utc)
 
 __all__ = [
     "SignalType",
@@ -305,7 +310,7 @@ class MemoryContext:
     semantic_context: SemanticContext
     commands: tuple[str, ...] = field(default_factory=tuple)
     spec_id: str | None = None
-    timestamp: datetime = field(default_factory=datetime.now)
+    timestamp: datetime = field(default_factory=_utc_now)
 
     @property
     def total_memories(self) -> int:
