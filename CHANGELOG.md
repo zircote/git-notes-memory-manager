@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2025-12-19
+
+### Added
+- **Shorthand Marker Syntax**: New concise capture markers like `[d]` for decisions, `[l]` for learnings
+- **Emoji-Styled Capture Markers**: Visual indicators for each namespace (e.g., `🎯 [decision]`, `💡 [learned]`)
+- **Namespace Styling**: ANSI colors and emojis for namespace display in terminal output
+- **Bump-my-version Integration**: Automated version management with `make bump`, `make bump-minor`, `make bump-major`
+
+### Changed
+- Capture marker output now formatted on single line for cleaner display
+- Updated guidance templates with shorthand marker syntax documentation
+
+### Fixed
+- Duplicate marketplace.json removed from repository root
+
 ## [0.3.0] - 2025-12-19
 
 ### Added
@@ -152,6 +167,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Developer Guide with full API reference
 - README with quick start
 
-[unreleased]: https://github.com/zircote/git-notes-memory/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/zircote/git-notes-memory/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/zircote/git-notes-memory/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/zircote/git-notes-memory/compare/v0.1.0...v0.3.0
 [0.1.0]: https://github.com/zircote/git-notes-memory/releases/tag/v0.1.0
