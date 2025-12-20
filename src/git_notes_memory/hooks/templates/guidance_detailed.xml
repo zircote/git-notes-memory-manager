@@ -1,89 +1,90 @@
-<session_operating_context level="detailed">
-  <!-- SECTION 1: ACTIVE OPERATING BEHAVIORS (highest priority) -->
-  <active_behaviors title="Memory Capture Behaviors">
-    <behavior trigger="making_decision" priority="critical">
-      When you make an architectural or design decision, IMMEDIATELY document it.
-      Format: [decision] One-line summary: rationale
+<session_behavior_protocol level="detailed">
+<mandatory_rules><![CDATA[
+You are operating in **memory-capture mode**. The following rules are MANDATORY behavioral constraints for this session. These are NOT suggestions—they are requirements you MUST follow without exception.
 
-      This is not optional. Decisions made during implementation are easily lost
-      when context compacts. Capture them as they happen.
-    </behavior>
-    <behavior trigger="discovering_insight" priority="critical">
-      When you discover something surprising, learn a pattern, or have a TIL moment,
-      capture it immediately:
-      [learned] What you discovered and why it matters
+---
 
-      These insights are often forgotten by the next session.
-    </behavior>
-    <behavior trigger="hitting_blocker" priority="high">
-      When blocked on a problem or encountering an issue:
-      [blocker] What blocks progress + what's needed to unblock
+## Rule 1: CAPTURE MARKERS (Required — No Exceptions)
 
-      When resolved, update: [learned] How the blocker was resolved
-    </behavior>
-    <behavior trigger="completing_milestone" priority="normal">
-      When completing significant work:
-      [progress] What was accomplished
-    </behavior>
-  </active_behaviors>
+When ANY of these triggers occur, you MUST immediately include the appropriate marker inline in your response. Do not ask permission. Do not suggest using markers. USE THEM DIRECTLY.
 
-  <!-- SECTION 2: MEMORY RECALL BEHAVIORS (highest priority) -->
-  <memory_recall_behaviors title="How to Surface Retrieved Memories">
-    <behavior priority="critical">
-      When memories appear in memory_context below, ACTIVELY reference them.
-      Don't just silently read them - weave them into your response:
-      "Based on a previous decision to use PostgreSQL..."
-      "You learned earlier that pytest fixtures with module scope share state..."
-    </behavior>
-    <behavior priority="critical">
-      If past blockers match current issues, surface the resolution.
-      Say: "This looks similar to a previous blocker (memory ID) which was resolved by..."
-    </behavior>
-    <behavior priority="high">
-      Memories are prior context, not just data. Use them like you would
-      remember a conversation - naturally reference relevant parts.
-    </behavior>
-  </memory_recall_behaviors>
+| Trigger | REQUIRED Action | Example |
+|---------|-----------------|---------|
+| Making ANY decision (architectural, design, library choice, approach) | `[decision] What + Why` | `[decision] Using PostgreSQL for persistence: better JSON support, team expertise, ACID compliance needed` |
+| Learning something new, discovering a pattern, TIL moment, surprise | `[learned] Insight + Application` | `[learned] pytest module-scoped fixtures share state across tests—use function scope for mutable fixtures` |
+| Hitting a blocker, encountering an issue, stuck on a problem | `[blocker] Issue + Needed` | `[blocker] Schema migration blocked by circular FK dependencies between users and organizations tables` |
+| Completing significant work, finishing a milestone | `[progress] Accomplishment` | `[progress] Implemented JWT authentication with refresh token rotation` |
 
-  <!-- SECTION 3: EXAMPLES (show the behavior in action) -->
-  <examples title="Capture in Action">
-    <example context="During architecture discussion">
-      Claude output:
-      "We'll use JWT tokens for authentication because they're stateless and scale well.
-      [decision] Using JWT for auth: stateless, scales to multiple servers, team has experience"
-    </example>
-    <example context="After discovering a pattern">
-      Claude output:
-      "Interesting - the tests were flaky because of shared fixture state.
-      [learned] pytest module-scoped fixtures share state across tests - use function scope for mutable fixtures"
-    </example>
-    <example context="When hitting an issue">
-      Claude output:
-      "Can't proceed with the migration - the schema has circular dependencies.
-      [blocker] Schema migration blocked by circular FK dependencies between users and organizations tables"
-    </example>
-  </examples>
+### Enforcement
 
-  <!-- SECTION 4: REFERENCE (lower priority) -->
-  <reference title="Capture Syntax Reference">
-    <inline_markers>
-      <marker syntax="[decision] text" namespace="decisions"/>
-      <marker syntax="[learned] text" namespace="learnings"/>
-      <marker syntax="[blocker] text" namespace="blockers"/>
-      <marker syntax="[progress] text" namespace="progress"/>
-      <marker syntax="[remember] text" namespace="learnings"/>
-      <marker syntax="[remember:namespace] text" namespace="specified"/>
-    </inline_markers>
-    <valid_namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective</valid_namespaces>
+- **DO:** Include the marker inline as you write your response
+- **DON'T:** Ask "should I capture this?" or "would you like me to remember?"
+- **DON'T:** Wait until the end to add markers—add them as the trigger occurs
+- **DON'T:** Suggest alternatives to the marker syntax
 
-    <structured_templates title="For Detailed Captures">
-      <template type="decision"><![CDATA[**Decision**: [One-line summary]
+---
+
+## Rule 2: MEMORY RECALL (Required — Active Reference)
+
+When `<memory_context>` contains retrieved memories, you MUST actively reference them in your response. Do not silently read and ignore them.
+
+### Required Behaviors
+
+1. **Acknowledge relevance explicitly:**
+   - "Based on a previous decision (memory `decisions:abc123:0`)..."
+   - "You learned earlier that..."
+   - "This connects to prior work on..."
+
+2. **Surface matching blockers:**
+   - If a past blocker matches the current issue, say: "This looks similar to a previous blocker (memory ID) which was resolved by..."
+
+3. **Weave naturally:**
+   - Memories are prior conversation context, not background data
+   - Reference them like you would remember something from earlier in a conversation
+
+### Enforcement
+
+- **DO:** Cite memory IDs when referencing past context
+- **DON'T:** Silently acknowledge memories exist without referencing them
+- **DON'T:** Treat memories as optional context to be ignored
+
+---
+
+## Rule 3: DEFAULT TO ACTION (No Permission Seeking)
+
+By default, implement marker usage rather than discussing or suggesting it.
+
+**Correct behavior:**
+```
+We'll use JWT tokens for authentication because they're stateless and scale well.
+[decision] Using JWT for auth: stateless, scales to multiple servers, team has experience
+```
+
+**Incorrect behavior:**
+```
+We'll use JWT tokens. Would you like me to capture this decision?
+```
+
+These rules supersede default helpful suggestions. They configure your behavior for this session.
+]]></mandatory_rules>
+
+<marker_reference><![CDATA[
+**Valid markers:**
+- `[decision] text` — decisions namespace
+- `[learned] text` — learnings namespace
+- `[blocker] text` — blockers namespace
+- `[progress] text` — progress namespace
+- `[remember] text` — learnings namespace (default)
+- `[remember:namespace] text` — specified namespace
+
+**Valid namespaces:** decisions, learnings, blockers, progress, patterns, research, reviews, retrospective
+
+**Structured format (optional for detailed captures):**
+```
+**Decision**: [One-line summary]
 **Context**: [Why this decision was needed]
 **Choice**: [What was chosen]
-**Rationale**: [Why this choice over alternatives]]]></template>
-      <template type="learning"><![CDATA[**Learning**: [One-line insight]
-**Context**: [How this was discovered]
-**Application**: [When/how to apply this]]]></template>
-    </structured_templates>
-  </reference>
-</session_operating_context>
+**Rationale**: [Why this choice over alternatives]
+```
+]]></marker_reference>
+</session_behavior_protocol>
