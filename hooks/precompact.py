@@ -17,12 +17,13 @@ Environment Variables:
     HOOK_PRE_COMPACT_MAX_CAPTURES: Max captures (default: 3)
 """
 
-from __future__ import annotations
+# Bootstrap: Ensure venv exists and re-exec if needed (MUST be first import)
+import bootstrap  # noqa: F401, I001
 
 import sys
 from pathlib import Path
 
-# Bootstrap: Add plugin's src directory to sys.path for self-contained execution
+# Add plugin's src directory to sys.path for self-contained execution
 _plugin_root = Path(__file__).resolve().parent.parent
 _src_path = _plugin_root / "src"
 if _src_path.exists() and str(_src_path) not in sys.path:
