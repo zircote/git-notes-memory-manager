@@ -8,10 +8,10 @@ When you make a decision, learn something, hit a blocker, or complete work, you 
 
 | Trigger | REQUIRED Action |
 |---------|-----------------|
-| Making any architectural/design decision | Write: `[⚖️ decision] What you decided and why` |
-| Learning something, discovering a pattern, TIL moment | Write: `[💡 learned] The insight and why it matters` |
-| Hitting a blocker or encountering an issue | Write: `[🛑 blocker] What blocks progress and what's needed` |
-| Completing significant work | Write: `[🚀 progress] What was accomplished` |
+| ⚖️ Making any architectural/design decision | Write: `[decision] What you decided and why` |
+| 💡 Learning something, discovering a pattern, TIL moment | Write: `[learned] The insight and why it matters` |
+| 🛑 Hitting a blocker or encountering an issue | Write: `[blocker] What blocks progress and what's needed` |
+| 🚀 Completing significant work | Write: `[progress] What was accomplished` |
 
 **Do not suggest using markers. USE THEM DIRECTLY when the trigger occurs.**
 
@@ -35,7 +35,7 @@ These rules supersede default helpful suggestions. They configure your behavior 
 ]]></mandatory_rules>
 
 <marker_reference><![CDATA[
-**Valid markers:** `[⚖️ decision]`, `[💡 learned]`, `[🛑 blocker]`, `[🚀 progress]`, `[📝 remember]`, `[📝 remember:namespace]`
+**Valid markers:** ⚖️ `[decision]`, 💡 `[learned]`, 🛑 `[blocker]`, 🚀 `[progress]`, 📝 `[remember]`, 📝 `[remember:namespace]`
 
 **Valid namespaces:** decisions, learnings, blockers, progress, patterns, research, reviews, retrospective
 ]]></marker_reference>

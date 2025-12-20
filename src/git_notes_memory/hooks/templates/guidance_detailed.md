@@ -10,10 +10,10 @@ When ANY of these triggers occur, you MUST immediately include the appropriate m
 
 | Trigger | REQUIRED Action | Example |
 |---------|-----------------|---------|
-| Making ANY decision (architectural, design, library choice, approach) | `[⚖️ decision] What + Why` | `[⚖️ decision] Using PostgreSQL for persistence: better JSON support, team expertise, ACID compliance needed` |
-| Learning something new, discovering a pattern, TIL moment, surprise | `[💡 learned] Insight + Application` | `[💡 learned] pytest module-scoped fixtures share state across tests—use function scope for mutable fixtures` |
-| Hitting a blocker, encountering an issue, stuck on a problem | `[🛑 blocker] Issue + Needed` | `[🛑 blocker] Schema migration blocked by circular FK dependencies between users and organizations tables` |
-| Completing significant work, finishing a milestone | `[🚀 progress] Accomplishment` | `[🚀 progress] Implemented JWT authentication with refresh token rotation` |
+| Making ANY decision (architectural, design, library choice, approach) | ⚖️ `[decision] What + Why` | `[decision] Using PostgreSQL for persistence: better JSON support, team expertise, ACID compliance needed` |
+| Learning something new, discovering a pattern, TIL moment, surprise | 💡 `[learned] Insight + Application` | `[learned] pytest module-scoped fixtures share state across tests—use function scope for mutable fixtures` |
+| Hitting a blocker, encountering an issue, stuck on a problem | 🛑 `[blocker] Issue + Needed` | `[blocker] Schema migration blocked by circular FK dependencies between users and organizations tables` |
+| Completing significant work, finishing a milestone | 🚀 `[progress] Accomplishment` | `[progress] Implemented JWT authentication with refresh token rotation` |
 
 ### Enforcement
 
@@ -57,7 +57,7 @@ By default, implement marker usage rather than discussing or suggesting it.
 **Correct behavior:**
 ```
 We'll use JWT tokens for authentication because they're stateless and scale well.
-[⚖️ decision] Using JWT for auth: stateless, scales to multiple servers, team has experience
+[decision] Using JWT for auth: stateless, scales to multiple servers, team has experience
 ```
 
 **Incorrect behavior:**
@@ -71,21 +71,21 @@ These rules supersede default helpful suggestions. They configure your behavior 
 <marker_reference><![CDATA[
 **Valid markers:**
 
-- `[⚖️ decision] text` — decisions namespace (trust, authority, choices)
-- `[💡 learned] text` — learnings namespace (growth, insight, knowledge)
-- `[🛑 blocker] text` — blockers namespace (danger, urgency, stop)
-- `[🚀 progress] text` — progress namespace (movement, achievement)
-- `[📝 remember] text` — learnings namespace (default)
-- `[📝 remember:namespace] text` — specified namespace
+- ⚖️ `[decision] text` — decisions namespace (trust, authority, choices)
+- 💡 `[learned] text` — learnings namespace (growth, insight, knowledge)
+- 🛑 `[blocker] text` — blockers namespace (danger, urgency, stop)
+- 🚀 `[progress] text` — progress namespace (movement, achievement)
+- 📝 `[remember] text` — learnings namespace (default)
+- 📝 `[remember:namespace] text` — specified namespace
 
 **Additional namespaces:**
 
-- `[🔍 research] text` — research namespace (curiosity, discovery)
-- `[🧩 patterns] text` — patterns namespace (abstraction, wisdom)
-- `[👁️ reviews] text` — reviews namespace (evaluation, feedback)
-- `[🔄 retrospective] text` — retrospective namespace (reflection)
-- `[🌱 inception] text` — inception namespace (beginnings, scope)
-- `[💬 elicitation] text` — elicitation namespace (requirements, dialogue)
+- 🔍 `[research] text` — research namespace (curiosity, discovery)
+- 🧩 `[pattern] text` — patterns namespace (abstraction, wisdom)
+- 👁️ `[review] text` — reviews namespace (evaluation, feedback)
+- 🔄 `[retro] text` — retrospective namespace (reflection)
+- 🌱 `[inception] text` — inception namespace (beginnings, scope)
+- 💬 `[requirement] text` — elicitation namespace (requirements, dialogue)
 
 **Structured format (optional for detailed captures):**
 
