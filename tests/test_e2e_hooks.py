@@ -13,9 +13,11 @@ Hooks tested:
 
 from __future__ import annotations
 
+import contextlib
 import json
 import subprocess
 import sys
+from datetime import UTC
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -433,11 +435,13 @@ class TestSessionStartHookExecution:
         if not hook_script.exists():
             pytest.skip("Hook script not found")
 
-        input_data = json.dumps({
-            "cwd": str(tmp_path),
-            "source": "startup",
-            "session_id": "test-session-123",
-        })
+        input_data = json.dumps(
+            {
+                "cwd": str(tmp_path),
+                "source": "startup",
+                "session_id": "test-session-123",
+            }
+        )
 
         # Set up environment to avoid loading real memories
         env = os.environ.copy()
@@ -473,11 +477,13 @@ class TestSessionStartHookExecution:
         if not hook_script.exists():
             return
 
-        input_data = json.dumps({
-            "source": "startup",
-            "session_id": "test-session-123",
-            # Missing "cwd"
-        })
+        input_data = json.dumps(
+            {
+                "source": "startup",
+                "session_id": "test-session-123",
+                # Missing "cwd"
+            }
+        )
 
         env = os.environ.copy()
         env["HOOK_DEBUG"] = "false"
@@ -517,7 +523,7 @@ class TestSessionStartHookExecution:
         This test specifically validates that timezone-aware and timezone-naive
         datetimes are handled correctly to prevent TypeError.
         """
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         from git_notes_memory.hooks.context_builder import ContextBuilder
         from git_notes_memory.models import Memory
@@ -529,7 +535,7 @@ class TestSessionStartHookExecution:
             namespace="decisions",
             summary="Old decision",
             content="Made 10 days ago",
-            timestamp=datetime.now(timezone.utc) - timedelta(days=10),
+            timestamp=datetime.now(UTC) - timedelta(days=10),
             status="active",
         )
         recent_memory = Memory(
@@ -538,7 +544,7 @@ class TestSessionStartHookExecution:
             namespace="decisions",
             summary="Recent decision",
             content="Made today",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             status="active",
         )
 
@@ -546,10 +552,8 @@ class TestSessionStartHookExecution:
         from unittest.mock import MagicMock
 
         mock_recall = MagicMock()
-        mock_recall.get_by_namespace.side_effect = (
-            lambda ns, spec=None, limit=None: (
-                [old_memory, recent_memory] if ns == "decisions" else []
-            )
+        mock_recall.get_by_namespace.side_effect = lambda ns, spec=None, limit=None: (  # noqa: ARG005
+            [old_memory, recent_memory] if ns == "decisions" else []
         )
         mock_recall.search.return_value = []
 
@@ -566,16 +570,14 @@ class TestSessionStartHookExecution:
         assert len(result.recent_decisions) == 1
         assert result.recent_decisions[0].id == "decisions:new123:0"
 
-    def test_context_builder_with_offset_naive_memories(
-        self, tmp_path: Path
-    ) -> None:
+    def test_context_builder_with_offset_naive_memories(self, tmp_path: Path) -> None:
         """Test ContextBuilder handles offset-naive timestamps by conversion.
 
         Edge case: if a memory somehow has offset-naive timestamp, the builder
         should either handle it gracefully or the test should document the
         expected behavior.
         """
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         from git_notes_memory.hooks.context_builder import ContextBuilder
         from git_notes_memory.models import Memory
@@ -587,7 +589,7 @@ class TestSessionStartHookExecution:
             namespace="decisions",
             summary="Test decision",
             content="Test content",
-            timestamp=datetime.now(timezone.utc) - timedelta(days=1),
+            timestamp=datetime.now(UTC) - timedelta(days=1),
             status="active",
         )
 
@@ -595,7 +597,7 @@ class TestSessionStartHookExecution:
 
         mock_recall = MagicMock()
         mock_recall.get_by_namespace.side_effect = (
-            lambda ns, spec=None, limit=None: [memory] if ns == "decisions" else []
+            lambda ns, spec=None, limit=None: [memory] if ns == "decisions" else []  # noqa: ARG005
         )
         mock_recall.search.return_value = []
 
@@ -622,11 +624,13 @@ class TestSessionStartHookExecution:
         from unittest.mock import patch
 
         # Prepare test input
-        input_data = json.dumps({
-            "cwd": str(tmp_path),
-            "source": "startup",
-            "session_id": "integration-test-123",
-        })
+        input_data = json.dumps(
+            {
+                "cwd": str(tmp_path),
+                "source": "startup",
+                "session_id": "integration-test-123",
+            }
+        )
 
         # Mock stdin and capture stdout
         mock_stdin = io.StringIO(input_data)
@@ -635,20 +639,21 @@ class TestSessionStartHookExecution:
         with (
             patch("sys.stdin", mock_stdin),
             patch("sys.stdout", mock_stdout),
-            patch.dict(os.environ, {
-                "MEMORY_PLUGIN_DATA_DIR": str(tmp_path),
-                "HOOK_ENABLED": "true",
-                "HOOK_SESSION_START_ENABLED": "true",
-                "HOOK_DEBUG": "false",
-            }),
+            patch.dict(
+                os.environ,
+                {
+                    "MEMORY_PLUGIN_DATA_DIR": str(tmp_path),
+                    "HOOK_ENABLED": "true",
+                    "HOOK_SESSION_START_ENABLED": "true",
+                    "HOOK_DEBUG": "false",
+                },
+            ),
         ):
             from git_notes_memory.hooks.session_start_handler import main
 
-            # Run should not raise exceptions
-            try:
+            # Run should not raise exceptions (main() calls sys.exit(0))
+            with contextlib.suppress(SystemExit):
                 main()
-            except SystemExit:
-                pass  # main() calls sys.exit(0)
 
         # Verify output is valid JSON
         output = mock_stdout.getvalue().strip()

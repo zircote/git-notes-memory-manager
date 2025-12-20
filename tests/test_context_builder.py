@@ -14,7 +14,7 @@ This module tests all aspects of the ContextBuilder, including:
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
@@ -53,7 +53,7 @@ def mock_memory() -> Memory:
         namespace="decisions",
         summary="Use PostgreSQL for persistence",
         content="We decided to use PostgreSQL because of ACID compliance.",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         repo_path="/path/to/repo",
         spec="test-project",
         phase="planning",
@@ -72,7 +72,7 @@ def mock_blocker_memory() -> Memory:
         namespace="blockers",
         summary="CI pipeline failing on arm64",
         content="The CI pipeline fails due to architecture incompatibility.",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         repo_path="/path/to/repo",
         spec="test-project",
         phase="implementation",
@@ -91,7 +91,7 @@ def mock_learning_memory() -> Memory:
         namespace="learnings",
         summary="pytest-cov requires separate install",
         content="Learned that pytest-cov needs to be installed separately.",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         repo_path="/path/to/repo",
         spec="test-project",
         phase="testing",
@@ -110,7 +110,7 @@ def mock_pattern_memory() -> Memory:
         namespace="patterns",
         summary="Use factory functions for service singletons",
         content="Factory pattern ensures lazy initialization and testability.",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         repo_path="/path/to/repo",
         spec=None,  # Patterns are often cross-project
         phase=None,
@@ -129,7 +129,7 @@ def mock_progress_memory() -> Memory:
         namespace="progress",
         summary="Implement user authentication",
         content="Task to implement OAuth2 authentication flow.",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         repo_path="/path/to/repo",
         spec="test-project",
         phase="implementation",
@@ -151,7 +151,9 @@ def mock_recall_service(
     mock_service = MagicMock()
 
     # Configure get_by_namespace to return appropriate memories
-    def mock_get_by_namespace(namespace: str, spec: str | None = None, limit: int | None = None) -> list[Memory]:
+    def mock_get_by_namespace(
+        namespace: str, spec: str | None = None, limit: int | None = None
+    ) -> list[Memory]:
         if namespace == "blockers":
             return [mock_blocker_memory]
         if namespace == "decisions":
@@ -163,7 +165,9 @@ def mock_recall_service(
     mock_service.get_by_namespace.side_effect = mock_get_by_namespace
 
     # Configure search to return learning and pattern results
-    def mock_search(query: str, k: int = 10, namespace: str | None = None) -> list[MemoryResult]:
+    def mock_search(
+        query: str, k: int = 10, namespace: str | None = None
+    ) -> list[MemoryResult]:
         if namespace == "learnings":
             return [MemoryResult(memory=mock_learning_memory, distance=0.5)]
         if namespace == "patterns":
@@ -183,7 +187,7 @@ def mock_index_service() -> MagicMock:
         total_memories=25,
         by_namespace=(("decisions", 10), ("learnings", 8), ("blockers", 7)),
         by_spec=(("test-project", 20), ("other-project", 5)),
-        last_sync=datetime.now(timezone.utc),
+        last_sync=datetime.now(UTC),
         index_size_bytes=1024,
     )
     return mock_service
@@ -328,7 +332,10 @@ class TestCalculateBudget:
 
         assert budget.total == 500
         # Check that allocations don't exceed total
-        assert budget.working_memory + budget.semantic_context + budget.commands <= budget.total
+        assert (
+            budget.working_memory + budget.semantic_context + budget.commands
+            <= budget.total
+        )
 
     def test_fixed_budget_mode(self, fixed_config: HookConfig) -> None:
         """Test FIXED budget mode uses configured fixed budget."""
@@ -337,7 +344,10 @@ class TestCalculateBudget:
         budget = builder.calculate_budget("test-project")
 
         assert budget.total == 1500
-        assert budget.working_memory + budget.semantic_context + budget.commands <= budget.total
+        assert (
+            budget.working_memory + budget.semantic_context + budget.commands
+            <= budget.total
+        )
 
     def test_full_budget_mode(self, full_config: HookConfig) -> None:
         """Test FULL budget mode uses max budget."""
@@ -346,11 +356,12 @@ class TestCalculateBudget:
         budget = builder.calculate_budget("test-project")
 
         assert budget.total == 3000
-        assert budget.working_memory + budget.semantic_context + budget.commands <= budget.total
+        assert (
+            budget.working_memory + budget.semantic_context + budget.commands
+            <= budget.total
+        )
 
-    def test_adaptive_mode_simple_project(
-        self, mock_index_service: MagicMock
-    ) -> None:
+    def test_adaptive_mode_simple_project(self, mock_index_service: MagicMock) -> None:
         """Test ADAPTIVE mode with simple project (< 10 memories)."""
         mock_index_service.get_stats.return_value = IndexStats(
             total_memories=5,
@@ -369,9 +380,7 @@ class TestCalculateBudget:
         # Simple tier from default budget_tiers
         assert budget.total == 500
 
-    def test_adaptive_mode_medium_project(
-        self, mock_index_service: MagicMock
-    ) -> None:
+    def test_adaptive_mode_medium_project(self, mock_index_service: MagicMock) -> None:
         """Test ADAPTIVE mode with medium project (10-50 memories)."""
         mock_index_service.get_stats.return_value = IndexStats(
             total_memories=25,
@@ -390,9 +399,7 @@ class TestCalculateBudget:
         # Medium tier
         assert budget.total == 1000
 
-    def test_adaptive_mode_complex_project(
-        self, mock_index_service: MagicMock
-    ) -> None:
+    def test_adaptive_mode_complex_project(self, mock_index_service: MagicMock) -> None:
         """Test ADAPTIVE mode with complex project (50-200 memories)."""
         mock_index_service.get_stats.return_value = IndexStats(
             total_memories=100,
@@ -411,9 +418,7 @@ class TestCalculateBudget:
         # Complex tier
         assert budget.total == 2000
 
-    def test_adaptive_mode_full_project(
-        self, mock_index_service: MagicMock
-    ) -> None:
+    def test_adaptive_mode_full_project(self, mock_index_service: MagicMock) -> None:
         """Test ADAPTIVE mode with very large project (>= 200 memories)."""
         mock_index_service.get_stats.return_value = IndexStats(
             total_memories=500,
@@ -593,9 +598,7 @@ class TestBuildContext:
 class TestBuildWorkingMemory:
     """Tests for the _build_working_memory private method."""
 
-    def test_retrieves_blockers(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_retrieves_blockers(self, mock_recall_service: MagicMock) -> None:
         """Test that blockers are retrieved from recall service."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -612,9 +615,7 @@ class TestBuildWorkingMemory:
         assert isinstance(result, WorkingMemory)
         assert len(result.active_blockers) >= 0
 
-    def test_retrieves_decisions(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_retrieves_decisions(self, mock_recall_service: MagicMock) -> None:
         """Test that decisions are retrieved from recall service."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -629,9 +630,7 @@ class TestBuildWorkingMemory:
         )
         assert isinstance(result, WorkingMemory)
 
-    def test_retrieves_progress_actions(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_retrieves_progress_actions(self, mock_recall_service: MagicMock) -> None:
         """Test that pending actions are retrieved from progress namespace."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -646,9 +645,7 @@ class TestBuildWorkingMemory:
         )
         assert isinstance(result, WorkingMemory)
 
-    def test_filters_recent_decisions(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_filters_recent_decisions(self, mock_recall_service: MagicMock) -> None:
         """Test that only recent decisions (last 7 days) are included."""
         # Create an old decision
         old_decision = Memory(
@@ -657,7 +654,7 @@ class TestBuildWorkingMemory:
             namespace="decisions",
             summary="Old decision",
             content="This is 10 days old",
-            timestamp=datetime.now(timezone.utc) - timedelta(days=10),
+            timestamp=datetime.now(UTC) - timedelta(days=10),
             status="active",
         )
         recent_decision = Memory(
@@ -666,12 +663,14 @@ class TestBuildWorkingMemory:
             namespace="decisions",
             summary="Recent decision",
             content="This is from today",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             status="active",
         )
 
-        mock_recall_service.get_by_namespace.side_effect = lambda ns, spec=None, limit=None: (
-            [old_decision, recent_decision] if ns == "decisions" else []
+        mock_recall_service.get_by_namespace.side_effect = (
+            lambda ns, spec=None, limit=None: (  # noqa: ARG005
+                [old_decision, recent_decision] if ns == "decisions" else []
+            )
         )
 
         builder = ContextBuilder(recall_service=mock_recall_service)
@@ -696,12 +695,14 @@ class TestBuildWorkingMemory:
             namespace="progress",
             summary="Completed task",
             content="This is done",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             status="done",  # Not pending or in-progress
         )
 
-        mock_recall_service.get_by_namespace.side_effect = lambda ns, spec=None, limit=None: (
-            [mock_progress_memory, completed_action] if ns == "progress" else []
+        mock_recall_service.get_by_namespace.side_effect = (
+            lambda ns, spec=None, limit=None: (  # noqa: ARG005
+                [mock_progress_memory, completed_action] if ns == "progress" else []
+            )
         )
 
         builder = ContextBuilder(recall_service=mock_recall_service)
@@ -716,9 +717,7 @@ class TestBuildWorkingMemory:
         assert len(result.pending_actions) == 1
         assert result.pending_actions[0].status == "pending"
 
-    def test_respects_spec_id_filter(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_respects_spec_id_filter(self, mock_recall_service: MagicMock) -> None:
         """Test that spec_id is passed to recall service."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -732,9 +731,7 @@ class TestBuildWorkingMemory:
         for call in mock_recall_service.get_by_namespace.call_args_list:
             assert call.kwargs.get("spec") == "SPEC-123"
 
-    def test_budget_allocation_split(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_budget_allocation_split(self, mock_recall_service: MagicMock) -> None:
         """Test that budget is split 50/40/10 for blockers/decisions/actions."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -757,9 +754,7 @@ class TestBuildWorkingMemory:
 class TestBuildSemanticContext:
     """Tests for the _build_semantic_context private method."""
 
-    def test_searches_learnings(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_searches_learnings(self, mock_recall_service: MagicMock) -> None:
         """Test that learnings are searched semantically."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -774,9 +769,7 @@ class TestBuildSemanticContext:
         )
         assert isinstance(result, SemanticContext)
 
-    def test_searches_patterns(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_searches_patterns(self, mock_recall_service: MagicMock) -> None:
         """Test that patterns are searched semantically."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -807,9 +800,7 @@ class TestBuildSemanticContext:
         assert len(result.relevant_learnings) > 0
         assert result.relevant_learnings[0].namespace == "learnings"
 
-    def test_empty_project_skips_search(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_empty_project_skips_search(self, mock_recall_service: MagicMock) -> None:
         """Test that empty project string skips semantic search."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -823,9 +814,7 @@ class TestBuildSemanticContext:
         assert len(result.relevant_learnings) == 0
         assert len(result.related_patterns) == 0
 
-    def test_budget_split_60_40(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_budget_split_60_40(self, mock_recall_service: MagicMock) -> None:
         """Test budget is split 60% learnings, 40% patterns."""
         builder = ContextBuilder(recall_service=mock_recall_service)
 
@@ -949,9 +938,7 @@ class TestAnalyzeProjectComplexity:
 
         assert complexity == "complex"
 
-    def test_boundary_200_memories_is_full(
-        self, mock_index_service: MagicMock
-    ) -> None:
+    def test_boundary_200_memories_is_full(self, mock_index_service: MagicMock) -> None:
         """Test exactly 200 memories is 'full' (not complex)."""
         mock_index_service.get_stats.return_value = IndexStats(
             total_memories=200,
@@ -966,9 +953,7 @@ class TestAnalyzeProjectComplexity:
 
         assert complexity == "full"
 
-    def test_error_returns_medium(
-        self, mock_index_service: MagicMock
-    ) -> None:
+    def test_error_returns_medium(self, mock_index_service: MagicMock) -> None:
         """Test that errors default to 'medium' complexity."""
         mock_index_service.get_stats.side_effect = Exception("DB Error")
         builder = ContextBuilder(index_service=mock_index_service)
@@ -994,9 +979,7 @@ class TestFilterMemories:
 
         assert result == []
 
-    def test_all_memories_fit_in_budget(
-        self, mock_memory: Memory
-    ) -> None:
+    def test_all_memories_fit_in_budget(self, mock_memory: Memory) -> None:
         """Test all memories are returned when they fit in budget."""
         builder = ContextBuilder()
         memories = [mock_memory]
@@ -1019,9 +1002,7 @@ class TestFilterMemories:
         # May return 0 or 1 depending on estimated token size
         assert len(result) <= len(memories)
 
-    def test_zero_budget_returns_empty(
-        self, mock_memory: Memory
-    ) -> None:
+    def test_zero_budget_returns_empty(self, mock_memory: Memory) -> None:
         """Test zero budget returns empty list."""
         builder = ContextBuilder()
         memories = [mock_memory]
@@ -1042,9 +1023,7 @@ class TestFilterMemories:
         assert result[0] is mock_memory
         assert result[1] is mock_blocker_memory
 
-    def test_estimate_tokens_uses_summary_and_tags(
-        self, mock_memory: Memory
-    ) -> None:
+    def test_estimate_tokens_uses_summary_and_tags(self, mock_memory: Memory) -> None:
         """Test token estimation includes summary and tags."""
         builder = ContextBuilder()
 
@@ -1053,7 +1032,9 @@ class TestFilterMemories:
         # Should include summary length, overhead, and tags
         expected_chars = len(mock_memory.summary or "") + 50
         if mock_memory.tags:
-            expected_chars += sum(len(t) for t in mock_memory.tags) + len(mock_memory.tags) * 2
+            expected_chars += (
+                sum(len(t) for t in mock_memory.tags) + len(mock_memory.tags) * 2
+            )
         expected_tokens = int(expected_chars * TOKENS_PER_CHAR)
 
         assert tokens == expected_tokens
@@ -1066,7 +1047,7 @@ class TestFilterMemories:
             namespace="test",
             summary="",  # Empty summary
             content="",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
         builder = ContextBuilder()
 
@@ -1102,7 +1083,7 @@ class TestToXml:
             semantic_context=SemanticContext(),
             commands=("Use /memory:capture",),
             spec_id=None,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
         result = builder.to_xml(context)
@@ -1175,9 +1156,7 @@ class TestToXml:
         assert "memories_retrieved" in result
         assert 'memories_retrieved="0"' in result
 
-    def test_includes_working_memory_section(
-        self, mock_blocker_memory: Memory
-    ) -> None:
+    def test_includes_working_memory_section(self, mock_blocker_memory: Memory) -> None:
         """Test XML includes working_memory section with blockers."""
         builder = ContextBuilder()
 
@@ -1203,7 +1182,9 @@ class TestToXml:
             project="test-project",
             token_budget=TokenBudget.simple(500),
             working_memory=WorkingMemory(),
-            semantic_context=SemanticContext(relevant_learnings=(mock_learning_memory,)),
+            semantic_context=SemanticContext(
+                relevant_learnings=(mock_learning_memory,)
+            ),
         )
 
         result = builder.to_xml(context)
@@ -1228,9 +1209,7 @@ class TestToXml:
         assert "<commands>" in result
         assert "<hint>" in result
 
-    def test_includes_memory_elements(
-        self, mock_memory: Memory
-    ) -> None:
+    def test_includes_memory_elements(self, mock_memory: Memory) -> None:
         """Test XML includes properly formatted memory elements."""
         builder = ContextBuilder()
 
@@ -1248,9 +1227,7 @@ class TestToXml:
         assert f'namespace="{mock_memory.namespace}"' in result
         assert "<summary>" in result
 
-    def test_memory_includes_tags_when_present(
-        self, mock_memory: Memory
-    ) -> None:
+    def test_memory_includes_tags_when_present(self, mock_memory: Memory) -> None:
         """Test memory elements include tags."""
         builder = ContextBuilder()
 
@@ -1274,9 +1251,7 @@ class TestToXml:
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
 
-    def test_no_memories_in_index(
-        self, mock_index_service: MagicMock
-    ) -> None:
+    def test_no_memories_in_index(self, mock_index_service: MagicMock) -> None:
         """Test handling when no memories exist in index."""
         # Create fresh mock recall service that returns empty results
         empty_recall_service = MagicMock()
@@ -1300,9 +1275,7 @@ class TestEdgeCases:
         assert isinstance(result, str)
         assert 'memories_retrieved="0"' in result
 
-    def test_very_large_memory_set(
-        self, mock_recall_service: MagicMock
-    ) -> None:
+    def test_very_large_memory_set(self, mock_recall_service: MagicMock) -> None:
         """Test handling of large memory set with small budget."""
         # Create many memories
         memories = [
@@ -1312,7 +1285,7 @@ class TestEdgeCases:
                 namespace="decisions",
                 summary=f"Decision {i} " * 20,  # Make summaries substantial
                 content=f"Content {i}" * 100,
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 status="active",
             )
             for i in range(100)
@@ -1348,7 +1321,7 @@ class TestEdgeCases:
             index_service=mock_index_service,
         )
 
-        result = builder.build_context(project='my-project<>&"\'')
+        result = builder.build_context(project="my-project<>&\"'")
 
         # XML should be properly escaped
         assert isinstance(result, str)
@@ -1362,7 +1335,7 @@ class TestEdgeCases:
             namespace="test",
             summary="No tags memory",
             content="Content",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             tags=(),  # No tags
             status="active",
         )
@@ -1404,7 +1377,10 @@ class TestEdgeCases:
         assert budget.semantic_context > 0
         assert budget.commands > 0
         # Should not exceed total
-        assert budget.working_memory + budget.semantic_context + budget.commands <= budget.total
+        assert (
+            budget.working_memory + budget.semantic_context + budget.commands
+            <= budget.total
+        )
 
 
 # =============================================================================
@@ -1458,10 +1434,18 @@ class TestIntegration:
         result = builder.build_context(project="test-project")
 
         # Should have working memory section
-        assert "<working_memory>" in result or "blockers" in result or "decisions" in result
+        assert (
+            "<working_memory>" in result
+            or "blockers" in result
+            or "decisions" in result
+        )
 
         # Should have semantic context section
-        assert "<semantic_context>" in result or "learnings" in result or "patterns" in result
+        assert (
+            "<semantic_context>" in result
+            or "learnings" in result
+            or "patterns" in result
+        )
 
     def test_budget_affects_memory_count(
         self,

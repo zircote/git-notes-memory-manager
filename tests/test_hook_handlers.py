@@ -16,6 +16,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from types import ModuleType
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
@@ -23,6 +24,24 @@ import pytest
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+
+
+# ============================================================================
+# Bootstrap Mock Helper
+# ============================================================================
+
+
+def create_mock_bootstrap() -> ModuleType:
+    """Create a mock bootstrap module that does nothing.
+
+    The real bootstrap module auto-runs on import to set up venv.
+    For tests, we need a mock that just passes.
+    """
+    mock_bootstrap = ModuleType("bootstrap")
+    mock_bootstrap.bootstrap = lambda: None  # type: ignore[attr-defined]
+    mock_bootstrap.PLUGIN_ROOT = Path(__file__).parent.parent  # type: ignore[attr-defined]
+    mock_bootstrap.VENV_DIR = Path(__file__).parent.parent / ".venv"  # type: ignore[attr-defined]
+    return mock_bootstrap
 
 
 # ============================================================================
@@ -615,18 +634,21 @@ class TestWrapperScripts:
         import importlib.util
         from pathlib import Path as P
 
-        wrapper_path = P(__file__).parent.parent / "hooks" / "session_start.py"
+        wrapper_path = P(__file__).parent.parent / "hooks" / "sessionstart.py"
         if not wrapper_path.exists():
             pytest.skip("Wrapper script not found")
 
-        spec = importlib.util.spec_from_file_location("session_start", wrapper_path)
+        spec = importlib.util.spec_from_file_location("sessionstart", wrapper_path)
         if spec is None or spec.loader is None:
             pytest.skip("Could not load wrapper script")
 
         module = importlib.util.module_from_spec(spec)
 
-        # Mock the import to raise ImportError
-        with patch.dict(sys.modules, {"git_notes_memory": None}):
+        # Mock bootstrap module (it auto-runs on import) and git_notes_memory
+        mock_bootstrap = create_mock_bootstrap()
+        with patch.dict(
+            sys.modules, {"bootstrap": mock_bootstrap, "git_notes_memory": None}
+        ):
             with patch.object(sys, "exit") as mock_exit:
                 # The wrapper should catch ImportError and exit 0
                 try:
@@ -636,30 +658,39 @@ class TestWrapperScripts:
                     pass  # Expected from sys.exit(0)
 
     def test_user_prompt_wrapper_import_error(self) -> None:
-        """Test user_prompt.py handles ImportError gracefully."""
+        """Test userpromptsubmit.py handles ImportError gracefully."""
         import importlib.util
         from pathlib import Path as P
 
-        wrapper_path = P(__file__).parent.parent / "hooks" / "user_prompt.py"
+        wrapper_path = P(__file__).parent.parent / "hooks" / "userpromptsubmit.py"
         if not wrapper_path.exists():
             pytest.skip("Wrapper script not found")
 
-        spec = importlib.util.spec_from_file_location("user_prompt", wrapper_path)
+        spec = importlib.util.spec_from_file_location("userpromptsubmit", wrapper_path)
         if spec is None or spec.loader is None:
             pytest.skip("Could not load wrapper script")
 
         module = importlib.util.module_from_spec(spec)
 
+        # Prepare stdin with a capture marker to trigger git_notes_memory import
+        mock_stdin = io.StringIO(json.dumps({"prompt": "[remember] test content"}))
         captured = io.StringIO()
-        with patch.object(sys, "stdout", captured):
-            with patch.dict(sys.modules, {"git_notes_memory": None}):
-                try:
-                    spec.loader.exec_module(module)
-                    module.main()
-                except SystemExit:
-                    pass
 
-        # Should output continue: true
+        # Mock bootstrap module (it auto-runs on import) and git_notes_memory
+        mock_bootstrap = create_mock_bootstrap()
+        with patch.object(sys, "stdin", mock_stdin):
+            with patch.object(sys, "stdout", captured):
+                with patch.dict(
+                    sys.modules,
+                    {"bootstrap": mock_bootstrap, "git_notes_memory": None},
+                ):
+                    try:
+                        spec.loader.exec_module(module)
+                        module.main()
+                    except SystemExit:
+                        pass
+
+        # Should output continue: true (with warning about capture failure)
         if captured.getvalue():
             output = json.loads(captured.getvalue())
             assert output.get("continue") is True
@@ -680,8 +711,12 @@ class TestWrapperScripts:
         module = importlib.util.module_from_spec(spec)
 
         captured = io.StringIO()
+        # Mock bootstrap module (it auto-runs on import) and git_notes_memory
+        mock_bootstrap = create_mock_bootstrap()
         with patch.object(sys, "stdout", captured):
-            with patch.dict(sys.modules, {"git_notes_memory": None}):
+            with patch.dict(
+                sys.modules, {"bootstrap": mock_bootstrap, "git_notes_memory": None}
+            ):
                 try:
                     spec.loader.exec_module(module)
                     module.main()
