@@ -12,6 +12,7 @@ from __future__ import annotations
 import pytest
 
 from git_notes_memory.hooks.namespace_parser import (
+    SHORTHAND_MARKERS,
     VALID_NAMESPACES,
     NamespaceParser,
     ParsedMarker,
@@ -431,6 +432,158 @@ class TestContentPreservation:
         result = namespace_parser.parse(text)
         assert result is not None
         assert result.original_text == text
+
+
+# =============================================================================
+# Shorthand Marker Tests
+# =============================================================================
+
+
+class TestShorthandMarkers:
+    """Test shorthand marker patterns like [decision], [learned], etc."""
+
+    def test_shorthand_markers_constant(self) -> None:
+        """Test SHORTHAND_MARKERS has all expected entries."""
+        expected = {
+            "decision": "decisions",
+            "learned": "learnings",
+            "blocker": "blockers",
+            "progress": "progress",
+            "pattern": "patterns",
+            "research": "research",
+            "learning": "learnings",
+            "block": "blockers",
+            "insight": "learnings",
+            "til": "learnings",
+            "review": "reviews",
+            "retro": "retrospective",
+            "inception": "inception",
+            "requirement": "elicitation",
+        }
+        assert expected == SHORTHAND_MARKERS
+
+    def test_shorthand_namespaces_are_valid(self) -> None:
+        """Test all shorthand namespaces are in VALID_NAMESPACES."""
+        for namespace in SHORTHAND_MARKERS.values():
+            assert namespace in VALID_NAMESPACES, f"{namespace} not in VALID_NAMESPACES"
+
+    @pytest.mark.parametrize(
+        "marker,expected_namespace",
+        [
+            ("decision", "decisions"),
+            ("learned", "learnings"),
+            ("blocker", "blockers"),
+            ("progress", "progress"),
+            ("pattern", "patterns"),
+            ("research", "research"),
+        ],
+    )
+    def test_primary_shorthand_markers(
+        self, namespace_parser: NamespaceParser, marker: str, expected_namespace: str
+    ) -> None:
+        """Test primary shorthand markers map to correct namespaces."""
+        result = namespace_parser.parse(f"[{marker}] Test content here")
+        assert result is not None
+        assert result.marker_type == marker
+        assert result.namespace == expected_namespace
+        assert result.content == "Test content here"
+
+    @pytest.mark.parametrize(
+        "marker,expected_namespace",
+        [
+            ("learning", "learnings"),
+            ("block", "blockers"),
+            ("insight", "learnings"),
+            ("til", "learnings"),
+            ("review", "reviews"),
+            ("retro", "retrospective"),
+            ("inception", "inception"),
+            ("requirement", "elicitation"),
+        ],
+    )
+    def test_shorthand_aliases(
+        self, namespace_parser: NamespaceParser, marker: str, expected_namespace: str
+    ) -> None:
+        """Test shorthand aliases map to correct namespaces."""
+        result = namespace_parser.parse(f"[{marker}] Alias test content")
+        assert result is not None
+        assert result.namespace == expected_namespace
+
+    def test_shorthand_case_insensitive(
+        self, namespace_parser: NamespaceParser
+    ) -> None:
+        """Test shorthand markers are case-insensitive."""
+        result1 = namespace_parser.parse("[DECISION] Test")
+        result2 = namespace_parser.parse("[Decision] Test")
+        result3 = namespace_parser.parse("[decision] Test")
+
+        assert result1 is not None
+        assert result2 is not None
+        assert result3 is not None
+        assert result1.namespace == "decisions"
+        assert result2.namespace == "decisions"
+        assert result3.namespace == "decisions"
+
+    def test_shorthand_with_emoji_prefix(
+        self, namespace_parser: NamespaceParser
+    ) -> None:
+        """Test shorthand markers work with emoji prefix (as used in templates)."""
+        result = namespace_parser.parse("⚖️ [decision] Use PostgreSQL for persistence")
+        assert result is not None
+        assert result.marker_type == "decision"
+        assert result.namespace == "decisions"
+        assert result.content == "Use PostgreSQL for persistence"
+
+    def test_all_emoji_prefixed_markers(
+        self, namespace_parser: NamespaceParser
+    ) -> None:
+        """Test all marker types with their standard emoji prefixes."""
+        cases = [
+            ("⚖️ [decision] Decision content", "decisions"),
+            ("💡 [learned] Learning content", "learnings"),
+            ("🛑 [blocker] Blocker content", "blockers"),
+            ("🚀 [progress] Progress content", "progress"),
+        ]
+        for text, expected_ns in cases:
+            result = namespace_parser.parse(text)
+            assert result is not None, f"Failed to parse: {text}"
+            assert result.namespace == expected_ns, f"Wrong namespace for: {text}"
+
+    def test_shorthand_preserves_content(
+        self, namespace_parser: NamespaceParser
+    ) -> None:
+        """Test that shorthand markers preserve full content."""
+        text = "[decision] Use PostgreSQL for DB: ACID compliance, JSON support, team expertise"
+        result = namespace_parser.parse(text)
+        assert result is not None
+        assert "ACID compliance" in result.content
+        assert "JSON support" in result.content
+
+    def test_shorthand_multiline_content(
+        self, namespace_parser: NamespaceParser
+    ) -> None:
+        """Test shorthand with multiline content."""
+        text = "[learned] First line\nSecond line\nThird line"
+        result = namespace_parser.parse(text)
+        assert result is not None
+        assert "Second line" in result.content
+        assert "Third line" in result.content
+
+    def test_unknown_shorthand_returns_none(
+        self, namespace_parser: NamespaceParser
+    ) -> None:
+        """Test unknown shorthand marker returns None."""
+        result = namespace_parser.parse("[unknown] Some content")
+        assert result is None
+
+    def test_shorthand_not_uses_auto_detect(
+        self, namespace_parser: NamespaceParser
+    ) -> None:
+        """Test shorthand markers have explicit namespace (no auto-detect)."""
+        result = namespace_parser.parse("[decision] Content about learning")
+        assert result is not None
+        assert not result.uses_auto_detect
+        assert result.namespace == "decisions"  # Explicit, not auto-detected
 
 
 # =============================================================================

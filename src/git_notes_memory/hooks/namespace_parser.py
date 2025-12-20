@@ -12,6 +12,14 @@ Supported Marker Syntaxes:
 - @memory content             -> Auto-detect namespace from content
 - @memory:blockers content    -> Capture to 'blockers' namespace
 
+Shorthand Markers (direct namespace):
+- [decision] content          -> Capture to 'decisions' namespace
+- [learned] content           -> Capture to 'learnings' namespace
+- [blocker] content           -> Capture to 'blockers' namespace
+- [progress] content          -> Capture to 'progress' namespace
+- [pattern] content           -> Capture to 'patterns' namespace
+- [research] content          -> Capture to 'research' namespace
+
 Invalid namespaces fall back to auto-detection (namespace=None).
 """
 
@@ -41,6 +49,27 @@ VALID_NAMESPACES: frozenset[str] = frozenset(
         "patterns",
     }
 )
+
+# Shorthand marker mappings: marker keyword -> namespace
+# These allow simpler syntax like [decision] instead of [remember:decisions]
+SHORTHAND_MARKERS: dict[str, str] = {
+    # Primary shorthand markers
+    "decision": "decisions",
+    "learned": "learnings",
+    "blocker": "blockers",
+    "progress": "progress",
+    "pattern": "patterns",
+    "research": "research",
+    # Additional shorthand aliases
+    "learning": "learnings",
+    "block": "blockers",
+    "insight": "learnings",
+    "til": "learnings",
+    "review": "reviews",
+    "retro": "retrospective",
+    "inception": "inception",
+    "requirement": "elicitation",
+}
 
 
 @dataclass(frozen=True)
@@ -108,6 +137,15 @@ class NamespaceParser:
     # Group 2: content (rest of text after marker)
     _AT_PATTERN = re.compile(
         r"^@memory(?::(\w+))?\s+(.+)$",
+        re.IGNORECASE | re.DOTALL,
+    )
+
+    # Shorthand marker pattern: [decision], [learned], [blocker], [progress], etc.
+    # Allows optional emoji prefix (e.g., "⚖️ [decision]" or just "[decision]")
+    # Group 1: shorthand marker keyword
+    # Group 2: content (rest of text after marker)
+    _SHORTHAND_PATTERN = re.compile(
+        r"^(?:[^\[\]]*?)?\[(\w+)\]\s*(.+)$",
         re.IGNORECASE | re.DOTALL,
     )
 
@@ -192,6 +230,22 @@ class NamespaceParser:
                 content=content,
                 original_text=text,
             )
+
+        # Try shorthand pattern: [decision], [learned], [blocker], [progress], etc.
+        match = self._SHORTHAND_PATTERN.match(text)
+        if match:
+            shorthand_keyword = match.group(1).lower()
+            content = match.group(2).strip()
+
+            # Check if this is a valid shorthand marker
+            if shorthand_keyword in SHORTHAND_MARKERS:
+                namespace = SHORTHAND_MARKERS[shorthand_keyword]
+                return ParsedMarker(
+                    marker_type=shorthand_keyword,
+                    namespace=namespace,
+                    content=content,
+                    original_text=text,
+                )
 
         return None
 
