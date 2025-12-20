@@ -1,0 +1,10 @@
+---
+type: decisions
+timestamp: '2025-12-20T04:24:32.745456+00:00'
+summary: Use PostgreSQL
+tags:
+- explicit
+- database
+---
+
+Use PostgreSQL
