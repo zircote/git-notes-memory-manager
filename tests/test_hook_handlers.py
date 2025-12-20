@@ -688,6 +688,7 @@ class TestWrapperScripts:
                         spec.loader.exec_module(module)
                         module.main()
                     except SystemExit:
+                        # main() calls sys.exit(0); expected behavior
                         pass
 
         # Should output continue: true (with warning about capture failure)

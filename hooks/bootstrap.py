@@ -102,6 +102,7 @@ def _deps_installed() -> bool:
         )
         return result.returncode == 0 and "ok" in result.stdout
     except Exception:
+        # Subprocess failures indicate deps not installed; return False
         return False
 
 
@@ -113,6 +114,7 @@ def _pyproject_hash() -> str:
         content = PYPROJECT.read_bytes()
         return hashlib.sha256(content).hexdigest()[:16]
     except Exception:
+        # File read errors return empty hash; triggers re-bootstrap
         return ""
 
 
@@ -124,6 +126,7 @@ def _bootstrap_current() -> bool:
         marker_hash = BOOTSTRAP_MARKER.read_text().strip()
         return marker_hash == _pyproject_hash()
     except Exception:
+        # Marker read errors indicate stale bootstrap; return False
         return False
 
 
