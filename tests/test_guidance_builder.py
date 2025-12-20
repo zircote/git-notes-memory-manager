@@ -2,14 +2,12 @@
 
 Tests the response guidance builder including:
 - GuidanceBuilder class
-- XML generation for different detail levels
+- Markdown template generation for different detail levels
 - GuidanceLevel enum
 - Configuration integration
 """
 
 from __future__ import annotations
-
-import xml.etree.ElementTree as ET
 
 import pytest
 
@@ -62,12 +60,12 @@ class TestGuidanceLevel:
 
 
 # =============================================================================
-# XML Template Content Tests
+# Template Content Tests
 # =============================================================================
 
 
-class TestXMLTemplateContent:
-    """Test that XML templates contain expected content."""
+class TestTemplateContent:
+    """Test that templates contain expected content."""
 
     def test_detailed_has_behavioral_examples(
         self, guidance_builder: GuidanceBuilder
@@ -164,42 +162,36 @@ class TestGuidanceBuilder:
             assert "[blocker]" in xml
 
 
-class TestGuidanceBuilderXMLStructure:
-    """Test XML structure validity of generated guidance."""
+class TestGuidanceBuilderStructure:
+    """Test structure of generated guidance templates."""
 
-    def test_minimal_is_valid_xml(self, guidance_builder: GuidanceBuilder) -> None:
-        """Test that minimal output is valid XML."""
-        xml = guidance_builder.build_guidance("minimal")
-        # Should parse without error (S314 safe: parsing our own generated XML)
-        root = ET.fromstring(xml)  # noqa: S314
-        assert root.tag == "session_behavior_protocol"
-        assert root.attrib.get("level") == "minimal"
+    def test_minimal_has_protocol_tag(self, guidance_builder: GuidanceBuilder) -> None:
+        """Test that minimal output has session_behavior_protocol structure."""
+        content = guidance_builder.build_guidance("minimal")
+        assert '<session_behavior_protocol level="minimal">' in content
+        assert "</session_behavior_protocol>" in content
 
-    def test_standard_is_valid_xml(self, guidance_builder: GuidanceBuilder) -> None:
-        """Test that standard output is valid XML."""
-        xml = guidance_builder.build_guidance("standard")
-        root = ET.fromstring(xml)  # noqa: S314
-        assert root.tag == "session_behavior_protocol"
-        assert root.attrib.get("level") == "standard"
+    def test_standard_has_protocol_tag(self, guidance_builder: GuidanceBuilder) -> None:
+        """Test that standard output has session_behavior_protocol structure."""
+        content = guidance_builder.build_guidance("standard")
+        assert '<session_behavior_protocol level="standard">' in content
+        assert "</session_behavior_protocol>" in content
 
-    def test_detailed_is_valid_xml(self, guidance_builder: GuidanceBuilder) -> None:
-        """Test that detailed output is valid XML."""
-        xml = guidance_builder.build_guidance("detailed")
-        root = ET.fromstring(xml)  # noqa: S314
-        assert root.tag == "session_behavior_protocol"
-        assert root.attrib.get("level") == "detailed"
+    def test_detailed_has_protocol_tag(self, guidance_builder: GuidanceBuilder) -> None:
+        """Test that detailed output has session_behavior_protocol structure."""
+        content = guidance_builder.build_guidance("detailed")
+        assert '<session_behavior_protocol level="detailed">' in content
+        assert "</session_behavior_protocol>" in content
 
     def test_detailed_has_mandatory_rules(
         self, guidance_builder: GuidanceBuilder
     ) -> None:
-        """Test that detailed guidance has mandatory_rules element."""
-        xml = guidance_builder.build_guidance("detailed")
-        root = ET.fromstring(xml)  # noqa: S314
-        rules = root.find("mandatory_rules")
-        assert rules is not None
-        # Rules should contain the markdown content
-        assert rules.text is not None
-        assert "MUST" in rules.text
+        """Test that detailed guidance has mandatory_rules section."""
+        content = guidance_builder.build_guidance("detailed")
+        assert "<mandatory_rules>" in content
+        assert "</mandatory_rules>" in content
+        # Rules should contain MUST requirements
+        assert "MUST" in content
 
 
 class TestGuidanceBuilderTokenEstimation:
@@ -328,15 +320,15 @@ class TestEdgeCases:
         with pytest.raises(ValueError):
             guidance_builder.build_guidance("  ")
 
-    def test_special_chars_in_templates_escaped(
+    def test_special_chars_in_templates_preserved(
         self, guidance_builder: GuidanceBuilder
     ) -> None:
-        """Test that templates with special chars are still valid XML via CDATA."""
-        xml = guidance_builder.build_guidance("detailed")
-        # Templates contain markdown with special chars wrapped in CDATA
-        # Let's verify the XML is still valid (S314 safe: parsing our own generated XML)
-        root = ET.fromstring(xml)  # noqa: S314
-        assert root is not None
+        """Test that templates preserve markdown formatting chars."""
+        content = guidance_builder.build_guidance("detailed")
+        # Templates contain markdown formatting that should be preserved
+        assert "**" in content  # Bold markers
+        assert "`" in content  # Code markers
+        assert content  # Non-empty content
 
     def test_multiple_builds_are_independent(
         self, guidance_builder: GuidanceBuilder

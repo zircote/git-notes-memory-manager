@@ -179,7 +179,10 @@ print()
 print("## 4. Hook Entry Points")
 print("-" * 40)
 
-plugin_root = Path.home() / '.claude/plugins/cache/git-notes-memory/memory-capture/0.1.0'
+# Discover plugin root dynamically (version-agnostic)
+plugin_cache = Path.home() / '.claude/plugins/cache/git-notes-memory/memory-capture'
+plugin_versions = sorted(plugin_cache.glob('*/'), key=lambda p: p.name, reverse=True) if plugin_cache.exists() else []
+plugin_root = plugin_versions[0] if plugin_versions else plugin_cache / '0.3.0'
 hooks_dir = plugin_root / "hooks"
 hooks = [
     ("sessionstart.py", "SessionStart", "Context injection at session start"),

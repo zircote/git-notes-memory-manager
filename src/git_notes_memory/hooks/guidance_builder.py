@@ -1,9 +1,9 @@
 """Response guidance builder for SessionStart hook.
 
-This module provides the GuidanceBuilder class which loads XML templates
+This module provides the GuidanceBuilder class which loads Markdown templates
 teaching Claude how to structure responses for reliable memory signal detection.
 
-The guidance templates are stored as external XML files in the templates/
+The guidance templates are stored as external Markdown files in the templates/
 directory for easy editing without code changes.
 
 The guidance includes:
@@ -29,7 +29,7 @@ __all__ = ["GuidanceBuilder", "GuidanceLevel"]
 
 logger = logging.getLogger(__name__)
 
-# Directory containing XML templates
+# Directory containing Markdown templates
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
 
@@ -47,9 +47,9 @@ class GuidanceLevel(Enum):
 
 
 class GuidanceBuilder:
-    """Builds XML response guidance for session injection.
+    """Builds response guidance for session injection.
 
-    This class loads XML templates from the templates/ directory that teach
+    This class loads Markdown templates from the templates/ directory that teach
     Claude how to structure responses for reliable memory signal detection.
     The guidance helps improve signal detection accuracy from ~70% to ~85%+.
 
@@ -61,8 +61,8 @@ class GuidanceBuilder:
     Example::
 
         builder = GuidanceBuilder()
-        xml = builder.build_guidance("standard")
-        # Returns XML string for additionalContext prepending
+        guidance = builder.build_guidance("standard")
+        # Returns guidance string for additionalContext prepending
     """
 
     def __init__(self, templates_dir: Path | None = None) -> None:
@@ -76,7 +76,7 @@ class GuidanceBuilder:
         self._cache: dict[str, str] = {}
 
     def build_guidance(self, detail_level: str = "standard") -> str:
-        """Build response guidance XML by loading from template file.
+        """Build response guidance by loading from template file.
 
         Args:
             detail_level: One of "minimal", "standard", or "detailed".
@@ -85,7 +85,7 @@ class GuidanceBuilder:
                 - detailed: Full templates with examples (~1200 tokens)
 
         Returns:
-            XML string for inclusion in additionalContext.
+            Guidance string for inclusion in additionalContext.
 
         Raises:
             ValueError: If detail_level is not recognized.
@@ -94,7 +94,7 @@ class GuidanceBuilder:
         Example::
 
             builder = GuidanceBuilder()
-            xml = builder.build_guidance("standard")
+            guidance = builder.build_guidance("standard")
             # Use in SessionStart additionalContext
         """
         try:
@@ -122,7 +122,7 @@ class GuidanceBuilder:
         if level in self._cache:
             return self._cache[level]
 
-        template_path = self._templates_dir / f"guidance_{level}.xml"
+        template_path = self._templates_dir / f"guidance_{level}.md"
 
         if not template_path.exists():
             msg = f"Template file not found: {template_path}"
