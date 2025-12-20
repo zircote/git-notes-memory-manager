@@ -131,6 +131,7 @@ def _capture_memory(
             "error": "git-notes-memory library not installed",
         }
     except Exception as e:
+        logger.debug("Failed to capture memory: %s", e, exc_info=True)
         return {
             "success": False,
             "error": str(e),

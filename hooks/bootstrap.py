@@ -393,6 +393,7 @@ def _acquire_lock() -> int | None:
             fcntl.flock(fd, fcntl.LOCK_EX)  # Blocking wait
             return fd
         except Exception:
+            # Lock acquisition failed - proceed without lock (rare edge case)
             return None
 
 
@@ -403,6 +404,7 @@ def _release_lock(fd: int | None) -> None:
             fcntl.flock(fd, fcntl.LOCK_UN)
             os.close(fd)
         except Exception:
+            # Cleanup errors are non-fatal; fd may already be closed
             pass
 
 

@@ -85,6 +85,7 @@ def _get_memory_count() -> int:
         conn.close()
         return int(row[0]) if row else 0
     except Exception:
+        logger.debug("Failed to get memory count from index", exc_info=True)
         return 0
 
 
