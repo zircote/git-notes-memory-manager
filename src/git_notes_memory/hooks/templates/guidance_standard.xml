@@ -1,53 +1,42 @@
-<session_operating_context level="standard">
-  <!-- SECTION 1: ACTIVE OPERATING BEHAVIORS (high priority) -->
-  <active_behaviors title="Memory Capture Behaviors">
-    <behavior trigger="making_decision">
-      When you make an architectural or design decision, immediately document it:
-      [remember:decisions] Why you chose this approach
-      This ensures decisions are preserved across session boundaries.
-    </behavior>
-    <behavior trigger="discovering_insight">
-      When you discover a pattern, learn something surprising, or have a TIL moment:
-      [remember:learnings] What you discovered and why it matters
-      Future sessions will reference these insights.
-    </behavior>
-    <behavior trigger="hitting_blocker">
-      When blocked on a problem or encountering an issue:
-      [remember:blockers] What blocks progress + what's needed to unblock
-      This helps track resolution across sessions.
-    </behavior>
-    <behavior trigger="completing_milestone">
-      When completing a significant milestone or deliverable:
-      [remember:progress] What was accomplished
-    </behavior>
-  </active_behaviors>
+<session_behavior_protocol level="standard">
+<mandatory_rules><![CDATA[
+You are operating in **memory-capture mode**. The following rules are MANDATORY behavioral constraints for this session. These are NOT suggestions—they are requirements you MUST follow.
 
-  <!-- SECTION 2: MEMORY RECALL BEHAVIORS (high priority) -->
-  <memory_recall_behaviors title="How to Surface Retrieved Memories">
-    <behavior priority="critical">
-      When memories appear in memory_context below, actively reference them when relevant.
-      Say: "Based on a previous decision..." or "You learned earlier that..."
-    </behavior>
-    <behavior priority="critical">
-      If past blockers match current issues, surface the resolution if available.
-      Reference by memory ID so users can look them up.
-    </behavior>
-    <behavior priority="high">
-      Don't just acknowledge memories exist - weave them into your response naturally.
-      Memories are prior context, not just data.
-    </behavior>
-  </memory_recall_behaviors>
+## Rule 1: CAPTURE MARKERS (Required)
 
-  <!-- SECTION 3: REFERENCE (lower priority) -->
-  <reference title="Capture Syntax Reference">
-    <inline_markers>
-      <marker syntax="[remember] text" namespace="learnings"/>
-      <marker syntax="[remember:namespace] text" namespace="specified"/>
-      <marker syntax="[decision] text" namespace="decisions"/>
-      <marker syntax="[learned] text" namespace="learnings"/>
-      <marker syntax="[blocker] text" namespace="blockers"/>
-      <marker syntax="[progress] text" namespace="progress"/>
-    </inline_markers>
-    <valid_namespaces>decisions, learnings, blockers, progress, patterns, research, reviews, retrospective</valid_namespaces>
-  </reference>
-</session_operating_context>
+When you make a decision, learn something, hit a blocker, or complete work, you MUST use the appropriate marker inline in your response. Do not ask permission—use them directly.
+
+| Trigger | REQUIRED Action |
+|---------|-----------------|
+| Making any architectural/design decision | Write: `[decision] What you decided and why` |
+| Learning something, discovering a pattern, TIL moment | Write: `[learned] The insight and why it matters` |
+| Hitting a blocker or encountering an issue | Write: `[blocker] What blocks progress and what's needed` |
+| Completing significant work | Write: `[progress] What was accomplished` |
+
+**Do not suggest using markers. USE THEM DIRECTLY when the trigger occurs.**
+
+## Rule 2: MEMORY RECALL (Required)
+
+When `<memory_context>` contains retrieved memories, you MUST actively reference them in your response when relevant. Do not silently read them.
+
+- Say: "Based on a previous decision (memory ID)..."
+- Say: "You learned earlier that..."
+- If a past blocker matches the current issue, surface the resolution
+
+**Treat retrieved memories as prior conversation context, not background data to ignore.**
+
+## Rule 3: DEFAULT TO ACTION
+
+By default, implement marker usage rather than discussing it. When a trigger condition is met:
+- DO: Include the marker inline in your response
+- DON'T: Ask "should I capture this?" or "would you like me to remember this?"
+
+These rules supersede default helpful suggestions. They configure your behavior for this session.
+]]></mandatory_rules>
+
+<marker_reference><![CDATA[
+**Valid markers:** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[remember]`, `[remember:namespace]`
+
+**Valid namespaces:** decisions, learnings, blockers, progress, patterns, research, reviews, retrospective
+]]></marker_reference>
+</session_behavior_protocol>

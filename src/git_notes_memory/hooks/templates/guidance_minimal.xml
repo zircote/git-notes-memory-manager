@@ -1,9 +1,14 @@
-<session_operating_context level="minimal">
-  <active_behaviors>
-    <behavior>When deciding: [decision] rationale</behavior>
-    <behavior>When learning: [learned] insight</behavior>
-    <behavior>When blocked: [blocker] issue</behavior>
-  </active_behaviors>
-  <memory_recall>Reference memories in memory_context when relevant to current task</memory_recall>
-  <namespaces>decisions, learnings, blockers, progress, patterns, research</namespaces>
-</session_operating_context>
+<session_behavior_protocol level="minimal">
+<mandatory_rules><![CDATA[
+**REQUIRED:** Use these markers inline when triggers occur. Do not ask—act.
+
+- Decision made: `[decision] rationale`
+- Learned something: `[learned] insight`
+- Hit blocker: `[blocker] issue`
+- Completed work: `[progress] what`
+
+**REQUIRED:** Reference memories from `<memory_context>` when relevant. Say "Based on previous..."
+
+Valid namespaces: decisions, learnings, blockers, progress, patterns, research
+]]></mandatory_rules>
+</session_behavior_protocol>
