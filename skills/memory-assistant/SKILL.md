@@ -10,7 +10,7 @@ description: >
   asks about past work ("what did we decide", "why did we", "how did we solve", "remember when", "previously"),
   requests memory operations ("capture this", "remember this", "save this decision", "recall", "search memories"),
   or starts work on topics with likely stored context ("working on authentication", "implementing database", "debugging").
-version: 0.2.0
+version: 0.3.0
 allowed-tools:
   - Bash
   - Read
