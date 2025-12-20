@@ -24,6 +24,9 @@ __all__ = ["detect_project", "ProjectInfo"]
 
 logger = logging.getLogger(__name__)
 
+# Cache for project detection results to avoid repeated file I/O
+_project_cache: dict[str, ProjectInfo] = {}
+
 
 @dataclass(frozen=True)
 class ProjectInfo:
@@ -50,6 +53,8 @@ def detect_project(cwd: str | Path) -> ProjectInfo:
     2. Scans CLAUDE.md for spec references
     3. Falls back to directory name
 
+    Results are cached to avoid repeated file I/O on hot paths.
+
     Args:
         cwd: Current working directory path.
 
@@ -63,6 +68,12 @@ def detect_project(cwd: str | Path) -> ProjectInfo:
         print(info.spec_id)  # "SPEC-2025-12-19-001" or None
     """
     path = Path(cwd).resolve()
+
+    # Check cache first for performance
+    cache_key = str(path)
+    if cache_key in _project_cache:
+        return _project_cache[cache_key]
+
     logger.debug("Detecting project from: %s", path)
 
     # Find git repository root if present
@@ -84,6 +95,9 @@ def detect_project(cwd: str | Path) -> ProjectInfo:
         spec_id=spec_id,
         git_repo=git_repo,
     )
+
+    # Cache the result
+    _project_cache[cache_key] = info
 
     logger.debug("Detected project: %s", info)
     return info
