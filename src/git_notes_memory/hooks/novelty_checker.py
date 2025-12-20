@@ -149,6 +149,21 @@ class NoveltyChecker:
             )
 
         try:
+            # Check if embedding model is loaded to avoid blocking hooks
+            # If not loaded, assume novel (safe default) rather than block
+            embedding = self._get_embedding_service()
+            if not embedding.is_loaded:
+                logger.debug(
+                    "Embedding model not loaded, skipping novelty check "
+                    "(assuming novel to avoid blocking hook execution)"
+                )
+                return NoveltyResult(
+                    novelty_score=1.0,
+                    is_novel=True,
+                    similar_memory_ids=[],
+                    highest_similarity=0.0,
+                )
+
             recall = self._get_recall_service()
             results = recall.search(
                 text,
