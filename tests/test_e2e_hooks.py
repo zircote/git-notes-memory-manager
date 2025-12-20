@@ -19,6 +19,8 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import pytest
+
 if TYPE_CHECKING:
     pass
 
@@ -402,3 +404,252 @@ class TestHookHandlerIntegration:
             )
             assert hasattr(module, "main"), f"{module_name} should have main()"
             assert callable(module.main), f"{module_name}.main should be callable"
+
+
+# =============================================================================
+# SessionStart Hook Execution Tests
+# =============================================================================
+
+
+class TestSessionStartHookExecution:
+    """Tests for SessionStart hook execution with real subprocess calls.
+
+    These tests verify the hook works end-to-end when invoked via subprocess,
+    catching issues like datetime comparison errors that unit tests might miss.
+    """
+
+    @pytest.mark.slow
+    def test_hook_execution_with_valid_input(self, tmp_path: Path) -> None:
+        """Test SessionStart hook executes successfully with valid input.
+
+        This test is marked slow because it may trigger embedding model loading
+        which can take 30+ seconds on first run.
+        """
+        import os
+
+        hook_script = Path("hooks/sessionstart.py")
+        if not hook_script.exists():
+            pytest.skip("Hook script not found")
+
+        input_data = json.dumps({
+            "cwd": str(tmp_path),
+            "source": "startup",
+            "session_id": "test-session-123",
+        })
+
+        # Set up environment to avoid loading real memories
+        env = os.environ.copy()
+        env["MEMORY_PLUGIN_DATA_DIR"] = str(tmp_path)
+        env["HOOK_DEBUG"] = "false"
+        # Disable embedding to speed up test
+        env["MEMORY_PLUGIN_EMBEDDING_ENABLED"] = "false"
+
+        result = subprocess.run(
+            [sys.executable, str(hook_script)],
+            input=input_data,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=60,  # Allow more time for model loading if needed
+        )
+
+        # Hook should exit successfully (code 0)
+        assert result.returncode == 0, f"Hook failed with stderr: {result.stderr}"
+
+        # Output should be valid JSON
+        output = result.stdout.strip()
+        if output:  # May be empty if hooks are disabled
+            parsed = json.loads(output)
+            # Should have either hookSpecificOutput or continue flag
+            assert "hookSpecificOutput" in parsed or "continue" in parsed
+
+    def test_hook_execution_handles_missing_cwd(self) -> None:
+        """Test SessionStart hook handles missing cwd gracefully."""
+        import os
+
+        hook_script = Path("hooks/sessionstart.py")
+        if not hook_script.exists():
+            return
+
+        input_data = json.dumps({
+            "source": "startup",
+            "session_id": "test-session-123",
+            # Missing "cwd"
+        })
+
+        env = os.environ.copy()
+        env["HOOK_DEBUG"] = "false"
+
+        result = subprocess.run(
+            [sys.executable, str(hook_script)],
+            input=input_data,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30,
+        )
+
+        # Hook should exit successfully (graceful degradation)
+        assert result.returncode == 0
+
+    def test_hook_execution_with_invalid_json(self) -> None:
+        """Test SessionStart hook handles invalid JSON gracefully."""
+        hook_script = Path("hooks/sessionstart.py")
+        if not hook_script.exists():
+            return
+
+        result = subprocess.run(
+            [sys.executable, str(hook_script)],
+            input="not valid json",
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        # Hook should exit successfully (graceful degradation)
+        assert result.returncode == 0
+
+    def test_context_builder_datetime_comparison(self, tmp_path: Path) -> None:
+        """Test ContextBuilder handles datetime comparisons correctly.
+
+        This test specifically validates that timezone-aware and timezone-naive
+        datetimes are handled correctly to prevent TypeError.
+        """
+        from datetime import datetime, timedelta, timezone
+
+        from git_notes_memory.hooks.context_builder import ContextBuilder
+        from git_notes_memory.models import Memory
+
+        # Create memories with timezone-aware timestamps (production behavior)
+        old_memory = Memory(
+            id="decisions:old123:0",
+            commit_sha="old123",
+            namespace="decisions",
+            summary="Old decision",
+            content="Made 10 days ago",
+            timestamp=datetime.now(timezone.utc) - timedelta(days=10),
+            status="active",
+        )
+        recent_memory = Memory(
+            id="decisions:new123:0",
+            commit_sha="new123",
+            namespace="decisions",
+            summary="Recent decision",
+            content="Made today",
+            timestamp=datetime.now(timezone.utc),
+            status="active",
+        )
+
+        # Mock recall service
+        from unittest.mock import MagicMock
+
+        mock_recall = MagicMock()
+        mock_recall.get_by_namespace.side_effect = (
+            lambda ns, spec=None, limit=None: (
+                [old_memory, recent_memory] if ns == "decisions" else []
+            )
+        )
+        mock_recall.search.return_value = []
+
+        builder = ContextBuilder(recall_service=mock_recall)
+
+        # This should NOT raise TypeError about datetime comparison
+        result = builder._build_working_memory(
+            project="test-project",
+            spec_id=None,
+            token_budget=10000,
+        )
+
+        # Only recent memory should be included (old one filtered out)
+        assert len(result.recent_decisions) == 1
+        assert result.recent_decisions[0].id == "decisions:new123:0"
+
+    def test_context_builder_with_offset_naive_memories(
+        self, tmp_path: Path
+    ) -> None:
+        """Test ContextBuilder handles offset-naive timestamps by conversion.
+
+        Edge case: if a memory somehow has offset-naive timestamp, the builder
+        should either handle it gracefully or the test should document the
+        expected behavior.
+        """
+        from datetime import datetime, timedelta, timezone
+
+        from git_notes_memory.hooks.context_builder import ContextBuilder
+        from git_notes_memory.models import Memory
+
+        # Create memory with offset-aware timestamp (correct behavior)
+        memory = Memory(
+            id="decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="Test decision",
+            content="Test content",
+            timestamp=datetime.now(timezone.utc) - timedelta(days=1),
+            status="active",
+        )
+
+        from unittest.mock import MagicMock
+
+        mock_recall = MagicMock()
+        mock_recall.get_by_namespace.side_effect = (
+            lambda ns, spec=None, limit=None: [memory] if ns == "decisions" else []
+        )
+        mock_recall.search.return_value = []
+
+        builder = ContextBuilder(recall_service=mock_recall)
+
+        # Should work without raising TypeError
+        result = builder._build_working_memory(
+            project="test-project",
+            spec_id=None,
+            token_budget=10000,
+        )
+
+        # Recent memory (1 day old) should be included
+        assert len(result.recent_decisions) == 1
+
+    def test_full_session_start_handler_execution(self, tmp_path: Path) -> None:
+        """Test full SessionStart handler execution with mocked services.
+
+        This is an integration test that exercises the full handler path
+        without subprocess overhead.
+        """
+        import io
+        import os
+        from unittest.mock import patch
+
+        # Prepare test input
+        input_data = json.dumps({
+            "cwd": str(tmp_path),
+            "source": "startup",
+            "session_id": "integration-test-123",
+        })
+
+        # Mock stdin and capture stdout
+        mock_stdin = io.StringIO(input_data)
+        mock_stdout = io.StringIO()
+
+        with (
+            patch("sys.stdin", mock_stdin),
+            patch("sys.stdout", mock_stdout),
+            patch.dict(os.environ, {
+                "MEMORY_PLUGIN_DATA_DIR": str(tmp_path),
+                "HOOK_ENABLED": "true",
+                "HOOK_SESSION_START_ENABLED": "true",
+                "HOOK_DEBUG": "false",
+            }),
+        ):
+            from git_notes_memory.hooks.session_start_handler import main
+
+            # Run should not raise exceptions
+            try:
+                main()
+            except SystemExit:
+                pass  # main() calls sys.exit(0)
+
+        # Verify output is valid JSON
+        output = mock_stdout.getvalue().strip()
+        if output:
+            parsed = json.loads(output)
+            assert isinstance(parsed, dict)

@@ -14,7 +14,7 @@ This module tests all aspects of the ContextBuilder, including:
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
@@ -53,7 +53,7 @@ def mock_memory() -> Memory:
         namespace="decisions",
         summary="Use PostgreSQL for persistence",
         content="We decided to use PostgreSQL because of ACID compliance.",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(timezone.utc),
         repo_path="/path/to/repo",
         spec="test-project",
         phase="planning",
@@ -72,7 +72,7 @@ def mock_blocker_memory() -> Memory:
         namespace="blockers",
         summary="CI pipeline failing on arm64",
         content="The CI pipeline fails due to architecture incompatibility.",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(timezone.utc),
         repo_path="/path/to/repo",
         spec="test-project",
         phase="implementation",
@@ -91,7 +91,7 @@ def mock_learning_memory() -> Memory:
         namespace="learnings",
         summary="pytest-cov requires separate install",
         content="Learned that pytest-cov needs to be installed separately.",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(timezone.utc),
         repo_path="/path/to/repo",
         spec="test-project",
         phase="testing",
@@ -110,7 +110,7 @@ def mock_pattern_memory() -> Memory:
         namespace="patterns",
         summary="Use factory functions for service singletons",
         content="Factory pattern ensures lazy initialization and testability.",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(timezone.utc),
         repo_path="/path/to/repo",
         spec=None,  # Patterns are often cross-project
         phase=None,
@@ -129,7 +129,7 @@ def mock_progress_memory() -> Memory:
         namespace="progress",
         summary="Implement user authentication",
         content="Task to implement OAuth2 authentication flow.",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(timezone.utc),
         repo_path="/path/to/repo",
         spec="test-project",
         phase="implementation",
@@ -183,7 +183,7 @@ def mock_index_service() -> MagicMock:
         total_memories=25,
         by_namespace=(("decisions", 10), ("learnings", 8), ("blockers", 7)),
         by_spec=(("test-project", 20), ("other-project", 5)),
-        last_sync=datetime.now(),
+        last_sync=datetime.now(timezone.utc),
         index_size_bytes=1024,
     )
     return mock_service
@@ -657,7 +657,7 @@ class TestBuildWorkingMemory:
             namespace="decisions",
             summary="Old decision",
             content="This is 10 days old",
-            timestamp=datetime.now() - timedelta(days=10),
+            timestamp=datetime.now(timezone.utc) - timedelta(days=10),
             status="active",
         )
         recent_decision = Memory(
@@ -666,7 +666,7 @@ class TestBuildWorkingMemory:
             namespace="decisions",
             summary="Recent decision",
             content="This is from today",
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
             status="active",
         )
 
@@ -696,7 +696,7 @@ class TestBuildWorkingMemory:
             namespace="progress",
             summary="Completed task",
             content="This is done",
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
             status="done",  # Not pending or in-progress
         )
 
@@ -1066,7 +1066,7 @@ class TestFilterMemories:
             namespace="test",
             summary="",  # Empty summary
             content="",
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
         )
         builder = ContextBuilder()
 
@@ -1102,7 +1102,7 @@ class TestToXml:
             semantic_context=SemanticContext(),
             commands=("Use /memory:capture",),
             spec_id=None,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
         )
 
         result = builder.to_xml(context)
@@ -1312,7 +1312,7 @@ class TestEdgeCases:
                 namespace="decisions",
                 summary=f"Decision {i} " * 20,  # Make summaries substantial
                 content=f"Content {i}" * 100,
-                timestamp=datetime.now(),
+                timestamp=datetime.now(timezone.utc),
                 status="active",
             )
             for i in range(100)
@@ -1362,7 +1362,7 @@ class TestEdgeCases:
             namespace="test",
             summary="No tags memory",
             content="Content",
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
             tags=(),  # No tags
             status="active",
         )
