@@ -32,13 +32,18 @@ from __future__ import annotations
 
 import json
 import logging
-import signal
 import sys
 from typing import Any
 
 from git_notes_memory.config import HOOK_USER_PROMPT_TIMEOUT
 from git_notes_memory.hooks.capture_decider import CaptureDecider
 from git_notes_memory.hooks.config_loader import load_hook_config
+from git_notes_memory.hooks.hook_utils import (
+    cancel_timeout,
+    read_json_input,
+    setup_logging,
+    setup_timeout,
+)
 from git_notes_memory.hooks.models import (
     CaptureAction,
     CaptureSignal,
@@ -51,67 +56,6 @@ from git_notes_memory.hooks.signal_detector import SignalDetector
 __all__ = ["main"]
 
 logger = logging.getLogger(__name__)
-
-
-def _setup_logging(debug: bool = False) -> None:
-    """Configure logging based on debug flag.
-
-    Args:
-        debug: If True, log DEBUG level to stderr.
-    """
-    level = logging.DEBUG if debug else logging.WARNING
-    logging.basicConfig(
-        level=level,
-        format="[memory-hook] %(levelname)s: %(message)s",
-        stream=sys.stderr,
-    )
-
-
-def _setup_timeout(timeout: int) -> None:
-    """Set up alarm-based timeout for the hook.
-
-    Args:
-        timeout: Timeout in seconds.
-    """
-
-    def timeout_handler(signum: int, frame: Any) -> None:  # noqa: ARG001
-        """Handle timeout by exiting gracefully."""
-        logger.warning("UserPromptSubmit hook timed out after %d seconds", timeout)
-        # Output continue:true to not block the user
-        print(json.dumps({"continue": True}))
-        sys.exit(0)
-
-    # Only set alarm on Unix systems
-    if hasattr(signal, "SIGALRM"):
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(timeout)
-
-
-def _cancel_timeout() -> None:
-    """Cancel the alarm-based timeout."""
-    if hasattr(signal, "SIGALRM"):
-        signal.alarm(0)
-
-
-def _read_input() -> dict[str, Any]:
-    """Read and parse JSON input from stdin.
-
-    Returns:
-        Parsed JSON data.
-
-    Raises:
-        json.JSONDecodeError: If input is not valid JSON.
-        ValueError: If stdin is empty or not a dict.
-    """
-    input_text = sys.stdin.read()
-    if not input_text.strip():
-        msg = "Empty input received on stdin"
-        raise ValueError(msg)
-    result = json.loads(input_text)
-    if not isinstance(result, dict):
-        msg = f"Expected JSON object, got {type(result).__name__}"
-        raise ValueError(msg)
-    return dict(result)
 
 
 def _validate_input(data: dict[str, Any]) -> bool:
@@ -280,7 +224,7 @@ def main() -> None:
     config = load_hook_config()
 
     # Set up logging based on config
-    _setup_logging(config.debug)
+    setup_logging(config.debug)
 
     logger.debug("UserPromptSubmit hook invoked")
 
@@ -297,11 +241,11 @@ def main() -> None:
 
     # Set up timeout
     timeout = config.timeout or HOOK_USER_PROMPT_TIMEOUT
-    _setup_timeout(timeout)
+    setup_timeout(timeout, hook_name="UserPromptSubmit")
 
     try:
         # Read and validate input
-        input_data = _read_input()
+        input_data = read_json_input()
         logger.debug(
             "Received input with prompt: %s...", input_data.get("prompt", "")[:50]
         )
@@ -390,7 +334,7 @@ def main() -> None:
         logger.exception("UserPromptSubmit hook error: %s", e)
         print(json.dumps({"continue": True}))
     finally:
-        _cancel_timeout()
+        cancel_timeout()
 
     sys.exit(0)
 

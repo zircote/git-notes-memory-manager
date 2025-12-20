@@ -73,9 +73,13 @@ When used as a Claude Code plugin, the following slash commands are available:
 
 The plugin includes hooks that integrate with Claude Code's hook system for automatic memory context:
 
-- **SessionStart**: Injects relevant project memories at session start
-- **UserPromptSubmit**: Detects capture-worthy content in user prompts (opt-in)
-- **Stop**: Prompts for uncaptured content and syncs the search index
+| Hook | Description |
+|------|-------------|
+| **SessionStart** | Injects relevant project memories and response guidance at session start |
+| **UserPromptSubmit** | Detects capture markers like `[remember]` and `@memory` in prompts |
+| **PostToolUse** | Surfaces related memories after file operations (Read/Write/Edit) |
+| **PreCompact** | Auto-captures high-confidence content before context compaction |
+| **Stop** | Prompts for uncaptured content and syncs the search index |
 
 See [User Guide](docs/USER_GUIDE.md#hooks-integration) for configuration options.
 
@@ -114,6 +118,8 @@ Environment variables (see `.env.example` for all options):
 | `HOOK_ENABLED` | Master switch for hooks | `true` |
 | `HOOK_SESSION_START_ENABLED` | Enable SessionStart context injection | `true` |
 | `HOOK_USER_PROMPT_ENABLED` | Enable signal detection in prompts | `false` |
+| `HOOK_POST_TOOL_USE_ENABLED` | Enable file-contextual memory injection | `true` |
+| `HOOK_PRE_COMPACT_ENABLED` | Enable auto-capture before compaction | `true` |
 | `HOOK_STOP_ENABLED` | Enable Stop hook processing | `true` |
 | `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
 

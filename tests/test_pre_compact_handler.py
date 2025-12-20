@@ -19,12 +19,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from git_notes_memory.hooks.hook_utils import read_json_input
 from git_notes_memory.hooks.models import CaptureSignal, SignalType
 from git_notes_memory.hooks.pre_compact_handler import (
     DEFAULT_TIMEOUT,
     _capture_memory,
     _extract_summary,
-    _read_input,
     _report_captures,
     _report_suggestions,
     main,
@@ -137,32 +137,32 @@ class TestConstants:
 
 
 class TestReadInput:
-    """Test _read_input function."""
+    """Test read_json_input function (from hook_utils)."""
 
     def test_valid_json_input(self) -> None:
         """Test reading valid JSON input."""
         input_data = '{"trigger": "auto", "transcript_path": "/path/to/file"}'
         with patch("sys.stdin", StringIO(input_data)):
-            result = _read_input()
+            result = read_json_input()
             assert result == {"trigger": "auto", "transcript_path": "/path/to/file"}
 
     def test_empty_input_raises(self) -> None:
         """Test that empty input raises ValueError."""
         with patch("sys.stdin", StringIO("")):
             with pytest.raises(ValueError, match="Empty input"):
-                _read_input()
+                read_json_input()
 
     def test_invalid_json_raises(self) -> None:
         """Test that invalid JSON raises JSONDecodeError."""
         with patch("sys.stdin", StringIO("not valid json")):
             with pytest.raises(json.JSONDecodeError):
-                _read_input()
+                read_json_input()
 
     def test_non_dict_raises(self) -> None:
         """Test that non-dict JSON raises ValueError."""
         with patch("sys.stdin", StringIO('["a", "b"]')):
             with pytest.raises(ValueError, match="Expected JSON object"):
-                _read_input()
+                read_json_input()
 
 
 # =============================================================================

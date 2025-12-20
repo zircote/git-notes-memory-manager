@@ -91,6 +91,91 @@ def temp_transcript(tmp_path: Path) -> Path:
 
 
 # ============================================================================
+# Path Validation Tests
+# ============================================================================
+
+
+class TestValidateFilePath:
+    """Tests for validate_file_path security function."""
+
+    def test_absolute_path_valid(self, tmp_path: Path) -> None:
+        """Test that absolute paths to existing files are accepted."""
+        from git_notes_memory.hooks.hook_utils import validate_file_path
+
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("content")
+
+        result = validate_file_path(str(test_file))
+        assert result == test_file.resolve()
+
+    def test_path_traversal_rejected(self) -> None:
+        """Test that path traversal sequences are rejected."""
+        from git_notes_memory.hooks.hook_utils import validate_file_path
+
+        with pytest.raises(ValueError, match="traversal"):
+            validate_file_path("/tmp/../etc/passwd")
+
+        with pytest.raises(ValueError, match="traversal"):
+            validate_file_path("/tmp/foo/../../../etc/passwd")
+
+    def test_relative_path_rejected_by_default(self, tmp_path: Path) -> None:
+        """Test that relative paths are rejected by default."""
+        from git_notes_memory.hooks.hook_utils import validate_file_path
+
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("content")
+
+        with pytest.raises(ValueError, match="Relative path"):
+            validate_file_path("test.txt")
+
+    def test_relative_path_allowed_when_enabled(self, tmp_path: Path) -> None:
+        """Test that relative paths work when allow_relative=True."""
+        import os
+
+        from git_notes_memory.hooks.hook_utils import validate_file_path
+
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("content")
+
+        # Change to tmp_path so relative path resolves
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            result = validate_file_path("test.txt", allow_relative=True)
+            assert result == test_file.resolve()
+        finally:
+            os.chdir(original_cwd)
+
+    def test_nonexistent_file_rejected_by_default(self) -> None:
+        """Test that nonexistent files are rejected by default."""
+        from git_notes_memory.hooks.hook_utils import validate_file_path
+
+        with pytest.raises(ValueError, match="does not exist"):
+            validate_file_path("/nonexistent/path/file.txt")
+
+    def test_nonexistent_file_allowed_when_disabled(self) -> None:
+        """Test that nonexistent files work when must_exist=False."""
+        from git_notes_memory.hooks.hook_utils import validate_file_path
+
+        result = validate_file_path("/nonexistent/path/file.txt", must_exist=False)
+        assert result == Path("/nonexistent/path/file.txt").resolve()
+
+    def test_directory_rejected(self, tmp_path: Path) -> None:
+        """Test that directories are rejected."""
+        from git_notes_memory.hooks.hook_utils import validate_file_path
+
+        with pytest.raises(ValueError, match="directory"):
+            validate_file_path(str(tmp_path))
+
+    def test_empty_path_rejected(self) -> None:
+        """Test that empty paths are rejected."""
+        from git_notes_memory.hooks.hook_utils import validate_file_path
+
+        with pytest.raises(ValueError, match="Empty path"):
+            validate_file_path("")
+
+
+# ============================================================================
 # SessionStart Handler Tests
 # ============================================================================
 
@@ -100,36 +185,36 @@ class TestSessionStartHandler:
 
     def test_read_input_valid_json(self) -> None:
         """Test reading valid JSON input."""
-        from git_notes_memory.hooks.session_start_handler import _read_input
+        from git_notes_memory.hooks.hook_utils import read_json_input
 
         input_data = {"cwd": "/test/path", "source": "startup"}
         with patch.object(sys, "stdin", io.StringIO(json.dumps(input_data))):
-            result = _read_input()
+            result = read_json_input()
         assert result == input_data
 
     def test_read_input_empty_raises(self) -> None:
         """Test that empty input raises ValueError."""
-        from git_notes_memory.hooks.session_start_handler import _read_input
+        from git_notes_memory.hooks.hook_utils import read_json_input
 
         with patch.object(sys, "stdin", io.StringIO("")):
             with pytest.raises(ValueError, match="Empty input"):
-                _read_input()
+                read_json_input()
 
     def test_read_input_invalid_json_raises(self) -> None:
         """Test that invalid JSON raises JSONDecodeError."""
-        from git_notes_memory.hooks.session_start_handler import _read_input
+        from git_notes_memory.hooks.hook_utils import read_json_input
 
         with patch.object(sys, "stdin", io.StringIO("not json")):
             with pytest.raises(json.JSONDecodeError):
-                _read_input()
+                read_json_input()
 
     def test_read_input_non_dict_raises(self) -> None:
         """Test that non-dict JSON raises ValueError."""
-        from git_notes_memory.hooks.session_start_handler import _read_input
+        from git_notes_memory.hooks.hook_utils import read_json_input
 
         with patch.object(sys, "stdin", io.StringIO(json.dumps(["list", "data"]))):
             with pytest.raises(ValueError, match="Expected JSON object"):
-                _read_input()
+                read_json_input()
 
     def test_validate_input_with_cwd(self) -> None:
         """Test input validation with required cwd field."""
@@ -170,18 +255,18 @@ class TestSessionStartHandler:
 
     def test_setup_logging_debug(self) -> None:
         """Test debug logging setup configures correctly."""
-        from git_notes_memory.hooks.session_start_handler import _setup_logging
+        from git_notes_memory.hooks.hook_utils import setup_logging
 
         # Just verify it doesn't raise - basicConfig behavior varies based on
         # existing logging configuration in the test runner
-        _setup_logging(debug=True)
+        setup_logging(debug=True)
 
     def test_setup_logging_warning(self) -> None:
         """Test warning-level logging setup configures correctly."""
-        from git_notes_memory.hooks.session_start_handler import _setup_logging
+        from git_notes_memory.hooks.hook_utils import setup_logging
 
         # Just verify it doesn't raise
-        _setup_logging(debug=False)
+        setup_logging(debug=False)
 
 
 # ============================================================================
@@ -194,20 +279,20 @@ class TestUserPromptHandler:
 
     def test_read_input_valid_json(self) -> None:
         """Test reading valid JSON input."""
-        from git_notes_memory.hooks.user_prompt_handler import _read_input
+        from git_notes_memory.hooks.hook_utils import read_json_input
 
         input_data = {"prompt": "I decided to use PostgreSQL", "cwd": "/test"}
         with patch.object(sys, "stdin", io.StringIO(json.dumps(input_data))):
-            result = _read_input()
+            result = read_json_input()
         assert result == input_data
 
     def test_read_input_empty_raises(self) -> None:
         """Test that empty input raises ValueError."""
-        from git_notes_memory.hooks.user_prompt_handler import _read_input
+        from git_notes_memory.hooks.hook_utils import read_json_input
 
         with patch.object(sys, "stdin", io.StringIO("")):
             with pytest.raises(ValueError, match="Empty input"):
-                _read_input()
+                read_json_input()
 
     def test_validate_input_with_prompt(self) -> None:
         """Test input validation with required prompt field."""
@@ -623,14 +708,11 @@ class TestTimeoutHandling:
     )
     def test_session_start_setup_timeout(self) -> None:
         """Test timeout setup for SessionStart handler."""
-        from git_notes_memory.hooks.session_start_handler import (
-            _cancel_timeout,
-            _setup_timeout,
-        )
+        from git_notes_memory.hooks.hook_utils import cancel_timeout, setup_timeout
 
         # Should not raise on Unix systems
-        _setup_timeout(5)
-        _cancel_timeout()
+        setup_timeout(5, hook_name="SessionStart")
+        cancel_timeout()
 
     @pytest.mark.skipif(
         not hasattr(os, "kill"),
@@ -638,13 +720,10 @@ class TestTimeoutHandling:
     )
     def test_user_prompt_setup_timeout(self) -> None:
         """Test timeout setup for UserPromptSubmit handler."""
-        from git_notes_memory.hooks.user_prompt_handler import (
-            _cancel_timeout,
-            _setup_timeout,
-        )
+        from git_notes_memory.hooks.hook_utils import cancel_timeout, setup_timeout
 
-        _setup_timeout(5)
-        _cancel_timeout()
+        setup_timeout(5, hook_name="UserPromptSubmit")
+        cancel_timeout()
 
     @pytest.mark.skipif(
         not hasattr(os, "kill"),
@@ -652,10 +731,10 @@ class TestTimeoutHandling:
     )
     def test_stop_setup_timeout(self) -> None:
         """Test timeout setup for Stop handler."""
-        from git_notes_memory.hooks.stop_handler import _cancel_timeout, _setup_timeout
+        from git_notes_memory.hooks.hook_utils import cancel_timeout, setup_timeout
 
-        _setup_timeout(5)
-        _cancel_timeout()
+        setup_timeout(5, hook_name="Stop")
+        cancel_timeout()
 
 
 # ============================================================================

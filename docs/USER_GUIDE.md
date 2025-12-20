@@ -397,6 +397,8 @@ All environment variables are optional. Defaults are shown below.
 | `HOOK_ENABLED` | Master switch for hooks | `true` |
 | `HOOK_SESSION_START_ENABLED` | Enable SessionStart hook | `true` |
 | `HOOK_USER_PROMPT_ENABLED` | Enable UserPromptSubmit hook | `false` |
+| `HOOK_POST_TOOL_USE_ENABLED` | Enable PostToolUse hook | `true` |
+| `HOOK_PRE_COMPACT_ENABLED` | Enable PreCompact hook | `true` |
 | `HOOK_STOP_ENABLED` | Enable Stop hook | `true` |
 | `HOOK_DEBUG` | Enable debug logging | `false` |
 | `HOOK_TIMEOUT` | Hook timeout in seconds | `30` |
@@ -408,6 +410,8 @@ All environment variables are optional. Defaults are shown below.
 | `HOOK_SESSION_START_BUDGET_MODE` | Budget mode: adaptive, fixed, full, minimal | `adaptive` |
 | `HOOK_SESSION_START_FIXED_BUDGET` | Fixed budget (when mode=fixed) | `1000` |
 | `HOOK_SESSION_START_MAX_BUDGET` | Maximum budget cap | `3000` |
+| `HOOK_SESSION_START_INCLUDE_GUIDANCE` | Include response guidance in context | `true` |
+| `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance detail: minimal, standard, detailed | `standard` |
 
 #### Capture Detection Configuration
 
@@ -449,12 +453,14 @@ The memory plugin includes hooks that integrate with Claude Code's hook system f
 
 ### Overview
 
-Three hooks are available:
+Five hooks are available:
 
 | Hook | Event | Purpose | Default |
 |------|-------|---------|---------|
-| SessionStart | Session begins | Inject project memories | Enabled |
-| UserPromptSubmit | User sends prompt | Detect capture signals | Disabled |
+| SessionStart | Session begins | Inject project memories and response guidance | Enabled |
+| UserPromptSubmit | User sends prompt | Detect capture signals and inline markers | Disabled |
+| PostToolUse | After Read/Write/Edit | Surface related memories for files | Enabled |
+| PreCompact | Before context compaction | Auto-capture high-confidence content | Enabled |
 | Stop | Session ends | Prompt for uncaptured content, sync index | Enabled |
 
 ### SessionStart Hook
@@ -519,6 +525,85 @@ export HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD=0.95
 export HOOK_CAPTURE_DETECTION_NOVELTY_THRESHOLD=0.3
 ```
 
+### PostToolUse Hook
+
+Surfaces related memories after file operations to provide contextual information.
+
+**What it does:**
+1. Triggers after Read, Write, Edit, or MultiEdit operations
+2. Extracts domain terms from the file path (e.g., `src/auth/jwt.py` → auth, jwt)
+3. Searches for memories related to those domains
+4. Injects relevant memories as additional context
+
+**Example output:**
+When you read or edit `src/auth/oauth_handler.py`, the hook may inject:
+```xml
+<related_memories>
+  <memory namespace="decisions" confidence="0.82">
+    Chose OAuth 2.0 with PKCE for authentication flow
+  </memory>
+  <memory namespace="learnings" confidence="0.75">
+    Token refresh must happen before expiry to avoid race conditions
+  </memory>
+</related_memories>
+```
+
+**Configuration:**
+
+```bash
+# Disable PostToolUse hook
+export HOOK_POST_TOOL_USE_ENABLED=false
+
+# Minimum similarity threshold (0.0-1.0)
+export HOOK_POST_TOOL_USE_MIN_SIMILARITY=0.6
+
+# Maximum memories to inject
+export HOOK_POST_TOOL_USE_MAX_RESULTS=3
+
+# Timeout in seconds
+export HOOK_POST_TOOL_USE_TIMEOUT=5
+```
+
+### PreCompact Hook
+
+Auto-captures high-confidence content before Claude Code compacts the context.
+
+**What it does:**
+1. Triggers before context compaction (automatic or manual)
+2. Analyzes the conversation transcript for uncaptured signals
+3. Filters to high-confidence items (≥85% by default)
+4. Auto-captures up to 3 memories to prevent information loss
+5. Reports captures via stderr (visible in terminal)
+
+**Example stderr output:**
+```
+Auto-captured 2 memories before compaction:
+  - [decisions] Chose PostgreSQL for JSONB support
+  - [learnings] pytest fixtures need session scope for DB connections
+```
+
+**Configuration:**
+
+```bash
+# Disable PreCompact hook
+export HOOK_PRE_COMPACT_ENABLED=false
+
+# Enable auto-capture (captures without prompting)
+export HOOK_PRE_COMPACT_AUTO_CAPTURE=true
+
+# Enable suggestion mode (prompts before capturing)
+export HOOK_PRE_COMPACT_PROMPT_FIRST=false
+
+# Minimum confidence for auto-capture (0.0-1.0)
+export HOOK_PRE_COMPACT_MIN_CONFIDENCE=0.85
+
+# Maximum memories to auto-capture
+export HOOK_PRE_COMPACT_MAX_CAPTURES=3
+
+# Timeout in seconds
+export HOOK_PRE_COMPACT_TIMEOUT=15
+```
+
 ### Stop Hook
 
 Performs session-end cleanup and memory assistance.
@@ -560,6 +645,8 @@ The hooks are installed automatically when you configure the plugin in Claude Co
 
 - `hooks/sessionstart.py` - SessionStart event handler
 - `hooks/userpromptsubmit.py` - UserPromptSubmit event handler
+- `hooks/posttooluse.py` - PostToolUse event handler
+- `hooks/precompact.py` - PreCompact event handler
 - `hooks/stop.py` - Stop event handler
 - `hooks/hooks.json` - Hook registration configuration
 

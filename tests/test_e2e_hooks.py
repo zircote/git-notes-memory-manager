@@ -39,11 +39,11 @@ class TestSessionStartHookE2E:
 
     def test_handler_has_required_functions(self) -> None:
         """Test SessionStart handler has required internal functions."""
-        from git_notes_memory.hooks import session_start_handler
+        from git_notes_memory.hooks import hook_utils, session_start_handler
 
         # These functions are used by the hook entry point
         assert hasattr(session_start_handler, "main")
-        assert hasattr(session_start_handler, "_read_input")
+        assert hasattr(hook_utils, "read_json_input")  # Now in hook_utils
         assert hasattr(session_start_handler, "_write_output")
 
     def test_entry_point_syntax(self) -> None:
@@ -74,10 +74,10 @@ class TestUserPromptSubmitHookE2E:
 
     def test_handler_has_required_functions(self) -> None:
         """Test UserPromptSubmit handler has required internal functions."""
-        from git_notes_memory.hooks import user_prompt_handler
+        from git_notes_memory.hooks import hook_utils, user_prompt_handler
 
         assert hasattr(user_prompt_handler, "main")
-        assert hasattr(user_prompt_handler, "_read_input")
+        assert hasattr(hook_utils, "read_json_input")  # Now in hook_utils
 
     def test_signal_detector_exists(self) -> None:
         """Test SignalDetector class exists and works."""
@@ -120,11 +120,11 @@ class TestPostToolUseHookE2E:
 
     def test_handler_has_required_functions(self) -> None:
         """Test PostToolUse handler has required internal functions."""
-        from git_notes_memory.hooks import post_tool_use_handler
+        from git_notes_memory.hooks import hook_utils, post_tool_use_handler
 
         assert hasattr(post_tool_use_handler, "main")
-        assert hasattr(post_tool_use_handler, "_read_input")
-        assert hasattr(post_tool_use_handler, "MAX_INPUT_SIZE")
+        assert hasattr(hook_utils, "read_json_input")  # Now in hook_utils
+        assert hasattr(hook_utils, "MAX_INPUT_SIZE")  # Now in hook_utils
 
     def test_domain_extractor_singleton(self) -> None:
         """Test DomainExtractor uses singleton pattern for performance."""
@@ -165,7 +165,7 @@ class TestPostToolUseHookE2E:
 
     def test_input_size_limit(self) -> None:
         """Test handler has input size limit for security."""
-        from git_notes_memory.hooks.post_tool_use_handler import MAX_INPUT_SIZE
+        from git_notes_memory.hooks.hook_utils import MAX_INPUT_SIZE
 
         # Should be 10MB
         assert MAX_INPUT_SIZE == 10 * 1024 * 1024
@@ -187,11 +187,11 @@ class TestPreCompactHookE2E:
 
     def test_handler_has_required_functions(self) -> None:
         """Test PreCompact handler has required internal functions."""
-        from git_notes_memory.hooks import pre_compact_handler
+        from git_notes_memory.hooks import hook_utils, pre_compact_handler
 
         assert hasattr(pre_compact_handler, "main")
-        assert hasattr(pre_compact_handler, "_read_input")
-        assert hasattr(pre_compact_handler, "MAX_INPUT_SIZE")
+        assert hasattr(hook_utils, "read_json_input")  # Now in hook_utils
+        assert hasattr(hook_utils, "MAX_INPUT_SIZE")  # Now in hook_utils
 
     def test_capture_decider(self) -> None:
         """Test CaptureDecider for worthiness evaluation."""
@@ -228,7 +228,7 @@ class TestPreCompactHookE2E:
 
     def test_input_size_limit(self) -> None:
         """Test handler has input size limit for security."""
-        from git_notes_memory.hooks.pre_compact_handler import MAX_INPUT_SIZE
+        from git_notes_memory.hooks.hook_utils import MAX_INPUT_SIZE
 
         # Should be 10MB
         assert MAX_INPUT_SIZE == 10 * 1024 * 1024

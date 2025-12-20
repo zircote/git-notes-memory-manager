@@ -26,6 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from git_notes_memory.hooks.hook_utils import validate_file_path
 from git_notes_memory.hooks.models import CaptureSignal
 
 if TYPE_CHECKING:
@@ -140,9 +141,19 @@ class SessionAnalyzer:
             transcript_path: Path to the transcript file.
 
         Returns:
-            TranscriptContent with parsed messages, or None if file not found.
+            TranscriptContent with parsed messages, or None if file not found
+            or path is invalid.
+
+        Note:
+            Path validation is performed to prevent path traversal attacks.
+            Only absolute paths are accepted, and '..' sequences are rejected.
         """
-        path = Path(transcript_path)
+        try:
+            # Validate path for security (prevents path traversal)
+            path = validate_file_path(transcript_path, must_exist=False)
+        except ValueError as e:
+            logger.warning("Invalid transcript path: %s", e)
+            return None
 
         if not path.exists():
             logger.warning("Transcript file not found: %s", path)

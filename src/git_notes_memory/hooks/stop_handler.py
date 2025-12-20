@@ -35,58 +35,22 @@ from __future__ import annotations
 
 import json
 import logging
-import signal
 import sys
 from pathlib import Path
 from typing import Any
 
 from git_notes_memory.config import HOOK_STOP_TIMEOUT
 from git_notes_memory.hooks.config_loader import load_hook_config
+from git_notes_memory.hooks.hook_utils import (
+    cancel_timeout,
+    setup_logging,
+    setup_timeout,
+)
 from git_notes_memory.hooks.models import CaptureSignal
 
 __all__ = ["main"]
 
 logger = logging.getLogger(__name__)
-
-
-def _setup_logging(debug: bool = False) -> None:
-    """Configure logging based on debug flag.
-
-    Args:
-        debug: If True, log DEBUG level to stderr.
-    """
-    level = logging.DEBUG if debug else logging.WARNING
-    logging.basicConfig(
-        level=level,
-        format="[memory-hook] %(levelname)s: %(message)s",
-        stream=sys.stderr,
-    )
-
-
-def _setup_timeout(timeout: int) -> None:
-    """Set up alarm-based timeout for the hook.
-
-    Args:
-        timeout: Timeout in seconds.
-    """
-
-    def timeout_handler(signum: int, frame: Any) -> None:  # noqa: ARG001
-        """Handle timeout by exiting gracefully."""
-        logger.warning("Stop hook timed out after %d seconds", timeout)
-        # Output continue:true to not block the user
-        print(json.dumps({"continue": True}))
-        sys.exit(0)
-
-    # Only set alarm on Unix systems
-    if hasattr(signal, "SIGALRM"):
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(timeout)
-
-
-def _cancel_timeout() -> None:
-    """Cancel the alarm-based timeout."""
-    if hasattr(signal, "SIGALRM"):
-        signal.alarm(0)
 
 
 def _read_input() -> dict[str, Any]:
@@ -295,7 +259,7 @@ def main() -> None:
     config = load_hook_config()
 
     # Set up logging based on config
-    _setup_logging(config.debug)
+    setup_logging(config.debug)
 
     logger.debug("Stop hook invoked")
 
@@ -312,7 +276,7 @@ def main() -> None:
 
     # Set up timeout
     timeout = config.timeout or HOOK_STOP_TIMEOUT
-    _setup_timeout(timeout)
+    setup_timeout(timeout, hook_name="Stop")
 
     try:
         # Read input (may be empty for stop hook)
@@ -352,7 +316,7 @@ def main() -> None:
         logger.exception("Stop hook error: %s", e)
         print(json.dumps({"continue": True}))
     finally:
-        _cancel_timeout()
+        cancel_timeout()
 
     sys.exit(0)
 
