@@ -352,7 +352,9 @@ class TestHooksConfiguration:
             for hook_config in hook_configs:
                 for hook in hook_config.get("hooks", []):
                     timeout = hook.get("timeout", 10)
-                    assert 1 <= timeout <= 60, (
+                    # SessionStart allows up to 120s for bootstrap (venv creation + deps)
+                    max_timeout = 120 if hook_name == "SessionStart" else 60
+                    assert 1 <= timeout <= max_timeout, (
                         f"Unreasonable timeout for {hook_name}: {timeout}"
                     )
 
