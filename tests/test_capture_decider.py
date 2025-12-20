@@ -10,7 +10,6 @@ Comprehensive test coverage for capture decision logic including:
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -23,7 +22,6 @@ from git_notes_memory.hooks.models import (
     NoveltyResult,
     SignalType,
 )
-
 
 # =============================================================================
 # Fixtures
@@ -307,9 +305,7 @@ class TestExplicitSignals:
 
         assert decision.action == CaptureAction.AUTO
 
-    def test_mixed_explicit_and_low_confidence(
-        self, decider: CaptureDecider
-    ) -> None:
+    def test_mixed_explicit_and_low_confidence(self, decider: CaptureDecider) -> None:
         """Mixed explicit and low-confidence signals."""
         signals = [
             make_signal(confidence=0.3, match="low"),  # Would be SKIP
@@ -452,7 +448,9 @@ class TestNoveltyChecking:
 
         assert len(decision.suggested_captures) == 1
         # Confidence should be adjusted: 0.98 * (0.5 + 0.5 * 0.5) = 0.98 * 0.75 = 0.735
-        assert decision.suggested_captures[0].confidence == pytest.approx(0.735, rel=0.01)
+        assert decision.suggested_captures[0].confidence == pytest.approx(
+            0.735, rel=0.01
+        )
 
 
 # =============================================================================
@@ -558,9 +556,7 @@ class TestExtractSummary:
         assert not summary.startswith(" ")
         assert not summary.endswith(" ")
 
-    def test_summary_removes_ellipsis(
-        self, decider_no_novelty: CaptureDecider
-    ) -> None:
+    def test_summary_removes_ellipsis(self, decider_no_novelty: CaptureDecider) -> None:
         """Summary removes leading/trailing ellipsis from context."""
         signal = make_signal(context="...middle of the content...")
         summary = decider_no_novelty._extract_summary(signal)
@@ -744,13 +740,13 @@ class TestEdgeCases:
     def test_unicode_content(self, decider_no_novelty: CaptureDecider) -> None:
         """Handle unicode characters in content."""
         signal = make_signal(
-            context="Decided to use emoji: \U0001F680 \u4E2D\u6587 caf\xe9"
+            context="Decided to use emoji: \U0001f680 \u4e2d\u6587 caf\xe9"
         )
         decision = decider_no_novelty.decide([signal])
 
         assert decision.action == CaptureAction.SUGGEST
         summary = decision.suggested_captures[0].summary
-        assert "\U0001F680" in summary or "emoji" in summary
+        assert "\U0001f680" in summary or "emoji" in summary
 
     def test_very_long_content(self, decider_no_novelty: CaptureDecider) -> None:
         """Handle very long content (multiple KB)."""
@@ -780,9 +776,7 @@ class TestEdgeCases:
 
         assert decision.action == CaptureAction.SUGGEST
 
-    def test_whitespace_only_context(
-        self, decider_no_novelty: CaptureDecider
-    ) -> None:
+    def test_whitespace_only_context(self, decider_no_novelty: CaptureDecider) -> None:
         """Handle whitespace-only context."""
         signal = CaptureSignal(
             type=SignalType.DECISION,

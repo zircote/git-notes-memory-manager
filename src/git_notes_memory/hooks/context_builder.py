@@ -15,7 +15,7 @@ The context is structured into:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from git_notes_memory.config import TOKENS_PER_CHAR, get_project_index_path
@@ -172,7 +172,7 @@ class ContextBuilder:
             semantic_context=semantic_context,
             commands=self._get_command_hints(),
             spec_id=spec_id,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
         # Serialize to XML
@@ -357,7 +357,7 @@ class ContextBuilder:
 
         # Get recent decisions (last 7 days)
         decisions = recall.get_by_namespace("decisions", spec=spec_id, limit=10)
-        recent_cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+        recent_cutoff = datetime.now(UTC) - timedelta(days=7)
         decisions = [d for d in decisions if d.timestamp >= recent_cutoff]
         decisions = self.filter_memories(decisions, decision_budget)
 

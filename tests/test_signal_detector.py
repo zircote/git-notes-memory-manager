@@ -20,7 +20,6 @@ from git_notes_memory.hooks.signal_detector import (
     SignalDetector,
 )
 
-
 # =============================================================================
 # Test Fixtures
 # =============================================================================
@@ -87,7 +86,9 @@ class TestSignalDetectorInitialization:
         """Test that all SignalType values have defined patterns."""
         for signal_type in SignalType:
             assert signal_type in SIGNAL_PATTERNS, f"Missing patterns for {signal_type}"
-            assert len(SIGNAL_PATTERNS[signal_type]) > 0, f"Empty patterns for {signal_type}"
+            assert len(SIGNAL_PATTERNS[signal_type]) > 0, (
+                f"Empty patterns for {signal_type}"
+            )
 
 
 # =============================================================================
@@ -102,9 +103,15 @@ class TestSignalPatternsConstant:
         """Test each pattern is a tuple of (regex_string, confidence)."""
         for signal_type, patterns in SIGNAL_PATTERNS.items():
             for pattern_str, confidence in patterns:
-                assert isinstance(pattern_str, str), f"Pattern for {signal_type} not string"
-                assert isinstance(confidence, float), f"Confidence for {signal_type} not float"
-                assert 0.0 <= confidence <= 1.0, f"Invalid confidence {confidence} for {signal_type}"
+                assert isinstance(pattern_str, str), (
+                    f"Pattern for {signal_type} not string"
+                )
+                assert isinstance(confidence, float), (
+                    f"Confidence for {signal_type} not float"
+                )
+                assert 0.0 <= confidence <= 1.0, (
+                    f"Invalid confidence {confidence} for {signal_type}"
+                )
 
     def test_expected_signal_types(self) -> None:
         """Test all expected signal types are present."""
@@ -430,7 +437,9 @@ class TestConfidenceScoring:
             # The base is 0.95, but short match (-0.05) and short context could reduce it
             assert learning_signals[0].confidence < 0.95
 
-    def test_complete_sentence_increases_confidence(self, detector: SignalDetector) -> None:
+    def test_complete_sentence_increases_confidence(
+        self, detector: SignalDetector
+    ) -> None:
         """Test complete sentences (ending with punctuation) increase confidence."""
         text = "I decided to use PostgreSQL for this project."
         signals = detector.detect(text)
@@ -439,7 +448,9 @@ class TestConfidenceScoring:
         # With complete sentence, confidence should be boosted
         assert decision_signals[0].confidence >= 0.85
 
-    def test_reinforcing_words_increase_confidence(self, detector: SignalDetector) -> None:
+    def test_reinforcing_words_increase_confidence(
+        self, detector: SignalDetector
+    ) -> None:
         """Test reinforcing words in context increase confidence."""
         text = "This is important: I decided to prioritize security, it's critical."
         signals = detector.detect(text)
@@ -571,7 +582,9 @@ class TestSignalDeduplication:
 
     def test_non_overlapping_signals_preserved(self, detector: SignalDetector) -> None:
         """Test that non-overlapping signals are all preserved."""
-        text = "I decided to use PostgreSQL. TIL that it supports JSON. Fixed the issue."
+        text = (
+            "I decided to use PostgreSQL. TIL that it supports JSON. Fixed the issue."
+        )
         signals = detector.detect(text)
         # Should have at least 3 different signals
         types_found = {s.type for s in signals}
@@ -588,7 +601,9 @@ class TestSignalDeduplication:
                 sig1_end = sig1.position + len(sig1.match)
                 # Either no overlap, or same position means different patterns
                 if sig1.position < sig2.position:
-                    assert sig2.position >= sig1_end or sig1.confidence >= sig2.confidence
+                    assert (
+                        sig2.position >= sig1_end or sig1.confidence >= sig2.confidence
+                    )
 
     def test_single_signal_not_affected(self, detector: SignalDetector) -> None:
         """Test that single signal passes through deduplication unchanged."""
@@ -625,9 +640,13 @@ class TestDetectAllTypes:
         result = detector.detect_all_types(text)
 
         if SignalType.DECISION in result:
-            assert all(s.type == SignalType.DECISION for s in result[SignalType.DECISION])
+            assert all(
+                s.type == SignalType.DECISION for s in result[SignalType.DECISION]
+            )
         if SignalType.LEARNING in result:
-            assert all(s.type == SignalType.LEARNING for s in result[SignalType.LEARNING])
+            assert all(
+                s.type == SignalType.LEARNING for s in result[SignalType.LEARNING]
+            )
 
     def test_multiple_signals_same_type(self, detector: SignalDetector) -> None:
         """Test multiple signals of same type are grouped together."""
@@ -756,7 +775,7 @@ class TestEdgeCases:
 
     def test_special_characters(self, detector: SignalDetector) -> None:
         """Test special characters don't break detection."""
-        text = "I decided to use <HTML> & \"quotes\" in the `code`"
+        text = 'I decided to use <HTML> & "quotes" in the `code`'
         signals = detector.detect(text)
         decision_signals = [s for s in signals if s.type == SignalType.DECISION]
         assert len(decision_signals) >= 1
@@ -854,7 +873,9 @@ class TestSignalPositions:
 
         signal = decision_signals[0]
         # Position should point to where match starts
-        assert text[signal.position : signal.position + len(signal.match)] == signal.match
+        assert (
+            text[signal.position : signal.position + len(signal.match)] == signal.match
+        )
 
     def test_signals_sorted_by_position(self, detector: SignalDetector) -> None:
         """Test signals are returned sorted by position."""

@@ -12,7 +12,7 @@ All models are frozen dataclasses for immutability.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -22,7 +22,8 @@ if TYPE_CHECKING:
 
 def _utc_now() -> datetime:
     """Return current UTC time as timezone-aware datetime."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
+
 
 __all__ = [
     "SignalType",
