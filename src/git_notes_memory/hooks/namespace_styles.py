@@ -109,10 +109,7 @@ class NamespaceStyle:
         elif self.namespace == "blockers":
             marker_name = "blocker"
 
-        return (
-            f"{self.color}[{self.emoji} {marker_name}]{Color.RESET.value} "
-            f"{content}"
-        )
+        return f"{self.color}[{self.emoji} {marker_name}]{Color.RESET.value} {content}"
 
     def format_inline(self) -> str:
         """Format just the namespace with emoji and color.
