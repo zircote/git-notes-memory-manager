@@ -567,11 +567,13 @@ class TestExtractSummary:
         self, decider_no_novelty: CaptureDecider
     ) -> None:
         """Summary truncates content over 200 characters."""
+        max_length = 200  # From capture_decider.py
         long_context = "A" * 300
         signal = make_signal(context=long_context)
         summary = decider_no_novelty._extract_summary(signal)
 
-        assert len(summary) <= 203  # 200 + "..."
+        # No word boundary (all A's), so truncates at max_length - 3 + "..."
+        assert len(summary) == max_length  # 197 chars + "..."
         assert summary.endswith("...")
 
     def test_summary_truncates_at_word_boundary(
@@ -594,12 +596,14 @@ class TestExtractSummary:
         self, decider_no_novelty: CaptureDecider
     ) -> None:
         """Summary handles content with no good word boundary."""
+        max_length = 200  # From capture_decider.py
         # No spaces = no word boundary
         long_context = "x" * 300
         signal = make_signal(context=long_context)
         summary = decider_no_novelty._extract_summary(signal)
 
-        assert len(summary) == 200  # 197 + "..."
+        # Hard truncate at max_length - 3, add "..." = max_length total
+        assert len(summary) == max_length
         assert summary.endswith("...")
 
 

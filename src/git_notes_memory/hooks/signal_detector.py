@@ -56,7 +56,7 @@ SIGNAL_PATTERNS: dict[SignalType, list[tuple[str, float]]] = {
         (r"(?i)\bkey (insight|takeaway|learning)[:\s]", 0.92),
         # Moderate learning signals
         (r"(?i)\binteresting(ly)?[,:]?\s+", 0.70),
-        (r"(?i)\bI (didn't|never) (know|realize)\b", 0.80),
+        (r"(?i)\bI (didn't|never) (know|realized?)\b", 0.80),
         (r"(?i)\bnow I (know|understand)\b", 0.82),
         (r"(?i)\baha moment\b", 0.88),
     ],

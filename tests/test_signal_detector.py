@@ -200,7 +200,7 @@ class TestLearningSignalDetection:
             "Key learning: test early",
             "Interestingly, this works",
             "I didn't know about this feature",
-            "I never realize how complex it is",
+            "I never realized how complex it is",
             "Now I know how to fix it",
             "Now I understand the issue",
             "It was an aha moment for me",
