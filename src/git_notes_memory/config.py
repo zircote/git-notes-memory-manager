@@ -194,11 +194,17 @@ def get_index_path() -> Path:
 MEMORY_DIR_NAME = ".memory"
 
 
+# Cache for project identifiers to avoid repeated file I/O
+_project_id_cache: dict[str, str] = {}
+
+
 def get_project_identifier(repo_path: Path | str | None = None) -> str:
     """Get a unique identifier for a repository.
 
     Uses the repository's git remote URL if available, otherwise falls back
     to the canonical path. The identifier is a short hash for filesystem safety.
+
+    Results are cached to avoid repeated file I/O on hot paths.
 
     Args:
         repo_path: Path to the repository. If None, uses current directory.
@@ -207,31 +213,45 @@ def get_project_identifier(repo_path: Path | str | None = None) -> str:
         A short identifier string (e.g., "a1b2c3d4") unique to this repository.
     """
     import hashlib
-    import subprocess
+    import re
 
     if repo_path is None:
         repo_path = Path.cwd()
     else:
         repo_path = Path(repo_path).resolve()
 
-    # Try to get the remote URL for a stable identifier across machines
-    try:
-        result = subprocess.run(  # noqa: S603
-            ["git", "-C", str(repo_path), "config", "--get", "remote.origin.url"],  # noqa: S607
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            identifier_source = result.stdout.strip()
-        else:
-            # Fall back to canonical path
-            identifier_source = str(repo_path)
-    except (subprocess.TimeoutExpired, FileNotFoundError):
+    # Check cache first for performance
+    cache_key = str(repo_path)
+    if cache_key in _project_id_cache:
+        return _project_id_cache[cache_key]
+
+    # Try to read remote URL from .git/config directly (no subprocess)
+    identifier_source: str | None = None
+    git_config = repo_path / ".git" / "config"
+
+    if git_config.exists():
+        try:
+            content = git_config.read_text(encoding="utf-8")
+            # Match url = <value> under [remote "origin"] section
+            match = re.search(
+                r'\[remote\s+"origin"\][^\[]*url\s*=\s*(.+?)$',
+                content,
+                re.MULTILINE | re.IGNORECASE,
+            )
+            if match:
+                identifier_source = match.group(1).strip()
+        except OSError:
+            pass
+
+    # Fall back to canonical path if git config not available
+    if not identifier_source:
         identifier_source = str(repo_path)
 
     # Create a short hash for filesystem-safe naming
     hash_digest = hashlib.sha256(identifier_source.encode()).hexdigest()[:12]
+
+    # Cache the result
+    _project_id_cache[cache_key] = hash_digest
     return hash_digest
 
 

@@ -44,7 +44,6 @@ from git_notes_memory.hooks.hook_utils import (
     setup_timeout,
 )
 from git_notes_memory.hooks.project_detector import detect_project
-from git_notes_memory.index import IndexService
 
 __all__ = ["main"]
 
@@ -67,18 +66,24 @@ def _validate_input(data: dict[str, Any]) -> bool:
 def _get_memory_count() -> int:
     """Get total memory count from index.
 
+    Uses lightweight direct SQLite query without full IndexService
+    initialization to avoid loading sqlite-vec extension on hot path.
+
     Returns:
         Number of memories indexed, or 0 if index doesn't exist.
     """
+    import sqlite3
+
     try:
         index_path = get_project_index_path()
         if not index_path.exists():
             return 0
-        index = IndexService(index_path)
-        index.initialize()
-        stats = index.get_stats()
-        index.close()
-        return stats.total_memories
+        # Use direct SQLite query for performance (skip full initialization)
+        conn = sqlite3.connect(str(index_path))
+        cursor = conn.execute("SELECT COUNT(*) FROM memories")
+        row = cursor.fetchone()
+        conn.close()
+        return int(row[0]) if row else 0
     except Exception:
         return 0
 
