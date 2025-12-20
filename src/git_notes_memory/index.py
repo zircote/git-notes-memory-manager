@@ -991,38 +991,35 @@ class IndexService:
 
         with self._cursor() as cursor:
             try:
-                # KNN search using sqlite-vec MATCH syntax
-                cursor.execute(
-                    """
-                    SELECT v.id, v.distance
+                # Build parameterized query with optional filters
+                # Use single JOIN to eliminate N+1 query pattern
+                params: list[object] = [blob, k * 3]
+
+                sql = """
+                    SELECT m.*, v.distance
                     FROM vec_memories v
+                    JOIN memories m ON v.id = m.id
                     WHERE v.embedding MATCH ?
                       AND k = ?
-                    ORDER BY v.distance
-                    """,
-                    (blob, k * 3),  # Fetch more for filtering
-                )
+                """
+
+                if namespace is not None:
+                    sql += " AND m.namespace = ?"
+                    params.append(namespace)
+                if spec is not None:
+                    sql += " AND m.spec = ?"
+                    params.append(spec)
+
+                sql += " ORDER BY v.distance LIMIT ?"
+                params.append(k)
+
+                cursor.execute(sql, params)
 
                 results: list[tuple[Memory, float]] = []
                 for row in cursor.fetchall():
-                    memory_id = row[0]
-                    distance = row[1]
-
-                    # Get the full memory
-                    memory = self.get(memory_id)
-                    if memory is None:
-                        continue
-
-                    # Apply filters
-                    if namespace is not None and memory.namespace != namespace:
-                        continue
-                    if spec is not None and memory.spec != spec:
-                        continue
-
+                    memory = self._row_to_memory(row)
+                    distance = row["distance"]
                     results.append((memory, distance))
-
-                    if len(results) >= k:
-                        break
 
                 return results
 
