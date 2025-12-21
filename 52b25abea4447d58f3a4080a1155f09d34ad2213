@@ -420,3 +420,21 @@ tags:
 - Contextual patterns: "I decided", "TIL", "blocked by"
 
 **Real...
+
+---
+type: decisions
+timestamp: '2025-12-21T06:21:54.889909+00:00'
+summary: Use PostgreSQL for persistence layer
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+Use PostgreSQL for persistence layer
+## Context
+Evaluated SQLite, PostgreSQL, and MongoDB.
+
+## Rationale
+- ACID guarantees required for financial data
+- Team expertise in PostgreSQL
