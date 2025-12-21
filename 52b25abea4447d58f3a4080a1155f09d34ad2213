@@ -208,3 +208,18 @@ tags:
 | learnings | Technical insights | "I learned", "TIL", "[learned]" |
 | blockers | Impediments | "blocked by", "stuck on", "[blocker]" |
 | progress...
+
+---
+type: learnings
+timestamp: '2025-12-21T06:28:25.694857+00:00'
+summary: '...decided", "we chose", "[decision]" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...decided", "we chose", "[decision]" |
+| learnings | Technical insights | "I learned", "TIL", "[learned]" |
+| blockers | Impediments | "blocked by", "stuck on", "[blocker]" |
+| progress | Milestones...
