@@ -6,3 +6,12 @@ summary: '...architectural decisions, retrospectives, and planning documents. Re
 ---
 
 ...architectural decisions, retrospectives, and planning documents. Read EVERY file in docs/spec/completed/ and docs/architecture/completed/. For each project found, extract:\n1. Key architectural...
+
+---
+type: progress
+timestamp: '2025-12-21T05:22:25.565195+00:00'
+summary: '...retrospectives, and planning documents. Read EVERY file in docs/spec/completed/
+  and docs/architec'
+---
+
+...retrospectives, and planning documents. Read EVERY file in docs/spec/completed/ and docs/architecture/completed/. For each project found, extract:\n1. Key architectural decisions (ADRs)\n2. Learnings and...
