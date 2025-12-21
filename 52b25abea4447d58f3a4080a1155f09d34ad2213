@@ -454,3 +454,111 @@ Found 5 signals in transcript
   Signal: type=decision, ns=decisions, conf=1.00, match=[decision]...
   Signal: type=decision, ns=decisions, conf=0.99, match=▶ decision ───...
   Signal: type=decision...
+
+---
+type: decisions
+timestamp: '2025-12-21T06:21:54.932116+00:00'
+summary: Use PostgreSQL for JSONB support
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+Use PostgreSQL for JSONB support
+## Context
+    Why this decision was needed...
+
+    ## Rationale
+    - Reason 1 with supporting evidence
+    - Alternative considered and why rejected
+    ────────────────────────────────────────────────
+    ```
+  </mandatory_rules>
+</session_behavior_protocol>
+```
+
+This teaches the LLM the capture syntax, enabling it to actively create memories during sessions.
+
+### 6.3 Token Budget Adaptation
+
+Context injection adapts to project complexity:
+
+| Complexity | Memory Count | Token Budget | Working % | Semantic % |
+|------------|--------------|--------------|-----------|------------|
+| Simple | < 10 | 500 | 70% | 20% |
+| Medium | 10-50 | 1000 | 70% | 20% |
+| Complex | 50-200 | 2000 | 70% | 25% |
+| Full | > 200 | 3500 | 60% | 35% |
+
+---
+
+## 7. Claude Skills Integration
+
+### 7.1 Skill-Based Memory Commands
+
+The system exposes memory operations as Claude Code skills:
+
+| Skill | Trigger | Action |
+|-------|---------|--------|
+| `/memory:capture` | "Remember this" | Manual memory creation |
+| `/memory:recall` | "What did we decide about..." | Semantic search |
+| `/memory:search` | "Find memories about..." | Advanced search |
+| `/memory:sync` | "Sync memory index" | Reindex from git notes |
+| `/memory:status` | "Memory status" | Index statistics |
+
+### 7.2 Skill Prompt Example
+
+**User**: `/memory:recall database architecture`
+
+**System executes**:
+```python
+results = recall_service.search("database architecture", k=5)
+for r in results:
+    print(f"{r.memory.id}: {r.memory.summary} (distance={r.distance:.3f})")
+```
+
+**Output**:
+```
+decisions:5da308d:18: Git notes as source of truth, SQLite as derived queryable index (0.234)
+decisions:abc123:5: Use PostgreSQL for persistence layer (0.312)
+learnings:def456:2: SQLite FTS5 vs sqlite-vec trade-offs (0.387)
+```
+
+### 7.3 Active Memory Enrichment
+
+The response guidance teaches Claude to actively enrich memory:
+
+1. **Proactive Capture**: When making decisions, Claude outputs block markers
+2. **Memory Reference**: When memories are relevant, Claude cites them: "Based on a previous decision (decisions:5da308d:18)..."
+3. **Git Commit Tracing**: Memory IDs contain commit SHAs for implementation context
+
+---
+
+## 8. Novel Use Cases
+
+### 8.1 Cross-Session Architectural Continuity
+
+**Scenario**: Developer asks about database choice in new session
+
+**Memory Context** (injected at SessionStart):
+```xml
+<memory id="decisions:5da308d:18">
+  <summary>Git notes as source of truth, SQLite as derived queryable index</summary>
+</memory>
+```
+
+**LLM Response**: "Based on a previous architectural decision (decisions:5da308d:18), we chose to use git notes as the source of truth with SQLite as a derived index for search performance."
+
+### 8.2 Blocker Resolution Tracking
+
+**Session 1** (captured):
+```
+▶ blocker ─────────────────────────────────────
+Hook-based memory capture not working
+
+## Context
+User outputs 16 block markers but /memory:status shows 0 memories.
+
+## Impact
+5 hours of exploration produced no captured memories.
