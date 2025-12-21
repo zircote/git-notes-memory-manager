@@ -48,3 +48,21 @@ tags:
 ## Completed Spec Projects
 
 - `docs/spec/completed/2025-12-19-hook-based-memory-capture/` - Hook-Based...
+
+---
+type: progress
+timestamp: '2025-12-21T16:06:42.335715+00:00'
+summary: '...injection'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...injection
+5. Team knowledge distribution via git push/pull
+
+## Completed Spec Projects
+
+- `docs/spec/completed/2025-12-19-hook-based-memory-capture/` - Hook-Based Memory Capture
+  - Completed: 2025-12-19...
