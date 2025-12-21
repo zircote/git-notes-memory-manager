@@ -15,3 +15,17 @@ logger = logging.getLogger(__name__)
 # ANSI escape sequence pattern for stripping colors from input
 # Matches: ESC[...m (SGR sequences for colors/styles)
 ANSI_ESCAPE_PATTERN...
+
+---
+type: patterns
+timestamp: '2025-12-21T04:43:28.391151+00:00'
+summary: '# ANSI escape sequence pattern for stripping colors from input'
+tags:
+- auto-captured
+- post-tool-use
+- file:signal_detector.py
+---
+
+# ANSI escape sequence pattern for stripping colors from input
+# Matches: ESC[...m (SGR sequences for colors/styles)
+ANSI_ESCAPE_PATTERN...
