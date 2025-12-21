@@ -34,6 +34,7 @@ import sys
 from typing import Any
 
 from git_notes_memory.config import HOOK_SESSION_START_TIMEOUT, get_project_index_path
+from git_notes_memory.git_ops import GitOps
 from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.context_builder import ContextBuilder
 from git_notes_memory.hooks.guidance_builder import GuidanceBuilder
@@ -164,6 +165,16 @@ def main() -> None:
             project_info.name,
             project_info.spec_id,
         )
+
+        # Ensure git notes sync is configured for this repository
+        try:
+            git_ops = GitOps(repo_path=cwd)
+            if git_ops.ensure_sync_configured():
+                logger.debug("Git notes sync configured for repository")
+            else:
+                logger.debug("Git notes sync not configured (no remote or not a git repo)")
+        except Exception as e:
+            logger.debug("Could not configure git notes sync: %s", e)
 
         # Build response guidance if enabled
         guidance_xml = ""

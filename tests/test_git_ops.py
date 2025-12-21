@@ -589,6 +589,84 @@ class TestGitOpsSyncConfigMocked:
             assert result["rewrite"] is True
             assert result["merge"] is True
 
+    def test_ensure_sync_configured_when_not_git_repo(self, tmp_path: Path) -> None:
+        """Test ensure_sync_configured returns False for non-git repos."""
+        git = GitOps(tmp_path)
+        mock_result = MagicMock(returncode=128, stdout="")
+
+        with patch("subprocess.run", return_value=mock_result):
+            assert git.ensure_sync_configured() is False
+
+    def test_ensure_sync_configured_when_no_remote(self, tmp_path: Path) -> None:
+        """Test ensure_sync_configured returns False when no origin remote."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args, **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            if "rev-parse" in args_str and "--git-dir" in args_str:
+                return MagicMock(returncode=0, stdout=".git")
+            if "remote" in args_str and "get-url" in args_str:
+                return MagicMock(returncode=1, stdout="")
+            return MagicMock(returncode=0, stdout="")
+
+        with patch("subprocess.run", side_effect=mock_run):
+            assert git.ensure_sync_configured() is False
+
+    def test_ensure_sync_configured_already_configured(self, tmp_path: Path) -> None:
+        """Test ensure_sync_configured returns True when already configured."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args, **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+            if "rev-parse" in args_str and "--git-dir" in args_str:
+                result.stdout = ".git"
+            elif "remote" in args_str and "get-url" in args_str:
+                result.stdout = "git@github.com:user/repo.git"
+            elif "remote.origin.push" in args_str or "remote.origin.fetch" in args_str:
+                result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            elif "notes.rewriteRef" in args_str:
+                result.stdout = "refs/notes/mem/*"
+            elif "notes.mergeStrategy" in args_str:
+                result.stdout = "cat_sort_uniq"
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            assert git.ensure_sync_configured() is True
+
+    def test_ensure_sync_configured_configures_missing(self, tmp_path: Path) -> None:
+        """Test ensure_sync_configured configures missing settings."""
+        git = GitOps(tmp_path)
+        config_calls = []
+
+        def mock_run(args, **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+
+            if "rev-parse" in args_str and "--git-dir" in args_str:
+                result.stdout = ".git"
+            elif "remote" in args_str and "get-url" in args_str:
+                result.stdout = "git@github.com:user/repo.git"
+            elif "config" in args_str and "--add" in args_str:
+                # Track config calls
+                config_calls.append(args)
+                result.returncode = 0
+            elif "config" in args_str and "--get" in args_str:
+                # First is_sync_configured call returns not configured
+                if len(config_calls) == 0:
+                    result.returncode = 1
+                    result.stdout = ""
+                else:
+                    # After configure, return configured
+                    result.stdout = "refs/notes/mem/*"
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.ensure_sync_configured()
+            # Should have made config calls
+            assert len(config_calls) > 0
+            assert result is True
+
 
 # =============================================================================
 # GitOps Repository Info Tests (Mocked)

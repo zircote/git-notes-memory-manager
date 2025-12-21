@@ -18,7 +18,7 @@ import fcntl
 import logging
 import os
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -915,8 +915,14 @@ def get_default_service() -> CaptureService:
         The default service is created without index or embedding services.
         Use set_index_service() and set_embedding_service() to enable
         these features after getting the default service.
+
+        On first creation, also ensures git notes sync is configured
+        for the repository (push/fetch refspecs for notes).
     """
     global _default_service
     if _default_service is None:
         _default_service = CaptureService()
+        # Ensure git notes sync is configured on first use (best effort)
+        with suppress(Exception):
+            _default_service.git_ops.ensure_sync_configured()
     return _default_service

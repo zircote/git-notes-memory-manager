@@ -611,6 +611,47 @@ class GitOps:
 
         return configured
 
+    def ensure_sync_configured(self) -> bool:
+        """Ensure git notes sync is configured for this repository.
+
+        This is the primary entry point for auto-configuration. Call this
+        at service initialization or session start to ensure notes will
+        sync with push/pull operations.
+
+        Returns:
+            True if sync is fully configured (either already was or just configured).
+
+        Note:
+            This method is idempotent and safe to call repeatedly.
+            It will only configure what's missing.
+        """
+        # Check if we're in a git repository with a remote
+        if not self.is_git_repository():
+            return False
+
+        # Check for origin remote
+        result = self._run_git(
+            ["remote", "get-url", "origin"],
+            check=False,
+        )
+        if result.returncode != 0:
+            # No origin remote - can't configure sync
+            return False
+
+        # Check current configuration
+        status = self.is_sync_configured()
+
+        # If already fully configured, nothing to do
+        if all(status.values()):
+            return True
+
+        # Configure missing parts
+        self.configure_sync()
+
+        # Verify configuration
+        final_status = self.is_sync_configured()
+        return all(final_status.values())
+
     # =========================================================================
     # Repository Information
     # =========================================================================
