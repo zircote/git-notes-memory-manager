@@ -30,3 +30,19 @@ tags:
             return []
 
         #...
+
+---
+type: learnings
+timestamp: '2025-12-21T04:52:45.558820+00:00'
+summary: '...blocker`, `▶ progress`, `▶ pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...blocker`, `▶ progress`, `▶ pattern`
+
+**Quick markers (brief notes only):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`
+
+**REQUIRED:** Memories in `<memory_context>` are summaries. Use...
