@@ -59,3 +59,19 @@ tags:
 ---
 
 ...semantically-searchable memory using Git's native notes mechanism as the storage layer. The system, implemented as "git-notes-memory-manager," demonstrates how developer context can be captured, indexed,...
+
+---
+type: progress
+timestamp: '2025-12-21T06:21:54.793023+00:00'
+summary: '...learned", "TIL" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...learned", "TIL" |
+| blockers | Impediments | "blocked by", "stuck on" |
+| progress | Milestones | "completed", "shipped" |
+| patterns | Reusable approaches | "best practice" |
+| research | External findings...
