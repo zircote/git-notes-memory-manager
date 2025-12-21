@@ -45,3 +45,21 @@ tags:
     return ANSI_ESCAPE_PATTERN.sub("", text)
 
 # Pattern definitions by signal type
+
+---
+type: patterns
+timestamp: '2025-12-21T04:50:10.540773+00:00'
+summary: '...SignalType'
+tags:
+- auto-captured
+- post-tool-use
+- file:signal_detector.py
+---
+
+...SignalType
+
+__all__ = ["SignalDetector", "SIGNAL_PATTERNS"]
+
+logger = logging.getLogger(__name__)
+
+# Pattern definitions by signal type
