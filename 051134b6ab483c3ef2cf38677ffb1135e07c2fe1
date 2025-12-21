@@ -283,3 +283,20 @@ tags:
 |---------|--------|---------|
 | Decision | `[decision]` | `[decision] Using PostgreSQL for JSONB support` |
 | Learning | `[learned]` | `[learned]...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:53:58.743731+00:00'
+summary: '...preferred.'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...preferred.
+
+| Trigger | Marker | Example |
+|---------|--------|---------|
+| Decision | `[decision]` | `[decision] Using PostgreSQL for JSONB support` |
+| Learning | `[learned]` | `[learned] pytest fixtures...
