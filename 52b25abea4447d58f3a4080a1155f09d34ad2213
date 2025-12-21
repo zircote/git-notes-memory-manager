@@ -16,3 +16,18 @@ tags:
 3. RETROSPECTIVE.md files for lessons learned
 
 ### Phase 2C:...
+
+---
+type: progress
+timestamp: '2025-12-21T06:19:36.064658+00:00'
+summary: '...Models: models.py (core), hooks/models.py (hook-specific)'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...Models: models.py (core), hooks/models.py (hook-specific)
+4. Architecture docs: docs/spec/completed/*/ARCHITECTURE.md
+5. ADRs: docs/spec/completed/*/DECISIONS.md
+6. Session logs: ~/.local/share/memory...
