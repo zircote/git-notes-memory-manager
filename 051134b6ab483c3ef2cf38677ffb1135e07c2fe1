@@ -30,3 +30,21 @@ tags:
 | Progress | `[progress] What was done` |
 
 **IMPORTANT:** Block format...
+
+---
+type: blockers
+timestamp: '2025-12-21T04:53:16.194480+00:00'
+summary: '...────────────────────────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...────────────────────────
+```
+
+**Inline markers (quick captures only):**
+`[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Valid namespaces:** decisions, learnings, blockers, progress,...
