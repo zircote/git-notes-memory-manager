@@ -104,3 +104,18 @@ tags:
 ...blockers | Impediments | "blocked by", "stuck on", "[blocker]" |
 | progress | Milestones | "completed", "shipped", "[progress]" |
 | patterns | Reusable approaches | "best practice", "[pattern]"...
+
+---
+type: progress
+timestamp: '2025-12-21T06:28:25.790792+00:00'
+summary: '...Impediments | "blocked by", "stuck on", "[blocker]" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...Impediments | "blocked by", "stuck on", "[blocker]" |
+| progress | Milestones | "completed", "shipped", "[progress]" |
+| patterns | Reusable approaches | "best practice", "[pattern]" |
+| research...
