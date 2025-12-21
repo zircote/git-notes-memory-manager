@@ -127,3 +127,23 @@ tags:
 ...`[decision]` | `[decision] Using PostgreSQL for JSONB support` |
 | Learning | `[learned]` | `[learned] pytest fixtures share state with module scope` |
 | Blocker | `[blocker]` | `[blocker] Circular...
+
+---
+type: learnings
+timestamp: '2025-12-21T04:53:58.915568+00:00'
+summary: '...──────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...──────
+```
+
+**Inline markers (quick captures only):**
+
+- `[decision] text` — decisions namespace
+- `[learned] text` — learnings namespace
+- `[blocker] text` — blockers namespace
+- `[progress] text` —...
