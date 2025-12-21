@@ -193,3 +193,18 @@ tags:
 ...namespace="blockers" timestamp="2025-12-21T04:53:58.818864+00:00">
         <summary>...[learned]` | `[learned] pytest fixtures share state with module scope` |</summary>
         <tags>auto-captured, post-tool-use...
+
+---
+type: learnings
+timestamp: '2025-12-21T06:28:25.674547+00:00'
+summary: '...| "I decided", "we chose", "[decision]" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...| "I decided", "we chose", "[decision]" |
+| learnings | Technical insights | "I learned", "TIL", "[learned]" |
+| blockers | Impediments | "blocked by", "stuck on", "[blocker]" |
+| progress...
