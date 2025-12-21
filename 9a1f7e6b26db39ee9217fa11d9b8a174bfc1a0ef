@@ -1,0 +1,16 @@
+---
+type: decisions
+timestamp: '2025-12-21T02:47:43.382550+00:00'
+summary: '...namespace.'
+tags:
+- auto-captured
+- post-tool-use
+- file:models.py
+---
+
+...namespace.
+
+    Attributes:
+        DECISION: User made a decision ("I chose", "decided to", "we'll go with")
+        LEARNING: User learned something ("I learned", "TIL", "turns out")
+        BLOCKER:...
