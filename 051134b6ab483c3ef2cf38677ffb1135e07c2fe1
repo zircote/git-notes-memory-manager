@@ -78,3 +78,21 @@ tags:
 ...[learned]` | `[learned] pytest fixtures share state with module scope` |
 | Blocker | `[blocker]` | `[blocker] Circular FK dependency between tables` |
 | Progress | `[progress]` | `[progress] JWT auth...
+
+---
+type: blockers
+timestamp: '2025-12-21T04:53:58.934648+00:00'
+summary: '...only):**'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...only):**
+
+- `[decision] text` — decisions namespace
+- `[learned] text` — learnings namespace
+- `[blocker] text` — blockers namespace
+- `[progress] text` — progress namespace
+- `[pattern] text` — patterns...
