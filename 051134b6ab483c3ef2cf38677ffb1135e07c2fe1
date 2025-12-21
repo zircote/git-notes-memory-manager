@@ -319,3 +319,12 @@ tags:
 - `[decision] text` — decisions namespace
 - `[learned] text` — learnings namespace
 - `[blocker] text` —...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:58:10.762421+00:00'
+summary: '...────────────────`\n\n---\n\n## 📋 DECISIONS TO CAPTURE\n\n### ADR-001:
+  Git Notes as Source of Trut'
+---
+
+...────────────────`\n\n---\n\n## 📋 DECISIONS TO CAPTURE\n\n### ADR-001: Git Notes as Source of Truth\n[decision] Git notes chosen as primary storage (`refs/notes/mem/{namespace}`) because they are distributed,...
