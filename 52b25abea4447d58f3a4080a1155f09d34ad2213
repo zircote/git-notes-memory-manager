@@ -88,3 +88,18 @@ tags:
 ```
 
 Research on metadata management in...
+
+---
+type: patterns
+timestamp: '2025-12-21T06:28:25.831572+00:00'
+summary: '..."[blocker]" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+..."[blocker]" |
+| progress | Milestones | "completed", "shipped", "[progress]" |
+| patterns | Reusable approaches | "best practice", "[pattern]" |
+| research | External findings | Manual capture...
