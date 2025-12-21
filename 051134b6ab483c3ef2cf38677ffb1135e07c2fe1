@@ -63,3 +63,18 @@ tags:
 ...Learning | `[learned]` | `[learned] pytest fixtures share state with module scope` |
 | Blocker | `[blocker]` | `[blocker] Circular FK dependency between tables` |
 | Progress | `[progress]` | `[progress]...
+
+---
+type: blockers
+timestamp: '2025-12-21T04:53:58.818864+00:00'
+summary: '...[learned]` | `[learned] pytest fixtures share state with module scope`
+  |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...[learned]` | `[learned] pytest fixtures share state with module scope` |
+| Blocker | `[blocker]` | `[blocker] Circular FK dependency between tables` |
+| Progress | `[progress]` | `[progress] JWT auth...
