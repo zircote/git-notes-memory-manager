@@ -10,3 +10,24 @@ summary: '...memories**: Use markers anywhere in your messages:'
 - `/memory:capture <namespace> <content>` - Explicit capture
 
 **Available...
+
+---
+type: decisions
+timestamp: '2025-12-21T06:02:24.773514+00:00'
+summary: Git notes as source of truth, SQLite as derived queryable index
+---
+
+Git notes as source of truth, SQLite as derived queryable index
+## Context
+Core architectural decision for the memory storage system. Git notes provide distributed, versioned storage that syncs with code, while SQLite + sqlite-vec provides fast KNN search.
+
+## Rationale
+- Git notes are inherently distributed (push/pull with repos)
+- Version history comes free with git
+- Index can be rebuilt from notes (SyncService.reindex)
+- sqlite-vec enables local semantic search without external APIs
+
+## Related Files
+- docs/spec/completed/2025-12-18-memory-capture-plugin/ARCHITECTURE.md:85-91
+- src/git_notes_memory/git_ops.py:1-50
+- src/git_notes_memory/sync.py:1-50
