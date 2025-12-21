@@ -14,3 +14,19 @@ Supported marker formats:
 - Inline: [decision], [learned], [blocker], [progress], [remember]
 - Block: ▶ decision ───, ▶ learned ───, etc.
 - Colon blocks:...
+
+---
+type: learnings
+timestamp: '2025-12-21T05:46:13.301086+00:00'
+summary: Session analyzer fix verified - block markers detected
+tags:
+- hook-fix
+- session-analyzer
+---
+
+The session_analyzer._parse_jsonl_transcript() method was not extracting
+text from Claude's structured message format. Claude JSONL has:
+  message.content = [{type: "text", text: "..."}, ...]
+
+Fixed by iterating content blocks and extracting text where type == "text".
+Now properly detects unicode block markers like ▶ decision ───.
