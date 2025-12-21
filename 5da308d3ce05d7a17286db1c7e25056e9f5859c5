@@ -500,3 +500,22 @@ Core architectural decision for the memory storage system. Git notes provide dis
 - docs/spec/completed/2025-12-18-memory-capture-plugin/ARCHITECTURE.md:85-91
 - src/git_notes_memory/git_ops.py:1-50
 - src/git_notes_memory/sync.py:1-50
+
+---
+type: decisions
+timestamp: '2025-12-21T05:59:07.676512+00:00'
+summary: Lazy loading via __getattr__ to avoid embedding model import penalty
+---
+
+Lazy loading via __getattr__ to avoid embedding model import penalty
+## Context
+The sentence-transformers embedding model adds 2-3 seconds to import time. SessionStart hooks must complete quickly (<5s) to avoid blocking Claude Code sessions.
+
+## Rationale
+- Defer all expensive imports until first use
+- Factory functions (`get_capture_service()`) create singletons lazily
+- Direct SQLite queries in session_start_handler avoid full IndexService initialization
+
+## Related Files
+- src/git_notes_memory/__init__.py:27-85
+- src/git_notes_memory/hooks/session_start_handler.py:66-89
