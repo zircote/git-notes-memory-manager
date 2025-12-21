@@ -30,3 +30,21 @@ tags:
 ...following `/claude-spec:complete` protocol for non-standard projects. The protocol applies to ALL completed work, not just implementation projects
 
 2. **Proactive Retrospective**: Should have planned...
+
+---
+type: progress
+timestamp: '2025-12-21T16:06:42.312778+00:00'
+summary: '...detection'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...detection
+4. Token-budgeted context injection
+5. Team knowledge distribution via git push/pull
+
+## Completed Spec Projects
+
+- `docs/spec/completed/2025-12-19-hook-based-memory-capture/` - Hook-Based...
