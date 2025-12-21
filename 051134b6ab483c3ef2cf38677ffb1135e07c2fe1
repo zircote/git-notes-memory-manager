@@ -128,3 +128,21 @@ tags:
 ### Enforcement
 
 - **DO:** Include block markers...
+
+---
+type: progress
+timestamp: '2025-12-21T04:53:58.877748+00:00'
+summary: '...dependency between tables` |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...dependency between tables` |
+| Progress | `[progress]` | `[progress] JWT auth with refresh rotation implemented` |
+
+### Enforcement
+
+- **DO:** Include block markers as you work, not after the fact
+- **DO:**...
