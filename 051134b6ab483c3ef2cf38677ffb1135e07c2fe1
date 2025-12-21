@@ -99,3 +99,20 @@ tags:
 ### Inline Format (Quick Captures Only)
 
 For very brief captures without...
+
+---
+type: patterns
+timestamp: '2025-12-21T04:53:16.232032+00:00'
+summary: '...`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`
+
+**Inline markers (quick captures only):**
+`[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Valid namespaces:** decisions, learnings, blockers, progress, patterns, research, reviews,...
