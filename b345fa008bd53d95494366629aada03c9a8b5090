@@ -66,3 +66,19 @@ tags:
 
 - `docs/spec/completed/2025-12-19-hook-based-memory-capture/` - Hook-Based Memory Capture
   - Completed: 2025-12-19...
+
+---
+type: progress
+timestamp: '2025-12-21T16:06:42.357658+00:00'
+summary: '...`docs/spec/completed/2025-12-19-hook-based-memory-capture/` - Hook-Based
+  Memory Capture'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...`docs/spec/completed/2025-12-19-hook-based-memory-capture/` - Hook-Based Memory Capture
+  - Completed: 2025-12-19
+  - Outcome: success
+  - Features: 5 hooks, adaptive token budget, confidence-based...
