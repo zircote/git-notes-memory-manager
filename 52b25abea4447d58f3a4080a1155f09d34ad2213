@@ -91,3 +91,18 @@ tags:
 | blockers | Impediments | "blocked by", "stuck on", "[blocker]" |
 | progress | Milestones | "completed", "shipped", "[progress]" |
 | patterns...
+
+---
+type: blockers
+timestamp: '2025-12-21T06:28:25.752114+00:00'
+summary: '...| "I learned", "TIL", "[learned]" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...| "I learned", "TIL", "[learned]" |
+| blockers | Impediments | "blocked by", "stuck on", "[blocker]" |
+| progress | Milestones | "completed", "shipped", "[progress]" |
+| patterns | Reusable...
