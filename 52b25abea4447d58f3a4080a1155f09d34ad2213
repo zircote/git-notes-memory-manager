@@ -46,3 +46,16 @@ tags:
 4. Architecture docs: docs/spec/completed/*/ARCHITECTURE.md
 5. ADRs: docs/spec/completed/*/DECISIONS.md
 6. Session logs: ~/.local/share/memory-plugin/logs/*.log
+
+---
+type: progress
+timestamp: '2025-12-21T06:21:54.698406+00:00'
+summary: '...semantically-searchable memory using Git''s native notes mechanism as
+  the storage layer. The syste'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...semantically-searchable memory using Git's native notes mechanism as the storage layer. The system, implemented as "git-notes-memory-manager," demonstrates how developer context can be captured, indexed,...
