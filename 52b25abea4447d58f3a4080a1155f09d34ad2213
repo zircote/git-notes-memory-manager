@@ -31,3 +31,19 @@ tags:
 ```
 ▶ learned ─────────────────────────────────────
 Hook...
+
+---
+type: blockers
+timestamp: '2025-12-21T06:21:54.756515+00:00'
+summary: '...chose" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...chose" |
+| learnings | Technical insights | "I learned", "TIL" |
+| blockers | Impediments | "blocked by", "stuck on" |
+| progress | Milestones | "completed", "shipped" |
+| patterns | Reusable approaches...
