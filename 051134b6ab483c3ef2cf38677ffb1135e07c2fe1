@@ -132,3 +132,18 @@ tags:
 | Identified pattern | `▶ pattern ───` | patterns | Reusable approaches, idioms, best practices |
 
 ### Inline Format...
+
+---
+type: patterns
+timestamp: '2025-12-21T04:53:58.680611+00:00'
+summary: '...progress ───` | progress | Finished features, milestones, fixes |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...progress ───` | progress | Finished features, milestones, fixes |
+| Identified pattern | `▶ pattern ───` | patterns | Reusable approaches, idioms, best practices |
+
+### Inline Format (Quick Captures...
