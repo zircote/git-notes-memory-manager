@@ -111,3 +111,15 @@ tags:
 ---
 
 ...recall_behaviors>` → `<reference>`\n- "When you make a decision, IMMEDIATELY document it..." > "Syntax: [decision]"\n- Context engineering: operating instructions become part of workflow\n\n## Related Files\n-...
+
+---
+type: decisions
+timestamp: '2025-12-21T05:31:41.564887+00:00'
+summary: '...Use markers anywhere in your messages:\n- `[remember] <insight>` - Captures
+  a learning\n- `[de...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Use markers anywhere in your messages:\n- `[remember] <insight>` - Captures a learning\n- `[decision] <choice>` - Captures a decision\n- `/memory:capture <namespace> <content>` - Explicit capture\n\n**Available...
