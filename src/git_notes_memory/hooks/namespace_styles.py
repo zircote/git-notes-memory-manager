@@ -24,6 +24,9 @@ __all__ = [
     "get_style",
     "format_namespace",
     "format_marker",
+    "format_block_marker",
+    "format_block_open",
+    "format_block_close",
     "STYLES",
 ]
 
@@ -118,6 +121,39 @@ class NamespaceStyle:
             Colored namespace string like "🛑 blockers".
         """
         return f"{self.color}{self.emoji} {self.namespace}{Color.RESET.value}"
+
+    def format_block_open(self, summary: str = "") -> str:
+        """Format a block marker opening with color.
+
+        Args:
+            summary: Optional summary line after the marker.
+
+        Returns:
+            Colored block opening like ":::decision Summary here".
+        """
+        # Use shortened name for block marker
+        marker_name = self.namespace
+        if self.namespace == "learnings":
+            marker_name = "learned"
+        elif self.namespace == "decisions":
+            marker_name = "decision"
+        elif self.namespace == "blockers":
+            marker_name = "blocker"
+        elif self.namespace == "patterns":
+            marker_name = "pattern"
+
+        marker = f"{self.color}:::{marker_name}{Color.RESET.value}"
+        if summary:
+            return f"{marker} {summary}"
+        return marker
+
+    def format_block_close(self) -> str:
+        """Format a block marker closing with color.
+
+        Returns:
+            Colored block closing ":::".
+        """
+        return f"{self.color}:::{Color.RESET.value}"
 
 
 # =============================================================================
@@ -266,6 +302,62 @@ def format_marker(namespace: str, content: str) -> str:
     """
     style = get_style(namespace)
     return style.format_marker(content)
+
+
+def format_block_open(namespace: str, summary: str = "") -> str:
+    """Format a block marker opening with color.
+
+    Args:
+        namespace: The namespace identifier.
+        summary: Optional summary line after the marker.
+
+    Returns:
+        Colored block opening like ":::decision Summary here".
+
+    Example:
+        >>> format_block_open("decisions", "Use PostgreSQL for persistence")
+        ':::decision Use PostgreSQL for persistence'  # with blue coloring
+    """
+    style = get_style(namespace)
+    return style.format_block_open(summary)
+
+
+def format_block_close(namespace: str) -> str:
+    """Format a block marker closing with color.
+
+    Args:
+        namespace: The namespace identifier.
+
+    Returns:
+        Colored block closing ":::".
+
+    Example:
+        >>> format_block_close("decisions")
+        ':::'  # with blue coloring
+    """
+    style = get_style(namespace)
+    return style.format_block_close()
+
+
+def format_block_marker(namespace: str, summary: str, body: str) -> str:
+    """Format a complete block marker with opening, body, and closing.
+
+    Args:
+        namespace: The namespace identifier.
+        summary: Summary line for the block.
+        body: Full body content of the block.
+
+    Returns:
+        Complete styled block with colored markers.
+
+    Example:
+        >>> format_block_marker("decisions", "Use PostgreSQL", "## Context\\n...")
+        ':::decision Use PostgreSQL\\n## Context\\n...\\n:::'
+    """
+    style = get_style(namespace)
+    opening = style.format_block_open(summary)
+    closing = style.format_block_close()
+    return f"{opening}\n{body}\n{closing}"
 
 
 def format_memory_header(
