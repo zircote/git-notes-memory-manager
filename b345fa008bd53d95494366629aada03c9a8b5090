@@ -147,3 +147,13 @@ summary: '...namespace="blockers" timestamp="2025-12-21T04:53:58.799793+00:00">'
 ...namespace="blockers" timestamp="2025-12-21T04:53:58.799793+00:00">
         <summary>...Learning | `[learned]` | `[learned] pytest fixtures share state with module scope` |</summary>
         <tags>auto-captured...
+
+---
+type: learnings
+timestamp: '2025-12-21T15:54:00.732076+00:00'
+summary: '...timestamp="2025-12-21T04:53:58.799793+00:00">'
+---
+
+...timestamp="2025-12-21T04:53:58.799793+00:00">
+        <summary>...Learning | `[learned]` | `[learned] pytest fixtures share state with module scope` |</summary>
+        <tags>auto-captured, post-tool-use...
