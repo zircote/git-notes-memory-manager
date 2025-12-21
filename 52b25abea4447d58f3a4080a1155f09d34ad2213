@@ -1,0 +1,18 @@
+---
+type: progress
+timestamp: '2025-12-21T06:16:14.239002+00:00'
+summary: '...HydrationLevel, CaptureSignal structures'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_PLAN.md
+---
+
+...HydrationLevel, CaptureSignal structures
+
+### Phase 2B: Documentation Mining
+1. ARCHITECTURE.md files in completed specs
+2. DECISIONS.md (ADRs)
+3. RETROSPECTIVE.md files for lessons learned
+
+### Phase 2C:...
