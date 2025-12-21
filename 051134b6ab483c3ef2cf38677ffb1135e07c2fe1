@@ -1,0 +1,14 @@
+---
+type: learnings
+timestamp: '2025-12-21T04:43:48.157471+00:00'
+summary: 'Example::'
+tags:
+- auto-captured
+- post-tool-use
+- file:signal_detector.py
+---
+
+Example::
+
+            text = "I learned that async/await is cleaner than callbacks"
+            signals = detector.detect(text)...
