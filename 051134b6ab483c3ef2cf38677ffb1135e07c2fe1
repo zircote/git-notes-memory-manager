@@ -266,3 +266,20 @@ tags:
 `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
 
 **Valid namespaces:** decisions, learnings,...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:53:58.722958+00:00'
+summary: '...strongly preferred.'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...strongly preferred.
+
+| Trigger | Marker | Example |
+|---------|--------|---------|
+| Decision | `[decision]` | `[decision] Using PostgreSQL for JSONB support` |
+| Learning | `[learned]` | `[learned]...
