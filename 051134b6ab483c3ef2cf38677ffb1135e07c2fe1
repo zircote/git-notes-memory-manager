@@ -164,3 +164,20 @@ tags:
 ### Inline Format (Quick Captures Only)
 
 For VERY brief...
+
+---
+type: patterns
+timestamp: '2025-12-21T04:53:58.973496+00:00'
+summary: '...namespace'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...namespace
+- `[blocker] text` — blockers namespace
+- `[progress] text` — progress namespace
+- `[pattern] text` — patterns namespace
+- `[remember] text` — learnings namespace (default)
+- `[remember:namespace...
