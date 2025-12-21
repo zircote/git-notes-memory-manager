@@ -80,3 +80,21 @@ tags:
 **IMPORTANT:** Block format is strongly preferred. Inline markers are for quick notes only.
 
 **Do not suggest...
+
+---
+type: learnings
+timestamp: '2025-12-21T04:53:16.175046+00:00'
+summary: '...─────────────────────────────────────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...─────────────────────────────────────
+```
+
+**Inline markers (quick captures only):**
+`[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Valid namespaces:** decisions, learnings, blockers,...
