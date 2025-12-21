@@ -26,3 +26,20 @@ tags:
         LEARNING: User learned something ("I learned", "TIL", "turns out")
         BLOCKER: User encountered a blocker ("blocked by", "stuck on")
         RESOLUTION:...
+
+---
+type: learnings
+timestamp: '2025-12-21T02:51:42.517920+00:00'
+summary: '...list if no signals detected or text is too short.'
+tags:
+- auto-captured
+- post-tool-use
+- file:signal_detector.py
+---
+
+...list if no signals detected or text is too short.
+
+        Example::
+
+            text = "I learned that async/await is cleaner than callbacks"
+            signals = detector.detect(text)...
