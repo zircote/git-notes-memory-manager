@@ -87,3 +87,12 @@ summary: '...────────────────`\n\n---\n\n## 📋
 ---
 
 ...────────────────`\n\n---\n\n## 📋 DECISIONS TO CAPTURE\n\n### ADR-001: Git Notes as Source of Truth\n[decision] Git notes chosen as primary storage (`refs/notes/mem/{namespace}`) because they are distributed,...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:40:52.803627+00:00'
+summary: '...18-memory-capture-plugin/ARCHITECTURE.md:85`\n\n### ADR-002: SQLite +
+  sqlite-vec for Vector Searc'
+---
+
+...18-memory-capture-plugin/ARCHITECTURE.md:85`\n\n### ADR-002: SQLite + sqlite-vec for Vector Search\n[decision] Selected SQLite with sqlite-vec extension for KNN search: single file, no server, <200ms search,...
