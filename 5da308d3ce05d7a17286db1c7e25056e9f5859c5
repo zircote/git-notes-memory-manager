@@ -123,3 +123,20 @@ tags:
 ---
 
 ...Use markers anywhere in your messages:\n- `[remember] <insight>` - Captures a learning\n- `[decision] <choice>` - Captures a decision\n- `/memory:capture <namespace> <content>` - Explicit capture\n\n**Available...
+
+---
+type: decisions
+timestamp: '2025-12-21T05:39:50.735166+00:00'
+summary: '...inline markers, block markers, and semantic patterns.'
+tags:
+- auto-captured
+- post-tool-use
+- file:userpromptsubmit.py
+---
+
+...inline markers, block markers, and semantic patterns.
+
+Supported marker formats:
+- Inline: [decision], [learned], [blocker], [progress], [remember]
+- Block: ▶ decision ───, ▶ learned ───, etc.
+-...
