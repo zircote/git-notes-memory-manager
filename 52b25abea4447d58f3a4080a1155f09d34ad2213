@@ -133,3 +133,21 @@ tags:
 | patterns | Reusable approaches | "best practice", "[pattern]" |
 | research | External findings | Manual capture |
 | reviews | Code review notes | Manual...
+
+---
+type: patterns
+timestamp: '2025-12-21T06:28:25.887063+00:00'
+summary: '...implements the three-tier SDT-based model using regex patterns with confidence
+  scoring:'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...implements the three-tier SDT-based model using regex patterns with confidence scoring:
+
+**Pattern Examples**:
+```python
+DECISION_PATTERNS = [
+    (r"\[decision\]", 0.98),           # Explicit...
