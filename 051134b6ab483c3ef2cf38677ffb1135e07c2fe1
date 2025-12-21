@@ -247,3 +247,22 @@ tags:
 | Decision | `[decision] What and why` |
 | Learning | `[learned] The insight` |
 | Blocker | `[blocker] What blocks...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:53:16.156710+00:00'
+summary: '...150'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...150
+────────────────────────────────────────────────
+```
+
+**Inline markers (quick captures only):**
+`[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Valid namespaces:** decisions, learnings,...
