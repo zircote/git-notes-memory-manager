@@ -138,9 +138,8 @@ SIGNAL_PATTERNS: dict[SignalType, list[tuple[str, float]]] = {
     ],
 }
 
-# Block patterns extract FULL content between ::: markers
-# Format: (namespace_keyword, signal_type)
-# These are processed separately to capture the entire block as content
+# Block patterns extract FULL content between unicode markers
+# Format: ▶ namespace ─── ... content ... ────
 BLOCK_MARKERS: dict[str, SignalType] = {
     "decision": SignalType.DECISION,
     "learned": SignalType.LEARNING,
@@ -151,13 +150,15 @@ BLOCK_MARKERS: dict[str, SignalType] = {
     "remember": SignalType.EXPLICIT,
 }
 
-# Regex to capture full ::: blocks with document boundaries
-# Captures: full block including markers, namespace, title line, and body
+# Regex to capture unicode block markers
+# Format: ▶ namespace ───...
+#         content lines
+#         ────────────────
 BLOCK_PATTERN = re.compile(
-    r":::(decision|learned|learning|blocker|progress|pattern|remember)"
-    r"(?:\s+([^\n]+))?"  # Optional title on same line
-    r"(?:\n(.*?))?"  # Optional body content
-    r":::$",
+    r"▶\s+(decision|learned|learning|blocker|progress|pattern|remember)\s+─+"
+    r"(?:\s+([^\n]+))?"  # Optional summary on same line
+    r"\n(.*?)"  # Body content
+    r"^─+$",  # Closing line of dashes
     re.MULTILINE | re.DOTALL,
 )
 
@@ -273,7 +274,7 @@ class SignalDetector:
         signals: list[CaptureSignal] = []
         block_positions: set[tuple[int, int]] = set()
 
-        # FIRST: Detect full ::: block markers with complete content
+        # FIRST: Detect unicode block markers (▶ namespace ─── ... ────)
         for match in BLOCK_PATTERN.finditer(text):
             namespace_keyword = match.group(1).lower()
             title = (match.group(2) or "").strip()

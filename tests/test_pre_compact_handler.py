@@ -348,9 +348,9 @@ class TestReportSuggestions:
         stderr = capsys.readouterr().err
         assert "Found 2 memories" in stderr
         assert "Suggestion mode" in stderr
-        # Colored ::: block markers (with ANSI codes)
-        assert ":::decision" in stderr
-        assert ":::learned" in stderr
+        # Unicode block markers
+        assert "▶ decision" in stderr
+        assert "▶ learned" in stderr
         # Should show confidence percentages
         assert "90%" in stderr
         assert "85%" in stderr
@@ -383,8 +383,8 @@ class TestReportSuggestions:
         _report_suggestions([sample_signal])
 
         stderr = capsys.readouterr().err
-        # Colored ::: block marker
-        assert ":::decision" in stderr
+        # Unicode block marker
+        assert "▶ decision" in stderr
         assert "(90%)" in stderr
         assert "PostgreSQL" in stderr
 

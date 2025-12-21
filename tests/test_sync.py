@@ -238,6 +238,9 @@ class TestSyncServiceInit:
 
     def test_lazy_index_creation(self, tmp_path: Path) -> None:
         """Test index is created lazily."""
+        # Create .git directory to satisfy git root requirement
+        (tmp_path / ".git").mkdir()
+
         # Patch at the source module level where IndexService is defined
         with patch("git_notes_memory.index.IndexService") as mock_cls:
             mock_instance = MagicMock()
@@ -247,11 +250,10 @@ class TestSyncServiceInit:
             # Index not created yet
             assert service._index is None
 
-            # Access triggers creation
-            with patch("git_notes_memory.config.get_data_path", return_value=tmp_path):
-                result = service._get_index()
-                assert result is mock_instance
-                mock_instance.initialize.assert_called_once()
+            # Access triggers creation (find_git_root now returns tmp_path)
+            result = service._get_index()
+            assert result is mock_instance
+            mock_instance.initialize.assert_called_once()
 
     def test_lazy_git_ops_creation(self, tmp_path: Path) -> None:
         """Test git_ops is created lazily."""

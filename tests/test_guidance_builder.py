@@ -217,13 +217,13 @@ class TestGuidanceBuilderTokenEstimation:
         tokens = self.estimate_tokens(xml)
         assert tokens < 1000, f"Standard guidance is ~{tokens} tokens, expected <1000"
 
-    def test_detailed_under_1600_tokens(
+    def test_detailed_under_1700_tokens(
         self, guidance_builder: GuidanceBuilder
     ) -> None:
-        """Test that detailed guidance is under ~1600 tokens."""
+        """Test that detailed guidance is under ~1700 tokens."""
         xml = guidance_builder.build_guidance("detailed")
         tokens = self.estimate_tokens(xml)
-        assert tokens < 1600, f"Detailed guidance is ~{tokens} tokens, expected <1600"
+        assert tokens < 1700, f"Detailed guidance is ~{tokens} tokens, expected <1700"
 
 
 # =============================================================================

@@ -8,10 +8,12 @@ When you make a decision, learn something, hit a blocker, or complete work, you 
 
 ### Block Format (Required for All Captures)
 
-Memory blocks have THREE levels of detail for progressive hydration:
+Memory blocks use unicode markers for clean, readable formatting:
 
 ```
-:::decision Summary line describing the decision
+▶ decision ─────────────────────────────────────
+Use PostgreSQL for JSONB support
+
 ## Context
 Why this decision was needed and what problem it solves.
 
@@ -23,23 +25,25 @@ Why this decision was needed and what problem it solves.
 ## Related Files
 - src/database/connection.py:15-45
 - src/models/user.py:10-25
-:::
+────────────────────────────────────────────────
 ```
 
-**Three-Level Structure (REQUIRED):**
-1. **Summary Line** (after `:::namespace`) - One descriptive line
-2. **Detail Sections** (## Context, ## Rationale) - Full explanation
-3. **Related Files** (## Related Files) - file paths with line numbers
+**Structure:**
+1. **Opening line** (`▶ namespace ───`) - Starts the block
+2. **Summary** - First line after opening describes the capture
+3. **Detail Sections** (## Context, ## Rationale) - Full explanation
+4. **Related Files** (## Related Files) - File paths with line numbers
+5. **Closing line** (`────`) - Ends the block
 
 ### Supported Block Types
 
 | Trigger | Block Marker | Namespace |
 |---------|--------------|-----------|
-| Decision made | `:::decision Summary\n...\n:::` | decisions |
-| Learned something | `:::learned Summary\n...\n:::` | learnings |
-| Hit blocker | `:::blocker Summary\n...\n:::` | blockers |
-| Completed work | `:::progress Summary\n...\n:::` | progress |
-| Identified pattern | `:::pattern Summary\n...\n:::` | patterns |
+| Decision made | `▶ decision ───` | decisions |
+| Learned something | `▶ learned ───` | learnings |
+| Hit blocker | `▶ blocker ───` | blockers |
+| Completed work | `▶ progress ───` | progress |
+| Identified pattern | `▶ pattern ───` | patterns |
 
 ### Inline Format (Quick Captures Only)
 
@@ -79,7 +83,9 @@ These rules configure your behavior for this session.
 <marker_reference><![CDATA[
 **Block markers (PREFERRED):**
 ```
-:::namespace Summary line
+▶ namespace ─────────────────────────────────────
+Summary line describing the capture
+
 ## Context
 Details about why and what problem this solves.
 
@@ -90,7 +96,7 @@ Details about why and what problem this solves.
 ## Related Files
 - path/to/file.py:10-25
 - path/to/other.ts:100-150
-:::
+────────────────────────────────────────────────
 ```
 
 **Inline markers (quick captures only):**

@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../claude-spec"
+		},
+		{
+			"path": "../../../../git-notes-memory-manager"
+		}
+	],
+	"settings": {}
+}

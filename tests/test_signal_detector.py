@@ -1037,3 +1037,70 @@ class TestRealWorldPatterns:
         # Should have multiple types
         types_found = {s.type for s in signals}
         assert len(types_found) >= 3
+
+
+# =============================================================================
+# Unicode Block Marker Tests
+# =============================================================================
+
+
+class TestUnicodeBlockMarkers:
+    """Tests for unicode block marker detection."""
+
+    def test_detects_unicode_decision_block(self, detector: SignalDetector) -> None:
+        """Test detecting unicode decision block."""
+        text = (
+            "▶ decision ─────────────────────────────────────\n"
+            "Use PostgreSQL for JSONB support\n"
+            "## Context\n"
+            "Need flexible schema storage.\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].type == SignalType.DECISION
+        assert "Use PostgreSQL" in signals[0].context
+
+    def test_detects_unicode_learned_block(self, detector: SignalDetector) -> None:
+        """Test detecting unicode learned block."""
+        text = (
+            "▶ learned ──────────────────────────────────────\n"
+            "pytest fixtures share state with module scope\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].type == SignalType.LEARNING
+
+    def test_detects_unicode_blocker_block(self, detector: SignalDetector) -> None:
+        """Test detecting unicode blocker block."""
+        text = (
+            "▶ blocker ──────────────────────────────────────\n"
+            "Circular FK dependency between tables\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].type == SignalType.BLOCKER
+
+    def test_detects_unicode_progress_block(self, detector: SignalDetector) -> None:
+        """Test detecting unicode progress block."""
+        text = (
+            "▶ progress ─────────────────────────────────────\n"
+            "JWT auth with refresh rotation implemented\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].type == SignalType.PROGRESS
+
+    def test_unicode_block_high_confidence(self, detector: SignalDetector) -> None:
+        """Test that unicode blocks have high confidence."""
+        text = (
+            "▶ decision ─────────────────────────────────────\n"
+            "Use SQLite for local storage\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].confidence >= 0.95

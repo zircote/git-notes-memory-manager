@@ -40,6 +40,8 @@ __all__ = [
     "MODELS_DIR_NAME",
     "LOCK_FILE_NAME",
     "MEMORY_DIR_NAME",
+    "find_git_root",
+    "NotInGitRepositoryError",
     "get_data_path",
     "get_index_path",
     "get_project_index_path",
@@ -194,6 +196,53 @@ def get_index_path() -> Path:
 MEMORY_DIR_NAME = ".memory"
 
 
+class NotInGitRepositoryError(Exception):
+    """Raised when an operation requires a git repository but none is found."""
+
+    pass
+
+
+def find_git_root(start_path: Path | str | None = None) -> Path:
+    """Find the git repository root from a starting path.
+
+    Walks up the directory tree looking for a .git directory. The .memory
+    folder MUST always be at the git root, parallel to .git.
+
+    Args:
+        start_path: Starting path to search from. Defaults to current directory.
+
+    Returns:
+        Path to the git repository root.
+
+    Raises:
+        NotInGitRepositoryError: If not inside a git repository.
+
+    Example::
+
+        git_root = find_git_root()
+        # Returns /path/to/repo even if cwd is /path/to/repo/src/deep/subdir
+    """
+    if start_path is None:
+        current = Path.cwd()
+    else:
+        current = Path(start_path).resolve()
+
+    # Walk up looking for .git directory
+    for _ in range(100):  # Safety limit on depth
+        if (current / ".git").exists():
+            return current
+        parent = current.parent
+        if parent == current:
+            # Reached filesystem root without finding .git
+            break
+        current = parent
+
+    raise NotInGitRepositoryError(
+        f"Not inside a git repository: {start_path or Path.cwd()}. "
+        "The .memory folder must be at the git root parallel to .git."
+    )
+
+
 # Cache for project identifiers to avoid repeated file I/O
 _project_id_cache: dict[str, str] = {}
 
@@ -202,32 +251,38 @@ def get_project_identifier(repo_path: Path | str | None = None) -> str:
     """Get a unique identifier for a repository.
 
     Uses the repository's git remote URL if available, otherwise falls back
-    to the canonical path. The identifier is a short hash for filesystem safety.
+    to the canonical git root path. The identifier is a short hash for
+    filesystem safety.
+
+    This function always resolves to the git root before computing the
+    identifier, ensuring consistent IDs regardless of subdirectory.
 
     Results are cached to avoid repeated file I/O on hot paths.
 
     Args:
-        repo_path: Path to the repository. If None, uses current directory.
+        repo_path: Path within the repository. If None, uses current directory.
+                   The actual git root is discovered by walking up the tree.
 
     Returns:
         A short identifier string (e.g., "a1b2c3d4") unique to this repository.
+
+    Raises:
+        NotInGitRepositoryError: If not inside a git repository.
     """
     import hashlib
     import re
 
-    if repo_path is None:
-        repo_path = Path.cwd()
-    else:
-        repo_path = Path(repo_path).resolve()
+    # Always resolve to git root for consistent identification
+    git_root = find_git_root(repo_path)
 
-    # Check cache first for performance
-    cache_key = str(repo_path)
+    # Check cache first for performance (use git root as cache key)
+    cache_key = str(git_root)
     if cache_key in _project_id_cache:
         return _project_id_cache[cache_key]
 
     # Try to read remote URL from .git/config directly (no subprocess)
     identifier_source: str | None = None
-    git_config = repo_path / ".git" / "config"
+    git_config = git_root / ".git" / "config"
 
     if git_config.exists():
         try:
@@ -244,9 +299,9 @@ def get_project_identifier(repo_path: Path | str | None = None) -> str:
             # Git config file may not exist; fall back to path-based ID
             pass
 
-    # Fall back to canonical path if git config not available
+    # Fall back to canonical git root path if git config not available
     if not identifier_source:
-        identifier_source = str(repo_path)
+        identifier_source = str(git_root)
 
     # Create a short hash for filesystem-safe naming
     hash_digest = hashlib.sha256(identifier_source.encode()).hexdigest()[:12]
@@ -260,34 +315,51 @@ def get_project_memory_dir(repo_path: Path | str | None = None) -> Path:
     """Get the path to the project's .memory directory.
 
     The .memory directory stores project-specific memory data including
-    the SQLite index. This directory should be added to .gitignore.
+    the SQLite index. This directory is ALWAYS placed at the git repository
+    root, parallel to the .git folder, regardless of the current working
+    directory.
+
+    ARCHITECTURAL INVARIANT: .memory MUST be at git root parallel to .git.
+    This ensures consistent memory storage even when working from subdirectories.
 
     Args:
-        repo_path: Path to the repository. If None, uses current directory.
+        repo_path: Path within the repository. If None, uses current directory.
+                   The actual git root is discovered by walking up the tree.
 
     Returns:
-        Path to .memory/ directory in the repository root.
-    """
-    if repo_path is None:
-        repo_path = Path.cwd()
-    else:
-        repo_path = Path(repo_path).resolve()
+        Path to .memory/ directory at the git repository root.
 
-    return repo_path / MEMORY_DIR_NAME
+    Raises:
+        NotInGitRepositoryError: If not inside a git repository.
+
+    Example::
+
+        # From /path/to/repo/src/deep/subdir
+        get_project_memory_dir()  # Returns /path/to/repo/.memory
+    """
+    git_root = find_git_root(repo_path)
+    return git_root / MEMORY_DIR_NAME
 
 
 def get_project_index_path(repo_path: Path | str | None = None) -> Path:
     """Get the path to a project-specific SQLite index database.
 
-    Each repository gets its own index database stored in <repo>/.memory/index.db.
+    Each repository gets its own index database stored in <git-root>/.memory/index.db.
     This ensures sync/reindex operations only affect the current project.
     The .memory directory should be added to .gitignore.
 
+    ARCHITECTURAL INVARIANT: The database is ALWAYS at the git root, parallel
+    to .git, regardless of the current working directory.
+
     Args:
-        repo_path: Path to the repository. If None, uses current directory.
+        repo_path: Path within the repository. If None, uses current directory.
+                   The actual git root is discovered by walking up the tree.
 
     Returns:
-        Path to project-specific index.db file (e.g., <repo>/.memory/index.db).
+        Path to project-specific index.db file (e.g., <git-root>/.memory/index.db).
+
+    Raises:
+        NotInGitRepositoryError: If not inside a git repository.
     """
     return get_project_memory_dir(repo_path) / INDEX_DB_NAME
 

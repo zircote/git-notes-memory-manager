@@ -43,7 +43,7 @@ from git_notes_memory.hooks.hook_utils import (
     setup_logging,
     setup_timeout,
 )
-from git_notes_memory.hooks.namespace_styles import Color, get_style
+from git_notes_memory.hooks.namespace_styles import get_style
 from git_notes_memory.hooks.session_analyzer import SessionAnalyzer
 
 if TYPE_CHECKING:
@@ -190,11 +190,10 @@ def _report_suggestions(signals: list[CaptureSignal]) -> None:
         summary = _extract_summary(sig)[:50]
         namespace = sig.suggested_namespace
         confidence = f"{sig.confidence:.0%}"
-        # Use colored ::: block marker
+        # Use unicode block marker
         style = get_style(namespace)
-        reset = Color.RESET.value
-        colored_marker = f"{style.color}:::{style.label.lower()}{reset}"
-        print(f"  {colored_marker} ({confidence}) {summary}", file=sys.stderr)
+        marker = f"▶ {style.label}"
+        print(f"  {marker} ({confidence}) {summary}", file=sys.stderr)
 
 
 def main() -> None:

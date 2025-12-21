@@ -182,6 +182,108 @@ class TestPathConfiguration:
 
 
 # =============================================================================
+# Git Root Detection Tests
+# =============================================================================
+
+
+class TestFindGitRoot:
+    """Tests for find_git_root() function."""
+
+    def test_finds_git_root_from_root(self, tmp_path: Path) -> None:
+        """Test finding git root when at the repo root."""
+        (tmp_path / ".git").mkdir()
+        result = config.find_git_root(tmp_path)
+        assert result == tmp_path
+
+    def test_finds_git_root_from_subdir(self, tmp_path: Path) -> None:
+        """Test finding git root from a subdirectory."""
+        (tmp_path / ".git").mkdir()
+        subdir = tmp_path / "src" / "deep" / "nested"
+        subdir.mkdir(parents=True)
+        result = config.find_git_root(subdir)
+        assert result == tmp_path
+
+    def test_uses_cwd_when_no_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test using current directory when no path provided."""
+        (tmp_path / ".git").mkdir()
+        monkeypatch.chdir(tmp_path)
+        result = config.find_git_root()
+        assert result == tmp_path
+
+    def test_raises_when_not_in_git_repo(self, tmp_path: Path) -> None:
+        """Test raising NotInGitRepositoryError when not in a git repo."""
+        # tmp_path has no .git directory
+        with pytest.raises(config.NotInGitRepositoryError) as exc_info:
+            config.find_git_root(tmp_path)
+        assert "Not inside a git repository" in str(exc_info.value)
+        assert ".memory folder must be at the git root" in str(exc_info.value)
+
+    def test_error_includes_path(self, tmp_path: Path) -> None:
+        """Test that error message includes the path that was searched."""
+        with pytest.raises(config.NotInGitRepositoryError) as exc_info:
+            config.find_git_root(tmp_path)
+        assert str(tmp_path) in str(exc_info.value)
+
+
+class TestProjectMemoryDirGitRoot:
+    """Tests for get_project_memory_dir() git root enforcement."""
+
+    def test_returns_memory_dir_at_git_root(self, tmp_path: Path) -> None:
+        """Test .memory is placed at git root."""
+        (tmp_path / ".git").mkdir()
+        result = config.get_project_memory_dir(tmp_path)
+        assert result == tmp_path / ".memory"
+
+    def test_finds_git_root_from_subdir(self, tmp_path: Path) -> None:
+        """Test .memory is placed at git root even when called from subdir."""
+        (tmp_path / ".git").mkdir()
+        subdir = tmp_path / "src" / "nested"
+        subdir.mkdir(parents=True)
+        result = config.get_project_memory_dir(subdir)
+        # Should be at git root, not in subdir
+        assert result == tmp_path / ".memory"
+        assert result != subdir / ".memory"
+
+    def test_raises_when_not_in_git_repo(self, tmp_path: Path) -> None:
+        """Test raising error when not in a git repository."""
+        with pytest.raises(config.NotInGitRepositoryError):
+            config.get_project_memory_dir(tmp_path)
+
+    def test_index_path_at_git_root(self, tmp_path: Path) -> None:
+        """Test index.db is placed at git root/.memory/."""
+        (tmp_path / ".git").mkdir()
+        subdir = tmp_path / "src"
+        subdir.mkdir()
+        result = config.get_project_index_path(subdir)
+        assert result == tmp_path / ".memory" / "index.db"
+
+
+class TestProjectIdentifierGitRoot:
+    """Tests for get_project_identifier() git root resolution."""
+
+    def test_consistent_id_from_any_subdir(self, tmp_path: Path) -> None:
+        """Test same ID returned from any subdirectory."""
+        (tmp_path / ".git").mkdir()
+        subdir1 = tmp_path / "src"
+        subdir2 = tmp_path / "tests" / "deep"
+        subdir1.mkdir()
+        subdir2.mkdir(parents=True)
+
+        id_root = config.get_project_identifier(tmp_path)
+        id_subdir1 = config.get_project_identifier(subdir1)
+        id_subdir2 = config.get_project_identifier(subdir2)
+
+        assert id_root == id_subdir1 == id_subdir2
+
+    def test_raises_when_not_in_git_repo(self, tmp_path: Path) -> None:
+        """Test raising error when not in a git repository."""
+        with pytest.raises(config.NotInGitRepositoryError):
+            config.get_project_identifier(tmp_path)
+
+
+# =============================================================================
 # Embedding Configuration Tests
 # =============================================================================
 

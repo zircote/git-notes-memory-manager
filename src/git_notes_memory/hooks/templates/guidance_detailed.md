@@ -10,40 +10,45 @@ When ANY of these triggers occur, you MUST immediately capture using block forma
 
 ### Block Format (REQUIRED for All Captures)
 
-Memory blocks MUST have THREE levels of detail for progressive hydration:
+Memory blocks use unicode markers for clean, readable formatting:
 
 ```
-:::decision Summary line describing the decision
+▶ decision ─────────────────────────────────────
+Use JWT for stateless authentication
+
 ## Context
-Why this decision was needed and what problem it solves.
-Background information and constraints.
+Need authentication that works across multiple servers without session sharing.
+Evaluating between session-based auth and token-based auth.
 
 ## Rationale
-- Reason 1 with supporting evidence
-- Reason 2 with trade-off analysis
-- Alternatives considered and why rejected
+- Stateless: No server-side session storage needed
+- Scalable: Works with load balancing out of the box
+- Team expertise: Backend team has JWT experience
+- Trade-off: Slightly larger request payload
 
 ## Related Files
-- src/database/connection.py:15-45
-- src/models/user.py:10-25
-- tests/test_db.py:100-150
-:::
+- src/auth/jwt_handler.py:1-50
+- src/middleware/auth.py:25-80
+- tests/test_auth.py:10-100
+────────────────────────────────────────────────
 ```
 
-**Three-Level Structure (MANDATORY):**
-1. **Summary Line** (after `:::namespace`) — One descriptive line, becomes memory title
-2. **Detail Sections** (## Context, ## Rationale) — Full explanation for FULL hydration
-3. **Related Files** (## Related Files) — File paths with line numbers for FILES hydration
+**Structure (MANDATORY):**
+1. **Opening line** (`▶ namespace ───`) — Starts the block with unicode arrow and dashes
+2. **Summary** — First line after opening, becomes memory title
+3. **Detail Sections** (## Context, ## Rationale) — Full explanation for hydration
+4. **Related Files** (## Related Files) — File paths with line numbers
+5. **Closing line** (`────`) — Line of dashes ends the block
 
 ### Supported Block Types
 
 | Trigger | Block Marker | Namespace | When to Use |
 |---------|--------------|-----------|-------------|
-| Decision made | `:::decision` | decisions | Architecture, technology, approach choices |
-| Learned something | `:::learned` | learnings | New insights, discoveries, TILs |
-| Hit blocker | `:::blocker` | blockers | Issues blocking progress, need for help |
-| Completed work | `:::progress` | progress | Finished features, milestones, fixes |
-| Identified pattern | `:::pattern` | patterns | Reusable approaches, idioms, best practices |
+| Decision made | `▶ decision ───` | decisions | Architecture, technology, approach choices |
+| Learned something | `▶ learned ───` | learnings | New insights, discoveries, TILs |
+| Hit blocker | `▶ blocker ───` | blockers | Issues blocking progress, need for help |
+| Completed work | `▶ progress ───` | progress | Finished features, milestones, fixes |
+| Identified pattern | `▶ pattern ───` | patterns | Reusable approaches, idioms, best practices |
 
 ### Inline Format (Quick Captures Only)
 
@@ -108,7 +113,9 @@ By default, implement marker usage rather than discussing or suggesting it.
 ```
 We'll use JWT tokens for authentication because they're stateless and scale well.
 
-:::decision Use JWT for stateless authentication
+▶ decision ─────────────────────────────────────
+Use JWT for stateless authentication
+
 ## Context
 Need authentication that works across multiple servers without session sharing.
 
@@ -121,7 +128,7 @@ Need authentication that works across multiple servers without session sharing.
 - src/auth/jwt_handler.py:1-50
 - src/middleware/auth.py:25-80
 - tests/test_auth.py:10-100
-:::
+────────────────────────────────────────────────
 ```
 
 **Incorrect behavior:**
@@ -136,7 +143,9 @@ These rules supersede default helpful suggestions. They configure your behavior 
 **Block markers (REQUIRED for detailed captures):**
 
 ```
-:::namespace Summary line
+▶ namespace ─────────────────────────────────────
+Summary line describing the capture
+
 ## Context
 Background information and why this matters.
 
@@ -147,7 +156,7 @@ Background information and why this matters.
 ## Related Files
 - path/to/file.py:10-25
 - path/to/other.ts:100-150
-:::
+────────────────────────────────────────────────
 ```
 
 **Inline markers (quick captures only):**

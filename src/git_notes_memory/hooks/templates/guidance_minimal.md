@@ -1,21 +1,14 @@
 <session_behavior_protocol level="minimal">
 <mandatory_rules><![CDATA[
-**REQUIRED:** Use block markers for captures with three-level structure:
+**REQUIRED:** Use unicode block markers for captures:
 
 ```
-:::decision Summary line here
-## Context
-Why this decision was needed.
-
-## Rationale
-- Key reasoning points
-
-## Related Files
-- path/file.py:10-25
-:::
+▶ decision ─────────────────────────────────────
+Use PostgreSQL for JSONB support
+────────────────────────────────────────────────
 ```
 
-**Block types:** `:::decision`, `:::learned`, `:::blocker`, `:::progress`, `:::pattern`
+**Block types:** `▶ decision`, `▶ learned`, `▶ blocker`, `▶ progress`, `▶ pattern`
 
 **Quick markers (brief notes only):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`
 
