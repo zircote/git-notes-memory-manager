@@ -118,3 +118,18 @@ tags:
 | patterns | Reusable approaches | "best practice", "[pattern]" |
 | research | External findings | Manual capture |
 | reviews | Code review...
+
+---
+type: patterns
+timestamp: '2025-12-21T06:28:25.868704+00:00'
+summary: '..."completed", "shipped", "[progress]" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+..."completed", "shipped", "[progress]" |
+| patterns | Reusable approaches | "best practice", "[pattern]" |
+| research | External findings | Manual capture |
+| reviews | Code review notes | Manual...
