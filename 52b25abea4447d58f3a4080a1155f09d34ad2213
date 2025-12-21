@@ -165,3 +165,17 @@ Hook-based memory capture works via Stop hook at session end
 ## Context
 Memories are captured when session ends (Stop hook), not during.
 /memory:status run mid-session shows 0 because Stop hasn't fired.
+
+---
+type: learnings
+timestamp: '2025-12-21T06:21:58.000531+00:00'
+summary: "...blockers:051134b:4\" namespace=\"blockers\" timestamp=\"2025-12-21T04:53:58.818864+00:00\"\
+  >\n       ..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...blockers:051134b:4" namespace="blockers" timestamp="2025-12-21T04:53:58.818864+00:00">
+        <summary>...[learned]` | `[learned] pytest fixtures share state with module scope` |</summary>
+        <tags>auto-captured...
