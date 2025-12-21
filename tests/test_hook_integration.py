@@ -388,7 +388,7 @@ class TestStopHookIntegration:
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            _write_output(signals, None, prompt_uncaptured=True)
+            _write_output(signals, [], None, prompt_uncaptured=True)
 
         output = json.loads(captured.getvalue())
 
@@ -411,7 +411,7 @@ class TestStopHookIntegration:
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            _write_output([], sync_result, prompt_uncaptured=True)
+            _write_output([], [], sync_result, prompt_uncaptured=True)
 
         output = json.loads(captured.getvalue())
 
@@ -430,7 +430,7 @@ class TestStopHookIntegration:
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            _write_output([], sync_result, prompt_uncaptured=True)
+            _write_output([], [], sync_result, prompt_uncaptured=True)
 
         output = json.loads(captured.getvalue())
 
@@ -589,7 +589,7 @@ class TestErrorHandlingIntegration:
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            stop_write([], None, prompt_uncaptured=True)
+            stop_write([], [], None, prompt_uncaptured=True)
         output = json.loads(captured.getvalue())
         assert output["continue"] is True
 

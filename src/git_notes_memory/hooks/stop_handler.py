@@ -138,6 +138,95 @@ def _sync_index() -> dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
+def _auto_capture_signals(
+    signals: list[CaptureSignal],
+    min_confidence: float,
+    max_captures: int,
+) -> tuple[list[dict[str, Any]], list[CaptureSignal]]:
+    """Auto-capture high-confidence signals.
+
+    Args:
+        signals: List of detected capture signals.
+        min_confidence: Minimum confidence threshold for auto-capture.
+        max_captures: Maximum number of signals to auto-capture.
+
+    Returns:
+        Tuple of (captured_results, remaining_signals).
+        - captured_results: List of dicts with memory_id and namespace
+        - remaining_signals: Signals that were not auto-captured
+    """
+    if not signals:
+        return [], []
+
+    # Sort by confidence (highest first) and filter by threshold
+    eligible = sorted(
+        [s for s in signals if s.confidence >= min_confidence],
+        key=lambda s: s.confidence,
+        reverse=True,
+    )
+
+    # Limit to max_captures
+    to_capture = eligible[:max_captures]
+    remaining = [s for s in signals if s not in to_capture]
+
+    captured: list[dict[str, Any]] = []
+
+    try:
+        from git_notes_memory.capture import get_default_service
+
+        capture_service = get_default_service()
+
+        for signal in to_capture:
+            try:
+                # Extract summary from first line or first 100 chars
+                content = signal.context or signal.match
+                lines = content.strip().split("\n")
+                summary = lines[0][:100] if lines else content[:100]
+
+                # Capture the memory
+                result = capture_service.capture(
+                    namespace=signal.suggested_namespace,
+                    summary=summary,
+                    content=content,
+                )
+
+                if result.success and result.memory:
+                    captured.append(
+                        {
+                            "memory_id": result.memory.id,
+                            "namespace": signal.suggested_namespace,
+                            "summary": summary[:50],
+                            "confidence": signal.confidence,
+                        }
+                    )
+                    logger.info(
+                        "Auto-captured memory: %s (confidence: %.2f)",
+                        result.memory.id,
+                        signal.confidence,
+                    )
+                else:
+                    # Capture failed, add back to remaining
+                    remaining.append(signal)
+                    logger.warning(
+                        "Auto-capture failed for signal: %s",
+                        result.warning or "Unknown error",
+                    )
+
+            except Exception as e:
+                # Capture failed, add back to remaining
+                remaining.append(signal)
+                logger.warning("Auto-capture error: %s", e)
+
+    except ImportError as e:
+        logger.warning("Capture service unavailable: %s", e)
+        return [], signals
+    except Exception as e:
+        logger.warning("Auto-capture failed: %s", e)
+        return [], signals
+
+    return captured, remaining
+
+
 def _signal_to_dict(signal: CaptureSignal) -> dict[str, Any]:
     """Convert a CaptureSignal to a JSON-serializable dict.
 
@@ -198,6 +287,7 @@ def _format_uncaptured_xml(signals: list[CaptureSignal]) -> str:
 
 def _write_output(
     uncaptured: list[CaptureSignal],
+    captured: list[dict[str, Any]],
     sync_result: dict[str, Any] | None,
     *,
     prompt_uncaptured: bool,
@@ -206,22 +296,32 @@ def _write_output(
 
     Args:
         uncaptured: List of uncaptured signals.
+        captured: List of auto-captured memory results.
         sync_result: Index sync result.
         prompt_uncaptured: Whether to prompt for uncaptured content.
     """
     output: dict[str, Any] = {"continue": True}
 
     hook_output: dict[str, Any] = {"hookEventName": "Stop"}
+    messages: list[str] = []
+
+    # Report auto-captured content
+    if captured:
+        hook_output["capturedMemories"] = captured
+        ns_counts: dict[str, int] = {}
+        for c in captured:
+            ns = c.get("namespace", "unknown")
+            ns_counts[ns] = ns_counts.get(ns, 0) + 1
+        ns_summary = ", ".join(f"{v} {k}" for k, v in ns_counts.items())
+        messages.append(f"📝 Auto-captured {len(captured)} memories: {ns_summary}")
 
     # Include uncaptured content if found and prompting is enabled
     if uncaptured and prompt_uncaptured:
         hook_output["uncapturedContent"] = [_signal_to_dict(s) for s in uncaptured]
         hook_output["additionalContext"] = _format_uncaptured_xml(uncaptured)
-
-        # Add a message about uncaptured content
-        output["message"] = (
-            f"🛑 Found {len(uncaptured)} potentially uncaptured memory(s) "
-            "from this session. Consider using /remember to capture them."
+        messages.append(
+            f"🛑 {len(uncaptured)} potentially uncaptured memory(s) remain. "
+            "Consider using /remember to capture them."
         )
 
     # Include sync stats if sync was performed
@@ -231,13 +331,13 @@ def _write_output(
             hook_output["syncStats"] = stats
             indexed = stats.get("indexed", 0)
             if indexed > 0:
-                sync_msg = f"📚 Index synced: {indexed} memories indexed"
-                if "message" in output:
-                    output["message"] += f"\n{sync_msg}"
-                else:
-                    output["message"] = sync_msg
+                messages.append(f"📚 Index synced: {indexed} memories indexed")
         else:
             hook_output["syncError"] = sync_result.get("error", "Unknown error")
+
+    # Combine messages
+    if messages:
+        output["message"] = "\n".join(messages)
 
     # Only add hookSpecificOutput if we have content
     if len(hook_output) > 1:  # More than just hookEventName
@@ -284,12 +384,27 @@ def main() -> None:
         logger.debug("Received stop hook input: %s", list(input_data.keys()))
 
         # Analyze session transcript for uncaptured content
-        uncaptured: list[CaptureSignal] = []
-        if config.stop_prompt_uncaptured:
+        detected_signals: list[CaptureSignal] = []
+        if config.stop_prompt_uncaptured or config.stop_auto_capture:
             transcript_path = input_data.get("transcript_path")
-            uncaptured = _analyze_session(transcript_path)
+            detected_signals = _analyze_session(transcript_path)
 
-        # Sync index if enabled
+        # Auto-capture high-confidence signals
+        captured: list[dict[str, Any]] = []
+        uncaptured: list[CaptureSignal] = detected_signals
+        if config.stop_auto_capture and detected_signals:
+            captured, uncaptured = _auto_capture_signals(
+                detected_signals,
+                min_confidence=config.stop_auto_capture_min_confidence,
+                max_captures=config.stop_max_captures,
+            )
+            logger.debug(
+                "Auto-capture: %d captured, %d remaining",
+                len(captured),
+                len(uncaptured),
+            )
+
+        # Sync index if enabled (after auto-capture to include new memories)
         sync_result: dict[str, Any] | None = None
         if config.stop_sync_index:
             sync_result = _sync_index()
@@ -305,6 +420,7 @@ def main() -> None:
         # Output result
         _write_output(
             uncaptured=uncaptured,
+            captured=captured,
             sync_result=sync_result,
             prompt_uncaptured=config.stop_prompt_uncaptured,
         )

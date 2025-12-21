@@ -22,6 +22,9 @@ Environment Variables:
     HOOK_USER_PROMPT_ENABLED: Enable UserPromptSubmit hook
     HOOK_STOP_ENABLED: Enable Stop hook
     HOOK_STOP_PROMPT_UNCAPTURED: Prompt for uncaptured content
+    HOOK_STOP_AUTO_CAPTURE: Auto-capture detected signals at session end (default: true)
+    HOOK_STOP_AUTO_CAPTURE_MIN_CONFIDENCE: Minimum confidence for auto-capture (default: 0.8)
+    HOOK_STOP_MAX_CAPTURES: Maximum auto-captures per session (default: 5)
     HOOK_POST_TOOL_USE_ENABLED: Enable PostToolUse hook
     HOOK_POST_TOOL_USE_MIN_SIMILARITY: Minimum similarity for memory recall
     HOOK_POST_TOOL_USE_MAX_RESULTS: Maximum memories to inject
@@ -129,13 +132,18 @@ class HookConfig:
     # Capture detection settings
     capture_detection_enabled: bool = True  # Enabled by default when plugin is active
     capture_detection_min_confidence: float = 0.7
-    capture_detection_auto_threshold: float = 0.95
+    capture_detection_auto_threshold: float = (
+        0.85  # Lowered to auto-capture strong natural language signals
+    )
     capture_detection_novelty_threshold: float = 0.3
 
     # Stop hook settings
     stop_enabled: bool = True
     stop_prompt_uncaptured: bool = True
     stop_sync_index: bool = True
+    stop_auto_capture: bool = True  # Auto-capture detected signals at session end
+    stop_auto_capture_min_confidence: float = 0.8  # Minimum confidence for auto-capture
+    stop_max_captures: int = 5  # Maximum auto-captures per session
 
     # UserPromptSubmit hook settings
     user_prompt_enabled: bool = True  # Enabled by default when plugin is active
@@ -145,6 +153,8 @@ class HookConfig:
     post_tool_use_min_similarity: float = 0.6
     post_tool_use_max_results: int = 3
     post_tool_use_timeout: int = 5
+    post_tool_use_auto_capture: bool = True  # Auto-capture signals in written content
+    post_tool_use_auto_capture_min_confidence: float = 0.8  # Min confidence for capture
 
     # PreCompact hook settings
     pre_compact_enabled: bool = True
@@ -378,6 +388,18 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
         )
     if "HOOK_STOP_SYNC_INDEX" in env:
         kwargs["stop_sync_index"] = _parse_bool(env["HOOK_STOP_SYNC_INDEX"])
+    if "HOOK_STOP_AUTO_CAPTURE" in env:
+        kwargs["stop_auto_capture"] = _parse_bool(env["HOOK_STOP_AUTO_CAPTURE"])
+    if "HOOK_STOP_AUTO_CAPTURE_MIN_CONFIDENCE" in env:
+        kwargs["stop_auto_capture_min_confidence"] = _parse_float(
+            env["HOOK_STOP_AUTO_CAPTURE_MIN_CONFIDENCE"],
+            defaults.stop_auto_capture_min_confidence,
+        )
+    if "HOOK_STOP_MAX_CAPTURES" in env:
+        kwargs["stop_max_captures"] = _parse_int(
+            env["HOOK_STOP_MAX_CAPTURES"],
+            defaults.stop_max_captures,
+        )
 
     # PostToolUse hook settings
     if "HOOK_POST_TOOL_USE_ENABLED" in env:
@@ -396,6 +418,15 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
         kwargs["post_tool_use_timeout"] = _parse_int(
             env["HOOK_POST_TOOL_USE_TIMEOUT"],
             defaults.post_tool_use_timeout,
+        )
+    if "HOOK_POST_TOOL_USE_AUTO_CAPTURE" in env:
+        kwargs["post_tool_use_auto_capture"] = _parse_bool(
+            env["HOOK_POST_TOOL_USE_AUTO_CAPTURE"]
+        )
+    if "HOOK_POST_TOOL_USE_AUTO_CAPTURE_MIN_CONFIDENCE" in env:
+        kwargs["post_tool_use_auto_capture_min_confidence"] = _parse_float(
+            env["HOOK_POST_TOOL_USE_AUTO_CAPTURE_MIN_CONFIDENCE"],
+            defaults.post_tool_use_auto_capture_min_confidence,
         )
 
     # PreCompact hook settings

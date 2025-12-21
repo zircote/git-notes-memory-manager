@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -541,7 +541,7 @@ class TestStopHandler:
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            _write_output([], None, prompt_uncaptured=True)
+            _write_output([], [], None, prompt_uncaptured=True)
 
         output = json.loads(captured.getvalue())
         assert output["continue"] is True
@@ -564,7 +564,7 @@ class TestStopHandler:
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            _write_output(signals, None, prompt_uncaptured=True)
+            _write_output(signals, [], None, prompt_uncaptured=True)
 
         output = json.loads(captured.getvalue())
         assert output["continue"] is True
@@ -581,7 +581,7 @@ class TestStopHandler:
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            _write_output([], sync_result, prompt_uncaptured=True)
+            _write_output([], [], sync_result, prompt_uncaptured=True)
 
         output = json.loads(captured.getvalue())
         assert output["continue"] is True
@@ -598,7 +598,7 @@ class TestStopHandler:
 
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            _write_output([], sync_result, prompt_uncaptured=True)
+            _write_output([], [], sync_result, prompt_uncaptured=True)
 
         output = json.loads(captured.getvalue())
         assert output["continue"] is True
@@ -618,6 +618,80 @@ class TestStopHandler:
 
         result = _analyze_session(str(tmp_path / "nonexistent.json"))
         assert result == []
+
+    def test_auto_capture_signals_empty(self) -> None:
+        """Test auto-capture with no signals."""
+        from git_notes_memory.hooks.stop_handler import _auto_capture_signals
+
+        captured, remaining = _auto_capture_signals([], 0.8, 5)
+        assert captured == []
+        assert remaining == []
+
+    def test_auto_capture_signals_filters_by_confidence(self) -> None:
+        """Test auto-capture filters signals by confidence."""
+        from git_notes_memory.hooks.models import CaptureSignal, SignalType
+        from git_notes_memory.hooks.stop_handler import _auto_capture_signals
+
+        signals = [
+            CaptureSignal(
+                type=SignalType.DECISION,
+                match="High confidence",
+                confidence=0.95,
+                context="High confidence decision",
+                suggested_namespace="decisions",
+            ),
+            CaptureSignal(
+                type=SignalType.LEARNING,
+                match="Low confidence",
+                confidence=0.5,
+                context="Low confidence learning",
+                suggested_namespace="learnings",
+            ),
+        ]
+
+        # Mock capture service to avoid actual git operations
+        with patch("git_notes_memory.capture.get_default_service") as mock:
+            mock_service = MagicMock()
+            mock_result = MagicMock()
+            mock_result.success = True
+            mock_result.memory = MagicMock()
+            mock_result.memory.id = "decisions:abc123:0"
+            mock_service.capture.return_value = mock_result
+            mock.return_value = mock_service
+
+            captured, remaining = _auto_capture_signals(signals, 0.8, 5)
+
+            # Only high confidence should be captured
+            assert len(captured) == 1
+            assert captured[0]["namespace"] == "decisions"
+            # Low confidence should remain
+            assert len(remaining) == 1
+            assert remaining[0].confidence == 0.5
+
+    def test_write_output_with_captured(self) -> None:
+        """Test output with auto-captured memories."""
+        from git_notes_memory.hooks.stop_handler import _write_output
+
+        captured_memories = [
+            {
+                "memory_id": "decisions:abc:0",
+                "namespace": "decisions",
+                "summary": "Test",
+                "confidence": 0.95,
+            }
+        ]
+
+        captured_output = io.StringIO()
+        with patch.object(sys, "stdout", captured_output):
+            _write_output([], captured_memories, None, prompt_uncaptured=True)
+
+        output = json.loads(captured_output.getvalue())
+        assert output["continue"] is True
+        assert "message" in output
+        assert "Auto-captured" in output["message"]
+        assert "1 memories" in output["message"]
+        assert "hookSpecificOutput" in output
+        assert "capturedMemories" in output["hookSpecificOutput"]
 
 
 # ============================================================================

@@ -381,6 +381,7 @@ class TestStopIntegration:
         with patch.object(sys, "stdout", captured):
             _write_output(
                 uncaptured=signals,
+                captured=[],
                 sync_result={"success": True, "stats": {"indexed": 3}},
                 prompt_uncaptured=True,
             )
@@ -480,7 +481,7 @@ class TestErrorHandlingIntegration:
         # Test Stop handler with empty data
         captured = io.StringIO()
         with patch.object(sys, "stdout", captured):
-            _write_output([], None, prompt_uncaptured=True)
+            _write_output([], [], None, prompt_uncaptured=True)
         output = json.loads(captured.getvalue())
         assert output["continue"] is True
 

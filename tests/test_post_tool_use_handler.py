@@ -23,6 +23,9 @@ from git_notes_memory.hooks.hook_utils import read_json_input
 from git_notes_memory.hooks.post_tool_use_handler import (
     DEFAULT_TIMEOUT,
     TRIGGERING_TOOLS,
+    _auto_capture_signals,
+    _detect_signals,
+    _extract_content,
     _extract_file_path,
     _format_memories_xml,
     _search_related_memories,
@@ -68,6 +71,8 @@ def mock_hook_config() -> MagicMock:
     config.post_tool_use_min_similarity = 0.6
     config.post_tool_use_max_results = 3
     config.post_tool_use_timeout = 5
+    config.post_tool_use_auto_capture = True
+    config.post_tool_use_auto_capture_min_confidence = 0.8
     return config
 
 
@@ -660,3 +665,183 @@ class TestMain:
         captured = capsys.readouterr()
         output = json.loads(captured.out)
         assert output == {"continue": True}
+
+
+# =============================================================================
+# Auto-Capture Functionality Tests
+# =============================================================================
+
+
+class TestExtractContent:
+    """Tests for _extract_content function."""
+
+    def test_extract_content_from_write(self) -> None:
+        """Test extracting content from Write tool."""
+        input_data = {
+            "tool_name": "Write",
+            "tool_input": {
+                "file_path": "/test.py",
+                "content": "I decided to use PostgreSQL",
+            },
+        }
+        result = _extract_content(input_data)
+        assert result == "I decided to use PostgreSQL"
+
+    def test_extract_content_from_edit(self) -> None:
+        """Test extracting content from Edit tool."""
+        input_data = {
+            "tool_name": "Edit",
+            "tool_input": {
+                "file_path": "/test.py",
+                "old_string": "old",
+                "new_string": "I learned that async is cleaner",
+            },
+        }
+        result = _extract_content(input_data)
+        assert result == "I learned that async is cleaner"
+
+    def test_extract_content_from_multiedit(self) -> None:
+        """Test extracting content from MultiEdit tool."""
+        input_data = {
+            "tool_name": "MultiEdit",
+            "tool_input": {
+                "edits": [
+                    {"old_string": "a", "new_string": "First edit"},
+                    {"old_string": "b", "new_string": "Second edit"},
+                ]
+            },
+        }
+        result = _extract_content(input_data)
+        assert result == "First edit\nSecond edit"
+
+    def test_extract_content_from_read(self) -> None:
+        """Test Read tool returns None (no content to extract)."""
+        input_data = {
+            "tool_name": "Read",
+            "tool_input": {"file_path": "/test.py"},
+        }
+        result = _extract_content(input_data)
+        assert result is None
+
+    def test_extract_content_no_tool_input(self) -> None:
+        """Test with missing tool_input."""
+        input_data = {"tool_name": "Write"}
+        result = _extract_content(input_data)
+        assert result is None
+
+
+class TestDetectSignals:
+    """Tests for _detect_signals function."""
+
+    def test_detect_decision_signal(self) -> None:
+        """Test detecting decision signal in content."""
+        content = "I decided to use PostgreSQL for the database"
+        signals = _detect_signals(content, min_confidence=0.7)
+        assert len(signals) >= 1
+        assert any(s.suggested_namespace == "decisions" for s in signals)
+
+    def test_detect_learning_signal(self) -> None:
+        """Test detecting learning signal in content."""
+        content = "TIL that async/await is much cleaner than callbacks"
+        signals = _detect_signals(content, min_confidence=0.7)
+        assert len(signals) >= 1
+        assert any(s.suggested_namespace == "learnings" for s in signals)
+
+    def test_no_signals_in_plain_code(self) -> None:
+        """Test no signals in plain code."""
+        content = "def foo():\n    return 42"
+        signals = _detect_signals(content, min_confidence=0.9)
+        assert len(signals) == 0
+
+    def test_high_confidence_threshold(self) -> None:
+        """Test high confidence threshold filters signals."""
+        content = "I prefer using TypeScript"
+        signals = _detect_signals(content, min_confidence=0.99)
+        # Very high threshold should filter most signals
+        assert len(signals) == 0
+
+
+class TestAutoCapture:
+    """Tests for _auto_capture_signals function."""
+
+    def test_auto_capture_empty_signals(self) -> None:
+        """Test with empty signals list."""
+        result = _auto_capture_signals([], "/test.py")
+        assert result == []
+
+    def test_auto_capture_with_signals(self) -> None:
+        """Test auto-capture with mock capture service."""
+        from git_notes_memory.hooks.models import CaptureSignal, SignalType
+
+        signal = CaptureSignal(
+            type=SignalType.DECISION,
+            match="decided to use",
+            confidence=0.9,
+            context="I decided to use PostgreSQL for persistence",
+            suggested_namespace="decisions",
+        )
+
+        mock_memory = MagicMock()
+        mock_memory.id = "decisions:abc123:0"
+
+        mock_result = MagicMock()
+        mock_result.success = True
+        mock_result.memory = mock_memory
+
+        mock_service = MagicMock()
+        mock_service.capture.return_value = mock_result
+
+        with patch(
+            "git_notes_memory.capture.get_default_service",
+            return_value=mock_service,
+        ):
+            result = _auto_capture_signals([signal], "/test.py")
+
+        assert len(result) == 1
+        assert result[0]["memory_id"] == "decisions:abc123:0"
+        assert result[0]["namespace"] == "decisions"
+
+
+class TestWriteOutputWithCapture:
+    """Tests for _write_output with capture data."""
+
+    def test_write_output_with_captured(self, capsys: pytest.CaptureFixture) -> None:
+        """Test output includes captured memories."""
+        captured = [
+            {
+                "memory_id": "decisions:abc:0",
+                "namespace": "decisions",
+                "summary": "Use PostgreSQL",
+                "confidence": 0.9,
+            }
+        ]
+        _write_output(captured=captured)
+        output = json.loads(capsys.readouterr().out)
+        assert "hookSpecificOutput" in output
+        assert output["hookSpecificOutput"]["capturedMemories"] == captured
+        assert "📝 Auto-captured" in output.get("message", "")
+
+    def test_write_output_with_context_and_captured(
+        self, capsys: pytest.CaptureFixture
+    ) -> None:
+        """Test output with both context and captured."""
+        captured = [
+            {
+                "memory_id": "learnings:xyz:0",
+                "namespace": "learnings",
+                "summary": "TIL",
+                "confidence": 0.95,
+            }
+        ]
+        _write_output(
+            context="<related_memories></related_memories>",
+            memory_count=2,
+            captured=captured,
+        )
+        output = json.loads(capsys.readouterr().out)
+        assert "hookSpecificOutput" in output
+        assert "capturedMemories" in output["hookSpecificOutput"]
+        assert "additionalContext" in output["hookSpecificOutput"]
+        # Should have both messages
+        assert "Auto-captured" in output.get("message", "")
+        assert "related memories" in output.get("message", "")
