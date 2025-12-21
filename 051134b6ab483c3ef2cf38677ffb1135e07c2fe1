@@ -93,3 +93,21 @@ tags:
 ...Issues blocking progress, need for help |
 | Completed work | `▶ progress ───` | progress | Finished features, milestones, fixes |
 | Identified pattern | `▶ pattern ───` | patterns | Reusable...
+
+---
+type: progress
+timestamp: '2025-12-21T04:53:58.838127+00:00'
+summary: '...Blocker | `[blocker]` | `[blocker] Circular FK dependency between tables`
+  |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...Blocker | `[blocker]` | `[blocker] Circular FK dependency between tables` |
+| Progress | `[progress]` | `[progress] JWT auth with refresh rotation implemented` |
+
+### Enforcement
+
+- **DO:** Include...
