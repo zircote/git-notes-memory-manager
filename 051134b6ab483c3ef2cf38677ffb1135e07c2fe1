@@ -123,3 +123,12 @@ summary: '...`src/git_notes_memory/__init__.py:61-122`\n\n### ADR-005: XML-Struc
 ---
 
 ...`src/git_notes_memory/__init__.py:61-122`\n\n### ADR-005: XML-Structured Context for Claude\n[decision] Use XML format (`<memory_context>`, `<working_memory>`) for hook additionalContext injection—provides...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:46:14.850055+00:00'
+summary: '...────────────────`\n\n---\n\n## 📋 DECISIONS TO CAPTURE\n\n### ADR-001:
+  Git Notes as Source of Trut'
+---
+
+...────────────────`\n\n---\n\n## 📋 DECISIONS TO CAPTURE\n\n### ADR-001: Git Notes as Source of Truth\n[decision] Git notes chosen as primary storage (`refs/notes/mem/{namespace}`) because they are distributed,...
