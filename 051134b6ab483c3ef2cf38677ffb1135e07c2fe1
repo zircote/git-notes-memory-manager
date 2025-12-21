@@ -30,3 +30,19 @@ tags:
 | Identified pattern | `▶ pattern ───` | patterns |
 
 ###...
+
+---
+type: progress
+timestamp: '2025-12-21T04:53:16.118879+00:00'
+summary: '...| `[learned] The insight` |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...| `[learned] The insight` |
+| Blocker | `[blocker] What blocks and needs` |
+| Progress | `[progress] What was done` |
+
+**IMPORTANT:** Block format is strongly preferred. Inline markers are for...
