@@ -300,3 +300,22 @@ tags:
 |---------|--------|---------|
 | Decision | `[decision]` | `[decision] Using PostgreSQL for JSONB support` |
 | Learning | `[learned]` | `[learned] pytest fixtures...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:53:58.896366+00:00'
+summary: '...────────────────────────────────────────────────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...────────────────────────────────────────────────
+```
+
+**Inline markers (quick captures only):**
+
+- `[decision] text` — decisions namespace
+- `[learned] text` — learnings namespace
+- `[blocker] text` —...
