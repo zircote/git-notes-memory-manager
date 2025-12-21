@@ -15,3 +15,18 @@ tags:
 **Completed**: 2025-12-21
 **Outcome**: Partial
 **PR**: https://github.com/zircote/git-notes-memory-manager/pull...
+
+---
+type: progress
+timestamp: '2025-12-21T16:06:04.548375+00:00'
+summary: '...following `/claude-spec:complete` protocol for non-standard projects.
+  The protocol applies to ALL'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...following `/claude-spec:complete` protocol for non-standard projects. The protocol applies to ALL completed work, not just implementation projects
+
+2. **Proactive Retrospective**: Should have planned...
