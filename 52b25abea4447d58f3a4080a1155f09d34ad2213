@@ -150,3 +150,18 @@ tags:
 | learnings | Technical insights | "I learned", "TIL" |
 | blockers | Impediments | "blocked by", "stuck on" |
 | progress | Milestones | "completed",...
+
+---
+type: learnings
+timestamp: '2025-12-21T06:21:54.951459+00:00'
+summary: Hook-based memory capture works via Stop hook at session end
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+Hook-based memory capture works via Stop hook at session end
+## Context
+Memories are captured when session ends (Stop hook), not during.
+/memory:status run mid-session shows 0 because Stop hasn't fired.
