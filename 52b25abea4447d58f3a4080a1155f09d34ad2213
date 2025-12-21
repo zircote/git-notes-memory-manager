@@ -76,3 +76,18 @@ tags:
 ...learnings | Technical insights | "I learned", "TIL", "[learned]" |
 | blockers | Impediments | "blocked by", "stuck on", "[blocker]" |
 | progress | Milestones | "completed", "shipped", "[progress]"...
+
+---
+type: blockers
+timestamp: '2025-12-21T06:28:25.732958+00:00'
+summary: '...Technical insights | "I learned", "TIL", "[learned]" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...Technical insights | "I learned", "TIL", "[learned]" |
+| blockers | Impediments | "blocked by", "stuck on", "[blocker]" |
+| progress | Milestones | "completed", "shipped", "[progress]" |
+| patterns...
