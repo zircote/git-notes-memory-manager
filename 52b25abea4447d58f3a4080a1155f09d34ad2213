@@ -48,3 +48,25 @@ tags:
 | patterns | Reusable approaches | "best practice" |
 | research | External findings | Manual capture |
 | reviews | Code review notes | Manual...
+
+---
+type: patterns
+timestamp: '2025-12-21T06:21:54.868034+00:00'
+summary: '...extraction)'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...extraction)
+```
+
+### 5.2 Signal Detection
+
+The SignalDetector uses regex patterns with confidence scoring:
+
+**Pattern Examples**:
+```python
+DECISION_PATTERNS = [
+    (r"\[decision\]", 0.98),           # Explicit...
