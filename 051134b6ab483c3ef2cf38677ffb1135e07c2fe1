@@ -60,3 +60,12 @@ summary: '...2025-12-18-memory-capture-plugin/ARCHITECTURE.md:86`\n\n### ADR-003
 ---
 
 ...2025-12-18-memory-capture-plugin/ARCHITECTURE.md:86`\n\n### ADR-003: Lazy Loading of Embedding Model\n[decision] Defer sentence-transformers model loading until first `embed()` call to avoid 2-3 second import...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:39:40.663925+00:00'
+summary: '...12-18-memory-capture-plugin/RETROSPECTIVE.md:67`\n\n### ADR-004: Singleton
+  Service Factory Patter'
+---
+
+...12-18-memory-capture-plugin/RETROSPECTIVE.md:67`\n\n### ADR-004: Singleton Service Factory Pattern\n[decision] Use factory functions (`get_capture_service()`, `get_recall_service()`) returning singletons...
