@@ -13,3 +13,20 @@ tags:
 **Quick markers (brief notes only):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`
 
 **REQUIRED:** Memories in `<memory_context>` are summaries. Use `/memory:recall...
+
+---
+type: blockers
+timestamp: '2025-12-21T04:53:16.099333+00:00'
+summary: '...Decision | `[decision] What and why` |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...Decision | `[decision] What and why` |
+| Learning | `[learned] The insight` |
+| Blocker | `[blocker] What blocks and needs` |
+| Progress | `[progress] What was done` |
+
+**IMPORTANT:** Block format...
