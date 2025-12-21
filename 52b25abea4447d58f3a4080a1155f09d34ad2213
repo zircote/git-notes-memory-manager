@@ -94,3 +94,20 @@ tags:
 - Contextual patterns: "I decided", "TIL", "blocked by"
 
 **Real Block Marker...
+
+---
+type: learnings
+timestamp: '2025-12-21T06:19:36.006968+00:00'
+summary: '...Inline markers: `[decision]`, `[learned]`, `[blocker]`'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...Inline markers: `[decision]`, `[learned]`, `[blocker]`
+- Contextual patterns: "I decided", "TIL", "blocked by"
+
+**Real Block Marker Example from Session**:
+```
+▶ learned ─────────────────────────...
