@@ -147,3 +147,20 @@ tags:
 | Identified pattern | `▶ pattern ───` | patterns | Reusable approaches, idioms, best practices |
 
 ### Inline Format (Quick Captures...
+
+---
+type: patterns
+timestamp: '2025-12-21T04:53:58.699518+00:00'
+summary: '...Finished features, milestones, fixes |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...Finished features, milestones, fixes |
+| Identified pattern | `▶ pattern ───` | patterns | Reusable approaches, idioms, best practices |
+
+### Inline Format (Quick Captures Only)
+
+For VERY brief...
