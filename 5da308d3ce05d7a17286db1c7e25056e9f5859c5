@@ -261,3 +261,23 @@ The sentence-transformers embedding model adds 2-3 seconds to import time. Sessi
 ## Related Files
 - src/git_notes_memory/__init__.py:27-85
 - src/git_notes_memory/hooks/session_start_handler.py:66-89
+
+---
+type: decisions
+timestamp: '2025-12-21T05:46:36.787743+00:00'
+summary: Confidence-based tiered capture behavior (AUTO/SUGGEST/SKIP)
+---
+
+Confidence-based tiered capture behavior (AUTO/SUGGEST/SKIP)
+## Context
+When detecting capture-worthy content, the system needs to balance automation with user control.
+
+## Rationale
+- ≥0.95 confidence → AUTO (capture silently, show notification)
+- 0.70-0.95 → SUGGEST (show suggestion, user confirms)
+- <0.70 → SKIP (no action unless explicit marker)
+- Explicit markers like `[decision]` always treated as confidence 0.98-1.0
+
+## Related Files
+- docs/spec/completed/2025-12-19-hook-based-memory-capture/DECISIONS.md:226-265
+- src/git_notes_memory/hooks/capture_decider.py:128-200
