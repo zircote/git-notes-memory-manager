@@ -1,19 +1,37 @@
 #!/usr/bin/env python3
 """Hook: Capture prompts as memories when marker is present.
 
-This hook is DISABLED by default. Enable in hooks.json when ready.
+This hook detects memory capture markers in user prompts and stores
+the content as memories in the git notes system.
 
-The hook looks for a special marker in prompts to capture them:
-- [remember] or [capture] at the start of a prompt
-- Only captures when explicitly marked to avoid over-capturing
+Supported marker formats:
+
+Inline Markers:
+- [remember] content          -> Capture to 'learnings'
+- [remember:decisions] content -> Capture to 'decisions' namespace
+- [capture] content           -> Auto-detect namespace from content
+- @memory content             -> Auto-detect namespace from content
+
+Shorthand Markers:
+- [decision] content          -> Capture to 'decisions'
+- [learned] content           -> Capture to 'learnings'
+- [blocker] content           -> Capture to 'blockers'
+- [progress] content          -> Capture to 'progress'
+
+Markdown Block Markers (for detailed captures):
+- :::decision Title here      -> Multi-line capture to 'decisions'
+  ## Context
+  Details...
+  :::
+- :::decision content:::      -> Single-line block capture
 
 Example prompts that would be captured:
 - "[remember] We decided to use PostgreSQL because..."
-- "[capture] The authentication flow works like this..."
+- "[decision] Using JWT for authentication due to stateless scaling"
+- ":::decision Use PostgreSQL\n## Context\nNeed JSONB support...\n:::"
 """
 
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -24,43 +42,64 @@ if _src_path.exists() and str(_src_path) not in sys.path:
     sys.path.insert(0, str(_src_path))
 
 
-def should_capture(prompt: str) -> tuple[bool, str]:
-    """Check if prompt should be captured and extract clean content.
+def parse_prompt(prompt: str) -> tuple[bool, str | None, str]:
+    """Parse prompt for capture markers using NamespaceParser.
 
     Returns:
-        Tuple of (should_capture, cleaned_content)
-    """
-    # Look for capture markers at the start
-    markers = [r"^\[remember\]\s*", r"^\[capture\]\s*", r"^@memory\s+"]
-
-    for pattern in markers:
-        match = re.match(pattern, prompt, re.IGNORECASE)
-        if match:
-            # Remove marker and return clean content
-            clean = prompt[match.end() :].strip()
-            return True, clean
-
-    return False, prompt
-
-
-def capture_memory(content: str) -> dict:
-    """Capture content as a memory.
-
-    Returns dict with capture result.
+        Tuple of (should_capture, namespace, content)
+        - should_capture: True if a marker was found
+        - namespace: Detected namespace (or None for auto-detect)
+        - content: Cleaned content with marker removed
     """
     try:
-        # Import here to avoid startup cost when hook is disabled
+        from git_notes_memory.hooks.namespace_parser import NamespaceParser
+
+        parser = NamespaceParser()
+        result = parser.parse(prompt)
+
+        if result is None:
+            return False, None, prompt
+
+        return True, result.namespace, result.content
+
+    except ImportError:
+        # Fallback if library not available - use basic detection
+        import re
+
+        markers = [r"^\[remember\]\s*", r"^\[capture\]\s*", r"^@memory\s+"]
+        for pattern in markers:
+            match = re.match(pattern, prompt, re.IGNORECASE)
+            if match:
+                clean = prompt[match.end() :].strip()
+                return True, None, clean
+
+        return False, None, prompt
+
+
+def capture_memory(content: str, namespace: str | None = None) -> dict:
+    """Capture content as a memory.
+
+    Args:
+        content: The content to capture.
+        namespace: Target namespace (None for auto-detection).
+
+    Returns:
+        Dict with capture result.
+    """
+    try:
         from git_notes_memory import get_capture_service
 
         capture = get_capture_service()
 
-        # Use the main capture() method with learnings namespace
+        # If no namespace specified, default to learnings
+        target_namespace = namespace or "learnings"
+
         # Extract a summary from the first line or first 100 chars
         lines = content.strip().split("\n")
         summary = lines[0][:100] if lines else content[:100]
 
         result = capture.capture(
-            namespace="learnings",
+            namespace=target_namespace,
             summary=summary,
             content=content,
         )
@@ -69,6 +108,7 @@ def capture_memory(content: str) -> dict:
             return {
                 "success": True,
                 "memory_id": result.memory.id,
+                "namespace": target_namespace,
                 "message": f"Captured as memory: {result.memory.id[:16]}...",
             }
         else:
@@ -86,6 +126,23 @@ def capture_memory(content: str) -> dict:
         return {"success": False, "error": str(e)}
 
 
+def get_namespace_emoji(namespace: str) -> str:
+    """Get display emoji for a namespace."""
+    emojis = {
+        "decisions": "\u2696\ufe0f",  # Balance scale
+        "learnings": "\U0001F4A1",  # Light bulb
+        "blockers": "\U0001F6D1",  # Stop sign
+        "progress": "\U0001F680",  # Rocket
+        "patterns": "\U0001F9E9",  # Puzzle piece
+        "research": "\U0001F50D",  # Magnifying glass
+        "reviews": "\U0001F441\ufe0f",  # Eye
+        "retrospective": "\U0001F504",  # Counterclockwise
+        "inception": "\U0001F331",  # Seedling
+        "elicitation": "\U0001F4AC",  # Speech bubble
+    }
+    return emojis.get(namespace, "\U0001F4DD")  # Default: memo
+
+
 def main() -> None:
     """Main hook entry point."""
     # Read hook input from stdin
@@ -97,8 +154,8 @@ def main() -> None:
 
     prompt = input_data.get("prompt", "")
 
-    # Check if this prompt should be captured
-    should, content = should_capture(prompt)
+    # Parse prompt for capture markers
+    should, namespace, content = parse_prompt(prompt)
 
     if not should:
         # No marker found, pass through unchanged
@@ -106,16 +163,21 @@ def main() -> None:
         return
 
     # Capture the memory
-    result = capture_memory(content)
+    result = capture_memory(content, namespace)
 
     # Output result with visual indicator
     output = {"continue": True}
+
     if result.get("success"):
+        ns = result.get("namespace", "learnings")
+        emoji = get_namespace_emoji(ns)
         # Extract summary for display (first 50 chars of content)
         summary = content[:50] + "..." if len(content) > 50 else content
-        output["message"] = f"💾 Captured to learnings: \"{summary}\""
+        # Remove newlines for display
+        summary = summary.replace("\n", " ")
+        output["message"] = f'{emoji} Captured to {ns}: "{summary}"'
     else:
-        output["warning"] = f"💾 Capture failed: {result.get('error', 'Unknown error')}"
+        output["warning"] = f"\U0001F4BE Capture failed: {result.get('error', 'Unknown error')}"
 
     print(json.dumps(output))
 

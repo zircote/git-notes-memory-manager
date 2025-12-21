@@ -87,6 +87,8 @@ class ContextBuilder:
         self._recall_service = recall_service
         self._index_service = index_service
         self.config = config or load_hook_config()
+        # Track relevance scores for memories (populated during semantic context building)
+        self._relevance_map: dict[str, float] = {}
 
     # -------------------------------------------------------------------------
     # Lazy-loaded Dependencies
@@ -148,6 +150,9 @@ class ContextBuilder:
             session_source,
             spec_id,
         )
+
+        # Clear relevance map for fresh build
+        self._relevance_map = {}
 
         # Calculate token budget
         budget = self.calculate_budget(project)
@@ -351,18 +356,28 @@ class ContextBuilder:
         decision_budget = int(token_budget * 0.4)
         action_budget = token_budget - blocker_budget - decision_budget
 
+        # Calculate proportional memory limits from configurable max
+        max_memories = self.config.session_start_max_memories
+        blocker_limit = max(3, max_memories // 3)  # ~33%
+        decision_limit = max(3, max_memories // 3)  # ~33%
+        action_limit = max(2, max_memories // 6)  # ~17%
+
         # Get active blockers (most recent first)
-        blockers = recall.get_by_namespace("blockers", spec=spec_id, limit=10)
+        blockers = recall.get_by_namespace(
+            "blockers", spec=spec_id, limit=blocker_limit
+        )
         blockers = self.filter_memories(blockers, blocker_budget)
 
         # Get recent decisions (last 7 days)
-        decisions = recall.get_by_namespace("decisions", spec=spec_id, limit=10)
+        decisions = recall.get_by_namespace(
+            "decisions", spec=spec_id, limit=decision_limit
+        )
         recent_cutoff = datetime.now(UTC) - timedelta(days=7)
         decisions = [d for d in decisions if d.timestamp >= recent_cutoff]
         decisions = self.filter_memories(decisions, decision_budget)
 
         # Get pending actions (from progress namespace)
-        actions = recall.get_by_namespace("progress", spec=spec_id, limit=5)
+        actions = recall.get_by_namespace("progress", spec=spec_id, limit=action_limit)
         actions = [a for a in actions if a.status in ("pending", "in-progress")]
         actions = self.filter_memories(actions, action_budget)
 
@@ -389,17 +404,29 @@ class ContextBuilder:
         learning_budget = int(token_budget * 0.6)
         pattern_budget = token_budget - learning_budget
 
-        # Search for relevant learnings
+        # Calculate proportional memory limits from configurable max
+        max_memories = self.config.session_start_max_memories
+        learning_limit = max(5, max_memories // 2)  # ~50% for learnings
+        pattern_limit = max(2, max_memories // 6)  # ~17% for patterns
+
+        # Search for relevant learnings and track relevance scores
         learnings: list[Memory] = []
         if project:
-            results = recall.search(project, k=10, namespace="learnings")
+            results = recall.search(project, k=learning_limit, namespace="learnings")
+            for r in results:
+                # Convert distance to similarity (lower distance = higher similarity)
+                # Using 1/(1+distance) for bounded [0,1] range
+                self._relevance_map[r.memory.id] = 1.0 / (1.0 + r.distance)
             learnings = [r.memory for r in results]
         learnings = self.filter_memories(learnings, learning_budget)
 
-        # Search for relevant patterns
+        # Search for relevant patterns and track relevance scores
         patterns: list[Memory] = []
         if project:
-            results = recall.search(project, k=5, namespace="patterns")
+            results = recall.search(project, k=pattern_limit, namespace="patterns")
+            for r in results:
+                # Convert distance to similarity (lower distance = higher similarity)
+                self._relevance_map[r.memory.id] = 1.0 / (1.0 + r.distance)
             patterns = [r.memory for r in results]
         patterns = self.filter_memories(patterns, pattern_budget)
 
@@ -464,22 +491,37 @@ class ContextBuilder:
             return
 
         sc_key = builder.add_section("root", "semantic_context")
+        threshold = self.config.session_start_auto_expand_threshold
 
-        # Add learnings
+        # Add learnings with relevance scores
         if semantic.relevant_learnings:
             learnings_key = builder.add_section(
                 sc_key, "learnings", title="Relevant Learnings"
             )
             for memory in semantic.relevant_learnings:
-                builder.add_memory_element(learnings_key, memory, hydration="summary")
+                relevance = self._relevance_map.get(memory.id)
+                builder.add_memory_element(
+                    learnings_key,
+                    memory,
+                    hydration="summary",
+                    relevance=relevance,
+                    auto_expand_threshold=threshold,
+                )
 
-        # Add patterns
+        # Add patterns with relevance scores
         if semantic.related_patterns:
             patterns_key = builder.add_section(
                 sc_key, "patterns", title="Related Patterns"
             )
             for memory in semantic.related_patterns:
-                builder.add_memory_element(patterns_key, memory, hydration="summary")
+                relevance = self._relevance_map.get(memory.id)
+                builder.add_memory_element(
+                    patterns_key,
+                    memory,
+                    hydration="summary",
+                    relevance=relevance,
+                    auto_expand_threshold=threshold,
+                )
 
     # -------------------------------------------------------------------------
     # Private Methods - Analysis

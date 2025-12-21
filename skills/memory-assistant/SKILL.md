@@ -248,15 +248,57 @@ The hook:
 - When the skill suggests capture, using `/memory:capture` satisfies both the skill's guidance AND prevents Stop hook from prompting for the same content
 - The skill's real-time suggestions are more specific than the Stop hook's end-of-session generic prompt
 
-## Inline Capture Markers
+## Capture Marker Formats
 
-Capture memories without interrupting your flow:
+### Block Markers (Preferred for Detailed Captures)
+
+Use markdown block syntax for rich, structured captures:
+
+```
+:::decision Use PostgreSQL for persistence
+## Context
+We need a reliable database for production workloads.
+
+## Rationale
+- Strong ACID compliance
+- Excellent JSON support via JSONB
+- Team expertise
+
+## Alternatives Considered
+- MySQL: Less JSON support
+- MongoDB: Overkill for structured data
+:::
+```
+
+Single-line block: `:::decision Use PostgreSQL for JSON support:::`
+
+### Inline Markers (Quick Captures)
 
 | Marker | Effect | Example |
 |--------|--------|---------|
 | `[remember] <text>` | Captures as learning | `[remember] pytest -k filters by test name` |
+| `[decision] <text>` | Captures as decision | `[decision] Using JWT for stateless auth` |
+| `[learned] <text>` | Captures as learning | `[learned] async fixtures need pytest-asyncio` |
+| `[blocker] <text>` | Captures as blocker | `[blocker] CI fails on arm64 runners` |
+| `[progress] <text>` | Captures as progress | `[progress] Completed auth module` |
 | `[capture] <text>` | Auto-detects namespace | `[capture] Chose Redis for caching` |
 | `@memory <text>` | Same as [capture] | `@memory API rate limit is 100 req/min` |
+
+## Memory Expansion
+
+Memories in `<memory_context>` are **summaries only**. When working with relevant memories:
+
+1. **Auto-expand when highly relevant** (relevance > 0.85):
+   - Use `/memory:recall <memory-id>` to get full content
+   - Check `git show <commit-sha>` to see associated files
+
+2. **Reference memories explicitly**:
+   - "Based on previous decision (decisions:abc123:0)..."
+   - "This relates to a prior blocker that was resolved by..."
+
+3. **Use git context**:
+   - Memory IDs: `namespace:COMMIT_SHA:index`
+   - `git show abc123 --name-only` reveals files changed with the memory
 
 ## Command Reference
 

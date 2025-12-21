@@ -764,8 +764,9 @@ class TestBuildSemanticContext:
             token_budget=1000,
         )
 
+        # Default max_memories=30, learning_limit = max(5, 30 // 2) = 15
         mock_recall_service.search.assert_any_call(
-            "test-project", k=10, namespace="learnings"
+            "test-project", k=15, namespace="learnings"
         )
         assert isinstance(result, SemanticContext)
 

@@ -91,6 +91,13 @@ class SessionAnalyzer:
         re.DOTALL | re.IGNORECASE,
     )
 
+    # Pattern for extracting assistant messages from transcript
+    # Matches "Assistant:" prefixed blocks
+    ASSISTANT_PATTERN = re.compile(
+        r"(?:^|\n)Assistant:\s*(.*?)(?=\n(?:Human|User|Assistant):|$)",
+        re.DOTALL | re.IGNORECASE,
+    )
+
     def __init__(
         self,
         min_confidence: float = 0.7,
@@ -169,12 +176,18 @@ class SessionAnalyzer:
         user_matches = self.USER_PATTERN.findall(raw_content)
         user_messages = tuple(msg.strip() for msg in user_matches if msg.strip())
 
+        # Extract assistant messages
+        assistant_matches = self.ASSISTANT_PATTERN.findall(raw_content)
+        assistant_messages = tuple(
+            msg.strip() for msg in assistant_matches if msg.strip()
+        )
+
         # Count conversation turns (approximation)
-        total_turns = len(user_messages)
+        total_turns = max(len(user_messages), len(assistant_messages))
 
         return TranscriptContent(
             user_messages=user_messages,
-            assistant_messages=(),  # Not currently extracted
+            assistant_messages=assistant_messages,
             raw_content=raw_content,
             total_turns=total_turns,
         )
@@ -204,19 +217,30 @@ class SessionAnalyzer:
             logger.debug("No transcript to analyze")
             return []
 
-        if not transcript.user_messages:
-            logger.debug("No user messages in transcript")
+        if not transcript.user_messages and not transcript.assistant_messages:
+            logger.debug("No messages in transcript")
             return []
 
-        # Detect signals in all user messages
+        # Detect signals in all messages (user and assistant)
         detector = self._get_signal_detector()
         all_signals: list[CaptureSignal] = []
 
+        # Scan user messages
         for message in transcript.user_messages:
             signals = detector.detect(message)
             all_signals.extend(signals)
 
-        logger.debug("Detected %d total signals in transcript", len(all_signals))
+        # Scan assistant messages (where markers are typically written)
+        for message in transcript.assistant_messages:
+            signals = detector.detect(message)
+            all_signals.extend(signals)
+
+        logger.debug(
+            "Detected %d total signals in transcript (user: %d, assistant: %d)",
+            len(all_signals),
+            len(transcript.user_messages),
+            len(transcript.assistant_messages),
+        )
 
         if not all_signals:
             return []

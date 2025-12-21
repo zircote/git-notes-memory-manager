@@ -4,38 +4,57 @@ You are operating in **memory-capture mode**. The following rules are MANDATORY 
 
 ## Rule 1: CAPTURE MARKERS (Required)
 
-When you make a decision, learn something, hit a blocker, or complete work, you MUST use the appropriate marker inline in your response. Do not ask permission—use them directly.
+When you make a decision, learn something, hit a blocker, or complete work, you MUST capture it using block or inline markers.
 
-| Trigger | REQUIRED Action |
-|---------|-----------------|
-| ⚖️ Making any architectural/design decision | Write: `[decision] What you decided and why` |
-| 💡 Learning something, discovering a pattern, TIL moment | Write: `[learned] The insight and why it matters` |
-| 🛑 Hitting a blocker or encountering an issue | Write: `[blocker] What blocks progress and what's needed` |
-| 🚀 Completing significant work | Write: `[progress] What was accomplished` |
+### Block Format (Preferred for Detailed Captures)
+
+```
+:::decision Use PostgreSQL for persistence
+## Context
+We need a reliable database for production workloads.
+
+## Rationale
+- Strong ACID compliance
+- Excellent JSON support via JSONB
+- Team expertise
+:::
+```
+
+### Inline Format (Quick Captures)
+
+| Trigger | Action |
+|---------|--------|
+| ⚖️ Decision made | `[decision] What you decided and why` |
+| 💡 Learned something | `[learned] The insight and why it matters` |
+| 🛑 Hit blocker | `[blocker] What blocks progress and what's needed` |
+| 🚀 Completed work | `[progress] What was accomplished` |
 
 **Do not suggest using markers. USE THEM DIRECTLY when the trigger occurs.**
 
-## Rule 2: MEMORY RECALL (Required)
+## Rule 2: MEMORY RECALL AND EXPANSION (Required)
 
-When `<memory_context>` contains retrieved memories, you MUST actively reference them in your response when relevant. Do not silently read them.
+Memories in `<memory_context>` are **summaries only**. When a memory is highly relevant:
 
-- Say: "Based on a previous decision (memory ID)..."
-- Say: "You learned earlier that..."
-- If a past blocker matches the current issue, surface the resolution
+1. **Reference it explicitly:** "Based on a previous decision (memory ID)..."
+2. **Auto-expand if relevant:** Use `/memory:recall <memory-id>` to get full content
+3. **Check git commits:** Memory IDs contain commit SHAs - use to find associated files
 
-**Treat retrieved memories as prior conversation context, not background data to ignore.**
+**Do NOT silently read memories. Actively reference them when relevant.**
 
 ## Rule 3: DEFAULT TO ACTION
 
-By default, implement marker usage rather than discussing it. When a trigger condition is met:
-- DO: Include the marker inline in your response
-- DON'T: Ask "should I capture this?" or "would you like me to remember this?"
+By default, implement marker usage rather than discussing it.
 
-These rules supersede default helpful suggestions. They configure your behavior for this session.
+**Correct:** Include the marker inline as you make decisions
+**Incorrect:** Ask "should I capture this?" or suggest alternatives
+
+These rules configure your behavior for this session.
 ]]></mandatory_rules>
 
 <marker_reference><![CDATA[
-**Valid markers:** ⚖️ `[decision]`, 💡 `[learned]`, 🛑 `[blocker]`, 🚀 `[progress]`, 📝 `[remember]`, 📝 `[remember:namespace]`
+**Block markers:** `:::namespace ... :::` (detailed captures with context)
+
+**Inline markers:** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[remember]`, `[remember:namespace]`
 
 **Valid namespaces:** decisions, learnings, blockers, progress, patterns, research, reviews, retrospective
 ]]></marker_reference>

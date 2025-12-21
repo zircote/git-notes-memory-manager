@@ -149,10 +149,13 @@ class TestHookConfig:
         config = HookConfig()
         assert config.enabled is True
         assert config.session_start_enabled is True
-        assert config.capture_detection_enabled is False
+        assert config.capture_detection_enabled is True  # Enabled by default
+        assert config.user_prompt_enabled is True  # Enabled by default
         assert config.stop_enabled is True
         assert config.timeout == 30
         assert config.debug is False
+        assert config.session_start_max_memories == 30
+        assert config.session_start_auto_expand_threshold == 0.85
 
     def test_load_config_with_env(self) -> None:
         """Test loading configuration from environment variables."""

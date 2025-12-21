@@ -13,6 +13,8 @@ Environment Variables:
     HOOK_SESSION_START_FIXED_BUDGET: Fixed budget amount
     HOOK_SESSION_START_INCLUDE_GUIDANCE: Include response guidance in SessionStart
     HOOK_SESSION_START_GUIDANCE_DETAIL: Guidance detail level (minimal/standard/detailed)
+    HOOK_SESSION_START_MAX_MEMORIES: Maximum memories to retrieve (default: 30)
+    HOOK_SESSION_START_AUTO_EXPAND_THRESHOLD: Relevance threshold for auto-expand hints (default: 0.85)
     HOOK_CAPTURE_DETECTION_ENABLED: Enable capture signal detection
     HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE: Minimum confidence for suggestions
     HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD: Confidence for auto-capture
@@ -119,9 +121,13 @@ class HookConfig:
     session_start_max_budget: int = 3000
     session_start_include_guidance: bool = True
     session_start_guidance_detail: GuidanceDetailLevel = GuidanceDetailLevel.STANDARD
+    session_start_max_memories: int = 30  # Max memories to retrieve (20-30 recommended)
+    session_start_auto_expand_threshold: float = (
+        0.85  # Relevance threshold for auto-expand hint
+    )
 
     # Capture detection settings
-    capture_detection_enabled: bool = False  # Disabled by default, opt-in
+    capture_detection_enabled: bool = True  # Enabled by default when plugin is active
     capture_detection_min_confidence: float = 0.7
     capture_detection_auto_threshold: float = 0.95
     capture_detection_novelty_threshold: float = 0.3
@@ -132,7 +138,7 @@ class HookConfig:
     stop_sync_index: bool = True
 
     # UserPromptSubmit hook settings
-    user_prompt_enabled: bool = False  # Uses capture_detection_enabled by default
+    user_prompt_enabled: bool = True  # Enabled by default when plugin is active
 
     # PostToolUse hook settings
     post_tool_use_enabled: bool = True
@@ -327,6 +333,16 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
             kwargs["session_start_guidance_detail"] = _parse_guidance_detail(
                 env["HOOK_SESSION_START_GUIDANCE_DETAIL"]
             )
+    if "HOOK_SESSION_START_MAX_MEMORIES" in env:
+        kwargs["session_start_max_memories"] = _parse_int(
+            env["HOOK_SESSION_START_MAX_MEMORIES"],
+            defaults.session_start_max_memories,
+        )
+    if "HOOK_SESSION_START_AUTO_EXPAND_THRESHOLD" in env:
+        kwargs["session_start_auto_expand_threshold"] = _parse_float(
+            env["HOOK_SESSION_START_AUTO_EXPAND_THRESHOLD"],
+            defaults.session_start_auto_expand_threshold,
+        )
 
     # Capture detection settings
     if "HOOK_CAPTURE_DETECTION_ENABLED" in env:

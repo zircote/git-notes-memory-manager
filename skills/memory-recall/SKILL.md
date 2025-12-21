@@ -107,13 +107,49 @@ The memory system supports 10 namespaces:
 | `retrospective` | Post-mortems and retrospectives | "project retrospective", "lessons learned" |
 | `patterns` | Recurring solutions | "error handling", "API patterns" |
 
+## Memory Expansion and Hydration
+
+Memories in `<memory_context>` are **summaries only** to save token budget. When a memory is highly relevant to the current task, you should expand it.
+
+### Auto-Expansion Triggers
+
+Expand a memory automatically when:
+- **Relevance > 0.85**: High semantic similarity to current task
+- **Active blocker**: Memory is in `blockers` namespace and may be recurring
+- **Decision context**: User is making a similar decision and past context helps
+
+### How to Expand Memories
+
+1. **Use recall command**:
+   ```bash
+   /memory:recall <memory-id>
+   ```
+   Example: `/memory:recall decisions:abc123:0`
+
+2. **Check git commits** for file context:
+   Memory IDs contain commit SHAs: `namespace:COMMIT_SHA:index`
+   ```bash
+   git show abc123 --name-only  # See files changed with this memory
+   ```
+
+3. **Reference expanded content** in your response:
+   - "Based on the decision (decisions:abc123:0), we chose PostgreSQL because..."
+   - "This is similar to a previous blocker (blockers:def456:0) which was resolved by..."
+
+### When to Use Summaries Only
+
+- Memory is tangentially related (relevance < 0.7)
+- User is just exploring, not deeply working on the topic
+- Multiple memories match - summarize first, expand on request
+
 ## Non-Intrusive Design Principles
 
 1. **Relevance threshold**: Only surface memories above 0.7 similarity
 2. **Limited output**: Show brief summaries, not full content
-3. **No interruption**: Don't break user's flow mid-thought
-4. **Escape hatch**: Can be disabled via environment variable
-5. **On-demand detail**: Full content available via `/memory:recall`
+3. **Auto-expand high relevance**: Expand memories above 0.85 automatically
+4. **No interruption**: Don't break user's flow mid-thought
+5. **Escape hatch**: Can be disabled via environment variable
+6. **On-demand detail**: Full content available via `/memory:recall`
 
 ## Integration Examples
 

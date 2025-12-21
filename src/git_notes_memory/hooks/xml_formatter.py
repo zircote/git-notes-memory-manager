@@ -97,6 +97,9 @@ class XMLBuilder:
         parent: str,
         memory: Memory,
         hydration: str = "summary",
+        *,
+        relevance: float | None = None,
+        auto_expand_threshold: float = 0.85,
     ) -> str:
         """Add a memory-specific element with proper formatting.
 
@@ -107,6 +110,8 @@ class XMLBuilder:
             parent: Key of the parent element.
             memory: Memory object to add.
             hydration: Hydration level ("summary", "full", "files").
+            relevance: Optional relevance score (0.0-1.0) for this memory.
+            auto_expand_threshold: Threshold above which auto_expand hint is added.
 
         Returns:
             Key to reference this element.
@@ -127,6 +132,12 @@ class XMLBuilder:
             attrs["spec"] = memory.spec
         if memory.phase:
             attrs["phase"] = memory.phase
+
+        # Add relevance and auto-expand hints
+        if relevance is not None:
+            attrs["relevance"] = f"{relevance:.2f}"
+            if relevance >= auto_expand_threshold:
+                attrs["auto_expand"] = "true"
 
         mem_elem = ET.SubElement(parent_elem, "memory", attrs)
 

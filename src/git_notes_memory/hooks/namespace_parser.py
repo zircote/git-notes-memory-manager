@@ -5,6 +5,8 @@ namespace specification. It extends the existing marker detection to allow
 users to specify which namespace their captured content should go to.
 
 Supported Marker Syntaxes:
+
+Inline Markers:
 - [remember] content          -> Capture to 'learnings' (default)
 - [remember:decisions] content -> Capture to 'decisions' namespace
 - [capture] content           -> Auto-detect namespace from content
@@ -19,6 +21,13 @@ Shorthand Markers (direct namespace):
 - [progress] content          -> Capture to 'progress' namespace
 - [pattern] content           -> Capture to 'patterns' namespace
 - [research] content          -> Capture to 'research' namespace
+
+Markdown Block Markers (for detailed captures):
+- :::decision Title here      -> Multi-line capture to 'decisions'
+  ## Context
+  Details...
+  :::
+- :::decision content:::      -> Single-line block capture
 
 Invalid namespaces fall back to auto-detection (namespace=None).
 """
@@ -149,6 +158,24 @@ class NamespaceParser:
         re.IGNORECASE | re.DOTALL,
     )
 
+    # Markdown block pattern: :::namespace content :::
+    # Supports both single-line title and multi-line content
+    # Group 1: namespace (required)
+    # Group 2: optional title on same line
+    # Group 3: content between ::: markers (may be empty if title only)
+    _MARKDOWN_BLOCK_PATTERN = re.compile(
+        r"^:::(\w+)(?:\s+(.+?))??\n(.*?)^:::$",
+        re.MULTILINE | re.DOTALL,
+    )
+
+    # Alternative: Single-line markdown block :::namespace content:::
+    # Group 1: namespace
+    # Group 2: content
+    _MARKDOWN_INLINE_PATTERN = re.compile(
+        r"^:::(\w+)\s+(.+?):::$",
+        re.DOTALL,
+    )
+
     def __init__(
         self,
         *,
@@ -242,6 +269,52 @@ class NamespaceParser:
                 namespace = SHORTHAND_MARKERS[shorthand_keyword]
                 return ParsedMarker(
                     marker_type=shorthand_keyword,
+                    namespace=namespace,
+                    content=content,
+                    original_text=text,
+                )
+
+        # Try markdown block pattern: :::namespace\ncontent\n:::
+        match = self._MARKDOWN_BLOCK_PATTERN.search(text)
+        if match:
+            raw_namespace = match.group(1).lower()
+            title = (match.group(2) or "").strip()
+            body = (match.group(3) or "").strip()
+
+            # Combine title and body for content
+            if title and body:
+                content = f"{title}\n\n{body}"
+            elif title:
+                content = title
+            else:
+                content = body
+
+            # Validate namespace - check both VALID_NAMESPACES and SHORTHAND_MARKERS
+            namespace = self._validate_namespace(raw_namespace)
+            if namespace is None and raw_namespace in SHORTHAND_MARKERS:
+                namespace = SHORTHAND_MARKERS[raw_namespace]
+
+            if namespace:
+                return ParsedMarker(
+                    marker_type="block",
+                    namespace=namespace,
+                    content=content,
+                    original_text=text,
+                )
+
+        # Try inline markdown block: :::namespace content:::
+        match = self._MARKDOWN_INLINE_PATTERN.match(text)
+        if match:
+            raw_namespace = match.group(1).lower()
+            content = match.group(2).strip()
+
+            namespace = self._validate_namespace(raw_namespace)
+            if namespace is None and raw_namespace in SHORTHAND_MARKERS:
+                namespace = SHORTHAND_MARKERS[raw_namespace]
+
+            if namespace:
+                return ParsedMarker(
+                    marker_type="block",
                     namespace=namespace,
                     content=content,
                     original_text=text,
