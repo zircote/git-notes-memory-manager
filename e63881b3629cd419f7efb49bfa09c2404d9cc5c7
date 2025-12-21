@@ -1,0 +1,8 @@
+---
+type: learnings
+timestamp: '2025-12-21T19:16:48.799017+00:00'
+summary: 'Now I understand the architecture. The best approach is:'
+---
+
+Now I understand the architecture. The best approach is:
+1. Add an `ensure_sync_configured()` method to `GitOps`...
