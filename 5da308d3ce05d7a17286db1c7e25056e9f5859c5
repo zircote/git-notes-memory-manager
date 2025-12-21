@@ -539,3 +539,25 @@ When detecting capture-worthy content, the system needs to balance automation wi
 ## Related Files
 - docs/spec/completed/2025-12-19-hook-based-memory-capture/DECISIONS.md:226-265
 - src/git_notes_memory/hooks/capture_decider.py:128-200
+
+---
+type: decisions
+timestamp: '2025-12-21T05:59:07.715487+00:00'
+summary: Adaptive token budget based on project complexity
+---
+
+Adaptive token budget based on project complexity
+## Context
+SessionStart context injection must balance providing useful context without overwhelming Claude's context window.
+
+## Rationale
+- Simple projects (<10 memories): 500 tokens
+- Medium (10-50 memories): 1000 tokens
+- Complex (50-100 memories): 2000 tokens
+- Full (>100 memories): 3000 tokens
+- Proportional allocation: 50% blockers, 40% decisions, 10% actions
+
+## Related Files
+- docs/spec/completed/2025-12-19-hook-based-memory-capture/DECISIONS.md:145-183
+- src/git_notes_memory/hooks/context_builder.py:186-221
+- src/git_notes_memory/config.py:536-539
