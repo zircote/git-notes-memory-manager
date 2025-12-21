@@ -111,3 +111,20 @@ tags:
 ### Enforcement
 
 - **DO:** Include...
+
+---
+type: progress
+timestamp: '2025-12-21T04:53:58.858328+00:00'
+summary: '...`[blocker]` | `[blocker] Circular FK dependency between tables` |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...`[blocker]` | `[blocker] Circular FK dependency between tables` |
+| Progress | `[progress]` | `[progress] JWT auth with refresh rotation implemented` |
+
+### Enforcement
+
+- **DO:** Include block markers...
