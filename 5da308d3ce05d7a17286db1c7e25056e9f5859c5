@@ -1,0 +1,8 @@
+---
+type: progress
+timestamp: '2025-12-21T05:22:25.549686+00:00'
+summary: '...architectural decisions, retrospectives, and planning documents. Read
+  EVERY file in docs/spec/com'
+---
+
+...architectural decisions, retrospectives, and planning documents. Read EVERY file in docs/spec/completed/ and docs/architecture/completed/. For each project found, extract:\n1. Key architectural...
