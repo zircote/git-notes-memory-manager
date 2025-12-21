@@ -29,3 +29,19 @@ tags:
 # ANSI escape sequence pattern for stripping colors from input
 # Matches: ESC[...m (SGR sequences for colors/styles)
 ANSI_ESCAPE_PATTERN...
+
+---
+type: patterns
+timestamp: '2025-12-21T04:43:28.412746+00:00'
+summary: '...Returns ":::decision Use PostgreSQL"'
+tags:
+- auto-captured
+- post-tool-use
+- file:signal_detector.py
+---
+
+...Returns ":::decision Use PostgreSQL"
+    """
+    return ANSI_ESCAPE_PATTERN.sub("", text)
+
+# Pattern definitions by signal type
