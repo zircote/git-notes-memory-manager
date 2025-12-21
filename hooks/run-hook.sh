@@ -125,8 +125,21 @@ main() {
         bootstrap
     fi
 
-    # Run the hook script with stdin passthrough
-    exec "${VENV_PYTHON}" "${HOOK_SCRIPT}"
+    # DEBUG: Capture stdin to debug file for troubleshooting
+    local debug_dir="${PLUGIN_ROOT}/.debug"
+    mkdir -p "${debug_dir}"
+    local hook_name
+    hook_name=$(basename "${HOOK_SCRIPT}" .py)
+    local debug_file="${debug_dir}/${hook_name}_$(date +%s).json"
+
+    # Read stdin into variable, write to debug file, then pipe to hook
+    local stdin_content
+    stdin_content=$(cat)
+    echo "${stdin_content}" > "${debug_file}"
+    echo "[DEBUG] Saved hook input to: ${debug_file}" >&2
+
+    # Run the hook script with captured stdin
+    echo "${stdin_content}" | exec "${VENV_PYTHON}" "${HOOK_SCRIPT}"
 }
 
 main "$@"

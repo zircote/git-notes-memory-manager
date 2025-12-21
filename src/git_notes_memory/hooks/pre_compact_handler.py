@@ -39,6 +39,9 @@ from typing import TYPE_CHECKING, Any
 from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.hook_utils import (
     cancel_timeout,
+    get_hook_logger,
+    log_hook_input,
+    log_hook_output,
     read_json_input,
     setup_logging,
     setup_timeout,
@@ -210,16 +213,27 @@ def main() -> None:
     # Set up logging based on config
     setup_logging(config.debug)
 
-    logger.debug("PreCompact hook invoked")
+    # Get dedicated file logger for debugging
+    hook_logger = get_hook_logger("PreCompact")
+    hook_logger.info("PreCompact hook invoked")
+    hook_logger.info(
+        "Config: auto_capture=%s, prompt_first=%s, min_conf=%.2f, max=%d",
+        config.pre_compact_auto_capture,
+        config.pre_compact_prompt_first,
+        config.pre_compact_min_confidence,
+        config.pre_compact_max_captures,
+    )
 
     # Check if hooks are enabled
     if not config.enabled:
-        logger.debug("Hooks disabled via HOOK_ENABLED=false")
+        hook_logger.info("Hooks disabled via HOOK_ENABLED=false - exiting")
         print(json.dumps({}))
         sys.exit(0)
 
     if not config.pre_compact_enabled:
-        logger.debug("PreCompact hook disabled via HOOK_PRE_COMPACT_ENABLED=false")
+        hook_logger.info(
+            "PreCompact hook disabled via HOOK_PRE_COMPACT_ENABLED=false - exiting"
+        )
         print(json.dumps({}))
         sys.exit(0)
 
@@ -232,26 +246,35 @@ def main() -> None:
         input_data = read_json_input()
         logger.debug("Received input: trigger=%s", input_data.get("trigger"))
 
+        # Log full input to file for debugging
+        log_hook_input("PreCompact", input_data)
+
         # Get transcript path
         transcript_path = input_data.get("transcript_path")
         if not transcript_path:
-            logger.debug("No transcript_path in input")
+            hook_logger.info("No transcript_path in input - exiting")
             print(json.dumps({}))
             sys.exit(0)
+
+        hook_logger.info("Transcript path: %s", transcript_path)
 
         # Check if transcript exists
         if not Path(transcript_path).exists():
-            logger.debug("Transcript file not found: %s", transcript_path)
+            hook_logger.info("Transcript file not found: %s - exiting", transcript_path)
             print(json.dumps({}))
             sys.exit(0)
 
+        hook_logger.info("Transcript exists, checking config...")
+
         # Check if auto-capture is enabled
         if not config.pre_compact_auto_capture:
-            logger.debug(
-                "Auto-capture disabled via HOOK_PRE_COMPACT_AUTO_CAPTURE=false"
+            hook_logger.info(
+                "Auto-capture disabled via HOOK_PRE_COMPACT_AUTO_CAPTURE=false - exiting"
             )
             print(json.dumps({}))
             sys.exit(0)
+
+        hook_logger.info("Analyzing transcript for uncaptured signals...")
 
         # Analyze transcript for uncaptured signals
         analyzer = SessionAnalyzer(
@@ -262,18 +285,28 @@ def main() -> None:
         signals = analyzer.analyze(transcript_path, check_novelty=True)
 
         if not signals:
-            logger.debug("No uncaptured signals found in transcript")
+            hook_logger.info("No uncaptured signals found in transcript - exiting")
             print(json.dumps({}))
             sys.exit(0)
 
-        logger.debug("Found %d uncaptured signals", len(signals))
+        hook_logger.info("Found %d uncaptured signals", len(signals))
+        for sig in signals[:5]:
+            hook_logger.info(
+                "  Signal: type=%s, ns=%s, conf=%.2f, match=%s...",
+                sig.type.value,
+                sig.suggested_namespace,
+                sig.confidence,
+                sig.match[:50],
+            )
 
         # Check for suggestion mode (prompt_first)
         if config.pre_compact_prompt_first:
-            logger.debug("Suggestion mode enabled - showing suggestions only")
+            hook_logger.info("Suggestion mode enabled - showing suggestions only")
             _report_suggestions(signals)
             print(json.dumps({}))
             sys.exit(0)
+
+        hook_logger.info("Auto-capturing signals...")
 
         # Capture the signals
         captured: list[dict[str, Any]] = []
@@ -283,23 +316,30 @@ def main() -> None:
             captured.append(result)
 
             if result.get("success"):
-                logger.info(
-                    "Auto-captured: %s (%s)",
-                    result.get("memory_id", "")[:8],
-                    signal.suggested_namespace,
-                )
+                hook_logger.info("  Captured: %s", result)
+            else:
+                hook_logger.info("  Failed: %s", result)
+
+        successful = len([c for c in captured if c.get("success")])
+        hook_logger.info(
+            "Auto-capture result: %d captured, %d remaining",
+            successful,
+            len(signals) - successful,
+        )
 
         # Report captures to user
         _report_captures(captured)
 
         # Output empty JSON (PreCompact is side-effects only)
-        print(json.dumps({}))
+        output: dict[str, Any] = {}
+        log_hook_output("PreCompact", output)
+        print(json.dumps(output))
 
     except json.JSONDecodeError as e:
-        logger.error("Failed to parse hook input: %s", e)
+        hook_logger.error("Failed to parse hook input: %s", e)
         print(json.dumps({}))
     except Exception as e:
-        logger.exception("PreCompact hook error: %s", e)
+        hook_logger.exception("PreCompact hook error: %s", e)
         print(json.dumps({}))
     finally:
         cancel_timeout()

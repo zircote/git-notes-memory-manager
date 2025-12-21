@@ -1,9 +1,10 @@
 """Shared utilities for hook handlers.
 
 This module provides common utility functions used across all hook handlers:
-- Logging configuration
+- Logging configuration with file rotation
 - Timeout management (SIGALRM-based)
 - JSON input parsing with size limits
+- Hook input/output debugging
 
 These utilities were extracted from the handler modules to eliminate
 code duplication and ensure consistent behavior across hooks.
@@ -15,13 +16,16 @@ Usage::
         setup_timeout,
         cancel_timeout,
         read_json_input,
+        get_hook_logger,
     )
 
     # In your handler's main():
-    setup_logging(debug=config.debug)
+    hook_logger = get_hook_logger("SessionStart")
+    setup_logging(debug=config.debug, hook_name="SessionStart")
     setup_timeout(30, hook_name="SessionStart")
     try:
         data = read_json_input()
+        hook_logger.info("Received input: %s", json.dumps(data)[:500])
         # ... process data ...
     finally:
         cancel_timeout()
@@ -31,8 +35,11 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import signal
 import sys
+from datetime import datetime
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +49,9 @@ __all__ = [
     "cancel_timeout",
     "read_json_input",
     "validate_file_path",
+    "get_hook_logger",
+    "log_hook_input",
+    "log_hook_output",
     "MAX_INPUT_SIZE",
     "DEFAULT_TIMEOUT",
 ]
@@ -54,20 +64,144 @@ DEFAULT_TIMEOUT = 30
 # Maximum input size (10MB) to prevent memory exhaustion
 MAX_INPUT_SIZE = 10 * 1024 * 1024
 
+# Log file settings
+LOG_DIR = Path(
+    os.environ.get("MEMORY_PLUGIN_LOG_DIR", "~/.local/share/memory-plugin/logs")
+).expanduser()
+LOG_MAX_BYTES = 5 * 1024 * 1024  # 5MB per file
+LOG_BACKUP_COUNT = 5  # Keep 5 backup files
 
-def setup_logging(debug: bool = False) -> None:
+# Module-level cache for hook loggers
+_hook_loggers: dict[str, logging.Logger] = {}
+
+
+def get_hook_logger(hook_name: str) -> logging.Logger:
+    """Get a dedicated file logger for a specific hook.
+
+    Creates a rotating file logger that writes to a hook-specific log file.
+    This enables detailed debugging of hook input/output without cluttering stderr.
+
+    Args:
+        hook_name: Name of the hook (e.g., "SessionStart", "Stop").
+
+    Returns:
+        Logger configured with rotating file handler.
+
+    Example::
+
+        logger = get_hook_logger("SessionStart")
+        logger.info("Hook started with cwd: %s", cwd)
+    """
+    if hook_name in _hook_loggers:
+        return _hook_loggers[hook_name]
+
+    # Create log directory if needed
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Create hook-specific logger
+    hook_logger = logging.getLogger(f"memory_hook.{hook_name}")
+    hook_logger.setLevel(logging.DEBUG)
+
+    # Avoid duplicate handlers
+    if not hook_logger.handlers:
+        # Create rotating file handler
+        log_file = LOG_DIR / f"{hook_name.lower()}.log"
+        handler = RotatingFileHandler(
+            log_file,
+            maxBytes=LOG_MAX_BYTES,
+            backupCount=LOG_BACKUP_COUNT,
+            encoding="utf-8",
+        )
+        handler.setLevel(logging.DEBUG)
+
+        # Detailed format for file logs
+        formatter = logging.Formatter(
+            "%(asctime)s | %(levelname)-8s | %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        handler.setFormatter(formatter)
+        hook_logger.addHandler(handler)
+
+    _hook_loggers[hook_name] = hook_logger
+    return hook_logger
+
+
+def log_hook_input(hook_name: str, data: dict[str, Any]) -> None:
+    """Log hook input for debugging.
+
+    Args:
+        hook_name: Name of the hook.
+        data: Parsed JSON input data.
+    """
+    hook_logger = get_hook_logger(hook_name)
+    hook_logger.info("=" * 60)
+    hook_logger.info("HOOK INPUT at %s", datetime.now().isoformat())
+    hook_logger.info("-" * 60)
+
+    # Log key fields
+    for key in ["cwd", "session_id", "source", "transcript_path"]:
+        if key in data:
+            hook_logger.info("  %s: %s", key, data[key])
+
+    # Log prompt (truncated)
+    if "prompt" in data:
+        prompt = data["prompt"]
+        if len(prompt) > 500:
+            hook_logger.info(
+                "  prompt: %s... (truncated, %d chars)", prompt[:500], len(prompt)
+            )
+        else:
+            hook_logger.info("  prompt: %s", prompt)
+
+    # Log tool info for PostToolUse
+    if "tool_name" in data:
+        hook_logger.info("  tool_name: %s", data["tool_name"])
+    if "tool_input" in data:
+        tool_input_str = json.dumps(data["tool_input"])
+        if len(tool_input_str) > 500:
+            hook_logger.info("  tool_input: %s... (truncated)", tool_input_str[:500])
+        else:
+            hook_logger.info("  tool_input: %s", tool_input_str)
+
+    # Log all keys for reference
+    hook_logger.info("  all_keys: %s", list(data.keys()))
+
+
+def log_hook_output(hook_name: str, output: dict[str, Any]) -> None:
+    """Log hook output for debugging.
+
+    Args:
+        hook_name: Name of the hook.
+        output: JSON output data.
+    """
+    hook_logger = get_hook_logger(hook_name)
+    hook_logger.info("-" * 60)
+    hook_logger.info("HOOK OUTPUT")
+    hook_logger.info("-" * 60)
+
+    output_str = json.dumps(output, indent=2)
+    if len(output_str) > 2000:
+        hook_logger.info("%s... (truncated)", output_str[:2000])
+    else:
+        hook_logger.info("%s", output_str)
+
+    hook_logger.info("=" * 60)
+
+
+def setup_logging(debug: bool = False, hook_name: str | None = None) -> None:
     """Configure logging based on debug flag.
 
-    Sets up basic logging to stderr with appropriate level.
+    Sets up logging to stderr and optionally to a rotating file.
     This function is idempotent - calling it multiple times is safe.
 
     Args:
         debug: If True, log DEBUG level to stderr.
-            If False, only log WARNING and above.
+            If False, only log WARNING and above to stderr.
+        hook_name: If provided, also configure file logging for this hook.
 
     Example::
 
-        setup_logging(debug=config.debug)
+        setup_logging(debug=config.debug, hook_name="SessionStart")
         logger.debug("This will show if debug=True")
     """
     level = logging.DEBUG if debug else logging.WARNING
@@ -76,6 +210,10 @@ def setup_logging(debug: bool = False) -> None:
         format="[memory-hook] %(levelname)s: %(message)s",
         stream=sys.stderr,
     )
+
+    # Also setup file logging if hook_name provided
+    if hook_name:
+        get_hook_logger(hook_name)
 
 
 def setup_timeout(

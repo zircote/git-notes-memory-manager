@@ -43,6 +43,7 @@ from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.domain_extractor import extract_domain_terms
 from git_notes_memory.hooks.hook_utils import (
     cancel_timeout,
+    log_hook_input,
     read_json_input,
     setup_logging,
     setup_timeout,
@@ -382,6 +383,9 @@ def main() -> None:
         # Read and validate input
         input_data = read_json_input()
         logger.debug("Received input: tool_name=%s", input_data.get("tool_name"))
+
+        # Log full input to file for debugging
+        log_hook_input("PostToolUse", input_data)
 
         # Check if this is a triggering tool
         tool_name = input_data.get("tool_name", "")

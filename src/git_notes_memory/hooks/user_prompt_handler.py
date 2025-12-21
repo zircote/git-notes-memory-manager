@@ -40,6 +40,7 @@ from git_notes_memory.hooks.capture_decider import CaptureDecider
 from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.hook_utils import (
     cancel_timeout,
+    log_hook_input,
     read_json_input,
     setup_logging,
     setup_timeout,
@@ -249,6 +250,9 @@ def main() -> None:
         logger.debug(
             "Received input with prompt: %s...", input_data.get("prompt", "")[:50]
         )
+
+        # Log full input to file for debugging
+        log_hook_input("UserPromptSubmit", input_data)
 
         if not _validate_input(input_data):
             logger.warning("Invalid hook input - missing prompt field")

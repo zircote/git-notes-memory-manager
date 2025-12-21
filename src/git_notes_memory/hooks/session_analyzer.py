@@ -225,7 +225,20 @@ class SessionAnalyzer:
             # Handle message as string or structured content
             if isinstance(message, dict):
                 # Message might be structured with 'content' field
-                message = message.get("content", str(message))
+                content = message.get("content", "")
+                if isinstance(content, list):
+                    # Claude message format: content is list of {type, text} blocks
+                    text_parts = []
+                    for block in content:
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            text = block.get("text", "")
+                            if text:
+                                text_parts.append(text)
+                    message = "\n".join(text_parts)
+                elif isinstance(content, str):
+                    message = content
+                else:
+                    message = str(message)
             message = str(message).strip()
 
             if not message:

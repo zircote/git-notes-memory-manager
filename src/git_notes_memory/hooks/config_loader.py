@@ -143,7 +143,7 @@ class HookConfig:
     stop_sync_index: bool = True
     stop_auto_capture: bool = True  # Auto-capture detected signals at session end
     stop_auto_capture_min_confidence: float = 0.8  # Minimum confidence for auto-capture
-    stop_max_captures: int = 5  # Maximum auto-captures per session
+    stop_max_captures: int = 50  # Maximum auto-captures per session
 
     # UserPromptSubmit hook settings
     user_prompt_enabled: bool = True  # Enabled by default when plugin is active
@@ -163,7 +163,7 @@ class HookConfig:
         False  # Suggestion mode: show what would be captured
     )
     pre_compact_min_confidence: float = 0.85
-    pre_compact_max_captures: int = 3
+    pre_compact_max_captures: int = 50
     pre_compact_timeout: int = 15
 
     # Performance settings

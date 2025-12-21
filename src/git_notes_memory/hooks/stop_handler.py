@@ -43,6 +43,8 @@ from git_notes_memory.config import HOOK_STOP_TIMEOUT
 from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.hook_utils import (
     cancel_timeout,
+    get_hook_logger,
+    log_hook_input,
     setup_logging,
     setup_timeout,
 )
@@ -358,19 +360,23 @@ def main() -> None:
     # Load configuration first (before timeout setup)
     config = load_hook_config()
 
-    # Set up logging based on config
-    setup_logging(config.debug)
+    # Set up logging based on config - with file logging
+    setup_logging(config.debug, hook_name="Stop")
+    hook_logger = get_hook_logger("Stop")
 
     logger.debug("Stop hook invoked")
+    hook_logger.info("Stop hook invoked")
 
     # Check if hooks are enabled
     if not config.enabled:
         logger.debug("Hooks disabled via HOOK_ENABLED=false")
+        hook_logger.info("Hooks disabled via HOOK_ENABLED=false")
         print(json.dumps({"continue": True}))
         sys.exit(0)
 
     if not config.stop_enabled:
         logger.debug("Stop hook disabled via HOOK_STOP_ENABLED")
+        hook_logger.info("Stop hook disabled via HOOK_STOP_ENABLED")
         print(json.dumps({"continue": True}))
         sys.exit(0)
 
@@ -383,25 +389,68 @@ def main() -> None:
         input_data = _read_input()
         logger.debug("Received stop hook input: %s", list(input_data.keys()))
 
+        # Log full input to file for debugging
+        log_hook_input("Stop", input_data)
+        hook_logger.info(
+            "Config: stop_auto_capture=%s, stop_prompt_uncaptured=%s, stop_sync_index=%s",
+            config.stop_auto_capture,
+            config.stop_prompt_uncaptured,
+            config.stop_sync_index,
+        )
+
         # Analyze session transcript for uncaptured content
         detected_signals: list[CaptureSignal] = []
         if config.stop_prompt_uncaptured or config.stop_auto_capture:
             transcript_path = input_data.get("transcript_path")
+            hook_logger.info("Analyzing transcript: %s", transcript_path)
             detected_signals = _analyze_session(transcript_path)
+            hook_logger.info("Found %d signals in transcript", len(detected_signals))
+            for sig in detected_signals[:5]:  # Log first 5
+                hook_logger.info(
+                    "  Signal: type=%s, ns=%s, conf=%.2f, match=%s...",
+                    sig.type.value,
+                    sig.suggested_namespace,
+                    sig.confidence,
+                    sig.match[:50],
+                )
+        else:
+            hook_logger.info(
+                "Skipping transcript analysis (auto_capture=%s, prompt_uncaptured=%s)",
+                config.stop_auto_capture,
+                config.stop_prompt_uncaptured,
+            )
 
         # Auto-capture high-confidence signals
         captured: list[dict[str, Any]] = []
         uncaptured: list[CaptureSignal] = detected_signals
         if config.stop_auto_capture and detected_signals:
+            hook_logger.info(
+                "Auto-capturing signals (min_conf=%.2f, max=%d)",
+                config.stop_auto_capture_min_confidence,
+                config.stop_max_captures,
+            )
             captured, uncaptured = _auto_capture_signals(
                 detected_signals,
                 min_confidence=config.stop_auto_capture_min_confidence,
                 max_captures=config.stop_max_captures,
             )
+            hook_logger.info(
+                "Auto-capture result: %d captured, %d remaining",
+                len(captured),
+                len(uncaptured),
+            )
+            for c in captured:
+                hook_logger.info("  Captured: %s", c)
             logger.debug(
                 "Auto-capture: %d captured, %d remaining",
                 len(captured),
                 len(uncaptured),
+            )
+        else:
+            hook_logger.info(
+                "Auto-capture skipped (auto_capture=%s, signals=%d)",
+                config.stop_auto_capture,
+                len(detected_signals),
             )
 
         # Sync index if enabled (after auto-capture to include new memories)

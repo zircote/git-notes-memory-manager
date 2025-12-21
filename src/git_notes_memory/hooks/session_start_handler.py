@@ -39,6 +39,7 @@ from git_notes_memory.hooks.context_builder import ContextBuilder
 from git_notes_memory.hooks.guidance_builder import GuidanceBuilder
 from git_notes_memory.hooks.hook_utils import (
     cancel_timeout,
+    log_hook_input,
     read_json_input,
     setup_logging,
     setup_timeout,
@@ -144,6 +145,9 @@ def main() -> None:
         # Read and validate input
         input_data = read_json_input()
         logger.debug("Received input: %s", input_data)
+
+        # Log full input to file for debugging
+        log_hook_input("SessionStart", input_data)
 
         if not _validate_input(input_data):
             logger.warning("Invalid hook input - missing required fields")
