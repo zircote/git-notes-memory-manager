@@ -42,3 +42,12 @@ summary: '...`src/git_notes_memory/__init__.py:61-122`\n\n### ADR-005: XML-Struc
 ---
 
 ...`src/git_notes_memory/__init__.py:61-122`\n\n### ADR-005: XML-Structured Context for Claude\n[decision] Use XML format (`<memory_context>`, `<working_memory>`) for hook additionalContext injection—provides...
+
+---
+type: decisions
+timestamp: '2025-12-21T05:22:25.508559+00:00'
+summary: '...user confirms)\n- <0.70 → SKIP (no action unless explicit marker)\n-
+  Explicit markers like `[deci'
+---
+
+...user confirms)\n- <0.70 → SKIP (no action unless explicit marker)\n- Explicit markers like `[decision]` always treated as confidence 0.98-1.0\n\n## Related Files\n- docs/spec/completed/2025-12-19-hook-based...
