@@ -113,3 +113,17 @@ tags:
 ...Decision | `[decision]` | `[decision] Using PostgreSQL for JSONB support` |
 | Learning | `[learned]` | `[learned] pytest fixtures share state with module scope` |
 | Blocker | `[blocker]` | `[blocker]...
+
+---
+type: learnings
+timestamp: '2025-12-21T04:53:58.780774+00:00'
+summary: '...`[decision]` | `[decision] Using PostgreSQL for JSONB support` |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...`[decision]` | `[decision] Using PostgreSQL for JSONB support` |
+| Learning | `[learned]` | `[learned] pytest fixtures share state with module scope` |
+| Blocker | `[blocker]` | `[blocker] Circular...
