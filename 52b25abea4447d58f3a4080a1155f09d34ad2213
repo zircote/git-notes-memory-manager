@@ -1,0 +1,9 @@
+---
+type: learnings
+timestamp: '2025-12-21T06:10:55.749332+00:00'
+summary: '...blockers:051134b:4" namespace="blockers" timestamp="2025-12-21T04:53:58.818864+00:00">'
+---
+
+...blockers:051134b:4" namespace="blockers" timestamp="2025-12-21T04:53:58.818864+00:00">
+        <summary>...[learned]` | `[learned] pytest fixtures share state with module scope` |</summary>
+        <tags>auto-captured...
