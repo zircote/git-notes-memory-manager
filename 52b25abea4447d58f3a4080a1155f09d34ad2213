@@ -438,3 +438,19 @@ Evaluated SQLite, PostgreSQL, and MongoDB.
 ## Rationale
 - ACID guarantees required for financial data
 - Team expertise in PostgreSQL
+
+---
+type: decisions
+timestamp: '2025-12-21T06:21:54.912134+00:00'
+summary: '...52886bb605c8.jsonl'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...52886bb605c8.jsonl
+Found 5 signals in transcript
+  Signal: type=decision, ns=decisions, conf=1.00, match=[decision]...
+  Signal: type=decision, ns=decisions, conf=0.99, match=▶ decision ───...
+  Signal: type=decision...
