@@ -135,3 +135,18 @@ hook's transcript analysis.
 
 ## Related Files
 - src/git_notes_memory/hooks/stop_handler.py:398-410
+
+---
+type: learnings
+timestamp: '2025-12-21T06:21:54.736039+00:00'
+summary: '...Architectural choices | "I decided", "we chose" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...Architectural choices | "I decided", "we chose" |
+| learnings | Technical insights | "I learned", "TIL" |
+| blockers | Impediments | "blocked by", "stuck on" |
+| progress | Milestones | "completed",...
