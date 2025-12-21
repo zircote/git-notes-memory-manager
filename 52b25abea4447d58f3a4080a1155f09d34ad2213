@@ -70,3 +70,21 @@ The SignalDetector uses regex patterns with confidence scoring:
 ```python
 DECISION_PATTERNS = [
     (r"\[decision\]", 0.98),           # Explicit...
+
+---
+type: patterns
+timestamp: '2025-12-21T06:28:25.627732+00:00'
+summary: '...Impediments and resolutions'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...Impediments and resolutions
+  progress/      # Milestones and completions
+  patterns/      # Reusable approaches
+  ...            # 10 namespaces total
+```
+
+Research on metadata management in...
