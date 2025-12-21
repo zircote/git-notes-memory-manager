@@ -595,3 +595,18 @@ tags:
 - `/memory:capture <namespace> <content>` - Explicit capture
 
 **Available...
+
+---
+type: decisions
+timestamp: '2025-12-21T06:28:25.652617+00:00'
+summary: '...------|---------|-----------------|'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+...------|---------|-----------------|
+| decisions | Architectural choices | "I decided", "we chose", "[decision]" |
+| learnings | Technical insights | "I learned", "TIL", "[learned]" |
+| blockers | Impediments...
