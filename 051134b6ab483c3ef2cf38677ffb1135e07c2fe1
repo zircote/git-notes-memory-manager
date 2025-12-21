@@ -163,3 +163,19 @@ tags:
 - `[progress] text` — progress namespace
 - `[pattern] text` — patterns namespace
 - `[remember] text` — learnings...
+
+---
+type: progress
+timestamp: '2025-12-21T04:55:08.368797+00:00'
+summary: '...progress ─────────────────────────────────────\n"'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_signal_detector.py
+---
+
+...progress ─────────────────────────────────────\n"
+            "JWT auth with refresh rotation implemented\n"
+            "────────────────────────────────────────────────"
+        )
+        signals...
