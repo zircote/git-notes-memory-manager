@@ -403,3 +403,20 @@ summary: '...memories**: Use markers anywhere in your messages:'
 - `/memory:capture <namespace> <content>` - Explicit capture
 
 **Available...
+
+---
+type: decisions
+timestamp: '2025-12-21T06:19:35.947713+00:00'
+summary: '...patterns and base confidence'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...patterns and base confidence
+- Block markers: `▶ namespace ─────────────────`
+- Inline markers: `[decision]`, `[learned]`, `[blocker]`
+- Contextual patterns: "I decided", "TIL", "blocked by"
+
+**Real...
