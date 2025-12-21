@@ -213,3 +213,19 @@ summary: '...`src/git_notes_memory/__init__.py:61-122`\n\n### ADR-005: XML-Struc
 ---
 
 ...`src/git_notes_memory/__init__.py:61-122`\n\n### ADR-005: XML-Structured Context for Claude\n[decision] Use XML format (`<memory_context>`, `<working_memory>`) for hook additionalContext injection—provides...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:52:45.535763+00:00'
+summary: '...`▶ learned`, `▶ blocker`, `▶ progress`, `▶ pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...`▶ learned`, `▶ blocker`, `▶ progress`, `▶ pattern`
+
+**Quick markers (brief notes only):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`
+
+**REQUIRED:** Memories in `<memory_context>` are...
