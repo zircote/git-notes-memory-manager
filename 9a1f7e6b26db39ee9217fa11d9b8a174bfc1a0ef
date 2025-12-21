@@ -1,0 +1,13 @@
+---
+type: blockers
+timestamp: '2025-12-21T02:47:43.438229+00:00'
+summary: '...something ("I learned", "TIL", "turns out")'
+tags:
+- auto-captured
+- post-tool-use
+- file:models.py
+---
+
+...something ("I learned", "TIL", "turns out")
+        BLOCKER: User encountered a blocker ("blocked by", "stuck on")
+        RESOLUTION: User resolved an issue ("fixed", "solved", "workaround")...
