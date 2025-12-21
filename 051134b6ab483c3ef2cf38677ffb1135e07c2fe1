@@ -12,3 +12,21 @@ Example::
 
             text = "I learned that async/await is cleaner than callbacks"
             signals = detector.detect(text)...
+
+---
+type: learnings
+timestamp: '2025-12-21T04:43:48.175341+00:00'
+summary: '...signals = detector.detect(text)'
+tags:
+- auto-captured
+- post-tool-use
+- file:signal_detector.py
+---
+
+...signals = detector.detect(text)
+            # Returns [CaptureSignal(type=LEARNING, match="I learned that", ...)]
+        """
+        if not text or len(text) < 5:
+            return []
+
+        #...
