@@ -1,0 +1,15 @@
+---
+type: blockers
+timestamp: '2025-12-21T06:19:35.987363+00:00'
+summary: '...Block markers: `▶ namespace ─────────────────`'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...Block markers: `▶ namespace ─────────────────`
+- Inline markers: `[decision]`, `[learned]`, `[blocker]`
+- Contextual patterns: "I decided", "TIL", "blocked by"
+
+**Real Block Marker Example from...
