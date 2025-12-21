@@ -303,3 +303,21 @@ SessionStart context injection must balance providing useful context without ove
 - docs/spec/completed/2025-12-19-hook-based-memory-capture/DECISIONS.md:145-183
 - src/git_notes_memory/hooks/context_builder.py:186-221
 - src/git_notes_memory/config.py:536-539
+
+---
+type: decisions
+timestamp: '2025-12-21T05:51:41.820135+00:00'
+summary: '...memories**: Use markers anywhere in your messages:
+
+  - `[remember] <insight>` - Captures a learn...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...memories**: Use markers anywhere in your messages:
+- `[remember] <insight>` - Captures a learning
+- `[decision] <choice>` - Captures a decision
+- `/memory:capture <namespace> <content>` - Explicit capture
+
+**Available...
