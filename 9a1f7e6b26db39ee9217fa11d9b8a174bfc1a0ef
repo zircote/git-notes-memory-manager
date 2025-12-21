@@ -11,3 +11,18 @@ tags:
 ...chose", "decided to", "we'll go with")
         LEARNING: User learned something ("I learned", "TIL", "turns out")
         BLOCKER: User encountered a blocker ("blocked by", "stuck on")...
+
+---
+type: learnings
+timestamp: '2025-12-21T02:47:43.417868+00:00'
+summary: '..."decided to", "we''ll go with")'
+tags:
+- auto-captured
+- post-tool-use
+- file:models.py
+---
+
+..."decided to", "we'll go with")
+        LEARNING: User learned something ("I learned", "TIL", "turns out")
+        BLOCKER: User encountered a blocker ("blocked by", "stuck on")
+        RESOLUTION:...
