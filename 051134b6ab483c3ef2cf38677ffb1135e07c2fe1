@@ -229,3 +229,21 @@ tags:
 **Quick markers (brief notes only):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`
 
 **REQUIRED:** Memories in `<memory_context>` are...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:53:16.060335+00:00'
+summary: '...file context, use inline markers:'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...file context, use inline markers:
+
+| Trigger | Marker |
+|---------|--------|
+| Decision | `[decision] What and why` |
+| Learning | `[learned] The insight` |
+| Blocker | `[blocker] What blocks...
