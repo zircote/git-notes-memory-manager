@@ -33,3 +33,12 @@ tags:
 ---
 
 ...2025-12-18-memory-capture-plugin/ARCHITECTURE.md:86`\n\n### ADR-003: Lazy Loading of Embedding Model\n[decision] Defer sentence-transformers model loading until first `embed()` call to avoid 2-3 second import...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:39:40.601077+00:00'
+summary: '...────────────────`\n\n---\n\n## 📋 DECISIONS TO CAPTURE\n\n### ADR-001:
+  Git Notes as Source of Trut'
+---
+
+...────────────────`\n\n---\n\n## 📋 DECISIONS TO CAPTURE\n\n### ADR-001: Git Notes as Source of Truth\n[decision] Git notes chosen as primary storage (`refs/notes/mem/{namespace}`) because they are distributed,...
