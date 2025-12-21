@@ -355,3 +355,12 @@ summary: '...12-18-memory-capture-plugin/RETROSPECTIVE.md:67`\n\n### ADR-004: Si
 ---
 
 ...12-18-memory-capture-plugin/RETROSPECTIVE.md:67`\n\n### ADR-004: Singleton Service Factory Pattern\n[decision] Use factory functions (`get_capture_service()`, `get_recall_service()`) returning singletons...
+
+---
+type: decisions
+timestamp: '2025-12-21T04:58:10.848813+00:00'
+summary: '...`src/git_notes_memory/__init__.py:61-122`\n\n### ADR-005: XML-Structured
+  Context for Claude\n[dec'
+---
+
+...`src/git_notes_memory/__init__.py:61-122`\n\n### ADR-005: XML-Structured Context for Claude\n[decision] Use XML format (`<memory_context>`, `<working_memory>`) for hook additionalContext injection—provides...
