@@ -16,3 +16,19 @@ tags:
 
 **Advantages over databases**:
 1....
+
+---
+type: patterns
+timestamp: '2025-12-21T06:21:54.830848+00:00'
+summary: '..."blocked by", "stuck on" |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_REPORT.md
+---
+
+..."blocked by", "stuck on" |
+| progress | Milestones | "completed", "shipped" |
+| patterns | Reusable approaches | "best practice" |
+| research | External findings | Manual capture |
+| reviews...
