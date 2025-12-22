@@ -70,3 +70,23 @@ tags:
 
 1. **Lock Timeout Not Implemented**: `_acquire_lock()` has timeout parameter but blocks indefinitely
 2. **No Subprocess Timeout**:...
+
+---
+type: progress
+timestamp: '2025-12-22T23:26:48.542810+00:00'
+summary: '...indefinitely'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...indefinitely
+5. **Reactive only**: System waits for queries instead of proactively helping
+
+## Proposed Solution: The Subconsciousness Pattern
+
+### Conceptual Model
+
+```
+┌──────────────────────────────────────────...
