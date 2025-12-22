@@ -36,3 +36,22 @@ tags:
 ---
 
 test content
+
+---
+type: learnings
+timestamp: '2025-12-22T00:00:59.926837+00:00'
+summary: v0.7.0 never published to PyPI despite workflow "success"
+---
+
+v0.7.0 never published to PyPI despite workflow "success"
+## Context
+The GitHub Actions workflow #17 for v0.7.0 "completed in 45s" (vs normal 2+ min) but the version is absent from PyPI's release list. This indicates the publish step likely failed silently or was skipped.
+
+## Root Cause Analysis
+1. **Lightweight tag**: `v0.7.0` was created as a lightweight tag (type: `commit`) instead of annotated tag
+2. **Fast completion**: 45 seconds is too fast for a full publish cycle (checkout → deps → tests → build → publish)
+3. **Missing from PyPI**: Only 13 versions exist, jumping from 0.6.2 directly to 0.7.1
+
+## Related Files
+- .github/workflows/publish.yml:1-47
+- pyproject.toml:181-206 (bump-my-version config)
