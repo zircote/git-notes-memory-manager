@@ -49,3 +49,18 @@ tags:
 │                                                               │
 │  3. [pattern] Always validate git refs before subprocess      │
 │     Confidence: 0.82...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:53.512250+00:00'
+summary: '...├── detector.py          # Main detection orchestrator'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-secrets.md
+---
+
+...├── detector.py          # Main detection orchestrator
+│   ├── patterns.py          # Regex pattern definitions
+│   ├── entropy.py           # Shannon entropy calculator
+│   ├── contextual.py...
