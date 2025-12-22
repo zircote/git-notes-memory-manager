@@ -16,3 +16,18 @@ The GitHub Actions workflow #17 for v0.7.0 "completed in 45s" (vs normal 2+ min)
 ## Related Files
 - .github/workflows/publish.yml:1-47
 - pyproject.toml:181-206 (bump-my-version config)
+
+---
+type: learnings
+timestamp: '2025-12-22T23:26:48.487334+00:00'
+summary: '...**explicit and manual**:'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...**explicit and manual**:
+- Users must explicitly capture memories with markers (`[decision]`, `[learned]`, etc.)
+- Recall requires explicit search queries
+- No automatic consolidation of related...
