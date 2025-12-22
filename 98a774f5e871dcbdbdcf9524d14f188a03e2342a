@@ -63,3 +63,18 @@ tags:
 │                                                               │
 │  2. [learned] SQLite FTS5 requires explicit column list       │
 │     Confidence: 0.76...
+
+---
+type: learnings
+timestamp: '2025-12-22T23:26:48.778884+00:00'
+summary: '...surfacing has >50% "useful" rating'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...surfacing has >50% "useful" rating
+- [ ] Decay system archives stale memories without losing important ones
+- [ ] All features toggleable via environment variables
+- [ ] LLM calls cached/batched...
