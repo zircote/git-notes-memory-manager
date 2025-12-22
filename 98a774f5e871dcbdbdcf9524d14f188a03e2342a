@@ -86,3 +86,21 @@ tags:
 ```python
 class PatternDetector:
     """Fast regex-based secret detection."""...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:53.566190+00:00'
+summary: '...com|org|net|io)",'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-secrets.md
+---
+
+...com|org|net|io)",
+    }
+
+    def detect(self, text: str) -> List[Detection]:
+        """Scan text for pattern matches."""
+        detections = []
+        for name, pattern in self.PATTERNS.items():...
