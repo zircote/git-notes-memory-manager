@@ -111,3 +111,20 @@ tags:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │...
+
+---
+type: progress
+timestamp: '2025-12-22T23:28:00.128756+00:00'
+summary: Created 3 comprehensive GitHub issues for git-notes-memory-manager
+---
+
+Created 3 comprehensive GitHub issues for git-notes-memory-manager
+## Summary
+- #10: Observability with tiered implementation (timing decorators → structured logging → OpenTelemetry)
+- #11: Subconsciousness pattern with 5 LLM agents (implicit capture, consolidation, forgetting, surfacing, linking)
+- #12: Secrets filtering with multi-layer defense (pattern, entropy, contextual detection)
+
+## Related Files
+- src/git_notes_memory/capture.py (secrets integration point)
+- src/git_notes_memory/hooks/ (observability instrumentation targets)
+- src/git_notes_memory/recall.py (subconsciousness surfacing integration)
