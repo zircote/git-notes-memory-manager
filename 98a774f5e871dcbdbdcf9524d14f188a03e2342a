@@ -44,3 +44,18 @@ tags:
 │                                                               │
 │  1. [decision] Use retry with exponential backoff for API     │
 │     Confidence: 0.89...
+
+---
+type: decisions
+timestamp: '2025-12-22T23:26:48.729044+00:00'
+summary: '...│'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...│
+│                                                               │
+│  💡 [decision] Validate all git refs to prevent injection     │
+│     Relevance: 0.94 | Last accessed: 3...
