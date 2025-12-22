@@ -17,3 +17,20 @@ tags:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:48.621225+00:00'
+summary: '...previous blocker resolution'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...previous blocker resolution
+        - Discussion topic relates to past learnings
+        - Code pattern matches known anti-patterns
+        """
+
+    async def rank_by_intuition(self, memories: List[Memory...
