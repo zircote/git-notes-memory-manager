@@ -18,3 +18,23 @@ tags:
 #### Tier 1: Immediate Wins (High Value, Low Effort)
 
 1....
+
+---
+type: progress
+timestamp: '2025-12-22T23:26:44.055249+00:00'
+summary: '...--timing'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-observability.md
+---
+
+...--timing
+```
+
+## Acceptance Criteria
+
+### Tier 1 (MVP)
+- [ ] `@measure_duration` decorator implemented and applied to critical paths
+- [ ] Hook execution timing with timeout tracking
+- [ ] In-memory...
