@@ -31,3 +31,20 @@ tags:
 - Users must explicitly capture memories with markers (`[decision]`, `[learned]`, etc.)
 - Recall requires explicit search queries
 - No automatic consolidation of related...
+
+---
+type: learnings
+timestamp: '2025-12-22T23:26:48.514808+00:00'
+summary: '...rule-based, not context-aware'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...rule-based, not context-aware
+
+This results in:
+1. **Capture fatigue**: Users forget to mark important decisions
+2. **Information overload**: Old, redundant memories accumulate
+3. **Missed connections**:...
