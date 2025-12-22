@@ -48,3 +48,18 @@ This results in:
 1. **Capture fatigue**: Users forget to mark important decisions
 2. **Information overload**: Old, redundant memories accumulate
 3. **Missed connections**:...
+
+---
+type: learnings
+timestamp: '2025-12-22T23:26:48.676772+00:00'
+summary: '...│'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...│
+│                                                               │
+│  2. [learned] SQLite FTS5 requires explicit column list       │
+│     Confidence: 0.76...
