@@ -1,0 +1,14 @@
+---
+type: decisions
+timestamp: '2025-12-22T23:26:48.461658+00:00'
+summary: '...management is **explicit and manual**:'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...management is **explicit and manual**:
+- Users must explicitly capture memories with markers (`[decision]`, `[learned]`, etc.)
+- Recall requires explicit search queries
+- No automatic consolidation...
