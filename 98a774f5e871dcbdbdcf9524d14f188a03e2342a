@@ -120,3 +120,20 @@ tags:
         detections = []
         for name, pattern in self.PATTERNS.items():
             for match in re.finditer(pattern, text):...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:53.619876+00:00'
+summary: '...if value_hash in self.allowlist.get("hashes", []):'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-secrets.md
+---
+
+...if value_hash in self.allowlist.get("hashes", []):
+            return True
+
+        # Check pattern exceptions
+        for pattern in self.allowlist.get("patterns", []):
+            if re.match(pattern...
