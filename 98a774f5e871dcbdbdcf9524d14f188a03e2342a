@@ -190,3 +190,12 @@ tags:
 
 - LLM-powered subconsciousness pattern (secrets filtering enables safe LLM analysis)
 - Observability instrumentation (track secrets...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:28:00.159276+00:00'
+summary: '...https://github.com/zircote/git-notes-memory/issues/10 |'
+---
+
+...https://github.com/zircote/git-notes-memory/issues/10 |
+| #11 | **LLM-powered subconsciousness pattern for intelligent memory management** | https://github.com/zircote/git-notes-memory/issues/11...
