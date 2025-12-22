@@ -64,3 +64,25 @@ tags:
 │   ├── patterns.py          # Regex pattern definitions
 │   ├── entropy.py           # Shannon entropy calculator
 │   ├── contextual.py...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:53.539778+00:00'
+summary: '...capture.py               # Updated with filtering'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-secrets.md
+---
+
+...capture.py               # Updated with filtering
+└── ...
+```
+
+### Core Components
+
+#### 1. Pattern Detector
+
+```python
+class PatternDetector:
+    """Fast regex-based secret detection."""...
