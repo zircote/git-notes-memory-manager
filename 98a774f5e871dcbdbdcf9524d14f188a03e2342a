@@ -12,3 +12,20 @@ tags:
 - Users must explicitly capture memories with markers (`[decision]`, `[learned]`, etc.)
 - Recall requires explicit search queries
 - No automatic consolidation...
+
+---
+type: decisions
+timestamp: '2025-12-22T23:26:48.594253+00:00'
+summary: '...List[ImplicitMemory]:'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...List[ImplicitMemory]:
+        """
+        Use LLM to identify:
+        - Decisions made (even without [decision] marker)
+        - Lessons learned from debugging
+        - Patterns in code changes...
