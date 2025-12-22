@@ -34,3 +34,18 @@ tags:
         """
 
     async def rank_by_intuition(self, memories: List[Memory...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:48.704108+00:00'
+summary: '...│'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...│
+│                                                               │
+│  3. [pattern] Always validate git refs before subprocess      │
+│     Confidence: 0.82...
