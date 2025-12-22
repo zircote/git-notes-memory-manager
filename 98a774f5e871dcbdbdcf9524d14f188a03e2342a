@@ -1,0 +1,19 @@
+---
+type: patterns
+timestamp: '2025-12-22T23:26:48.569834+00:00'
+summary: '...waits for queries instead of proactively helping'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...waits for queries instead of proactively helping
+
+## Proposed Solution: The Subconsciousness Pattern
+
+### Conceptual Model
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│...
