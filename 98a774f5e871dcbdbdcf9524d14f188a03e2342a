@@ -1,0 +1,14 @@
+---
+type: blockers
+timestamp: '2025-12-22T23:26:48.756012+00:00'
+summary: '...ago               │'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-subconsciousness.md
+---
+
+...ago               │
+│                                                               │
+│  💡 [blocker] subprocess.run timeout not honored on macOS     │
+│     Relevance: 0.78 | Last accessed: 2...
