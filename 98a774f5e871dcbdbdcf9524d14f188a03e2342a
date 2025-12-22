@@ -154,3 +154,22 @@ tags:
         # Check pattern exceptions
         for pattern in self.allowlist.get("patterns", []):
             if re.match(pattern, detection.value):...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:53.674118+00:00'
+summary: '...result.success'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-secrets.md
+---
+
+...result.success
+        assert "blocked" in result.error.lower()
+```
+
+## Acceptance Criteria
+
+- [ ] Pattern detection catches >95% of common secret formats
+- [ ] False positive rate <5% on typical code/documentation...
