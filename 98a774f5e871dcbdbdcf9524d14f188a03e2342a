@@ -90,3 +90,24 @@ tags:
 
 ```
 ┌──────────────────────────────────────────...
+
+---
+type: progress
+timestamp: '2025-12-22T23:26:53.484321+00:00'
+summary: '...credentials'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-secrets.md
+---
+
+...credentials
+5. **Accidental sharing**: Memories shared across projects leak secrets
+
+## Proposed Solution
+
+### Multi-Layer Defense
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│...
