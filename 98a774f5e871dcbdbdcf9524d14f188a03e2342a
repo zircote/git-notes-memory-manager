@@ -38,3 +38,20 @@ tags:
 - [ ] `@measure_duration` decorator implemented and applied to critical paths
 - [ ] Hook execution timing with timeout tracking
 - [ ] In-memory...
+
+---
+type: progress
+timestamp: '2025-12-22T23:26:44.082460+00:00'
+summary: '...propagate through capture→embed→index pipeline'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-observability.md
+---
+
+...propagate through capture→embed→index pipeline
+- [ ] All metrics from "Proposed Metrics" section implemented
+- [ ] Prometheus scrape endpoint available
+- [ ] Documentation for observability configuration
+
+###...
