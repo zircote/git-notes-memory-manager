@@ -104,3 +104,19 @@ tags:
         """Scan text for pattern matches."""
         detections = []
         for name, pattern in self.PATTERNS.items():...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:53.592649+00:00'
+summary: '...List[Detection]:'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-secrets.md
+---
+
+...List[Detection]:
+        """Scan text for pattern matches."""
+        detections = []
+        for name, pattern in self.PATTERNS.items():
+            for match in re.finditer(pattern, text):...
