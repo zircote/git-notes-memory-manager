@@ -1,0 +1,20 @@
+---
+type: progress
+timestamp: '2025-12-22T23:26:44.030496+00:00'
+summary: '...capture→embed→index pipeline'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-observability.md
+---
+
+...capture→embed→index pipeline
+5. Measure hook execution performance against timeout thresholds
+
+## Proposed Solution
+
+### Tiered Implementation Approach
+
+#### Tier 1: Immediate Wins (High Value, Low Effort)
+
+1....
