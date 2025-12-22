@@ -173,3 +173,20 @@ tags:
 
 - [ ] Pattern detection catches >95% of common secret formats
 - [ ] False positive rate <5% on typical code/documentation...
+
+---
+type: patterns
+timestamp: '2025-12-22T23:26:53.701528+00:00'
+summary: '...ML model for advanced detection (future)'
+tags:
+- auto-captured
+- post-tool-use
+- file:issue-secrets.md
+---
+
+...ML model for advanced detection (future)
+
+## Related Issues
+
+- LLM-powered subconsciousness pattern (secrets filtering enables safe LLM analysis)
+- Observability instrumentation (track secrets...
