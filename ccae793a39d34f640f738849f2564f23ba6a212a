@@ -160,3 +160,22 @@ tags:
 
 **Memory commands:**
 -...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:35.244063+00:00'
+summary: '...decision ───` blocks: ___'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...decision ───` blocks: ___
+- `▶ learned ───` blocks: ___
+- `▶ blocker ───` blocks: ___
+- `▶ pattern ───` blocks: ___
+- **TOTAL BLOCKS:** ___
+
+### Task Count Check
+- Tasks completed this session:...
