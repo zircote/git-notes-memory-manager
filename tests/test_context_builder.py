@@ -439,8 +439,13 @@ class TestCalculateBudget:
 
     def test_adaptive_mode_handles_index_error_gracefully(self) -> None:
         """Test ADAPTIVE mode defaults to medium when index fails."""
+        from git_notes_memory.exceptions import MemoryIndexError
+
         mock_index = MagicMock()
-        mock_index.get_stats.side_effect = Exception("Database error")
+        # QUAL-002: Use specific exception type that the code actually catches
+        mock_index.get_stats.side_effect = MemoryIndexError(
+            "Database error", "Check database file permissions"
+        )
 
         builder = ContextBuilder(
             index_service=mock_index,
@@ -956,7 +961,8 @@ class TestAnalyzeProjectComplexity:
 
     def test_error_returns_medium(self, mock_index_service: MagicMock) -> None:
         """Test that errors default to 'medium' complexity."""
-        mock_index_service.get_stats.side_effect = Exception("DB Error")
+        # QUAL-002: Use OSError which is one of the specifically caught exceptions
+        mock_index_service.get_stats.side_effect = OSError("DB Error")
         builder = ContextBuilder(index_service=mock_index_service)
 
         complexity = builder._analyze_project_complexity("test-project")

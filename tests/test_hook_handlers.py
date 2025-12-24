@@ -461,27 +461,30 @@ class TestStopHandler:
 
     def test_read_input_valid_json(self) -> None:
         """Test reading valid JSON input."""
-        from git_notes_memory.hooks.stop_handler import _read_input
+        # QUAL-001: Function renamed to _read_input_with_fallback
+        from git_notes_memory.hooks.stop_handler import _read_input_with_fallback
 
         input_data = {"cwd": "/test", "transcript_path": "/path/to/transcript"}
         with patch.object(sys, "stdin", io.StringIO(json.dumps(input_data))):
-            result = _read_input()
+            result = _read_input_with_fallback()
         assert result == input_data
 
     def test_read_input_empty_returns_dict(self) -> None:
         """Test that empty input returns empty dict for stop hook."""
-        from git_notes_memory.hooks.stop_handler import _read_input
+        # QUAL-001: Function renamed to _read_input_with_fallback
+        from git_notes_memory.hooks.stop_handler import _read_input_with_fallback
 
         with patch.object(sys, "stdin", io.StringIO("")):
-            result = _read_input()
+            result = _read_input_with_fallback()
         assert result == {}
 
     def test_read_input_whitespace_returns_dict(self) -> None:
         """Test that whitespace-only input returns empty dict."""
-        from git_notes_memory.hooks.stop_handler import _read_input
+        # QUAL-001: Function renamed to _read_input_with_fallback
+        from git_notes_memory.hooks.stop_handler import _read_input_with_fallback
 
         with patch.object(sys, "stdin", io.StringIO("   \n  ")):
-            result = _read_input()
+            result = _read_input_with_fallback()
         assert result == {}
 
     def test_signal_to_dict(self) -> None:

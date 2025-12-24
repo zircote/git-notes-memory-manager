@@ -271,6 +271,17 @@ class SignalDetector:
         if not text or len(text) < 5:
             return []
 
+        # SEC-001: Limit input length to prevent ReDoS attacks
+        # 100KB is generous for user prompts while preventing abuse
+        MAX_TEXT_LENGTH = 100 * 1024  # 100KB
+        if len(text) > MAX_TEXT_LENGTH:
+            logger.warning(
+                "Input text length %d exceeds maximum %d, truncating for safety",
+                len(text),
+                MAX_TEXT_LENGTH,
+            )
+            text = text[:MAX_TEXT_LENGTH]
+
         signals: list[CaptureSignal] = []
         block_positions: set[tuple[int, int]] = set()
 

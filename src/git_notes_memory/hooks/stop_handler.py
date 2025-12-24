@@ -45,6 +45,7 @@ from git_notes_memory.hooks.hook_utils import (
     cancel_timeout,
     get_hook_logger,
     log_hook_input,
+    read_json_input,
     setup_logging,
     setup_timeout,
 )
@@ -55,23 +56,22 @@ __all__ = ["main"]
 logger = logging.getLogger(__name__)
 
 
-def _read_input() -> dict[str, Any]:
-    """Read and parse JSON input from stdin.
+def _read_input_with_fallback() -> dict[str, Any]:
+    """Read and parse JSON input from stdin with fallback for empty input.
+
+    QUAL-001: Wraps hook_utils.read_json_input() with Stop-hook-specific
+    fallback behavior (empty input is valid for stop hooks).
 
     Returns:
-        Parsed JSON data.
-
-    Raises:
-        json.JSONDecodeError: If input is not valid JSON.
+        Parsed JSON data, or empty dict if stdin is empty.
     """
-    input_text = sys.stdin.read()
-    if not input_text.strip():
+    try:
+        return read_json_input()
+    except ValueError as e:
         # Empty input is OK for stop hook
-        return {}
-    result = json.loads(input_text)
-    if not isinstance(result, dict):
-        return {}
-    return dict(result)
+        if "empty" in str(e).lower():
+            return {}
+        raise
 
 
 def _analyze_session(transcript_path: str | None) -> list[CaptureSignal]:
@@ -385,8 +385,8 @@ def main() -> None:
     setup_timeout(timeout, hook_name="Stop")
 
     try:
-        # Read input (may be empty for stop hook)
-        input_data = _read_input()
+        # QUAL-001: Use hook_utils.read_json_input with fallback
+        input_data = _read_input_with_fallback()
         logger.debug("Received stop hook input: %s", list(input_data.keys()))
 
         # Log full input to file for debugging

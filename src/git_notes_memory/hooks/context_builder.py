@@ -19,6 +19,7 @@ from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from git_notes_memory.config import TOKENS_PER_CHAR, get_project_index_path
+from git_notes_memory.exceptions import MemoryIndexError
 from git_notes_memory.hooks.config_loader import (
     BudgetMode,
     HookConfig,
@@ -556,7 +557,8 @@ class ContextBuilder:
                 return "complex"
             return "full"
 
-        except Exception as e:
+        # QUAL-002: Catch specific exceptions instead of bare Exception
+        except (MemoryIndexError, OSError) as e:
             logger.debug("Failed to analyze complexity for %s: %s", project, e)
             return "medium"  # Default to medium on error
 
