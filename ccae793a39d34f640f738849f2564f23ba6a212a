@@ -52,3 +52,19 @@ tags:
 - `[blocker] What blocks progress`
 - `[progress] What was done`
 - `[pattern]...
+
+---
+type: learnings
+timestamp: '2025-12-24T16:35:29.854789+00:00'
+summary: '...`decision`, `learned`, `blocker`, `progress`, `pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`decision`, `learned`, `blocker`, `progress`, `pattern`
+
+**Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Memory commands:** `/memory:recall <id>`, `/memory:search...
