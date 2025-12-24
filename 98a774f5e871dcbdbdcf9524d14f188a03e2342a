@@ -42,3 +42,24 @@ summary: '...plugins load |'
 
 1. **Enable LSP tool**: `export ENABLE_LSP_TOOL=1` in shell profile
 2. **Add marketplace**:...
+
+---
+type: blockers
+timestamp: '2025-12-24T04:39:21.958219+00:00'
+summary: LSP tool unavailable due to race condition bug in Claude Code v2.0.76
+---
+
+LSP tool unavailable due to race condition bug in Claude Code v2.0.76
+## Context
+After installing pyright LSP plugin from boostvolt/claude-code-lsps marketplace and restarting, LSP operations still return "No LSP server available for file type: .py".
+
+## Root Cause
+GitHub issue #14803: LSP Manager initializes before plugins finish loading. Affects v2.0.69 through current (v2.0.76).
+
+## Workarounds
+1. Community patch: `npx tweakcc --apply`
+2. Downgrade: `npm install -g @anthropic-ai/claude-code@2.0.67`
+
+## Related Files
+- .claude/settings.local.json (ENABLE_LSP_TOOL=1 configured correctly)
+- pyrightconfig.json (type checking config ready)
