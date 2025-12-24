@@ -104,3 +104,18 @@ tags:
 ---
 
 test content
+
+---
+type: learnings
+timestamp: '2025-12-24T19:57:16.581951+00:00'
+summary: '...hook detects markers in YOUR messages, not MINE.**
+
+  When you write `[decision] something` or `...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...hook detects markers in YOUR messages, not MINE.**
+
+When you write `[decision] something` or `[learned] something` in your prompts, it gets detected. But the `▶ progress ───` blocks I write in my...
