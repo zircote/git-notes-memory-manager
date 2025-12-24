@@ -218,3 +218,13 @@ summary: The config works but found a few issues. Let me refine it to handle the
 ---
 
 The config works but found a few issues. Let me refine it to handle the lazy `__getattr__` pattern and remove the non-existent `stubPath`:
+
+---
+type: patterns
+timestamp: '2025-12-24T04:27:46.729862+00:00'
+summary: '...lazy import understanding** - `reportUnsupportedDunderAll: false` needed
+  for `__getattr__` patter'
+---
+
+...lazy import understanding** - `reportUnsupportedDunderAll: false` needed for `__getattr__` pattern
+3. **Covariance warnings** - Pyright suggests `Sequence` over `list` for function parameters...
