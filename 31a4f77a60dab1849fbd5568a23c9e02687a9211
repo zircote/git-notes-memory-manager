@@ -1,0 +1,26 @@
+---
+type: learnings
+timestamp: '2025-12-24T16:26:02.616264+00:00'
+summary: When project-specific index storage was added, commands were not updated
+---
+
+When project-specific index storage was added, commands were not updated
+## Context
+The memory system has two index paths:
+- **Global (legacy)**: `~/.local/share/memory-plugin/index.db` - for cross-project use
+- **Project-specific (current)**: `<git-root>/.memory/index.db` - for per-repo isolation
+
+The `commands/status.md` and `commands/validate.md` files were using `get_index_path()` (global) instead of `get_project_index_path()` (project-specific).
+
+## Evidence
+| Location | Memory Count |
+|----------|--------------|
+| Git notes (`refs/notes/mem/*`) | 60+ note objects |
+| Project index (`.memory/index.db`) | **352 memories** |
+| Global index (`~/.local/share/memory-plugin/`) | 0 memories |
+
+## Related Files
+- commands/status.md:74,117 (FIXED)
+- commands/validate.md:128,181 (FIXED)
+- src/git_notes_memory/config.py:185-193 (get_index_path - global)
+- src/git_notes_memory/config.py:344-365 (get_project_index_path - project)
