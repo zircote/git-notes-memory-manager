@@ -18,3 +18,21 @@ Brief description of the work completed.
 
 ## Related Files
 - path/to/file.py:10-25
+
+---
+type: progress
+timestamp: '2025-12-24T16:35:29.779957+00:00'
+summary: '...`[decision] Brief decision and why`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`[decision] Brief decision and why`
+- `[learned] The insight`
+- `[blocker] What blocks progress`
+- `[progress] What was done`
+- `[pattern] Reusable approach`
+
+**INLINE MARKERS DO NOT REPLACE BLOCKS.**...
