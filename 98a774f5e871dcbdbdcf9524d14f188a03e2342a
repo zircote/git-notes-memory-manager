@@ -158,3 +158,26 @@ After testing with `ENABLE_LSP_TOOL=1` in `.claude/settings.local.json`, the LSP
 
 ## Related Files
 - .claude/settings.local.json (created but ineffective)
+
+---
+type: learnings
+timestamp: '2025-12-24T04:38:25.475080+00:00'
+summary: LSP tool exists but is broken due to race condition bug in Claude Code
+---
+
+LSP tool exists but is broken due to race condition bug in Claude Code
+## Context
+GitHub issue #14803 confirms this is a known bug affecting versions 2.0.69+. The LSP Manager initializes before plugins finish loading, causing "No LSP server available" errors.
+
+## Key Findings
+- **Working version**: v2.0.67
+- **Broken versions**: v2.0.69 through current (v2.0.74+)
+- **Root cause**: Race condition - LSP Manager registers 0 servers before plugins load
+- **Status**: Open bug with "oncall" label
+
+## Workarounds
+1. Downgrade to v2.0.67
+2. Use community patch: `npx tweakcc --apply`
+
+## Related Files
+- .claude/settings.local.json (our attempt was correct but blocked by bug)
