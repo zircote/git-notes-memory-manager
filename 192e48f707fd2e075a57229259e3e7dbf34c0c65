@@ -185,3 +185,23 @@ tags:
 ...`memory.db` file (probably from an earlier version before the schema was called `index.db`).
 
 **The fix is complete.** Both `commands/status.md` and `commands/validate.md` now correctly use `get_project_index...
+
+---
+type: progress
+timestamp: '2025-12-24T20:03:47.565874+00:00'
+summary: '...raise CaptureError("Lock acquisition timed out")'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...raise CaptureError("Lock acquisition timed out")
+        time.sleep(0.1)
+```
+- [ ] Implemented
+- [ ] Tested
+- [ ] Verified
+
+### CRIT-002: Missing repo_path in insert_batch
+- **File:** `src/git_notes...
