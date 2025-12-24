@@ -292,3 +292,35 @@ Status now correctly shows 352 memories in the project index.
 ## Related Files
 - commands/status.md:71,74
 - commands/validate.md:128,181
+
+---
+type: progress
+timestamp: '2025-12-24T20:06:32.143465+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Committed fix and rebased into main
+
+  ## Summary
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Committed fix and rebased into main
+## Summary
+- Committed the index path fix to `fix/code-review-remediation` branch
+- Checked out `main` and rebased the feature branch into it
+
+## Git State
+```
+ccae793 fix: use project-specific index path in status and validate commands
+31a4f77 chore(release): bump version 0.8.0 → 0.9.0
+8820922 fix(git_ops): correct byte counting in batch content parsing
+...
+```
+
+## Related Files
+- commands/status.md
+- commands/validate.md
