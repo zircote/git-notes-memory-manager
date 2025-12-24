@@ -219,3 +219,24 @@ tags:
 - `[research]`, `[review]`, `[retro]`, `[inception]`, `[requirement]`
 
 **Memory...
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.262337+00:00'
+summary: '...blocks: ___'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...blocks: ___
+- `▶ pattern ───` blocks: ___
+- **TOTAL BLOCKS:** ___
+
+### Task Count Check
+- Tasks completed this session: ___
+- Decisions made this session: ___
+- Things learned this session: ___
+
+###...
