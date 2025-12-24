@@ -40,3 +40,22 @@ The `/memory:status` command was reporting 0 memories because it used `get_index
 - commands/status.md:74,117
 - src/git_notes_memory/config.py:185-193 (get_index_path)
 - src/git_notes_memory/config.py:344-365 (get_project_index_path)
+
+---
+type: decisions
+timestamp: '2025-12-24T16:35:29.726892+00:00'
+summary: '...MARKERS FOR QUICK NOTES ONLY'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...MARKERS FOR QUICK NOTES ONLY
+
+When a full block is not warranted (rare), use inline markers:
+
+- `[decision] Brief decision and why`
+- `[learned] The insight`
+- `[blocker] What blocks progress`
+- `[progress]...
