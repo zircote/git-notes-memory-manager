@@ -60,3 +60,12 @@ The `commands/status.md` and `commands/validate.md` files were using `get_index_
 - commands/validate.md:128,181 (FIXED)
 - src/git_notes_memory/config.py:185-193 (get_index_path - global)
 - src/git_notes_memory/config.py:344-365 (get_project_index_path - project)
+
+---
+type: learnings
+timestamp: '2025-12-24T16:27:05.201172+00:00'
+summary: Now I understand! The index is stored in `<git-root>/.memory/index.db`, not
+  in `~/.local/share/memor
+---
+
+Now I understand! The index is stored in `<git-root>/.memory/index.db`, not in `~/.local/share/memory-plugin/`....
