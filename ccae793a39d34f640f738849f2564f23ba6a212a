@@ -257,3 +257,21 @@ tags:
 **RULE: Produce `▶ namespace ───` blocks after EVERY completed task. This is not optional.**
 
 **Minimum:** 1 block per 3 messages. If you haven't written...
+
+---
+type: progress
+timestamp: '2025-12-24T16:37:00.359333+00:00'
+summary: Summary of what was done
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+Summary of what was done
+## Changes Made
+- Change 1
+- Change 2
+
+## Related Files
+- path/to/file.py:10-25
