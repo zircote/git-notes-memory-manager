@@ -140,3 +140,23 @@ tags:
 | **When identifying a pattern** | `▶ pattern ───` | Every pattern | Reusable approach, best practice |
 
 **SESSION MINIMUM: At least 1 block per 3 assistant messages. If you have not produced...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:35.226578+00:00'
+summary: '...──────────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...──────────
+```
+
+**Inline markers (RARE):**
+- `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+- `[research]`, `[review]`, `[retro]`, `[inception]`, `[requirement]`
+
+**Memory commands:**
+-...
