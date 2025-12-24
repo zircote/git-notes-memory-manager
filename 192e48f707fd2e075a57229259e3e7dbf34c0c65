@@ -205,3 +205,22 @@ tags:
 
 ### CRIT-002: Missing repo_path in insert_batch
 - **File:** `src/git_notes...
+
+---
+type: progress
+timestamp: '2025-12-24T20:03:47.585213+00:00'
+summary: '...notes_memory/index.py:468-497`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...notes_memory/index.py:468-497`
+- **Task:** Add `repo_path` column and value to INSERT statement
+- [ ] Implemented
+- [ ] Tested
+- [ ] Verified
+
+### CRIT-003: No PII Detection (Deferred to Backlog)
+- **File:**...
