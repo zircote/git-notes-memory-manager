@@ -4,6 +4,45 @@ argument-hint: "<query> [--type=semantic|text] [--namespace=ns] [--limit=n]"
 allowed-tools: ["Bash", "Read"]
 ---
 
+<help_check>
+## Help Check
+
+If `$ARGUMENTS` contains `--help` or `-h`:
+
+**Output this help and HALT (do not proceed further):**
+
+<help_output>
+```
+SEARCH(1)                                            User Commands                                            SEARCH(1)
+
+NAME
+    search - Search memories with advanced filtering options
+
+SYNOPSIS
+    /memory:search <query> [--type=semantic|text] [--namespace=ns] [--limit=n]
+
+DESCRIPTION
+    Search memories with advanced filtering options
+
+OPTIONS
+    --help, -h                Show this help message
+
+EXAMPLES
+    /memory:search
+    /memory:search --help
+
+SEE ALSO
+    /memory:* for related commands
+
+                                                                      SEARCH(1)
+```
+</help_output>
+
+**After outputting help, HALT immediately. Do not proceed with command execution.**
+</help_check>
+
+---
+
 # /memory:search - Advanced Memory Search
 
 Search memories with advanced filtering and search options.
@@ -12,7 +51,7 @@ Search memories with advanced filtering and search options.
 
 You will help the user search memories with precise control over search behavior.
 
-### Step 1: Parse Arguments
+<step number="1" name="Parse Arguments">
 
 **Arguments format**: `$ARGUMENTS`
 
@@ -26,7 +65,9 @@ Parse the arguments:
 
 If query is missing, use AskUserQuestion to prompt for it.
 
-### Step 2: Execute Search
+</step>
+
+<step number="2" name="Execute Search">
 
 Use Bash to invoke the Python library:
 
@@ -90,7 +131,9 @@ Replace:
 - `$NAMESPACE` with `'ns'` or `None`
 - `$SPEC` with `'spec'` or `None`
 
-### Step 3: Present Results
+</step>
+
+<step number="3" name="Present Results">
 
 **Standard output** (table format):
 ```
@@ -114,6 +157,8 @@ Replace:
 > - Easy to validate without database lookup
 > - Built-in expiration support
 ```
+
+</step>
 
 ## Search Types Explained
 
@@ -141,9 +186,19 @@ Replace:
 After search results, if patterns emerge or insights are gained from reviewing memories, suggest:
 
 ```
-💡 **Capture tip**: Did you notice a pattern or gain an insight? Use:
+**Capture tip**: Did you notice a pattern or gain an insight? Use:
 - `[remember] <pattern or insight>` - Inline capture
 - `/memory:capture patterns <description>` - Capture a pattern
 ```
 
 Search results often reveal connections worth preserving as new memories.
+
+## Related Commands
+
+| Command | Description |
+|---------|-------------|
+| `/memory:recall` | Quick semantic search with context inference |
+| `/memory:capture` | Capture insights discovered during search |
+| `/memory:status` | View memory counts by namespace |
+| `/memory:sync` | Synchronize if search results seem incomplete |
+| `/memory:validate` | Validate search pipeline is working |

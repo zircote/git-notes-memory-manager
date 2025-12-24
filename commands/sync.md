@@ -4,6 +4,47 @@ argument-hint: "[full|verify|repair] [--dry-run]"
 allowed-tools: ["Bash", "Read"]
 ---
 
+<help_check>
+## Help Check
+
+If `$ARGUMENTS` contains `--help` or `-h`:
+
+**Output this help and HALT (do not proceed further):**
+
+<help_output>
+```
+SYNC(1)                                              User Commands                                              SYNC(1)
+
+NAME
+    sync - Synchronize the memory index with git notes
+
+SYNOPSIS
+    /memory:sync [full|verify|repair] [--dry-run]
+
+DESCRIPTION
+    Synchronize the memory index with git notes
+
+OPTIONS
+    --help, -h                Show this help message
+
+EXAMPLES
+    /memory:sync
+    /memory:sync <--dry-run>
+    /memory:sync --dry-run
+    /memory:sync --help
+
+SEE ALSO
+    /memory:* for related commands
+
+                                                                      SYNC(1)
+```
+</help_output>
+
+**After outputting help, HALT immediately. Do not proceed with command execution.**
+</help_check>
+
+---
+
 # /memory:sync - Synchronize Memory Index
 
 Synchronize the local search index with git notes storage.
@@ -12,7 +53,7 @@ Synchronize the local search index with git notes storage.
 
 You will help the user synchronize or repair the memory index.
 
-### Step 1: Parse Arguments
+<step number="1" name="Parse Arguments">
 
 **Arguments format**: `$ARGUMENTS`
 
@@ -20,7 +61,9 @@ Parse the arguments:
 1. First positional argument is mode: `incremental` (default), `full`, `verify`, or `repair`
 2. Extract `--dry-run` flag if present
 
-### Step 2: Execute Sync
+</step>
+
+<step number="2" name="Execute Sync">
 
 Use Bash to invoke the Python library based on mode:
 
@@ -113,7 +156,9 @@ else:
 "
 ```
 
-### Step 3: Handle Dry Run
+</step>
+
+<step number="3" name="Handle Dry Run">
 
 If `--dry-run` is specified, show what would happen without making changes:
 ```bash
@@ -133,6 +178,8 @@ print('')
 print('Run without --dry-run to apply changes.')
 "
 ```
+
+</step>
 
 ## When to Use Each Mode
 
@@ -165,7 +212,17 @@ print('Run without --dry-run to apply changes.')
 After a sync operation, remind the user that new memories are immediately available:
 
 ```
-💡 **Ready to capture**: Your memory index is now synced. Use:
+**Ready to capture**: Your memory index is now synced. Use:
 - `[remember] <learning>` - Quick inline capture
 - `/memory:capture <namespace> <content>` - Explicit capture
 ```
+
+## Related Commands
+
+| Command | Description |
+|---------|-------------|
+| `/memory:status` | View index statistics and last sync time |
+| `/memory:validate` | Full validation of hooks and pipeline |
+| `/memory:recall` | Search memories after syncing |
+| `/memory:capture` | Capture new memories |
+| `/memory:search` | Advanced search with filters |

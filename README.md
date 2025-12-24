@@ -57,6 +57,63 @@ recall = get_recall_service()
 memories = recall.search("database choice", namespace="decisions", limit=5)
 ```
 
+## API Reference
+
+### Core Services
+
+The library exposes three primary service interfaces via factory functions:
+
+| Service | Factory Function | Description |
+|---------|-----------------|-------------|
+| `CaptureService` | `get_capture_service()` | Capture memories with validation, git notes storage, and indexing |
+| `RecallService` | `get_recall_service()` | Search memories using semantic (vector) or text-based queries |
+| `SyncService` | `get_sync_service()` | Synchronize the SQLite index with git notes, verify consistency |
+
+### Key Models
+
+All models are immutable dataclasses (`frozen=True`) for thread-safety:
+
+| Model | Description |
+|-------|-------------|
+| `Memory` | Core entity representing a captured memory (id, namespace, summary, content, timestamp, tags) |
+| `MemoryResult` | Memory with similarity distance score from vector search |
+| `CaptureResult` | Result of capture operation (success, memory, indexed, warning) |
+| `IndexStats` | Statistics about the memory index (total, by_namespace, by_spec, last_sync) |
+| `HydrationLevel` | Enum for progressive loading: `SUMMARY`, `FULL`, `FILES` |
+
+### Common Operations
+
+```python
+from git_notes_memory import get_capture_service, get_recall_service, get_sync_service
+
+# Capture with tags
+capture = get_capture_service()
+result = capture.capture(
+    namespace="learnings",
+    summary="pytest fixtures can be module-scoped",
+    content="Use @pytest.fixture(scope='module') for expensive setup",
+    tags=["pytest", "testing"],
+)
+
+# Semantic search with filters
+recall = get_recall_service()
+results = recall.search(
+    query="database configuration",
+    k=10,                    # max results
+    namespace="decisions",   # filter by namespace
+    min_similarity=0.5,      # minimum relevance threshold
+)
+
+# Sync and verify index
+sync = get_sync_service()
+sync.reindex(full=True)  # full reindex from git notes
+verification = sync.verify_consistency()
+if not verification.is_consistent:
+    sync.repair(verification)
+```
+
+For complete API documentation, see the [Developer Guide](docs/DEVELOPER_GUIDE.md).
+
 ## Claude Code Plugin
 
 When used as a Claude Code plugin, the following slash commands are available:
@@ -102,26 +159,47 @@ make quality
 
 ## Configuration
 
-Environment variables (see `.env.example` for all options):
+### Core Settings
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MEMORY_PLUGIN_DATA_DIR` | Data directory path | `~/.local/share/memory-plugin/` |
-| `MEMORY_PLUGIN_GIT_NAMESPACE` | Git notes namespace | `refs/notes/mem` |
-| `MEMORY_PLUGIN_EMBEDDING_MODEL` | Embedding model name | `all-MiniLM-L6-v2` |
+| `MEMORY_PLUGIN_DATA_DIR` | Data directory for index and models | `~/.local/share/memory-plugin/` |
+| `MEMORY_PLUGIN_GIT_NAMESPACE` | Git notes ref prefix | `refs/notes/mem` |
+| `MEMORY_PLUGIN_EMBEDDING_MODEL` | Sentence-transformer model | `all-MiniLM-L6-v2` |
 | `MEMORY_PLUGIN_AUTO_CAPTURE` | Enable auto-capture hook | `false` |
 
 ### Hook Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `HOOK_ENABLED` | Master switch for hooks | `true` |
+| `HOOK_ENABLED` | Master switch for all hooks | `true` |
 | `HOOK_SESSION_START_ENABLED` | Enable SessionStart context injection | `true` |
+| `HOOK_SESSION_START_INCLUDE_GUIDANCE` | Include response guidance templates | `true` |
+| `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance level: minimal/standard/detailed | `standard` |
 | `HOOK_USER_PROMPT_ENABLED` | Enable signal detection in prompts | `false` |
 | `HOOK_POST_TOOL_USE_ENABLED` | Enable file-contextual memory injection | `true` |
+| `HOOK_POST_TOOL_USE_MIN_SIMILARITY` | Minimum similarity threshold | `0.6` |
+| `HOOK_POST_TOOL_USE_MAX_RESULTS` | Maximum memories to inject | `3` |
+| `HOOK_POST_TOOL_USE_AUTO_CAPTURE` | Auto-capture from written content | `true` |
 | `HOOK_PRE_COMPACT_ENABLED` | Enable auto-capture before compaction | `true` |
+| `HOOK_PRE_COMPACT_AUTO_CAPTURE` | Auto-capture without prompt | `true` |
+| `HOOK_PRE_COMPACT_PROMPT_FIRST` | Suggestion mode (show, don't capture) | `false` |
+| `HOOK_PRE_COMPACT_MIN_CONFIDENCE` | Minimum confidence for capture | `0.85` |
+| `HOOK_PRE_COMPACT_MAX_CAPTURES` | Maximum captures per compaction | `3` |
 | `HOOK_STOP_ENABLED` | Enable Stop hook processing | `true` |
+| `HOOK_STOP_SYNC_INDEX` | Sync index on session end | `true` |
+| `HOOK_STOP_PROMPT_UNCAPTURED` | Prompt for uncaptured content | `true` |
 | `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
+
+### Performance Tuning
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `HOOK_SESSION_START_TOKEN_BUDGET` | Max tokens for context injection | `2000` |
+| `HOOK_POST_TOOL_USE_TIMEOUT` | Hook timeout in seconds | `5` |
+| `HOOK_PRE_COMPACT_TIMEOUT` | Hook timeout in seconds | `15` |
+
+See `.env.example` for the complete list of configuration options.
 
 ## Requirements
 

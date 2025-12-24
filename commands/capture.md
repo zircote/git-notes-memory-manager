@@ -4,6 +4,46 @@ argument-hint: "[namespace] <summary> -- <content>"
 allowed-tools: ["Bash", "Write", "Read", "AskUserQuestion"]
 ---
 
+<help_check>
+## Help Check
+
+If `$ARGUMENTS` contains `--help` or `-h`:
+
+**Output this help and HALT (do not proceed further):**
+
+<help_output>
+```
+CAPTURE(1)                                           User Commands                                           CAPTURE(1)
+
+NAME
+    capture - Capture a memory (decision, learning, blocker, progress...
+
+SYNOPSIS
+    /memory:capture [namespace] <summary> -- <content>
+
+DESCRIPTION
+    Capture a memory (decision, learning, blocker, progress, etc.) to the git-backed memory system
+
+OPTIONS
+    --help, -h                Show this help message
+
+EXAMPLES
+    /memory:capture
+    /memory:capture <namespace>
+    /memory:capture --help
+
+SEE ALSO
+    /memory:* for related commands
+
+                                                                      CAPTURE(1)
+```
+</help_output>
+
+**After outputting help, HALT immediately. Do not proceed with command execution.**
+</help_check>
+
+---
+
 # /memory:capture - Capture a Memory
 
 Capture information to the git-backed memory system for later retrieval.
@@ -12,7 +52,7 @@ Capture information to the git-backed memory system for later retrieval.
 
 You will help the user capture a memory. The memory will be stored as a git note and indexed for semantic search.
 
-### Step 1: Parse the Arguments
+<step number="1" name="Parse the Arguments">
 
 **Arguments format**: `$ARGUMENTS`
 
@@ -31,14 +71,18 @@ If no namespace specified, auto-detect based on content patterns:
 - Contains "pattern", "recurring", "often" → `patterns`
 - Default → `learnings`
 
-### Step 2: Validate Content
+</step>
+
+<step number="2" name="Validate Content">
 
 If `$ARGUMENTS` is empty or very short (< 10 characters):
 - Use AskUserQuestion to prompt for the memory content
 - Question: "What would you like to capture?"
 - Provide examples for each memory type
 
-### Step 3: Capture the Memory
+</step>
+
+<step number="3" name="Capture the Memory">
 
 Use Bash to invoke the Python library:
 
@@ -69,7 +113,9 @@ Replace:
 - `$SUMMARY` with a one-line summary (max 100 chars, escape quotes)
 - `$CONTENT` with the full content (escape quotes)
 
-### Step 4: Confirm to User
+</step>
+
+<step number="4" name="Confirm to User">
 
 Show the result:
 ```
@@ -82,6 +128,8 @@ Memory captured!
 This memory will be available for recall in future sessions.
 Use `/memory:recall` to retrieve it.
 ```
+
+</step>
 
 ## Namespace Reference
 
@@ -108,12 +156,14 @@ For structured captures, the library also provides:
 - `capture_pattern(summary, pattern_type, evidence, confidence)` - Patterns
 - `capture_review(spec, summary, findings, verdict)` - Code reviews
 
-## Error Handling
+<error_handling>
 
 If the capture fails:
 1. Check if we're in a git repository: `git rev-parse --git-dir`
 2. Check if the library is installed: `uv run python3 -c "import git_notes_memory"`
 3. Show helpful error message with recovery action
+
+</error_handling>
 
 ## Examples
 
@@ -131,9 +181,20 @@ If the capture fails:
 After successfully capturing a memory, remind the user:
 
 ```
-💡 **Pro tip**: You can capture memories inline using markers:
+**Pro tip**: You can capture memories inline using markers:
 - `[remember] <insight>` - Captures a learning
 - `[capture] <decision>` - Captures any type of memory
 - `@memory <content>` - Same as [capture]
 
 These markers work anywhere in your message and are automatically processed.
+```
+
+## Related Commands
+
+| Command | Description |
+|---------|-------------|
+| `/memory:recall` | Search and retrieve captured memories semantically |
+| `/memory:search` | Advanced search with filtering options |
+| `/memory:status` | View memory system statistics and health |
+| `/memory:sync` | Synchronize the index with git notes |
+| `/memory:validate` | Validate the memory system is working correctly |

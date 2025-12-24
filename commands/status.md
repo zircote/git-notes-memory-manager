@@ -4,6 +4,46 @@ argument-hint: "[--verbose]"
 allowed-tools: ["Bash", "Read"]
 ---
 
+<help_check>
+## Help Check
+
+If `$ARGUMENTS` contains `--help` or `-h`:
+
+**Output this help and HALT (do not proceed further):**
+
+<help_output>
+```
+STATUS(1)                                            User Commands                                            STATUS(1)
+
+NAME
+    status - Display memory system status and statistics
+
+SYNOPSIS
+    /memory:status [--verbose]
+
+DESCRIPTION
+    Display memory system status and statistics
+
+OPTIONS
+    --help, -h                Show this help message
+
+EXAMPLES
+    /memory:status
+    /memory:status <--verbose>
+    /memory:status --help
+
+SEE ALSO
+    /memory:* for related commands
+
+                                                                      STATUS(1)
+```
+</help_output>
+
+**After outputting help, HALT immediately. Do not proceed with command execution.**
+</help_check>
+
+---
+
 # /memory:status - Memory System Status
 
 Display the current status of the memory system.
@@ -12,13 +52,15 @@ Display the current status of the memory system.
 
 You will show the user the status of their memory system.
 
-### Step 1: Parse Arguments
+<step number="1" name="Parse Arguments">
 
 **Arguments format**: `$ARGUMENTS`
 
 Check if `--verbose` flag is present.
 
-### Step 2: Execute Status Check
+</step>
+
+<step number="2" name="Execute Status Check">
 
 **Basic Status**:
 ```bash
@@ -144,7 +186,9 @@ index.close()
 "
 ```
 
-### Step 3: Show Recommendations
+</step>
+
+<step number="3" name="Show Recommendations">
 
 If issues are detected, show recommendations:
 
@@ -155,6 +199,8 @@ If issues are detected, show recommendations:
 2. **No memories captured** - Use `/memory:capture` to store your first memory
 3. **Embedding model not loaded** - First search will be slower while model loads
 ```
+
+</step>
 
 ## Output Sections
 
@@ -178,10 +224,20 @@ If issues are detected, show recommendations:
 After showing status, remind the user about capture capabilities:
 
 ```
-💡 **Capture memories**: Use markers anywhere in your messages:
+**Capture memories**: Use markers anywhere in your messages:
 - `[remember] <insight>` - Captures a learning
 - `[capture] <decision>` - Captures any memory type
 - `/memory:capture <namespace> <content>` - Explicit capture
 
 Available namespaces: decisions, learnings, blockers, progress, reviews, patterns
 ```
+
+## Related Commands
+
+| Command | Description |
+|---------|-------------|
+| `/memory:sync` | Synchronize or repair the index |
+| `/memory:validate` | Full validation of the memory system |
+| `/memory:capture` | Capture a new memory |
+| `/memory:recall` | Search for memories |
+| `/memory:search` | Advanced search with filters |

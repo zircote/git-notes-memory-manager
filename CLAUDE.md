@@ -187,3 +187,41 @@ def capture_service(tmp_path, monkeypatch):
 | `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
 | `HOOK_SESSION_START_INCLUDE_GUIDANCE` | Include response guidance templates | `true` |
 | `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance level: minimal/standard/detailed | `standard` |
+
+## Code Intelligence (LSP)
+
+LSP hooks are configured in `.claude/hooks.json` for immediate feedback on Python edits.
+
+### Installed Hooks
+
+| Hook | Trigger | Action |
+|------|---------|--------|
+| `format-on-edit` | PostToolUse (Write/Edit) | Runs `ruff format` on changed files |
+| `lint-check-on-edit` | PostToolUse (Write/Edit) | Runs `ruff check` on changed files |
+| `typecheck-on-edit` | PostToolUse (Write/Edit) | Runs `mypy` on changed files |
+| `pre-commit-quality-gate` | PreToolUse (git commit) | Runs full `make quality` before commit |
+
+### Navigation & Understanding
+
+- Use LSP `goToDefinition` before modifying unfamiliar functions, classes, or modules
+- Use LSP `findReferences` before refactoring any symbol to understand full impact
+- Use LSP `documentSymbol` to get file structure overview before major edits
+- Prefer LSP navigation over grep—it resolves through imports and re-exports
+
+### Verification Workflow
+
+1. After each edit, check hook output for lint/type errors
+2. Fix errors immediately before proceeding
+3. Run `make quality` before committing
+
+### Pre-Edit Checklist
+
+- [ ] Navigate to definition to understand implementation
+- [ ] Find all references to assess change impact
+- [ ] Review type annotations via hover before modifying function signatures
+
+### Error Handling
+
+- If hooks report errors, fix them before proceeding to the next task
+- Type errors are blocking in this project (mypy strict mode)
+- Use hook output to guide fixes, not guesswork
