@@ -1,0 +1,199 @@
+---
+type: patterns
+timestamp: '2025-12-24T16:35:29.677085+00:00'
+summary: '...hitting a blocker** | `▶ blocker ───` | Every blocker |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...hitting a blocker** | `▶ blocker ───` | Every blocker |
+| **When identifying a pattern** | `▶ pattern ───` | Every pattern |
+
+**SESSION MINIMUM: At least 1 block per 3 assistant messages. If you...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:35:29.693655+00:00'
+summary: '...blocker ───` | Every blocker |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...blocker ───` | Every blocker |
+| **When identifying a pattern** | `▶ pattern ───` | Every pattern |
+
+**SESSION MINIMUM: At least 1 block per 3 assistant messages. If you have not produced a...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:35:29.798714+00:00'
+summary: '...`[learned] The insight`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`[learned] The insight`
+- `[blocker] What blocks progress`
+- `[progress] What was done`
+- `[pattern] Reusable approach`
+
+**INLINE MARKERS DO NOT REPLACE BLOCKS.** Blocks are the default. Inline...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:35:29.818314+00:00'
+summary: '...The insight`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...The insight`
+- `[blocker] What blocks progress`
+- `[progress] What was done`
+- `[pattern] Reusable approach`
+
+**INLINE MARKERS DO NOT REPLACE BLOCKS.** Blocks are the default. Inline is the...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:35:29.908723+00:00'
+summary: '...`pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`pattern`
+
+**Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Memory commands:** `/memory:recall <id>`, `/memory:search <query>`
+]]></marker_reference>
+
+<self...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:34.968322+00:00'
+summary: '...| Every blocker | Stuck, need help, can''t proceed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...| Every blocker | Stuck, need help, can't proceed |
+| **When identifying a pattern** | `▶ pattern ───` | Every pattern | Reusable approach, best practice |
+
+**SESSION MINIMUM: At least 1 block...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:34.985904+00:00'
+summary: '...Stuck, need help, can''t proceed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...Stuck, need help, can't proceed |
+| **When identifying a pattern** | `▶ pattern ───` | Every pattern | Reusable approach, best practice |
+
+**SESSION MINIMUM: At least 1 block per 3 assistant messages....
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:35.004504+00:00'
+summary: '...help, can''t proceed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...help, can't proceed |
+| **When identifying a pattern** | `▶ pattern ───` | Every pattern | Reusable approach, best practice |
+
+**SESSION MINIMUM: At least 1 block per 3 assistant messages. If...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:35.023452+00:00'
+summary: '...|'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...|
+| **When identifying a pattern** | `▶ pattern ───` | Every pattern | Reusable approach, best practice |
+
+**SESSION MINIMUM: At least 1 block per 3 assistant messages. If you have not produced...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:35.226578+00:00'
+summary: '...──────────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...──────────
+```
+
+**Inline markers (RARE):**
+- `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+- `[research]`, `[review]`, `[retro]`, `[inception]`, `[requirement]`
+
+**Memory commands:**
+-...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:35.244063+00:00'
+summary: '...decision ───` blocks: ___'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...decision ───` blocks: ___
+- `▶ learned ───` blocks: ___
+- `▶ blocker ───` blocks: ___
+- `▶ pattern ───` blocks: ___
+- **TOTAL BLOCKS:** ___
+
+### Task Count Check
+- Tasks completed this session:...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:37:00.452519+00:00'
+summary: '...pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...pattern`
+
+**Quick markers (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Self-check before EACH response:**
+- Did I complete a task? → WRITE `▶ progress ───`
+-...
