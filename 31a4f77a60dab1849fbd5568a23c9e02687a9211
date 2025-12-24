@@ -1,0 +1,8 @@
+---
+type: progress
+timestamp: '2025-12-24T16:27:05.165925+00:00'
+summary: The background task completed - it found the legacy global data directory
+  at `~/.local/share/memory-
+---
+
+The background task completed - it found the legacy global data directory at `~/.local/share/memory-plugin/` which contains...
