@@ -97,3 +97,22 @@ After testing with `ENABLE_LSP_TOOL=1` in `.claude/settings.local.json`, the LSP
 
 ## Related Files
 - .claude/settings.local.json (created but ineffective)
+
+---
+type: learnings
+timestamp: '2025-12-24T04:34:18.442119+00:00'
+summary: LSP tool is not a standard documented Claude Code feature
+---
+
+LSP tool is not a standard documented Claude Code feature
+## Context
+After testing with `ENABLE_LSP_TOOL=1` in `.claude/settings.local.json`, the LSP tool still returns "No LSP server available". Documentation search confirms this is not an officially documented feature.
+
+## Findings
+- The LSP tool exists in Claude Code's tool list but is not documented
+- No official settings key or flag exists to enable it
+- The `ENABLE_LSP_TOOL` env var doesn't activate it
+- May be experimental/beta or require Anthropic-side enablement
+
+## Related Files
+- .claude/settings.local.json (created but ineffective)
