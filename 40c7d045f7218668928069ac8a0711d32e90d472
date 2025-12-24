@@ -141,3 +141,14 @@ def reset_hook_loggers() -> Iterator[None]:
 
 - logging.Logger.manager.loggerDict - Global dict of all registered loggers
 - logger.handlers.clear() - Remove all handlers from a logger
+
+---
+type: learnings
+timestamp: '2025-12-24T09:19:50.648028+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
