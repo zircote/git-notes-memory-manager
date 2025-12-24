@@ -163,3 +163,19 @@ Need authentication that works across multiple servers.
 
 ## Related Files
 - src/auth/jwt_handler.py:1-50
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.079076+00:00'
+summary: '...(Expected)'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...(Expected)
+- **Blocks produced:** At least 1 per 3 messages
+- **Progress blocks:** At least 1 per completed task
+- **Decision blocks:** Every architectural/approach choice
+- **Related Files:** Every...
