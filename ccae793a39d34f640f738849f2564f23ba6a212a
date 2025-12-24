@@ -179,3 +179,24 @@ tags:
 - **Progress blocks:** At least 1 per completed task
 - **Decision blocks:** Every architectural/approach choice
 - **Related Files:** Every...
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.115954+00:00'
+summary: Summary of completed work
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+Summary of completed work
+## Summary
+What was accomplished.
+
+## Changes Made
+- Change 1
+- Change 2
+
+## Related Files
+- path/to/file.py:10-25
