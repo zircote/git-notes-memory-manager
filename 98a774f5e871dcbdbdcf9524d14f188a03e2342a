@@ -183,3 +183,14 @@ summary: '...**proactive** navigation (jump to definition before editing). Your 
 
 ...**proactive** navigation (jump to definition before editing). Your hooks are the best available workaround until LSP becomes a documented feature.
 `─────────────────────────────────────────────────`
+
+---
+type: progress
+timestamp: '2025-12-24T04:47:51.959668+00:00'
+summary: 'You''re right. The LSP feature shipped with:'
+---
+
+You're right. The LSP feature shipped with:
+
+- A race condition that makes it non-functional for plugin-based LSP servers
+- No clear...
