@@ -1,0 +1,15 @@
+---
+type: patterns
+timestamp: '2025-12-24T20:02:20.523118+00:00'
+summary: '...Remediation:** Reject `@` and `:` in path validation'
+tags:
+- auto-captured
+- post-tool-use
+- file:CODE_REVIEW.md
+---
+
+...Remediation:** Reject `@` and `:` in path validation
+
+### HIGH-007: Inefficient get_all_ids + get_batch Pattern
+**File:** `src/git_notes_memory/lifecycle.py:750-752`
+**Remediation:** Add SQL-level filtering...
