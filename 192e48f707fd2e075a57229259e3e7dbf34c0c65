@@ -118,3 +118,15 @@ Fixed 8 failing tests in `test_guidance_builder.py` that were checking for conte
 ## Related Files
 - tests/test_guidance_builder.py:70-132 (test assertions updated)
 - tests/test_guidance_builder.py:198-227 (token estimation tests)
+
+---
+type: progress
+timestamp: '2025-12-24T19:57:16.887771+00:00'
+summary: The background task completed - it found the legacy global data directory
+  at `~/.local/share/memo...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The background task completed - it found the legacy global data directory at `~/.local/share/memory-plugin/` which contains...
