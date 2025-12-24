@@ -219,6 +219,8 @@ class SyncService:
         Iterates through all namespaces, lists notes, and parses
         their content into NoteRecord objects.
 
+        Uses batch git operations (PERF-001) for efficient retrieval.
+
         Returns:
             List of all NoteRecord objects from git notes.
         """
@@ -233,9 +235,16 @@ class SyncService:
                 logger.debug("No notes in namespace %s: %s", namespace, e)
                 continue
 
+            if not notes_list:
+                continue
+
+            # PERF-001: Batch fetch all notes for this namespace
+            commit_shas = [commit_sha for _note_sha, commit_sha in notes_list]
+            contents = git_ops.show_notes_batch(namespace, commit_shas)
+
             for _note_sha, commit_sha in notes_list:
                 try:
-                    content = git_ops.show_note(namespace, commit_sha)
+                    content = contents.get(commit_sha)
                     if content:
                         # Pass commit_sha and namespace so NoteRecord has them
                         records = parser.parse_many(
@@ -257,6 +266,9 @@ class SyncService:
     def reindex(self, *, full: bool = False) -> int:
         """Rebuild the index from git notes.
 
+        Uses batch git operations (PERF-001) and batch embedding (PERF-002)
+        for efficient retrieval and vectorization.
+
         Args:
             full: If True, clears index first. Otherwise incremental.
 
@@ -269,7 +281,7 @@ class SyncService:
         """
         git_ops = self._get_git_ops()
         index = self._get_index()
-        embedding = self._get_embedding_service()
+        embedding_service = self._get_embedding_service()
         parser = self._get_note_parser()
 
         if full:
@@ -284,9 +296,20 @@ class SyncService:
                 logger.debug("No notes in namespace %s: %s", namespace, e)
                 continue
 
+            if not notes_list:
+                continue
+
+            # PERF-001: Batch fetch all notes for this namespace
+            commit_shas = [commit_sha for _note_sha, commit_sha in notes_list]
+            contents = git_ops.show_notes_batch(namespace, commit_shas)
+
+            # First pass: collect all memories and texts for batch embedding
+            memories_to_index: list[Memory] = []
+            texts_to_embed: list[str] = []
+
             for _note_sha, commit_sha in notes_list:
                 try:
-                    content = git_ops.show_note(namespace, commit_sha)
+                    content = contents.get(commit_sha)
                     if not content:
                         continue
 
@@ -300,34 +323,42 @@ class SyncService:
                         if not full and index.exists(memory.id):
                             continue
 
-                        # Generate embedding
-                        embed_vector = None
-                        try:
-                            text = f"{memory.summary}\n{memory.content}"
-                            embed_vector = embedding.embed(text)
-                        except Exception as e:
-                            logger.warning(
-                                "Embedding failed for %s: %s",
-                                memory.id,
-                                e,
-                            )
-
-                        # Insert into index
-                        try:
-                            index.insert(memory, embedding=embed_vector)
-                            indexed += 1
-                        except Exception as e:
-                            logger.warning(
-                                "Failed to index memory %s: %s",
-                                memory.id,
-                                e,
-                            )
+                        memories_to_index.append(memory)
+                        texts_to_embed.append(f"{memory.summary}\n{memory.content}")
 
                 except Exception as e:
                     logger.warning(
                         "Failed to process note %s/%s: %s",
                         namespace,
                         commit_sha,
+                        e,
+                    )
+
+            if not memories_to_index:
+                continue
+
+            # PERF-002: Batch generate all embeddings at once
+            embeddings: list[list[float]] | list[None] = []
+            try:
+                embeddings = embedding_service.embed_batch(texts_to_embed)
+            except Exception as e:
+                logger.warning(
+                    "Batch embedding failed for namespace %s: %s",
+                    namespace,
+                    e,
+                )
+                # Fall back to None embeddings for all
+                embeddings = [None] * len(memories_to_index)
+
+            # Second pass: insert memories with their embeddings
+            for memory, embed_vector in zip(memories_to_index, embeddings, strict=True):
+                try:
+                    index.insert(memory, embedding=embed_vector)
+                    indexed += 1
+                except Exception as e:
+                    logger.warning(
+                        "Failed to index memory %s: %s",
+                        memory.id,
                         e,
                     )
 
@@ -339,6 +370,8 @@ class SyncService:
 
         Compares the set of memory IDs in the index with those
         that should exist based on git notes content.
+
+        Uses batch git operations (PERF-001) for efficient retrieval.
 
         Returns:
             VerificationResult with details of any inconsistencies.
@@ -357,9 +390,16 @@ class SyncService:
             except Exception:
                 continue
 
+            if not notes_list:
+                continue
+
+            # PERF-001: Batch fetch all notes for this namespace
+            commit_shas = [commit_sha for _note_sha, commit_sha in notes_list]
+            contents = git_ops.show_notes_batch(namespace, commit_shas)
+
             for _note_sha, commit_sha in notes_list:
                 try:
-                    content = git_ops.show_note(namespace, commit_sha)
+                    content = contents.get(commit_sha)
                     if not content:
                         continue
 

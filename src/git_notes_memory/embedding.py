@@ -310,6 +310,32 @@ class EmbeddingService:
         # Dot product of normalized vectors = cosine similarity
         return sum(a * b for a, b in zip(embedding1, embedding2, strict=True))
 
+    def prewarm(self) -> bool:
+        """Pre-warm the embedding model by loading it eagerly.
+
+        PERF-004: Call this during application startup or hook initialization
+        to avoid cold start latency on first embed() call. Useful for:
+        - Session start hooks that need fast response
+        - Background workers that will process embeddings
+        - Applications where predictable latency is important
+
+        Returns:
+            True if model was loaded (or already loaded), False on error.
+
+        Examples:
+            >>> service = EmbeddingService()
+            >>> service.prewarm()  # Load model in background
+            True
+            >>> service.is_loaded
+            True
+        """
+        try:
+            self.load()
+            return True
+        except Exception as e:
+            logger.warning("Failed to pre-warm embedding model: %s", e)
+            return False
+
     def unload(self) -> None:
         """Unload the model to free memory.
 
@@ -322,11 +348,8 @@ class EmbeddingService:
 
 
 # =============================================================================
-# Singleton Instance
+# Singleton Access (using ServiceRegistry)
 # =============================================================================
-
-
-_default_service: EmbeddingService | None = None
 
 
 def get_default_service() -> EmbeddingService:
@@ -340,7 +363,6 @@ def get_default_service() -> EmbeddingService:
         >>> service.model_name
         'all-MiniLM-L6-v2'
     """
-    global _default_service
-    if _default_service is None:
-        _default_service = EmbeddingService()
-    return _default_service
+    from git_notes_memory.registry import ServiceRegistry
+
+    return ServiceRegistry.get(EmbeddingService)

@@ -143,6 +143,8 @@ def mock_git_ops() -> MagicMock:
     git_ops = MagicMock()
     git_ops.list_notes.return_value = []
     git_ops.show_note.return_value = None
+    # PERF-001: Also mock show_notes_batch for batch operations
+    git_ops.show_notes_batch.return_value = {}
     return git_ops
 
 
@@ -151,6 +153,8 @@ def mock_embedding() -> MagicMock:
     """Create a mock EmbeddingService."""
     embedding = MagicMock()
     embedding.embed.return_value = [0.1] * 384
+    # PERF-002: Also mock embed_batch for batch operations
+    embedding.embed_batch.return_value = [[0.1] * 384]
     return embedding
 
 
@@ -555,7 +559,10 @@ class TestCollectNotes:
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note_sha", "commit_sha")] if ns == "decisions" else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: decisions\n---"
+        # PERF-001: Mock batch operations
+        mock_git_ops.show_notes_batch.return_value = {
+            "commit_sha": "---\ntype: decisions\n---"
+        }
         mock_note_parser.parse_many.return_value = [sample_note_record]
 
         result = sync_service.collect_notes()
@@ -573,7 +580,8 @@ class TestCollectNotes:
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note1", "commit1")] if ns in ["decisions", "learnings"] else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: test\n---"
+        # PERF-001: Mock batch operations
+        mock_git_ops.show_notes_batch.return_value = {"commit1": "---\ntype: test\n---"}
 
         record1 = make_note_record(namespace="decisions")
         record2 = make_note_record(namespace="learnings")
@@ -581,9 +589,9 @@ class TestCollectNotes:
         call_count = [0]
 
         def parse_side_effect(
-            content: str,
-            commit_sha: str = "",
-            namespace: str = "",
+            content: str,  # noqa: ARG001 - Required by signature
+            commit_sha: str = "",  # noqa: ARG001 - Required by signature
+            namespace: str = "",  # noqa: ARG001 - Required by signature
         ) -> list[NoteRecord]:
             call_count[0] += 1
             return [record1] if call_count[0] == 1 else [record2]
@@ -604,7 +612,10 @@ class TestCollectNotes:
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note_sha", "abc123")] if ns == "decisions" else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: decisions\n---"
+        # PERF-001: Mock show_notes_batch for batch operations
+        mock_git_ops.show_notes_batch.return_value = {
+            "abc123": "---\ntype: decisions\n---"
+        }
 
         # Create record that will be returned (with commit_sha set)
         record = make_note_record(commit_sha="abc123", namespace="decisions")
@@ -675,12 +686,18 @@ class TestReindex:
         mock_git_ops: MagicMock,
         mock_note_parser: MagicMock,
         mock_index: MagicMock,
+        mock_embedding: MagicMock,
     ) -> None:
         """Test reindexing a single note."""
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note_sha", "abc123")] if ns == "decisions" else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: decisions\n---"
+        # PERF-001: Mock batch operations
+        mock_git_ops.show_notes_batch.return_value = {
+            "abc123": "---\ntype: decisions\n---"
+        }
+        # PERF-002: Mock batch embedding
+        mock_embedding.embed_batch.return_value = [[0.1] * 384]
 
         record = make_note_record()
         mock_note_parser.parse_many.return_value = [record]
@@ -731,12 +748,18 @@ class TestReindex:
         mock_git_ops: MagicMock,
         mock_note_parser: MagicMock,
         mock_index: MagicMock,
+        mock_embedding: MagicMock,
     ) -> None:
         """Test full reindex includes existing entries."""
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note_sha", "abc123")] if ns == "decisions" else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: decisions\n---"
+        # PERF-001: Mock batch operations
+        mock_git_ops.show_notes_batch.return_value = {
+            "abc123": "---\ntype: decisions\n---"
+        }
+        # PERF-002: Mock batch embedding
+        mock_embedding.embed_batch.return_value = [[0.1] * 384]
 
         record = make_note_record()
         mock_note_parser.parse_many.return_value = [record]
@@ -754,12 +777,19 @@ class TestReindex:
         mock_git_ops: MagicMock,
         mock_note_parser: MagicMock,
         mock_index: MagicMock,
+        mock_embedding: MagicMock,
     ) -> None:
         """Test reindexing multiple notes."""
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note1", "commit1"), ("note2", "commit2")] if ns == "decisions" else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: decisions\n---"
+        # PERF-001: Mock batch operations with both commits
+        mock_git_ops.show_notes_batch.return_value = {
+            "commit1": "---\ntype: decisions\n---",
+            "commit2": "---\ntype: decisions\n---",
+        }
+        # PERF-002: Mock batch embedding for 2 notes
+        mock_embedding.embed_batch.return_value = [[0.1] * 384, [0.1] * 384]
 
         record = make_note_record()
         mock_note_parser.parse_many.return_value = [record]
@@ -774,18 +804,21 @@ class TestReindex:
         sync_service: SyncService,
         mock_git_ops: MagicMock,
         mock_note_parser: MagicMock,
-        mock_index: MagicMock,
+        mock_index: MagicMock,  # noqa: ARG002 - Required fixture
+        mock_embedding: MagicMock,
     ) -> None:
         """Test reindex continues after note errors."""
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note1", "commit1"), ("note2", "commit2")] if ns == "decisions" else []
         )
 
-        # First call succeeds, second fails
-        mock_git_ops.show_note.side_effect = [
-            "---\ntype: decisions\n---",
-            Exception("Read error"),
-        ]
+        # PERF-001: Mock batch operations - commit2 returns None (error)
+        mock_git_ops.show_notes_batch.return_value = {
+            "commit1": "---\ntype: decisions\n---",
+            "commit2": None,  # Simulates read error
+        }
+        # PERF-002: Mock batch embedding for 1 note (only commit1 succeeds)
+        mock_embedding.embed_batch.return_value = [[0.1] * 384]
 
         record = make_note_record()
         mock_note_parser.parse_many.return_value = [record]
@@ -831,7 +864,10 @@ class TestVerifyConsistency:
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note_sha", "abc1234")] if ns == "decisions" else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: decisions\n---"
+        # PERF-001: Mock batch operations
+        mock_git_ops.show_notes_batch.return_value = {
+            "abc1234": "---\ntype: decisions\n---"
+        }
 
         record = make_note_record(
             commit_sha="abc1234",
@@ -857,7 +893,10 @@ class TestVerifyConsistency:
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note_sha", "abc1234")] if ns == "decisions" else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: decisions\n---"
+        # PERF-001: Mock batch operations
+        mock_git_ops.show_notes_batch.return_value = {
+            "abc1234": "---\ntype: decisions\n---"
+        }
 
         record = make_note_record()
         mock_note_parser.parse_many.return_value = [record]
@@ -896,7 +935,10 @@ class TestVerifyConsistency:
         mock_git_ops.list_notes.side_effect = lambda ns: (
             [("note_sha", "abc1234")] if ns == "decisions" else []
         )
-        mock_git_ops.show_note.return_value = "---\ntype: decisions\n---"
+        # PERF-001: Mock batch operations
+        mock_git_ops.show_notes_batch.return_value = {
+            "abc1234": "---\ntype: decisions\n---"
+        }
 
         # Note has different content than indexed
         record = make_note_record(
@@ -1219,7 +1261,8 @@ summary: Another decision
 
 Body for reindex test.
 """
-        mock_git_ops.show_note.return_value = note_content
+        # PERF-001: Mock batch operations
+        mock_git_ops.show_notes_batch.return_value = {"def7890123456": note_content}
 
         from git_notes_memory.note_parser import NoteParser
 
@@ -1227,6 +1270,8 @@ Body for reindex test.
 
         mock_embedding = MagicMock()
         mock_embedding.embed.return_value = [0.1] * 384
+        # PERF-002: Mock batch embedding
+        mock_embedding.embed_batch.return_value = [[0.1] * 384]
 
         service = SyncService(
             repo_path=tmp_path,

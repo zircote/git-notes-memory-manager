@@ -23,8 +23,10 @@ from __future__ import annotations
 
 import contextlib
 import sqlite3
+import struct
 from contextlib import contextmanager
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -32,6 +34,24 @@ import sqlite_vec
 
 from git_notes_memory.config import EMBEDDING_DIMENSIONS, get_index_path
 from git_notes_memory.exceptions import MemoryIndexError
+
+
+# PERF-007: Cache compiled struct format for embedding serialization
+@lru_cache(maxsize=8)
+def _get_struct_format(dimensions: int) -> struct.Struct:
+    """Get a cached struct.Struct for packing embeddings.
+
+    The embedding dimensions are typically constant (384 for all-MiniLM-L6-v2),
+    so caching the compiled Struct avoids repeated format string parsing.
+
+    Args:
+        dimensions: Number of float values in the embedding.
+
+    Returns:
+        A compiled struct.Struct instance for packing.
+    """
+    return struct.Struct(f"{dimensions}f")
+
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -508,10 +528,8 @@ class IndexService:
             memory_id: ID of the memory this embedding belongs to.
             embedding: The embedding vector.
         """
-        # sqlite-vec expects binary format for vectors
-        import struct
-
-        blob = struct.pack(f"{len(embedding)}f", *embedding)
+        # PERF-007: Use cached struct format for embedding packing
+        blob = _get_struct_format(len(embedding)).pack(*embedding)
         cursor.execute(
             "INSERT INTO vec_memories (id, embedding) VALUES (?, ?)",
             (memory_id, blob),
@@ -820,9 +838,8 @@ class IndexService:
             memory_id: ID of the memory this embedding belongs to.
             embedding: The new embedding vector.
         """
-        import struct
-
-        blob = struct.pack(f"{len(embedding)}f", *embedding)
+        # PERF-007: Use cached struct format for embedding packing
+        blob = _get_struct_format(len(embedding)).pack(*embedding)
 
         # Delete existing and insert new (sqlite-vec doesn't support UPDATE well)
         cursor.execute("DELETE FROM vec_memories WHERE id = ?", (memory_id,))
@@ -984,10 +1001,8 @@ class IndexService:
             List of (Memory, distance) tuples sorted by distance ascending.
             Lower distance means more similar.
         """
-        import struct
-
-        # Pack query embedding as binary
-        blob = struct.pack(f"{len(query_embedding)}f", *query_embedding)
+        # PERF-007: Use cached struct format for embedding packing
+        blob = _get_struct_format(len(query_embedding)).pack(*query_embedding)
 
         with self._cursor() as cursor:
             try:

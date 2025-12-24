@@ -143,11 +143,12 @@ class GitOps:
             )
         except subprocess.CalledProcessError as e:
             # Parse common git errors for better messages
+            # SEC-002: Sanitize paths in error messages to prevent info leakage
             stderr = e.stderr or ""
             if "not a git repository" in stderr.lower():
                 raise StorageError(
                     "Not in a Git repository",
-                    f"Initialize a git repository: cd {self.repo_path} && git init",
+                    "Initialize a git repository: cd <repo_path> && git init",
                 ) from e
             if "permission denied" in stderr.lower():
                 raise StorageError(
@@ -159,8 +160,12 @@ class GitOps:
                     "Repository has no commits",
                     "Create at least one commit: git commit --allow-empty -m 'initial'",
                 ) from e
+            # Sanitize the args to remove full paths
+            sanitized_args = [
+                arg if not arg.startswith("/") else "<path>" for arg in args
+            ]
             raise StorageError(
-                f"Git command failed: {' '.join(args)}\n{stderr}",
+                f"Git command failed: {' '.join(sanitized_args)}\n{stderr}",
                 "Check git status and try again",
             ) from e
 
@@ -320,6 +325,105 @@ class GitOps:
             return None
 
         return result.stdout
+
+    def show_notes_batch(
+        self,
+        namespace: str,
+        commit_shas: list[str],
+    ) -> dict[str, str | None]:
+        """Show multiple notes in a single subprocess call.
+
+        Uses `git cat-file --batch` for efficient bulk retrieval.
+        This is significantly faster than calling show_note() in a loop
+        when fetching many notes.
+
+        Args:
+            namespace: Memory namespace.
+            commit_shas: List of commit SHAs to get notes for.
+
+        Returns:
+            Dict mapping commit_sha -> note content (or None if no note).
+
+        Raises:
+            ValidationError: If namespace is invalid.
+        """
+        if not commit_shas:
+            return {}
+
+        self._validate_namespace(namespace)
+        for sha in commit_shas:
+            self._validate_git_ref(sha)
+
+        # Build object references: notes ref points to the note object for each commit
+        # Format: refs/notes/mem/namespace:commit_sha
+        ref = self._note_ref(namespace)
+        objects_input = "\n".join(f"{ref}:{sha}" for sha in commit_shas)
+
+        # Run cat-file --batch to get all notes at once
+        cmd = ["git", "-C", str(self.repo_path), "cat-file", "--batch"]
+
+        try:
+            result = subprocess.run(
+                cmd,
+                input=objects_input,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except Exception:
+            # Fallback to sequential if batch fails
+            return {sha: self.show_note(namespace, sha) for sha in commit_shas}
+
+        # Parse batch output
+        # Format per object:
+        #   <sha> <type> <size>\n
+        #   <content>\n
+        # Or for missing:
+        #   <ref> missing\n
+        results: dict[str, str | None] = {}
+        lines: list[str] = result.stdout.split("\n")
+        i = 0
+        sha_index = 0
+
+        while i < len(lines) and sha_index < len(commit_shas):
+            line = lines[i]
+            current_sha = commit_shas[sha_index]
+
+            if "missing" in line:
+                results[current_sha] = None
+                i += 1
+                sha_index += 1
+            elif line and not line.startswith(" "):
+                # Header line: <object_sha> <type> <size>
+                parts = line.split()
+                if len(parts) >= 3:
+                    try:
+                        size = int(parts[2])
+                        # Content follows on next lines until size bytes consumed
+                        content_lines: list[str] = []
+                        remaining = size
+                        i += 1
+                        while remaining > 0 and i < len(lines):
+                            content_line = lines[i]
+                            content_lines.append(content_line)
+                            remaining -= len(content_line) + 1  # +1 for newline
+                            i += 1
+                        results[current_sha] = "\n".join(content_lines)
+                        sha_index += 1
+                    except (ValueError, IndexError):
+                        results[current_sha] = None
+                        sha_index += 1
+                        i += 1
+                else:
+                    i += 1
+            else:
+                i += 1
+
+        # Fill in any remaining SHAs as None
+        for remaining_sha in commit_shas[sha_index:]:
+            results[remaining_sha] = None
+
+        return results
 
     def list_notes(
         self,

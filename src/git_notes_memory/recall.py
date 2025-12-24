@@ -501,6 +501,9 @@ class RecallService:
     ) -> list[HydratedMemory]:
         """Hydrate multiple memories to the specified level.
 
+        Uses batch git operations (PERF-003) for efficient retrieval when
+        hydrating FULL or FILES level.
+
         Args:
             memories: Sequence of memories to hydrate.
             level: The level of detail to hydrate to.
@@ -512,7 +515,81 @@ class RecallService:
             >>> results = service.search("auth")
             >>> hydrated = service.hydrate_batch(results, HydrationLevel.FULL)
         """
-        return [self.hydrate(m, level) for m in memories]
+        if not memories:
+            return []
+
+        # SUMMARY level doesn't need git ops
+        if level == HydrationLevel.SUMMARY:
+            return [
+                HydratedMemory(
+                    result=(
+                        MemoryResult(memory=m, distance=0.0)
+                        if isinstance(m, Memory)
+                        else m
+                    )
+                )
+                for m in memories
+            ]
+
+        # Normalize to MemoryResult
+        results: list[MemoryResult] = []
+        for m in memories:
+            if isinstance(m, Memory):
+                results.append(MemoryResult(memory=m, distance=0.0))
+            else:
+                results.append(m)
+
+        # PERF-003: Group memories by namespace for batch git operations
+        git_ops = self._get_git_ops()
+
+        # Collect unique (namespace, commit_sha) pairs
+        namespace_commits: dict[str, list[str]] = {}
+        for r in results:
+            ns = r.memory.namespace
+            if ns not in namespace_commits:
+                namespace_commits[ns] = []
+            if r.memory.commit_sha not in namespace_commits[ns]:
+                namespace_commits[ns].append(r.memory.commit_sha)
+
+        # Batch fetch note contents by namespace
+        note_contents: dict[str, dict[str, str | None]] = {}
+        for ns, commit_shas in namespace_commits.items():
+            note_contents[ns] = git_ops.show_notes_batch(ns, commit_shas)
+
+        # Build hydrated memories using cached contents
+        hydrated: list[HydratedMemory] = []
+        for r in results:
+            memory = r.memory
+            full_content: str | None = None
+            commit_info: CommitInfo | None = None
+            files: tuple[tuple[str, str], ...] = ()
+
+            if level.value >= HydrationLevel.FULL.value:
+                # Get from batch-fetched contents
+                ns_contents = note_contents.get(memory.namespace, {})
+                full_content = ns_contents.get(memory.commit_sha)
+
+                # Get commit info (not batched - less critical for perf)
+                try:
+                    commit_info = git_ops.get_commit_info(memory.commit_sha)
+                except Exception as e:
+                    logger.debug(
+                        "Failed to get commit info for %s: %s", memory.commit_sha, e
+                    )
+
+            if level == HydrationLevel.FILES:
+                files = self._load_files_at_commit(memory.commit_sha)
+
+            hydrated.append(
+                HydratedMemory(
+                    result=r,
+                    full_content=full_content,
+                    files=files,
+                    commit_info=commit_info,
+                )
+            )
+
+        return hydrated
 
     def _load_files_at_commit(self, commit_sha: str) -> tuple[tuple[str, str], ...]:
         """Load file snapshots at a specific commit.
@@ -603,6 +680,7 @@ class RecallService:
         """Estimate the number of tokens for a set of memories.
 
         Uses a simple character-based estimation: ~4 characters per token.
+        PERF-006: Uses generator expression for single-pass calculation.
 
         Args:
             memories: Sequence of memories to estimate.
@@ -611,19 +689,15 @@ class RecallService:
         Returns:
             Estimated token count.
         """
-        total_chars = 0
+        include_content = level.value >= HydrationLevel.FULL.value
 
-        for memory in memories:
-            # Always include summary
-            if memory.summary:
-                total_chars += len(memory.summary)
-
-            # Include content for FULL and FILES levels
-            if level.value >= HydrationLevel.FULL.value and memory.content:
-                total_chars += len(memory.content)
-
-            # Add overhead for metadata
-            total_chars += 50  # Approximate overhead for ID, namespace, etc.
+        # PERF-006: Single-pass generator avoids loop variable overhead
+        total_chars = sum(
+            len(m.summary or "")
+            + (len(m.content or "") if include_content else 0)
+            + 50  # Metadata overhead
+            for m in memories
+        )
 
         return int(total_chars * TOKENS_PER_CHAR)
 
@@ -699,11 +773,8 @@ class RecallService:
 
 
 # =============================================================================
-# Singleton Instance
+# Singleton Access (using ServiceRegistry)
 # =============================================================================
-
-
-_default_service: RecallService | None = None
 
 
 def get_default_service() -> RecallService:
@@ -716,7 +787,6 @@ def get_default_service() -> RecallService:
         >>> service = get_default_service()
         >>> results = service.search("authentication")
     """
-    global _default_service
-    if _default_service is None:
-        _default_service = RecallService()
-    return _default_service
+    from git_notes_memory.registry import ServiceRegistry
+
+    return ServiceRegistry.get(RecallService)
