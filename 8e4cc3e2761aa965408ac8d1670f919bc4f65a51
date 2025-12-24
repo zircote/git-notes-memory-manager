@@ -103,3 +103,20 @@ tags:
 ---
 
 The background task completed - it found the legacy global data directory at `~/.local/share/memory-plugin/` which contains...
+
+---
+type: progress
+timestamp: '2025-12-24T16:44:32.412914+00:00'
+summary: '...lacks enforcement mechanisms. I''ll add:
+
+  1. **Frequency requirements** - blocks after EVERY co...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...lacks enforcement mechanisms. I'll add:
+
+1. **Frequency requirements** - blocks after EVERY completed task
+2. **Self-audit checkpoints** - periodic verification
+3. **Visible accountability** -...
