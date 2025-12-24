@@ -29,3 +29,22 @@ tags:
 | LOW-002 | WHERE 1=1 pattern (cosmetic) | index.py |
 | LOW-003 | No connection pooling | index.py |
 | LOW-004 | SQL placeholder...
+
+---
+type: patterns
+timestamp: '2025-12-24T20:03:47.641314+00:00'
+summary: '...Backlog)'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...Backlog)
+
+### Database
+
+- [ ] Document vector search over-fetching behavior - LOW-001
+- [ ] WHERE 1=1 pattern (cosmetic, no action) - LOW-002
+- [ ] Document connection pooling for high concurrency - LOW-003
+-...
