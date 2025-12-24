@@ -6,3 +6,14 @@ summary: The background task completed - it found the legacy global data directo
 ---
 
 The background task completed - it found the legacy global data directory at `~/.local/share/memory-plugin/` which contains...
+
+---
+type: progress
+timestamp: '2025-12-24T16:27:05.182990+00:00'
+summary: '...`memory.db` file (probably from an earlier version before the schema
+  was called `index.db`).'
+---
+
+...`memory.db` file (probably from an earlier version before the schema was called `index.db`).
+
+**The fix is complete.** Both `commands/status.md` and `commands/validate.md` now correctly use `get_project_index...
