@@ -122,3 +122,21 @@ Why this decision was needed.
 
 ## Related Files
 - path/to/file.py:10-25
+
+---
+type: decisions
+timestamp: '2025-12-24T16:36:35.152222+00:00'
+summary: '...to/file.py:10-25'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...to/file.py:10-25
+────────────────────────────────────────────────
+```
+
+**Inline markers (RARE):**
+- `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+- `[research]`, `[review]`, `[retro]`,...
