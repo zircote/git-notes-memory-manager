@@ -36,3 +36,20 @@ tags:
 - `[pattern] Reusable approach`
 
 **INLINE MARKERS DO NOT REPLACE BLOCKS.**...
+
+---
+type: progress
+timestamp: '2025-12-24T16:35:29.891631+00:00'
+summary: '...`blocker`, `progress`, `pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`blocker`, `progress`, `pattern`
+
+**Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Memory commands:** `/memory:recall <id>`, `/memory:search <query>`
+]]></marker_reference...
