@@ -92,3 +92,14 @@ summary: '...better:'
 **The UserPromptSubmit hook detects markers in YOUR messages, not MINE.**
 
 When you write `[decision] something` or `[learned] something` in your prompts, it gets detected. But the `▶ progress...
+
+---
+type: decisions
+timestamp: '2025-12-24T16:31:22.491547+00:00'
+summary: '...**UserPromptSubmit hook** (real-time): Detects markers in YOUR messages
+  (e.g., when you type `[de'
+---
+
+...**UserPromptSubmit hook** (real-time): Detects markers in YOUR messages (e.g., when you type `[decision] something`)
+
+2. **Stop hook** (session end): Analyzes the full transcript including MY messages...
