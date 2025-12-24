@@ -48,8 +48,6 @@ def reset_hook_loggers() -> Iterator[None]:
     Also clears handlers from the underlying Python loggers to prevent
     cross-test pollution from the global logging.Logger cache.
     """
-    import logging
-
     from git_notes_memory.hooks import hook_utils
 
     def _clear_hook_loggers() -> None:
