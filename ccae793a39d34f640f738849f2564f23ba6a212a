@@ -101,3 +101,24 @@ Evaluating between session-based auth and token-based auth.
 - src/auth/jwt_handler.py:1-50
 - src/middleware/auth.py:25-80
 - tests/test_auth.py:10-100
+
+---
+type: decisions
+timestamp: '2025-12-24T16:36:35.096867+00:00'
+summary: Summary of decision
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+Summary of decision
+## Context
+Why this decision was needed.
+
+## Rationale
+- Reason 1
+- Reason 2
+
+## Related Files
+- path/to/file.py:10-25
