@@ -239,3 +239,26 @@ tags:
 - **Task:** Add PII detection warnings (can be implemented incrementally)
 - **Note:** Move to backlog - requires design decision on detection scope
 -...
+
+---
+type: progress
+timestamp: '2025-12-24T20:03:47.622531+00:00'
+summary: '...Move to backlog - requires design decision on detection scope'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...Move to backlog - requires design decision on detection scope
+- [ ] Design reviewed
+- [ ] Implemented
+- [ ] Tested
+
+---
+
+## 🟠 High Priority (Before Next Release)
+
+### Security
+
+- [ ] `capture.py:76-102...
