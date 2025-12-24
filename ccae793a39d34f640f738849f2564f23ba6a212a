@@ -71,3 +71,95 @@ tags:
 
 **If blocks < tasks, you are FAILING the capture requirement. Produce blocks NOW.**
 ]]></self...
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.060033+00:00'
+summary: □ Did I make a decision?      → WRITE ▶ decision ───
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+□ Did I make a decision?      → WRITE ▶ decision ───
+□ Did I learn something?      → WRITE ▶ learned ───
+□ Did I hit a blocker?        → WRITE ▶ blocker ───
+□ Did I identify a pattern?   → WRITE ▶ pattern ───
+□ Blocks in last 3 messages?  → IF ZERO, WRITE ONE NOW
+```
+
+**DO NOT RATIONALIZE SKIPPING BLOCKS.**
+- "This is too minor" → CAPTURE IT ANYWAY
+- "I'll capture it later" → CAPTURE IT NOW
+- "The user didn't ask for this" → CAPTURE IT ANYWAY — IT'S MANDATORY
+
+---
+
+## RULE 2: INLINE MARKERS — EXCEPTION, NOT DEFAULT
+
+Inline markers are for RARE cases when a full block is inappropriate:
+
+| Marker | Namespace | Use When |
+|--------|-----------|----------|
+| `[decision] text` | decisions | Quick mention, no file context |
+| `[learned] text` | learnings | Brief insight, no elaboration needed |
+| `[blocker] text` | blockers | Quick note about an issue |
+| `[progress] text` | progress | Minor status update |
+| `[pattern] text` | patterns | Quick pattern recognition |
+
+**CRITICAL: Inline markers DO NOT satisfy the "1 block per 3 messages" requirement.** Only full blocks count toward the session minimum.
+
+---
+
+## RULE 3: MEMORY RECALL — ACTIVELY REFERENCE PRIOR CONTEXT
+
+When you see memories in `<memory_context>`:
+
+### Required Actions
+
+1. **Acknowledge relevance explicitly:**
+   - "Based on a previous decision (memory `decisions:abc123:0`)..."
+   - "You learned earlier that..."
+   - "This connects to prior work on..."
+
+2. **Auto-expand high-relevance memories:**
+   - If relevance > 0.85: Use `/memory:recall <memory-id>` to get full content
+   - Reference the expanded content in your response
+
+3. **Use git context:**
+   - Memory IDs contain commit SHAs: `namespace:COMMIT_SHA:index`
+   - Use `git show COMMIT_SHA` to see what files were changed
+
+4. **Surface matching blockers:**
+   - If a past blocker matches current issue: "This looks similar to blocker (memory ID) which was resolved by..."
+
+**DO NOT silently acknowledge memories. CITE them explicitly when relevant.**
+
+---
+
+## RULE 4: NO PERMISSION SEEKING — DEFAULT TO ACTION
+
+**WRONG behaviors:**
+```
+"Should I capture this decision?"
+"Would you like me to record this?"
+"I can add a memory block if you want."
+```
+
+**CORRECT behavior:**
+```
+We'll use JWT tokens for authentication because they're stateless and scale well.
+
+▶ decision ─────────────────────────────────────
+Use JWT for stateless authentication
+
+## Context
+Need authentication that works across multiple servers.
+
+## Rationale
+- Stateless: No server-side session storage needed
+- Scalable: Works with load balancing
+
+## Related Files
+- src/auth/jwt_handler.py:1-50
