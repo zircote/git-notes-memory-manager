@@ -37,3 +37,15 @@ The `/memory:status` command was reporting 0 memories because it used `get_index
 - commands/status.md:74,117
 - src/git_notes_memory/config.py:185-193 (get_index_path)
 - src/git_notes_memory/config.py:344-365 (get_project_index_path)
+
+---
+type: decisions
+timestamp: '2025-12-24T16:29:17.612443+00:00'
+summary: '...better:'
+---
+
+...better:
+
+**The UserPromptSubmit hook detects markers in YOUR messages, not MINE.**
+
+When you write `[decision] something` or `[learned] something` in your prompts, it gets detected. But the `▶ progress...
