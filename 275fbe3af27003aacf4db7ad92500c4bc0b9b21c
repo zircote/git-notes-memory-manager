@@ -1,0 +1,159 @@
+---
+type: decisions
+timestamp: '2025-12-24T16:33:25.364902+00:00'
+summary: '...better:'
+---
+
+...better:
+
+**The UserPromptSubmit hook detects markers in YOUR messages, not MINE.**
+
+When you write `[decision] something` or `[learned] something` in your prompts, it gets detected. But the `▶ progress...
+
+---
+type: decisions
+timestamp: '2025-12-24T16:33:25.395509+00:00'
+summary: '...**UserPromptSubmit hook** (real-time): Detects markers in YOUR messages
+  (e.g., when you type `[de'
+---
+
+...**UserPromptSubmit hook** (real-time): Detects markers in YOUR messages (e.g., when you type `[decision] something`)
+
+2. **Stop hook** (session end): Analyzes the full transcript including MY messages...
+
+---
+type: decisions
+timestamp: '2025-12-24T16:33:25.414121+00:00'
+summary: Fix status command to use project-specific index path
+---
+
+Fix status command to use project-specific index path
+## Context
+The `/memory:status` command was reporting 0 memories because it used `get_index_path()` (global legacy path) instead of `get_project_index_path()` (current project-specific path).
+
+## Rationale
+- Per-project isolation was added to store indexes in `<git-root>/.memory/index.db`
+- The status command wasn't updated to use this new path
+- All memories (352) are safe in the project index
+
+## Related Files
+- commands/status.md:74,117
+- src/git_notes_memory/config.py:185-193 (get_index_path)
+- src/git_notes_memory/config.py:344-365 (get_project_index_path)
+
+---
+type: decisions
+timestamp: '2025-12-24T16:35:29.726892+00:00'
+summary: '...MARKERS FOR QUICK NOTES ONLY'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...MARKERS FOR QUICK NOTES ONLY
+
+When a full block is not warranted (rare), use inline markers:
+
+- `[decision] Brief decision and why`
+- `[learned] The insight`
+- `[blocker] What blocks progress`
+- `[progress]...
+
+---
+type: decisions
+timestamp: '2025-12-24T16:35:29.837148+00:00'
+summary: '...namespaces:** `decision`, `learned`, `blocker`, `progress`, `pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...namespaces:** `decision`, `learned`, `blocker`, `progress`, `pattern`
+
+**Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Memory commands:** `/memory:recall...
+
+---
+type: decisions
+timestamp: '2025-12-24T16:36:35.042261+00:00'
+summary: Use JWT for stateless authentication
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+Use JWT for stateless authentication
+## Context
+Need authentication that works across multiple servers without session sharing.
+Evaluating between session-based auth and token-based auth.
+
+## Rationale
+- Stateless: No server-side session storage needed
+- Scalable: Works with load balancing out of the box
+- Team expertise: Backend team has JWT experience
+- Trade-off: Slightly larger request payload
+
+## Related Files
+- src/auth/jwt_handler.py:1-50
+- src/middleware/auth.py:25-80
+- tests/test_auth.py:10-100
+
+---
+type: decisions
+timestamp: '2025-12-24T16:36:35.096867+00:00'
+summary: Summary of decision
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+Summary of decision
+## Context
+Why this decision was needed.
+
+## Rationale
+- Reason 1
+- Reason 2
+
+## Related Files
+- path/to/file.py:10-25
+
+---
+type: decisions
+timestamp: '2025-12-24T16:36:35.152222+00:00'
+summary: '...to/file.py:10-25'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...to/file.py:10-25
+────────────────────────────────────────────────
+```
+
+**Inline markers (RARE):**
+- `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+- `[research]`, `[review]`, `[retro]`,...
+
+---
+type: decisions
+timestamp: '2025-12-24T16:37:00.378442+00:00'
+summary: '...decision`, `▶ learned`, `▶ blocker`, `▶ progress`, `▶ pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...decision`, `▶ learned`, `▶ blocker`, `▶ progress`, `▶ pattern`
+
+**Quick markers (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Self-check before EACH response:**
+-...
