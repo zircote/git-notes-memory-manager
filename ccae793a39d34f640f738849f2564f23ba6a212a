@@ -1,0 +1,19 @@
+---
+type: blockers
+timestamp: '2025-12-24T16:35:29.763648+00:00'
+summary: '...(rare), use inline markers:'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...(rare), use inline markers:
+
+- `[decision] Brief decision and why`
+- `[learned] The insight`
+- `[blocker] What blocks progress`
+- `[progress] What was done`
+- `[pattern] Reusable approach`
+
+**INLINE...
