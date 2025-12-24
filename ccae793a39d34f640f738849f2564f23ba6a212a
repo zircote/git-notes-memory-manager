@@ -34,3 +34,20 @@ tags:
 
 **Memory commands:** `/memory:recall <id>`, `/memory:search <query>`
 ]...
+
+---
+type: blockers
+timestamp: '2025-12-24T16:36:35.189219+00:00'
+summary: '...─────────────────────────────────────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...─────────────────────────────────────
+```
+
+**Inline markers (RARE):**
+- `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+- `[research]`, `[review]`, `[retro]`, `[inception]`, `[requirement]`...
