@@ -262,3 +262,33 @@ tags:
 ### Security
 
 - [ ] `capture.py:76-102...
+
+---
+type: progress
+timestamp: '2025-12-24T20:06:32.101202+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed memory status display bug
+
+  ## Summary
+
+  Reso...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed memory status display bug
+## Summary
+Resolved the issue where `/memory:status` reported 0 memories despite 352 existing.
+
+## Changes Made
+- Fixed `commands/status.md`: Changed `get_index_path()` → `get_project_index_path()` (2 occurrences)
+- Fixed `commands/validate.md`: Changed `get_index_path()` → `get_project_index_path()` (2 occurrences)
+
+## Verification
+Status now correctly shows 352 memories in the project index.
+
+## Related Files
+- commands/status.md:71,74
+- commands/validate.md:128,181
