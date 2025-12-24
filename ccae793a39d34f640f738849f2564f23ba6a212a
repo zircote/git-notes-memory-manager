@@ -179,3 +179,21 @@ tags:
 
 ### Task Count Check
 - Tasks completed this session:...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:37:00.452519+00:00'
+summary: '...pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...pattern`
+
+**Quick markers (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Self-check before EACH response:**
+- Did I complete a task? → WRITE `▶ progress ───`
+-...
