@@ -169,3 +169,19 @@ Release completed successfully:
 - **Version**: 0.9.1
 - **All 1806 tests passed** with 88.93% coverage
 - **Quality...
+
+---
+type: progress
+timestamp: '2025-12-24T19:57:17.053605+00:00'
+summary: '...`memory.db` file (probably from an earlier version before the schema
+  was called `index.db`).
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`memory.db` file (probably from an earlier version before the schema was called `index.db`).
+
+**The fix is complete.** Both `commands/status.md` and `commands/validate.md` now correctly use `get_project_index...
