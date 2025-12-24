@@ -37,7 +37,7 @@ from git_notes_memory.exceptions import MemoryIndexError
 
 
 # PERF-007: Cache compiled struct format for embedding serialization
-@lru_cache(maxsize=8)
+@lru_cache(maxsize=1)
 def _get_struct_format(dimensions: int) -> struct.Struct:
     """Get a cached struct.Struct for packing embeddings.
 

@@ -65,20 +65,33 @@ class ServiceRegistry:
         Args:
             service_type: The service class to get an instance of.
             **kwargs: Keyword arguments to pass to the constructor
-                if creating a new instance.
+                if creating a new instance. If an instance already exists
+                for ``service_type``, providing ``kwargs`` will raise
+                a :class:`ValueError`.
 
         Returns:
             The singleton instance of the service.
+
+        Raises:
+            ValueError: If keyword arguments are provided for a service
+                type that already has a registered instance.
 
         Example::
 
             capture = ServiceRegistry.get(CaptureService)
             recall = ServiceRegistry.get(RecallService)
         """
-        if service_type not in cls._services:
-            cls._services[service_type] = service_type(**kwargs)
-            logger.debug("Created service instance: %s", service_type.__name__)
-        # Cast is safe: we just stored an instance of service_type
+        if service_type in cls._services:
+            if kwargs:
+                msg = (
+                    f"Service instance for {service_type.__name__} already exists; "
+                    "cannot pass constructor kwargs on subsequent get() calls."
+                )
+                raise ValueError(msg)
+            return cast(T, cls._services[service_type])
+
+        cls._services[service_type] = service_type(**kwargs)
+        logger.debug("Created service instance: %s", service_type.__name__)
         return cast(T, cls._services[service_type])
 
     @classmethod

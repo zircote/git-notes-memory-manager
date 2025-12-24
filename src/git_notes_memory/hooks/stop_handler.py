@@ -69,7 +69,9 @@ def _read_input_with_fallback() -> dict[str, Any]:
         return read_json_input()
     except ValueError as e:
         # Empty input is OK for stop hook
-        if "empty" in str(e).lower():
+        # Check for the specific error message from read_json_input
+        err_msg = str(e).lower()
+        if "empty input" in err_msg or "stdin" in err_msg and "empty" in err_msg:
             return {}
         raise
 

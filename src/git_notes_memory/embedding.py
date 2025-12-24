@@ -333,7 +333,9 @@ class EmbeddingService:
             self.load()
             return True
         except Exception as e:
-            logger.warning("Failed to pre-warm embedding model: %s", e)
+            # Use error level for prewarm failures - these indicate configuration
+            # issues (missing dependencies, permissions) that users should see
+            logger.error("Failed to pre-warm embedding model: %s", e, exc_info=True)
             return False
 
     def unload(self) -> None:

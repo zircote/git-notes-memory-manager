@@ -693,8 +693,8 @@ class RecallService:
 
         # PERF-006: Single-pass generator avoids loop variable overhead
         total_chars = sum(
-            len(m.summary or "")
-            + (len(m.content or "") if include_content else 0)
+            len(m.summary)
+            + (len(m.content) if include_content else 0)
             + 50  # Metadata overhead
             for m in memories
         )
