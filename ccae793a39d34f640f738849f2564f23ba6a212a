@@ -1,0 +1,20 @@
+---
+type: progress
+timestamp: '2025-12-24T16:35:29.712436+00:00'
+summary: One-line summary of what was done
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+One-line summary of what was done
+## Summary
+Brief description of the work completed.
+
+## Changes Made
+- Specific change 1
+- Specific change 2
+
+## Related Files
+- path/to/file.py:10-25
