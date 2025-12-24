@@ -91,3 +91,30 @@ Capture decisions, learnings, blockers, patterns, and significant progress. Skip
 - src/git_notes_memory/hooks/templates/guidance_standard.md
 - src/git_notes_memory/hooks/templates/guidance_detailed.md
 - src/git_notes_memory/hooks/templates/guidance_minimal.md
+
+---
+type: progress
+timestamp: '2025-12-24T19:57:16.848459+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Released version 0.9.1 with guidance template te...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Released version 0.9.1 with guidance template test fixes
+## Summary
+Fixed 8 failing tests in `test_guidance_builder.py` that were checking for content that changed when the guidance templates were rewritten. Successfully released version 0.9.1.
+
+## Changes Made
+- Updated assertions in `test_detailed_has_behavioral_examples` to accept "CORRECT behavior" or "**CORRECT**"
+- Updated `test_templates_have_namespaces` to check for "decision/learned/blocker" instead of "decisions/learnings/blockers"
+- Updated `test_build_minimal` to accept "MANDATORY" or "RULE" instead of "REQUIRED"
+- Updated `test_build_standard` to accept "RULE 1" or "Rule 1" (case flexible)
+- Updated `test_build_detailed` to accept "CORRECT/WRONG" and check for "ACCOUNTABILITY" or "FAILURE" sections
+- Updated token estimation tests with increased limits (500/1500/2500 vs 250/1000/1700)
+
+## Related Files
+- tests/test_guidance_builder.py:70-132 (test assertions updated)
+- tests/test_guidance_builder.py:198-227 (token estimation tests)
