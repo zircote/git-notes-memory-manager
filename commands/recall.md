@@ -4,6 +4,46 @@ argument-hint: "[query] [--namespace=ns] [--limit=n]"
 allowed-tools: ["Bash", "Read"]
 ---
 
+<help_check>
+## Help Check
+
+If `$ARGUMENTS` contains `--help` or `-h`:
+
+**Output this help and HALT (do not proceed further):**
+
+<help_output>
+```
+RECALL(1)                                            User Commands                                            RECALL(1)
+
+NAME
+    recall - Recall relevant memories for the current context or a s...
+
+SYNOPSIS
+    /memory:recall [query] [--namespace=ns] [--limit=n]
+
+DESCRIPTION
+    Recall relevant memories for the current context or a specific query
+
+OPTIONS
+    --help, -h                Show this help message
+
+EXAMPLES
+    /memory:recall
+    /memory:recall <query>
+    /memory:recall --help
+
+SEE ALSO
+    /memory:* for related commands
+
+                                                                      RECALL(1)
+```
+</help_output>
+
+**After outputting help, HALT immediately. Do not proceed with command execution.**
+</help_check>
+
+---
+
 # /memory:recall - Recall Relevant Memories
 
 Retrieve relevant memories from the git-backed memory system.
@@ -12,7 +52,7 @@ Retrieve relevant memories from the git-backed memory system.
 
 You will help the user recall memories relevant to their current context or query.
 
-### Step 1: Parse Arguments
+<step number="1" name="Parse Arguments">
 
 **Arguments format**: `$ARGUMENTS`
 
@@ -22,14 +62,18 @@ Parse the arguments:
 3. Everything else is the search query
 4. If no query provided, use recent conversation context
 
-### Step 2: Build Search Context
+</step>
+
+<step number="2" name="Build Search Context">
 
 If query is empty:
 - Extract key concepts from recent conversation (last 5-10 messages)
 - Look for: file names, function names, error messages, technology terms
 - Combine into a search query
 
-### Step 3: Execute Search
+</step>
+
+<step number="3" name="Execute Search">
 
 Use Bash to invoke the Python library:
 
@@ -62,7 +106,9 @@ Replace:
 - `$NAMESPACE` with `'$ns'` or `None`
 - `$LIMIT` with the limit number (default 5)
 
-### Step 4: Present Results
+</step>
+
+<step number="4" name="Present Results">
 
 Format the output as:
 
@@ -91,6 +137,8 @@ No relevant memories found for your query.
 - Use `/memory:search` for more options
 - Check `/memory:status` to verify memories exist
 ```
+
+</step>
 
 ## Namespace Reference
 
@@ -122,9 +170,19 @@ No relevant memories found for your query.
 After showing recalled memories, if the conversation reveals new insights worth preserving, remind the user:
 
 ```
-💡 **Capture tip**: If you discover something worth remembering, use:
+**Capture tip**: If you discover something worth remembering, use:
 - `[remember] <insight>` - Inline capture of learnings
 - `/memory:capture <namespace> <content>` - Explicit capture with namespace
 ```
 
 Consider whether the current context or findings should be captured for future recall.
+
+## Related Commands
+
+| Command | Description |
+|---------|-------------|
+| `/memory:capture` | Capture a new memory to the system |
+| `/memory:search` | Advanced search with type and filter options |
+| `/memory:status` | View memory counts and index health |
+| `/memory:sync` | Synchronize index if memories seem stale |
+| `/memory:validate` | Validate the memory system is working |

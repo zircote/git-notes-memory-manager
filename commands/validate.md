@@ -4,6 +4,46 @@ argument-hint: "[--verbose] [--fix]"
 allowed-tools: ["Bash", "Read"]
 ---
 
+<help_check>
+## Help Check
+
+If `$ARGUMENTS` contains `--help` or `-h`:
+
+**Output this help and HALT (do not proceed further):**
+
+<help_output>
+```
+VALIDATE(1)                                          User Commands                                          VALIDATE(1)
+
+NAME
+    validate - Validate memory system hooks, capture pipeline, and rec...
+
+SYNOPSIS
+    /memory:validate [--verbose] [--fix]
+
+DESCRIPTION
+    Validate memory system hooks, capture pipeline, and recall functionality
+
+OPTIONS
+    --help, -h                Show this help message
+
+EXAMPLES
+    /memory:validate
+    /memory:validate <--verbose>
+    /memory:validate --help
+
+SEE ALSO
+    /memory:* for related commands
+
+                                                                      VALIDATE(1)
+```
+</help_output>
+
+**After outputting help, HALT immediately. Do not proceed with command execution.**
+</help_check>
+
+---
+
 # /memory:validate - Memory System Validation
 
 Run comprehensive validation of the memory plugin, including all hooks and the capture/recall pipeline.
@@ -12,14 +52,16 @@ Run comprehensive validation of the memory plugin, including all hooks and the c
 
 You will validate that the memory system is functioning correctly by testing all components.
 
-### Step 1: Parse Arguments
+<step number="1" name="Parse Arguments">
 
 **Arguments format**: `$ARGUMENTS`
 
 - `--verbose`: Show detailed output for each test
 - `--fix`: Attempt to fix issues found (e.g., repair index, sync after capture)
 
-### Step 2: Run Validation Suite
+</step>
+
+<step number="2" name="Run Validation Suite">
 
 Execute the validation script:
 
@@ -408,7 +450,9 @@ else:
 VALIDATION_SCRIPT
 ```
 
-### Step 3: Present Results
+</step>
+
+<step number="3" name="Present Results">
 
 The validation script outputs a formatted report with test results.
 
@@ -429,6 +473,8 @@ Review the failed tests above. Common fixes:
 - "Index consistency" warning: Run `/memory:sync repair` or use `--fix`
 - "Hook entry point" failed: Check plugin installation
 ```
+
+</step>
 
 ## Validation Tests
 
@@ -467,3 +513,13 @@ If validation fails, common remediation steps:
 | Hook file missing | Reinstall plugin |
 | Capture failed | Check git permissions, disk space |
 | Search failed | Use `--fix` to sync before search, or run `/memory:sync` |
+
+## Related Commands
+
+| Command | Description |
+|---------|-------------|
+| `/memory:status` | Quick status check without full validation |
+| `/memory:sync` | Synchronize or repair the index |
+| `/memory:sync repair` | Fix index inconsistencies |
+| `/memory:capture` | Test capture manually |
+| `/memory:recall` | Test recall manually |
