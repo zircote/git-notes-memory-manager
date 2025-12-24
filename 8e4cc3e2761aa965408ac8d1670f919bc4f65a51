@@ -91,3 +91,15 @@ Capture decisions, learnings, blockers, patterns, and significant progress. Skip
 - src/git_notes_memory/hooks/templates/guidance_standard.md
 - src/git_notes_memory/hooks/templates/guidance_detailed.md
 - src/git_notes_memory/hooks/templates/guidance_minimal.md
+
+---
+type: progress
+timestamp: '2025-12-24T16:44:32.371435+00:00'
+summary: The background task completed - it found the legacy global data directory
+  at `~/.local/share/memo...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The background task completed - it found the legacy global data directory at `~/.local/share/memory-plugin/` which contains...
