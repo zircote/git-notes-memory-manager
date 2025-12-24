@@ -223,3 +223,21 @@ GitHub issue #14803 confirms this is a known bug affecting versions 2.0.69+. The
 
 ## Related Files
 - .claude/settings.local.json (our attempt was correct but blocked by bug)
+
+---
+type: learnings
+timestamp: '2025-12-24T04:40:40.212446+00:00'
+summary: LSP tool is functional but requires language server configuration
+---
+
+LSP tool is functional but requires language server configuration
+## Context
+Testing LSP tool in git-notes-memory-manager project to verify if race condition bug is resolved.
+
+## Finding
+- Tool responds correctly (no timeout/crash)
+- Returns "No LSP server available for file type: .py"
+- Previous blocker about race condition may be resolved, but server config needed
+
+## Related Files
+- .claude/hooks.json (references LSP but may not configure server)
