@@ -59,3 +59,35 @@ ccae793 fix: use project-specific index path in status and validate commands
 ## Related Files
 - commands/status.md
 - commands/validate.md
+
+---
+type: progress
+timestamp: '2025-12-24T19:57:16.810428+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Strengthened memory block guidance templates wit...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Strengthened memory block guidance templates with balanced approach
+## Summary
+Enhanced all three guidance templates (minimal, standard, detailed) to ensure consistent memory block production while avoiding noise from trivial operations.
+
+## Changes Made
+- Added "CRITICAL BEHAVIORAL OVERRIDE" framing for emphasis
+- Added self-check protocol with explicit checklist
+- Added failure modes section showing common mistakes
+- Added accountability framework with session metrics
+- **Balanced the requirements**: capture meaningful work, skip routine commands
+- Changed from rigid "1 per 3 messages" to "1 per 3-5 substantive messages"
+- Removed overly aggressive "blocks < tasks = FAILING" language
+
+## Key Principle
+Capture decisions, learnings, blockers, patterns, and significant progress. Skip simple git commands, confirmations, and trivial operations.
+
+## Related Files
+- src/git_notes_memory/hooks/templates/guidance_standard.md
+- src/git_notes_memory/hooks/templates/guidance_detailed.md
+- src/git_notes_memory/hooks/templates/guidance_minimal.md
