@@ -63,3 +63,21 @@ tags:
 `★ Insight ─────────────────────────────────────`
 The code shows a well-designed service layer pattern with:
 1. **File locking with fcntl** - Currently uses blocking `LOCK_EX` which is the critical...
+
+---
+type: patterns
+timestamp: '2025-12-24T20:08:33.446196+00:00'
+summary: '...with any provided kwargs.'
+tags:
+- auto-captured
+- post-tool-use
+- file:registry.py
+---
+
+...with any provided kwargs.
+
+        Thread Safety:
+            Uses double-checked locking pattern for efficient thread-safe
+            singleton creation (HIGH-012 fix).
+
+        Args:...
