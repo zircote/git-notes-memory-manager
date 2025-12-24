@@ -297,3 +297,23 @@ Testing LSP tool in git-notes-memory-manager project to verify if race condition
 
 ## Related Files
 - .claude/hooks.json (references LSP but may not configure server)
+
+---
+type: learnings
+timestamp: '2025-12-24T04:47:51.901081+00:00'
+summary: LSP tool failure is race condition bug in Claude Code 2.0.69+
+---
+
+LSP tool failure is race condition bug in Claude Code 2.0.69+
+## Root Cause
+LSP Manager initializes ~52ms before plugins load, so it never discovers the pyright configuration.
+
+## Your setup is correct
+- `ENABLE_LSP_TOOL=1` ✓
+- `pyright@claude-code-lsps` enabled ✓
+- `pyright-langserver` installed ✓
+
+## Fixes
+1. **Downgrade to 2.0.67** (reliable)
+2. **Apply patch**: `npx tweakcc --apply`
+3. **Wait** for Anthropic fix (issue #13952)
