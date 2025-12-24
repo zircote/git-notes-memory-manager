@@ -30,6 +30,10 @@ __all__ = ["SignalDetector", "SIGNAL_PATTERNS"]
 
 logger = logging.getLogger(__name__)
 
+# SEC-001: Maximum text length for signal detection to prevent ReDoS attacks
+# 100KB is generous for user prompts while preventing abuse
+MAX_TEXT_LENGTH = 100 * 1024
+
 # Pattern definitions by signal type
 # Each pattern is a tuple of (regex_string, base_confidence)
 # Higher base_confidence indicates a stronger signal
@@ -272,8 +276,6 @@ class SignalDetector:
             return []
 
         # SEC-001: Limit input length to prevent ReDoS attacks
-        # 100KB is generous for user prompts while preventing abuse
-        MAX_TEXT_LENGTH = 100 * 1024  # 100KB
         if len(text) > MAX_TEXT_LENGTH:
             logger.warning(
                 "Input text length %d exceeds maximum %d, truncating for safety",

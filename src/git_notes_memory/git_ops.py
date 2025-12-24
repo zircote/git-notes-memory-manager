@@ -160,10 +160,33 @@ class GitOps:
                     "Repository has no commits",
                     "Create at least one commit: git commit --allow-empty -m 'initial'",
                 ) from e
-            # Sanitize the args to remove full paths
-            sanitized_args = [
-                arg if not arg.startswith("/") else "<path>" for arg in args
-            ]
+
+            # SEC-002: Sanitize arguments to avoid leaking filesystem paths.
+            # Handles POSIX/Windows absolute paths, home-relative, and traversals.
+            def _looks_like_path(arg: str) -> bool:
+                if not arg:
+                    return False
+                # POSIX absolute paths
+                if arg.startswith("/"):
+                    return True
+                # Windows absolute paths (e.g., C:\path or D:/path)
+                if len(arg) >= 3 and arg[1] == ":" and arg[2] in ("/", "\\"):
+                    return True
+                # Home-relative paths
+                if arg.startswith("~"):
+                    return True
+                # Relative traversal paths
+                return bool(arg.startswith(".."))
+
+            repo_path_str = str(self.repo_path)
+            sanitized_args: list[str] = []
+            for arg in args:
+                if arg == repo_path_str:
+                    sanitized_args.append("<repo_path>")
+                elif _looks_like_path(arg):
+                    sanitized_args.append("<path>")
+                else:
+                    sanitized_args.append(arg)
             raise StorageError(
                 f"Git command failed: {' '.join(sanitized_args)}\n{stderr}",
                 "Check git status and try again",
@@ -389,13 +412,15 @@ class GitOps:
             line = lines[i]
             current_sha = commit_shas[sha_index]
 
-            if "missing" in line:
+            # Check for missing object (format: "<ref> missing")
+            header_parts = line.split()
+            if len(header_parts) == 2 and header_parts[1] == "missing":
                 results[current_sha] = None
                 i += 1
                 sha_index += 1
             elif line and not line.startswith(" "):
                 # Header line: <object_sha> <type> <size>
-                parts = line.split()
+                parts = header_parts
                 if len(parts) >= 3:
                     try:
                         size = int(parts[2])
@@ -415,6 +440,9 @@ class GitOps:
                         sha_index += 1
                         i += 1
                 else:
+                    # Malformed header; treat as missing for current SHA
+                    results[current_sha] = None
+                    sha_index += 1
                     i += 1
             else:
                 i += 1
