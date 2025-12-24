@@ -173,3 +173,13 @@ summary: 'All four parallel exploration agents have completed. Let me now use LS
 ---
 
 All four parallel exploration agents have completed. Let me now use LSP to verify key architectural points and add deeper insights, then synthesize...
+
+---
+type: progress
+timestamp: '2025-12-24T04:31:47.785286+00:00'
+summary: '...**proactive** navigation (jump to definition before editing). Your hooks
+  are the best available w'
+---
+
+...**proactive** navigation (jump to definition before editing). Your hooks are the best available workaround until LSP becomes a documented feature.
+`─────────────────────────────────────────────────`
