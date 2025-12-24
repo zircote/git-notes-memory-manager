@@ -224,3 +224,18 @@ tags:
 
 ### CRIT-003: No PII Detection (Deferred to Backlog)
 - **File:**...
+
+---
+type: progress
+timestamp: '2025-12-24T20:03:47.604325+00:00'
+summary: '...**File:** `src/git_notes_memory/capture.py:329-380`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...**File:** `src/git_notes_memory/capture.py:329-380`
+- **Task:** Add PII detection warnings (can be implemented incrementally)
+- **Note:** Move to backlog - requires design decision on detection scope
+-...
