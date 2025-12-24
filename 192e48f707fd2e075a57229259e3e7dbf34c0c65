@@ -417,3 +417,15 @@ Successfully deployed 11 specialist agents and synthesized 60 findings across Se
 - docs/code-review/2025/12/24/CODE_REVIEW.md
 - docs/code-review/2025/12/24/REVIEW_SUMMARY.md
 - docs/code-review/2025/12/24/REMEDIATION_TASKS.md
+
+---
+type: progress
+timestamp: '2025-12-24T20:06:32.346445+00:00'
+summary: The background task completed - it found the legacy global data directory
+  at `~/.local/share/memo...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The background task completed - it found the legacy global data directory at `~/.local/share/memory-plugin/` which contains...
