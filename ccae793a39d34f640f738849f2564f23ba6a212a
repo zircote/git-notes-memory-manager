@@ -240,3 +240,20 @@ tags:
 - Things learned this session: ___
 
 ###...
+
+---
+type: progress
+timestamp: '2025-12-24T16:37:00.340028+00:00'
+summary: '...![CDATA['
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...![CDATA[
+# MANDATORY: Memory Block Production
+
+**RULE: Produce `▶ namespace ───` blocks after EVERY completed task. This is not optional.**
+
+**Minimum:** 1 block per 3 messages. If you haven't written...
