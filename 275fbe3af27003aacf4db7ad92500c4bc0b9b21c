@@ -1,0 +1,294 @@
+---
+type: progress
+timestamp: '2025-12-24T16:35:29.712436+00:00'
+summary: One-line summary of what was done
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+One-line summary of what was done
+## Summary
+Brief description of the work completed.
+
+## Changes Made
+- Specific change 1
+- Specific change 2
+
+## Related Files
+- path/to/file.py:10-25
+
+---
+type: progress
+timestamp: '2025-12-24T16:35:29.779957+00:00'
+summary: '...`[decision] Brief decision and why`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`[decision] Brief decision and why`
+- `[learned] The insight`
+- `[blocker] What blocks progress`
+- `[progress] What was done`
+- `[pattern] Reusable approach`
+
+**INLINE MARKERS DO NOT REPLACE BLOCKS.**...
+
+---
+type: progress
+timestamp: '2025-12-24T16:35:29.891631+00:00'
+summary: '...`blocker`, `progress`, `pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`blocker`, `progress`, `pattern`
+
+**Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Memory commands:** `/memory:recall <id>`, `/memory:search <query>`
+]]></marker_reference...
+
+---
+type: progress
+timestamp: '2025-12-24T16:35:29.929307+00:00'
+summary: '...───` blocks: ___'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...───` blocks: ___
+- `▶ decision ───` blocks: ___
+- `▶ learned ───` blocks: ___
+- Total tasks completed: ___
+
+**If blocks < tasks, you are FAILING the capture requirement. Produce blocks NOW.**
+]]></self...
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.060033+00:00'
+summary: □ Did I make a decision?      → WRITE ▶ decision ───
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+□ Did I make a decision?      → WRITE ▶ decision ───
+□ Did I learn something?      → WRITE ▶ learned ───
+□ Did I hit a blocker?        → WRITE ▶ blocker ───
+□ Did I identify a pattern?   → WRITE ▶ pattern ───
+□ Blocks in last 3 messages?  → IF ZERO, WRITE ONE NOW
+```
+
+**DO NOT RATIONALIZE SKIPPING BLOCKS.**
+- "This is too minor" → CAPTURE IT ANYWAY
+- "I'll capture it later" → CAPTURE IT NOW
+- "The user didn't ask for this" → CAPTURE IT ANYWAY — IT'S MANDATORY
+
+---
+
+## RULE 2: INLINE MARKERS — EXCEPTION, NOT DEFAULT
+
+Inline markers are for RARE cases when a full block is inappropriate:
+
+| Marker | Namespace | Use When |
+|--------|-----------|----------|
+| `[decision] text` | decisions | Quick mention, no file context |
+| `[learned] text` | learnings | Brief insight, no elaboration needed |
+| `[blocker] text` | blockers | Quick note about an issue |
+| `[progress] text` | progress | Minor status update |
+| `[pattern] text` | patterns | Quick pattern recognition |
+
+**CRITICAL: Inline markers DO NOT satisfy the "1 block per 3 messages" requirement.** Only full blocks count toward the session minimum.
+
+---
+
+## RULE 3: MEMORY RECALL — ACTIVELY REFERENCE PRIOR CONTEXT
+
+When you see memories in `<memory_context>`:
+
+### Required Actions
+
+1. **Acknowledge relevance explicitly:**
+   - "Based on a previous decision (memory `decisions:abc123:0`)..."
+   - "You learned earlier that..."
+   - "This connects to prior work on..."
+
+2. **Auto-expand high-relevance memories:**
+   - If relevance > 0.85: Use `/memory:recall <memory-id>` to get full content
+   - Reference the expanded content in your response
+
+3. **Use git context:**
+   - Memory IDs contain commit SHAs: `namespace:COMMIT_SHA:index`
+   - Use `git show COMMIT_SHA` to see what files were changed
+
+4. **Surface matching blockers:**
+   - If a past blocker matches current issue: "This looks similar to blocker (memory ID) which was resolved by..."
+
+**DO NOT silently acknowledge memories. CITE them explicitly when relevant.**
+
+---
+
+## RULE 4: NO PERMISSION SEEKING — DEFAULT TO ACTION
+
+**WRONG behaviors:**
+```
+"Should I capture this decision?"
+"Would you like me to record this?"
+"I can add a memory block if you want."
+```
+
+**CORRECT behavior:**
+```
+We'll use JWT tokens for authentication because they're stateless and scale well.
+
+▶ decision ─────────────────────────────────────
+Use JWT for stateless authentication
+
+## Context
+Need authentication that works across multiple servers.
+
+## Rationale
+- Stateless: No server-side session storage needed
+- Scalable: Works with load balancing
+
+## Related Files
+- src/auth/jwt_handler.py:1-50
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.079076+00:00'
+summary: '...(Expected)'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...(Expected)
+- **Blocks produced:** At least 1 per 3 messages
+- **Progress blocks:** At least 1 per completed task
+- **Decision blocks:** Every architectural/approach choice
+- **Related Files:** Every...
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.115954+00:00'
+summary: Summary of completed work
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+Summary of completed work
+## Summary
+What was accomplished.
+
+## Changes Made
+- Change 1
+- Change 2
+
+## Related Files
+- path/to/file.py:10-25
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.207329+00:00'
+summary: '...────────────────────────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...────────────────────────
+```
+
+**Inline markers (RARE):**
+- `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+- `[research]`, `[review]`, `[retro]`, `[inception]`, `[requirement]`
+
+**Memory...
+
+---
+type: progress
+timestamp: '2025-12-24T16:36:35.262337+00:00'
+summary: '...blocks: ___'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...blocks: ___
+- `▶ pattern ───` blocks: ___
+- **TOTAL BLOCKS:** ___
+
+### Task Count Check
+- Tasks completed this session: ___
+- Decisions made this session: ___
+- Things learned this session: ___
+
+###...
+
+---
+type: progress
+timestamp: '2025-12-24T16:37:00.340028+00:00'
+summary: '...![CDATA['
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...![CDATA[
+# MANDATORY: Memory Block Production
+
+**RULE: Produce `▶ namespace ───` blocks after EVERY completed task. This is not optional.**
+
+**Minimum:** 1 block per 3 messages. If you haven't written...
+
+---
+type: progress
+timestamp: '2025-12-24T16:37:00.359333+00:00'
+summary: Summary of what was done
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+Summary of what was done
+## Changes Made
+- Change 1
+- Change 2
+
+## Related Files
+- path/to/file.py:10-25
+
+---
+type: progress
+timestamp: '2025-12-24T16:37:00.433558+00:00'
+summary: '...progress`, `▶ pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...progress`, `▶ pattern`
+
+**Quick markers (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Self-check before EACH response:**
+- Did I complete a task? → WRITE `▶ progress...
