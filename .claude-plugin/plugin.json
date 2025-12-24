@@ -1,6 +1,6 @@
 {
   "name": "memory-capture",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Git-backed memory system for Claude Code. Captures decisions, learnings, and context as git notes with semantic search and automatic recall.",
   "author": {
     "name": "Robert Allen",
