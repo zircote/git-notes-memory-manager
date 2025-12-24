@@ -240,3 +240,14 @@ Done! The guidance now strikes a balance between:
 - **Flexible enough** to avoid creating noise from trivial operations
 
 Would...
+
+---
+type: learnings
+timestamp: '2025-12-24T20:11:05.550645+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
