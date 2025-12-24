@@ -95,3 +95,18 @@ tags:
 | **When identifying a pattern** | `▶ pattern ───` | Every pattern | Reusable approach, best practice |
 
 **SESSION MINIMUM: At least 1 block...
+
+---
+type: patterns
+timestamp: '2025-12-24T16:36:34.985904+00:00'
+summary: '...Stuck, need help, can''t proceed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...Stuck, need help, can't proceed |
+| **When identifying a pattern** | `▶ pattern ───` | Every pattern | Reusable approach, best practice |
+
+**SESSION MINIMUM: At least 1 block per 3 assistant messages....
