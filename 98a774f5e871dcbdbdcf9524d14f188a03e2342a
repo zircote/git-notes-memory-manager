@@ -194,3 +194,28 @@ You're right. The LSP feature shipped with:
 
 - A race condition that makes it non-functional for plugin-based LSP servers
 - No clear...
+
+---
+type: progress
+timestamp: '2025-12-24T04:55:10.389842+00:00'
+summary: LSP tool is now fully functional - race condition bug resolved
+---
+
+LSP tool is now fully functional - race condition bug resolved
+## Test Results
+All LSP operations completed successfully:
+
+| Operation | Result |
+|-----------|--------|
+| `documentSymbol` | ✓ Returned 70+ symbols from capture.py |
+| `goToDefinition` | ✓ Navigated to CaptureService class definition |
+| `hover` | ✓ Displayed full type signature and docstring for `capture()` method |
+| `findReferences` | ✓ Found 15 references across 7 files for `get_default_service` |
+
+## Context
+The previous blocker (memory `blockers:98a774f:3`) noted LSP was unavailable due to a race condition in Claude Code v2.0.76. This appears to be fixed now.
+
+## Related Files
+- src/git_notes_memory/capture.py:176 (CaptureService definition)
+- src/git_notes_memory/capture.py:260 (capture method)
+- src/git_notes_memory/capture.py:908 (get_default_service)
