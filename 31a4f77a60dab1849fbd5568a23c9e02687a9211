@@ -69,3 +69,13 @@ summary: Now I understand! The index is stored in `<git-root>/.memory/index.db`,
 ---
 
 Now I understand! The index is stored in `<git-root>/.memory/index.db`, not in `~/.local/share/memory-plugin/`....
+
+---
+type: learnings
+timestamp: '2025-12-24T16:29:17.633473+00:00'
+summary: '...hook detects markers in YOUR messages, not MINE.**'
+---
+
+...hook detects markers in YOUR messages, not MINE.**
+
+When you write `[decision] something` or `[learned] something` in your prompts, it gets detected. But the `▶ progress ───` blocks I write in my...
