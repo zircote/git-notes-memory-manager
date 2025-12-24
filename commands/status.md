@@ -68,10 +68,10 @@ PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-mem
 uv run --directory "$PLUGIN_ROOT" python3 -c "
 from git_notes_memory import get_sync_service
 from git_notes_memory.index import IndexService
-from git_notes_memory.config import get_embedding_model, get_index_path, get_data_path
+from git_notes_memory.config import get_embedding_model, get_project_index_path, get_data_path
 
 sync = get_sync_service()
-index_path = get_index_path()
+index_path = get_project_index_path()
 
 print('## Memory System Status\n')
 print('| Metric | Value |')
@@ -109,10 +109,10 @@ uv run --directory "$PLUGIN_ROOT" python3 -c "
 import subprocess
 from git_notes_memory import get_sync_service
 from git_notes_memory.index import IndexService
-from git_notes_memory.config import get_embedding_model, get_index_path, get_data_path, NAMESPACES
+from git_notes_memory.config import get_embedding_model, get_project_index_path, get_data_path, NAMESPACES
 
 sync = get_sync_service()
-index_path = get_index_path()
+index_path = get_project_index_path()
 
 print('## Memory System Status (Detailed)\n')
 

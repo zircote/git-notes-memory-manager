@@ -125,7 +125,7 @@ except ImportError as e:
     sys.exit(1)
 
 try:
-    from git_notes_memory.config import get_index_path, get_data_path, NAMESPACES
+    from git_notes_memory.config import get_project_index_path, get_data_path, NAMESPACES
     test_pass("Config module", f"Data path: {get_data_path()}")
 except Exception as e:
     test_fail("Config module", e)
@@ -178,7 +178,7 @@ print("## 3. Index Health")
 print("-" * 40)
 
 try:
-    index_path = get_index_path()
+    index_path = get_project_index_path()
     if index_path.exists():
         test_pass("Index file exists", str(index_path))
         index = IndexService(index_path)
