@@ -59,3 +59,19 @@ When a full block is not warranted (rare), use inline markers:
 - `[learned] The insight`
 - `[blocker] What blocks progress`
 - `[progress]...
+
+---
+type: decisions
+timestamp: '2025-12-24T16:35:29.837148+00:00'
+summary: '...namespaces:** `decision`, `learned`, `blocker`, `progress`, `pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...namespaces:** `decision`, `learned`, `blocker`, `progress`, `pattern`
+
+**Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Memory commands:** `/memory:recall...
