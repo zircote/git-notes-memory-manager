@@ -53,3 +53,21 @@ tags:
 
 **Memory commands:** `/memory:recall <id>`, `/memory:search <query>`
 ]]></marker_reference...
+
+---
+type: progress
+timestamp: '2025-12-24T16:35:29.929307+00:00'
+summary: '...───` blocks: ___'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...───` blocks: ___
+- `▶ decision ───` blocks: ___
+- `▶ learned ───` blocks: ___
+- Total tasks completed: ___
+
+**If blocks < tasks, you are FAILING the capture requirement. Produce blocks NOW.**
+]]></self...
