@@ -784,6 +784,7 @@ class TestAnalyzeContent:
 
         result = analyzer.analyze_content("I decided to use PostgreSQL for storage")
         assert mock_signal_detector.detect.called
+        assert isinstance(result, list)  # Verify result type
 
     def test_returns_empty_for_empty_content(self, analyzer: SessionAnalyzer) -> None:
         """Test returns empty list for empty content."""
@@ -1047,8 +1048,9 @@ class TestSessionAnalyzerIntegration:
         result = analyzer.analyze(str(transcript), check_novelty=False)
 
         # Should detect decision and learning signals
-        types_found = {s.type for s in result}
         assert len(result) >= 1
+        types_found = {s.type for s in result}
+        assert types_found  # Verify types were extracted
 
     def test_full_analysis_workflow_plain_text(self, tmp_path: Path) -> None:
         """Test full analysis workflow with plain text transcript."""
