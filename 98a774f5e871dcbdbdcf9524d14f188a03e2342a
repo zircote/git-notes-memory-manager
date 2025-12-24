@@ -59,3 +59,20 @@ tags:
 │                                                               │
 │  💡 [decision] Validate all git refs to prevent injection     │
 │     Relevance: 0.94 | Last accessed: 3...
+
+---
+type: decisions
+timestamp: '2025-12-24T04:47:51.921061+00:00'
+summary: Stick with hooks-based type checking until LSP is fixed
+---
+
+Stick with hooks-based type checking until LSP is fixed
+## Rationale
+- LSP tool is broken in Claude Code 2.0.69+
+- Downgrading to 2.0.67 risks losing other fixes/features
+- Current hooks already run pyright/mypy on every edit
+- Hooks provide 80% of the value (error detection) without the navigation features
+
+## Trade-off
+Lose: go-to-definition, find-references, hover docs via LSP tool
+Keep: Type error detection, lint checking, format-on-save
