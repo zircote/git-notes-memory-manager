@@ -91,3 +91,53 @@ def reset_hook_loggers() -> Iterator[None]:
 
 - logging.Logger.manager.loggerDict - Global dict of all registered loggers
 - logger.handlers.clear() - Remove all handlers from a logger
+
+---
+type: learnings
+timestamp: '2025-12-24T09:09:04.599910+00:00'
+summary: Python logging.getLogger uses global cache requiring handler cleanup in tests
+tags:
+- python
+- testing
+- logging
+- fixtures
+- pytest
+---
+
+## Insight
+
+Python logging module maintains a global logger registry. When testing code that creates loggers, you must clear BOTH your local cache AND the handlers from the global logging.Logger.manager.loggerDict to prevent test pollution.
+
+## Context
+
+### The Problem
+
+Your module caches loggers locally, but Python ALSO caches the Logger object globally in logging.Logger.manager.loggerDict. When you clear only your local cache, the next call to get_hook_logger() returns a logger with handlers still pointing to old file paths.
+
+### The Symptoms
+
+- Test passes in isolation but fails in full suite
+- Log file assertions fail because handlers point to old paths
+- Different tmp_path directories in error messages vs assertions
+
+### The Solution
+
+@pytest.fixture
+def reset_hook_loggers() -> Iterator[None]:
+    import logging
+
+    def _clear_hook_loggers() -> None:
+        hook_utils._hook_loggers.clear()
+        for name in list(logging.Logger.manager.loggerDict.keys()):
+            if name.startswith("memory_hook."):
+                logger = logging.getLogger(name)
+                logger.handlers.clear()
+
+    _clear_hook_loggers()
+    yield
+    _clear_hook_loggers()
+
+### Key APIs
+
+- logging.Logger.manager.loggerDict - Global dict of all registered loggers
+- logger.handlers.clear() - Remove all handlers from a logger
