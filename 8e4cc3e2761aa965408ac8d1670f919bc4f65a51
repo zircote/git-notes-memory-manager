@@ -1,0 +1,18 @@
+---
+type: decisions
+timestamp: '2025-12-24T16:44:32.032851+00:00'
+summary: '...better:
+
+  **The UserPromptSubmit hook detects markers in YOUR messages, not MINE.**
+
+  When you w...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...better:
+
+**The UserPromptSubmit hook detects markers in YOUR messages, not MINE.**
+
+When you write `[decision] something` or `[learned] something` in your prompts, it gets detected. But the `▶ progress...
