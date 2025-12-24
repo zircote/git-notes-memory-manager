@@ -471,10 +471,8 @@ class SyncService:
 
 
 # =============================================================================
-# Singleton Pattern
+# Singleton Access (using ServiceRegistry)
 # =============================================================================
-
-_sync_service: SyncService | None = None
 
 
 def get_sync_service(repo_path: Path | None = None) -> SyncService:
@@ -486,7 +484,10 @@ def get_sync_service(repo_path: Path | None = None) -> SyncService:
     Returns:
         The SyncService singleton.
     """
-    global _sync_service  # noqa: PLW0603
-    if _sync_service is None:
-        _sync_service = SyncService(repo_path)
-    return _sync_service
+    from git_notes_memory.registry import ServiceRegistry
+
+    # If repo_path is provided, pass it to get() for initialization
+    if repo_path is not None:
+        return ServiceRegistry.get(SyncService, repo_path=repo_path)
+
+    return ServiceRegistry.get(SyncService)

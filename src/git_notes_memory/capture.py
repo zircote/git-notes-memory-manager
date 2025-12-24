@@ -254,6 +254,75 @@ class CaptureService:
         self._embedding_service = service
 
     # =========================================================================
+    # Input Validation (extracted for ARCH-007)
+    # =========================================================================
+
+    def _validate_capture_input(
+        self,
+        namespace: str,
+        summary: str,
+        content: str,
+    ) -> None:
+        """Validate all capture input parameters.
+
+        Args:
+            namespace: Memory type to validate.
+            summary: One-line summary to validate.
+            content: Full content to validate.
+
+        Raises:
+            ValidationError: If any validation fails.
+        """
+        _validate_namespace(namespace)
+        _validate_summary(summary)
+        _validate_content(content)
+
+    def _build_front_matter(
+        self,
+        namespace: str,
+        summary: str,
+        timestamp: datetime,
+        spec: str | None,
+        phase: str | None,
+        tags: tuple[str, ...],
+        status: str,
+        relates_to: tuple[str, ...],
+    ) -> dict[str, object]:
+        """Build the YAML front matter dictionary.
+
+        Args:
+            namespace: Memory type.
+            summary: One-line summary.
+            timestamp: Capture timestamp.
+            spec: Optional specification slug.
+            phase: Optional lifecycle phase.
+            tags: Categorization tags.
+            status: Memory status.
+            relates_to: Related memory IDs.
+
+        Returns:
+            Dictionary ready for YAML serialization.
+        """
+        front_matter: dict[str, object] = {
+            "type": namespace,
+            "timestamp": timestamp.isoformat(),
+            "summary": summary,
+        }
+
+        if spec:
+            front_matter["spec"] = spec
+        if phase:
+            front_matter["phase"] = phase
+        if tags:
+            front_matter["tags"] = list(tags)
+        if status != "active":
+            front_matter["status"] = status
+        if relates_to:
+            front_matter["relates_to"] = list(relates_to)
+
+        return front_matter
+
+    # =========================================================================
     # Core Capture Method
     # =========================================================================
 
@@ -307,10 +376,8 @@ class CaptureService:
             >>> result.success
             True
         """
-        # Validate input
-        _validate_namespace(namespace)
-        _validate_summary(summary)
-        _validate_content(content)
+        # Validate input (extracted method for ARCH-007)
+        self._validate_capture_input(namespace, summary, content)
 
         # Normalize tags
         tags_tuple = tuple(tags) if tags else ()
@@ -319,23 +386,17 @@ class CaptureService:
         # Get current timestamp
         timestamp = datetime.now(UTC)
 
-        # Build front matter
-        front_matter: dict[str, object] = {
-            "type": namespace,
-            "timestamp": timestamp.isoformat(),
-            "summary": summary,
-        }
-
-        if spec:
-            front_matter["spec"] = spec
-        if phase:
-            front_matter["phase"] = phase
-        if tags_tuple:
-            front_matter["tags"] = list(tags_tuple)
-        if status != "active":
-            front_matter["status"] = status
-        if relates_tuple:
-            front_matter["relates_to"] = list(relates_tuple)
+        # Build front matter (extracted method for ARCH-007)
+        front_matter = self._build_front_matter(
+            namespace=namespace,
+            summary=summary,
+            timestamp=timestamp,
+            spec=spec,
+            phase=phase,
+            tags=tags_tuple,
+            status=status,
+            relates_to=relates_tuple,
+        )
 
         # Serialize to YAML front matter format
         note_content = serialize_note(front_matter, content)
@@ -898,11 +959,8 @@ class CaptureService:
 
 
 # =============================================================================
-# Singleton Instance
+# Singleton Access (using ServiceRegistry)
 # =============================================================================
-
-
-_default_service: CaptureService | None = None
 
 
 def get_default_service() -> CaptureService:
@@ -915,14 +973,13 @@ def get_default_service() -> CaptureService:
         The default service is created without index or embedding services.
         Use set_index_service() and set_embedding_service() to enable
         these features after getting the default service.
-
-        On first creation, also ensures git notes sync is configured
-        for the repository (push/fetch refspecs for notes).
     """
-    global _default_service
-    if _default_service is None:
-        _default_service = CaptureService()
-        # Ensure git notes sync is configured on first use (best effort)
-        with suppress(Exception):
-            _default_service.git_ops.ensure_sync_configured()
-    return _default_service
+    from git_notes_memory.registry import ServiceRegistry
+
+    service = ServiceRegistry.get(CaptureService)
+
+    # Ensure git notes sync is configured on first use (best effort)
+    with suppress(Exception):
+        service.git_ops.ensure_sync_configured()
+
+    return service
