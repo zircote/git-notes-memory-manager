@@ -82,3 +82,24 @@ tags:
 
 ...**When learning something new** | `▶ learned ───` | Every insight | New info, discoveries, "TIL" moments |
 | **When hitting a blocker** | `▶ blocker ───` | Every blocker | Stuck, need help,...
+
+---
+type: learnings
+timestamp: '2025-12-24T16:36:35.133835+00:00'
+summary: The key insight
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+The key insight
+## Context
+How this was discovered.
+
+## Details
+- Key point 1
+- Key point 2
+
+## Related Files
+- path/to/file.py:10-25
