@@ -279,3 +279,21 @@ LSP Manager initializes ~52ms before plugins load, so it never discovers the pyr
 1. **Downgrade to 2.0.67** (reliable)
 2. **Apply patch**: `npx tweakcc --apply`
 3. **Wait** for Anthropic fix (issue #13952)
+
+---
+type: learnings
+timestamp: '2025-12-24T04:47:51.880408+00:00'
+summary: LSP tool is functional but requires language server configuration
+---
+
+LSP tool is functional but requires language server configuration
+## Context
+Testing LSP tool in git-notes-memory-manager project to verify if race condition bug is resolved.
+
+## Finding
+- Tool responds correctly (no timeout/crash)
+- Returns "No LSP server available for file type: .py"
+- Previous blocker about race condition may be resolved, but server config needed
+
+## Related Files
+- .claude/hooks.json (references LSP but may not configure server)
