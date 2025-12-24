@@ -1,0 +1,70 @@
+---
+type: blockers
+timestamp: '2025-12-24T16:35:29.763648+00:00'
+summary: '...(rare), use inline markers:'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...(rare), use inline markers:
+
+- `[decision] Brief decision and why`
+- `[learned] The insight`
+- `[blocker] What blocks progress`
+- `[progress] What was done`
+- `[pattern] Reusable approach`
+
+**INLINE...
+
+---
+type: blockers
+timestamp: '2025-12-24T16:35:29.872196+00:00'
+summary: '...`learned`, `blocker`, `progress`, `pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...`learned`, `blocker`, `progress`, `pattern`
+
+**Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Memory commands:** `/memory:recall <id>`, `/memory:search <query>`
+]...
+
+---
+type: blockers
+timestamp: '2025-12-24T16:36:35.189219+00:00'
+summary: '...─────────────────────────────────────'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...─────────────────────────────────────
+```
+
+**Inline markers (RARE):**
+- `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+- `[research]`, `[review]`, `[retro]`, `[inception]`, `[requirement]`...
+
+---
+type: blockers
+timestamp: '2025-12-24T16:37:00.415963+00:00'
+summary: '...blocker`, `▶ progress`, `▶ pattern`'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_minimal.md
+---
+
+...blocker`, `▶ progress`, `▶ pattern`
+
+**Quick markers (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
+
+**Self-check before EACH response:**
+- Did I complete a task?...
