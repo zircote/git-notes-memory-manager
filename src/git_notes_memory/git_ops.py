@@ -425,13 +425,24 @@ class GitOps:
                     try:
                         size = int(parts[2])
                         # Content follows on next lines until size bytes consumed
+                        # Note: git cat-file --batch output format has content
+                        # followed by a newline separator. We track bytes consumed
+                        # including newlines between lines (but not trailing).
                         content_lines: list[str] = []
-                        remaining = size
+                        bytes_read = 0
                         i += 1
-                        while remaining > 0 and i < len(lines):
+                        while bytes_read < size and i < len(lines):
                             content_line = lines[i]
-                            content_lines.append(content_line)
-                            remaining -= len(content_line) + 1  # +1 for newline
+                            line_bytes = len(content_line.encode("utf-8"))
+                            # Account for newline except after last content line
+                            if bytes_read + line_bytes >= size:
+                                # Last line of content
+                                content_lines.append(content_line)
+                                bytes_read += line_bytes
+                            else:
+                                # More content follows; add newline byte
+                                content_lines.append(content_line)
+                                bytes_read += line_bytes + 1
                             i += 1
                         results[current_sha] = "\n".join(content_lines)
                         sha_index += 1
