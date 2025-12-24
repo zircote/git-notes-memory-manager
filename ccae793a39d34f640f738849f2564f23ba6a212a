@@ -68,3 +68,17 @@ tags:
 **Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
 
 **Memory commands:** `/memory:recall <id>`, `/memory:search...
+
+---
+type: learnings
+timestamp: '2025-12-24T16:36:34.949280+00:00'
+summary: '...**When learning something new** | `▶ learned ───` | Every insight | New
+  info, discoveries, "TIL" '
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...**When learning something new** | `▶ learned ───` | Every insight | New info, discoveries, "TIL" moments |
+| **When hitting a blocker** | `▶ blocker ───` | Every blocker | Stuck, need help,...
