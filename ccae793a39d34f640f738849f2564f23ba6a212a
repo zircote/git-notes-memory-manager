@@ -75,3 +75,29 @@ tags:
 **Quick inline (RARE):** `[decision]`, `[learned]`, `[blocker]`, `[progress]`, `[pattern]`
 
 **Memory commands:** `/memory:recall...
+
+---
+type: decisions
+timestamp: '2025-12-24T16:36:35.042261+00:00'
+summary: Use JWT for stateless authentication
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+Use JWT for stateless authentication
+## Context
+Need authentication that works across multiple servers without session sharing.
+Evaluating between session-based auth and token-based auth.
+
+## Rationale
+- Stateless: No server-side session storage needed
+- Scalable: Works with load balancing out of the box
+- Team expertise: Backend team has JWT experience
+- Trade-off: Slightly larger request payload
+
+## Related Files
+- src/auth/jwt_handler.py:1-50
+- src/middleware/auth.py:25-80
+- tests/test_auth.py:10-100
