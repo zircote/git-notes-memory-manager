@@ -12,3 +12,18 @@ tags:
 │                                                               │
 │  💡 [blocker] subprocess.run timeout not honored on macOS     │
 │     Relevance: 0.78 | Last accessed: 2...
+
+---
+type: blockers
+timestamp: '2025-12-24T04:34:18.499406+00:00'
+summary: '...plugins load |'
+---
+
+...plugins load |
+| **Working** | v2.0.67 |
+| **Broken** | v2.0.69 → current |
+
+## Correct Setup (blocked by bug)
+
+1. **Enable LSP tool**: `export ENABLE_LSP_TOOL=1` in shell profile
+2. **Add marketplace**:...
