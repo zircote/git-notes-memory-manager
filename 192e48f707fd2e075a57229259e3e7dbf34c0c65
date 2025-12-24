@@ -13,3 +13,19 @@ tags:
 ### HIGH-007: Inefficient get_all_ids + get_batch Pattern
 **File:** `src/git_notes_memory/lifecycle.py:750-752`
 **Remediation:** Add SQL-level filtering...
+
+---
+type: patterns
+timestamp: '2025-12-24T20:02:20.540208+00:00'
+summary: '...|----|-------|------|'
+tags:
+- auto-captured
+- post-tool-use
+- file:CODE_REVIEW.md
+---
+
+...|----|-------|------|
+| LOW-001 | Vector search over-fetching 3x | index.py |
+| LOW-002 | WHERE 1=1 pattern (cosmetic) | index.py |
+| LOW-003 | No connection pooling | index.py |
+| LOW-004 | SQL placeholder...
