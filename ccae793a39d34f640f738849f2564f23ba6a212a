@@ -34,3 +34,21 @@ The `commands/status.md` and `commands/validate.md` files were using `get_index_
 - commands/validate.md:128,181 (FIXED)
 - src/git_notes_memory/config.py:185-193 (get_index_path - global)
 - src/git_notes_memory/config.py:344-365 (get_project_index_path - project)
+
+---
+type: learnings
+timestamp: '2025-12-24T16:35:29.745711+00:00'
+summary: '...block is not warranted (rare), use inline markers:'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...block is not warranted (rare), use inline markers:
+
+- `[decision] Brief decision and why`
+- `[learned] The insight`
+- `[blocker] What blocks progress`
+- `[progress] What was done`
+- `[pattern]...
