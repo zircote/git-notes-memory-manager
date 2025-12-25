@@ -1,0 +1,19 @@
+---
+type: progress
+timestamp: '2025-12-25T21:38:38.568901+00:00'
+summary: '...fix-git-notes-fetch-refspec'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...fix-git-notes-fetch-refspec
+status: draft
+created: 2025-12-25T21:35:00Z
+approved: null
+started: null
+completed: null
+expires: 2026-03-25T21:35:00Z
+superseded_by: null
+tags: [bug-fix, git-notes, sync, multi-machine...
