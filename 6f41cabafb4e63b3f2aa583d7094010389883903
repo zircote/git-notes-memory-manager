@@ -380,3 +380,19 @@ tags:
   - [ ] Existing tests pass (may need updates)
 
 **Code...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.773077+00:00'
+summary: '...Effort**: 20 minutes'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...Effort**: 20 minutes
+- **Dependencies**: None
+- **Acceptance Criteria**:
+  - [ ] Detects old pattern: `refs/notes/mem/*:refs/notes/mem/*`
+  - [ ] Detects new pattern: `+refs/notes/mem/*:refs/notes/origin...
