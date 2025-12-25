@@ -103,3 +103,19 @@ tags:
         # Check if old pattern exists
         has_old = any(old_pattern in c for c in configs)
         has_new = any(new_pattern...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:54.804785+00:00'
+summary: '...configure git notes sync: %s", e)'
+tags:
+- auto-captured
+- post-tool-use
+- file:session_start_handler.py
+---
+
+...configure git notes sync: %s", e)
+
+        # Migrate from old fetch refspec to new tracking refs pattern
+        # This is idempotent and safe to call every session
+        if git_ops is not None:...
