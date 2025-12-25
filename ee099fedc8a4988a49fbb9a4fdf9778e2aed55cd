@@ -55,3 +55,14 @@ tags:
 ---
 
 ...inception to completion. Every decision, implementation detail, and learning is preserved for future reference. The RETROSPECTIVE.md becomes a valuable resource for estimating similar projects and avoiding...
+
+---
+type: learnings
+timestamp: '2025-12-25T23:09:05.462112+00:00'
+summary: for future reference
+tags:
+- auto-captured
+- pre-compact
+---
+
+...planning artifacts are preserved in `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` for future reference.
