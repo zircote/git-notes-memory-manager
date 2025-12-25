@@ -301,3 +301,18 @@ tags:
 ...since that's what `configure_sync()` now sets up.
 
 Let me update the test to use the new fetch pattern while keeping the old push pattern (since push still uses the same pattern):
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.816360+00:00'
+summary: '...now sets up.
+
+  Let me update the test to use the new fetch pattern while keeping the old push p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...now sets up.
+
+Let me update the test to use the new fetch pattern while keeping the old push pattern (since push still uses the same pattern):
