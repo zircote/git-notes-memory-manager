@@ -343,3 +343,20 @@ tags:
 
 ...add a `--remote` flag that triggers the new `sync_with_remote()` method. This follows the pattern of extending existing commands rather than creating new ones.
 `─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.155499+00:00'
+summary: '...Configure sync'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...Configure sync
+        git.configure_sync()
+
+        # Check fetch refspec uses new tracking refs pattern
+        result = subprocess.run(
+            ["git", "config", "--get-all", "remote.origin.fetch"],...
