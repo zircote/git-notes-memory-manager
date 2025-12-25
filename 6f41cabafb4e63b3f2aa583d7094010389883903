@@ -362,3 +362,21 @@ tags:
 - **File**: `src/git_notes_memory/git_ops.py`
 - **Lines**: 731-742
 - **Estimated Effort**:...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.746936+00:00'
+summary: '...None'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...None
+- **Acceptance Criteria**:
+  - [ ] Fetch refspec uses `+{base}/*:refs/notes/origin/mem/*` pattern
+  - [ ] Force prefix (`+`) is included
+  - [ ] Existing tests pass (may need updates)
+
+**Code...
