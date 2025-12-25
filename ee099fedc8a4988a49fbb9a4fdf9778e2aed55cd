@@ -219,3 +219,19 @@ tags:
 def _unset_fetch_config(self, pattern: str) -> bool:
     if git_supports_fixed_value():
         # Git 2.37+: Use --fixed-value for...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.577020+00:00'
+summary: '...nothing to fetch (no remote notes yet)
+
+  2. `test_migration_from_old_to_new_pattern` - the old p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...nothing to fetch (no remote notes yet)
+2. `test_migration_from_old_to_new_pattern` - the old pattern is still present after migration
+
+Let me check the migration logic in git_ops:
