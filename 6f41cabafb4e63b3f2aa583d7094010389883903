@@ -601,3 +601,18 @@ tags:
 
 ### Key Findings
 - Root cause: Fetch refspec...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:43:53.751730+00:00'
+summary: '...writes directly to local refs, failing on divergence'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...writes directly to local refs, failing on divergence
+- Solution: Use remote tracking refs pattern (standard Git workflow)
+- Migration: Auto-migrate on session start via SessionStart hook
+-...
