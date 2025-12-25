@@ -431,3 +431,18 @@ tags:
         # Verify new pattern exists and old is gone
         status = git.is_sync_configured()
         assert status.get("fetch_new...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:39:14.446103+00:00'
+summary: '...notes/mem/*:refs/notes/mem/*"'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...notes/mem/*:refs/notes/mem/*"
+            elif "remote.origin.fetch" in args_str:
+                # New pattern uses tracking refs
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
