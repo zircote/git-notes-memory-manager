@@ -133,7 +133,7 @@ bump-dry:  ## Show what would be bumped (dry run)
 
 release: release-patch  ## Release (alias for release-patch)
 
-release-patch:  ## Release patch version (quality → bump → push → build)
+release-patch:  ## Release patch version (quality → bump → push → gh-release → build)
 	@echo "Starting patch release..."
 	@echo ""
 	@$(MAKE) quality
@@ -144,12 +144,16 @@ release-patch:  ## Release patch version (quality → bump → push → build)
 	@echo "Pushing to remote..."
 	git push && git push --tags
 	@echo ""
+	@echo "Creating GitHub release..."
+	@NEW_VERSION=$$(uv run bump-my-version show current_version) && \
+		gh release create "v$$NEW_VERSION" --title "v$$NEW_VERSION" --generate-notes
+	@echo ""
 	@echo "Building package..."
 	@$(MAKE) build
 	@echo ""
 	@echo "✓ Release complete! Version: $$(uv run bump-my-version show current_version)"
 
-release-minor:  ## Release minor version (quality → bump → push → build)
+release-minor:  ## Release minor version (quality → bump → push → gh-release → build)
 	@echo "Starting minor release..."
 	@echo ""
 	@$(MAKE) quality
@@ -160,12 +164,16 @@ release-minor:  ## Release minor version (quality → bump → push → build)
 	@echo "Pushing to remote..."
 	git push && git push --tags
 	@echo ""
+	@echo "Creating GitHub release..."
+	@NEW_VERSION=$$(uv run bump-my-version show current_version) && \
+		gh release create "v$$NEW_VERSION" --title "v$$NEW_VERSION" --generate-notes
+	@echo ""
 	@echo "Building package..."
 	@$(MAKE) build
 	@echo ""
 	@echo "✓ Release complete! Version: $$(uv run bump-my-version show current_version)"
 
-release-major:  ## Release major version (quality → bump → push → build)
+release-major:  ## Release major version (quality → bump → push → gh-release → build)
 	@echo "Starting major release..."
 	@echo ""
 	@$(MAKE) quality
@@ -175,6 +183,10 @@ release-major:  ## Release major version (quality → bump → push → build)
 	@echo ""
 	@echo "Pushing to remote..."
 	git push && git push --tags
+	@echo ""
+	@echo "Creating GitHub release..."
+	@NEW_VERSION=$$(uv run bump-my-version show current_version) && \
+		gh release create "v$$NEW_VERSION" --title "v$$NEW_VERSION" --generate-notes
 	@echo ""
 	@echo "Building package..."
 	@$(MAKE) build

@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add GitHub release creation to Makefile release workflow
+
+## [0.11.0] - 2025-12-25
+
+### Added
+- Add warnings when git version detection fails for better debugging
+- Configure git identity in bare remote for CI test robustness
+
+### Fixed
+- Address Copilot code review: safer regex fallback for older git versions
+- Address Copilot code review: branch detection error handling in tests
+- Extract SYNC_CORE_KEYS as module constant for DRY
+
+## [0.10.0] - 2025-12-25
+
+### Added
+- Fix git notes fetch refspec for multi-machine sync (closes #18)
+- Use remote tracking refs pattern (`+refs/notes/mem/*:refs/notes/origin/mem/*`)
+- Add git version detection for backwards compatibility (git < 2.37)
+- Auto-migrate from old refspec pattern on session start
+- Hook-based auto-sync (opt-in via `HOOK_SESSION_START_FETCH_REMOTE` and `HOOK_STOP_PUSH_REMOTE`)
+
 ### Security
 - Fix TOCTOU race condition in file locking with O_NOFOLLOW flag
 - Add subprocess timeout (30s) to prevent indefinite hangs
@@ -17,10 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix missing `repo_path` in batch insert operations
 - Fix blocking lock acquisition with timeout mechanism
 
-### Added
+### Changed
 - Enable SQLite WAL mode for better concurrent access
-- Add SECURITY.md with vulnerability reporting process
-- Add CHANGELOG.md
 
 ## [0.9.1] - 2025-12-24
 
@@ -136,20 +157,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Initial stable release with core memory capture functionality
 
-[Unreleased]: https://github.com/zircote/git-notes-memory-manager/compare/v0.9.1...HEAD
-[0.9.1]: https://github.com/zircote/git-notes-memory-manager/compare/v0.9.0...v0.9.1
-[0.9.0]: https://github.com/zircote/git-notes-memory-manager/compare/v0.8.0...v0.9.0
-[0.8.0]: https://github.com/zircote/git-notes-memory-manager/compare/v0.7.1...v0.8.0
-[0.7.1]: https://github.com/zircote/git-notes-memory-manager/compare/v0.7.0...v0.7.1
-[0.7.0]: https://github.com/zircote/git-notes-memory-manager/compare/v0.6.2...v0.7.0
-[0.6.2]: https://github.com/zircote/git-notes-memory-manager/compare/v0.6.1...v0.6.2
-[0.6.1]: https://github.com/zircote/git-notes-memory-manager/compare/v0.6.0...v0.6.1
-[0.6.0]: https://github.com/zircote/git-notes-memory-manager/compare/v0.5.4...v0.6.0
-[0.5.4]: https://github.com/zircote/git-notes-memory-manager/compare/v0.5.3...v0.5.4
-[0.5.3]: https://github.com/zircote/git-notes-memory-manager/compare/v0.5.2...v0.5.3
-[0.5.2]: https://github.com/zircote/git-notes-memory-manager/compare/v0.5.1...v0.5.2
-[0.5.1]: https://github.com/zircote/git-notes-memory-manager/compare/v0.5.0...v0.5.1
-[0.5.0]: https://github.com/zircote/git-notes-memory-manager/compare/v0.4.1...v0.5.0
-[0.4.1]: https://github.com/zircote/git-notes-memory-manager/compare/v0.4.0...v0.4.1
-[0.4.0]: https://github.com/zircote/git-notes-memory-manager/compare/v0.3.1...v0.4.0
-[0.3.1]: https://github.com/zircote/git-notes-memory-manager/releases/tag/v0.3.1
+[Unreleased]: https://github.com/zircote/git-notes-memory/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/zircote/git-notes-memory/compare/v0.10.0...v0.11.0
+[0.10.0]: https://github.com/zircote/git-notes-memory/compare/v0.9.1...v0.10.0
+[0.9.1]: https://github.com/zircote/git-notes-memory/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/zircote/git-notes-memory/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/zircote/git-notes-memory/compare/v0.7.1...v0.8.0
+[0.7.1]: https://github.com/zircote/git-notes-memory/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/zircote/git-notes-memory/compare/v0.6.2...v0.7.0
+[0.6.2]: https://github.com/zircote/git-notes-memory/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/zircote/git-notes-memory/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/zircote/git-notes-memory/compare/v0.5.4...v0.6.0
+[0.5.4]: https://github.com/zircote/git-notes-memory/compare/v0.5.3...v0.5.4
+[0.5.3]: https://github.com/zircote/git-notes-memory/compare/v0.5.2...v0.5.3
+[0.5.2]: https://github.com/zircote/git-notes-memory/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/zircote/git-notes-memory/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/zircote/git-notes-memory/compare/v0.4.1...v0.5.0
+[0.4.1]: https://github.com/zircote/git-notes-memory/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/zircote/git-notes-memory/compare/v0.3.1...v0.4.0
+[0.3.1]: https://github.com/zircote/git-notes-memory/releases/tag/v0.3.1
