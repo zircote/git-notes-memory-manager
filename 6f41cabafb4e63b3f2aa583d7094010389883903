@@ -35,3 +35,18 @@ tags:
 
 1. Change fetch refspec to use remote tracking refs pattern
 2. Add a proper sync workflow...
+
+---
+type: progress
+timestamp: '2025-12-25T21:40:59.882754+00:00'
+summary: '...──────────┘   │'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...──────────┘   │
+│                                                                             │
+│   Solution: Fetch to tracking refs, then merge using cat_sort_uniq         │
+│...
