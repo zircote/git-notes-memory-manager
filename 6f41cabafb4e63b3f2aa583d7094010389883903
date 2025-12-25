@@ -220,3 +220,21 @@ tags:
 5. Return migration status
 
 **Responsibilities...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:41:00.062303+00:00'
+summary: '...old pattern: `refs/notes/mem/*:refs/notes/mem/*`'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...old pattern: `refs/notes/mem/*:refs/notes/mem/*`
+3. If found, remove old pattern
+4. Add new pattern: `+refs/notes/mem/*:refs/notes/origin/mem/*`
+5. Return migration status
+
+**Responsibilities**:
+-...
