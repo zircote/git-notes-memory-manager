@@ -242,3 +242,18 @@ Added opt-in automatic sync on session boundaries based on user feedback.
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T21:59:56.216534+00:00'
+summary: '...where the fetch refspec is misconfigured
+
+  3. **The `+` prefix** in refspecs is the standard sol...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...where the fetch refspec is misconfigured
+3. **The `+` prefix** in refspecs is the standard solution for non-fast-forward situations
+4. **Remote tracking refs pattern** (`refs/notes/origin/mem/*`)...
