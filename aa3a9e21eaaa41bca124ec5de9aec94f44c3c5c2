@@ -617,3 +617,15 @@ tags:
 2. Test manually adds old fetch pattern
 3. Test calls `migrate_fetch_config()`
 4. After migration, both old AND new patterns still...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.385799+00:00'
+summary: Using `--unset-all` with a regex pattern works. The issue is that the `*`
+  in git refspecs is bein...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Using `--unset-all` with a regex pattern works. The issue is that the `*` in git refspecs is being interpreted as a regex wildcard....
