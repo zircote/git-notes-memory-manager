@@ -419,3 +419,14 @@ tags:
 ---
 
 ...is still in the `active/` directory. Let me complete the project lifecycle by moving it to `completed/`:
+
+---
+type: progress
+timestamp: '2025-12-25T23:09:05.934060+00:00'
+summary: '## Step 6: Move to Completed'
+tags:
+- auto-captured
+- pre-compact
+---
+
+## Step 6: Move to Completed
