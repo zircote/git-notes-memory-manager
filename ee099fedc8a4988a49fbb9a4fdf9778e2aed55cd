@@ -330,3 +330,18 @@ tags:
 else:
             # Git < 2.37: Use regex to match the exact pattern
             # Escape special regex characters in the pattern for git config --unset...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:10:49.110168+00:00'
+summary: '...Use regex to match the exact pattern'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...Use regex to match the exact pattern
+            # Escape special regex characters in the pattern for git config --unset
+            escaped = re.escape(pattern)
+            result = self._run_git(...
