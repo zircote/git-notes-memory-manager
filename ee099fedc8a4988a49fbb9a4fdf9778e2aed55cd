@@ -306,3 +306,31 @@ tags:
 ### Key Learnings Captured
 
 1. **Git Refspec Patterns** - Remote tracking...
+
+---
+type: progress
+timestamp: '2025-12-25T23:09:05.344331+00:00'
+summary: '...───────
+
+  ---
+
+  ## ✅ Project SPEC-2025-12-25-001 Closed Out Successfully
+
+  **Archived to:** `docs...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...───────
+
+---
+
+## ✅ Project SPEC-2025-12-25-001 Closed Out Successfully
+
+**Archived to:** `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/`
+
+### Final Metrics
+
+| Metric | Value |
+|--------|-------|...
