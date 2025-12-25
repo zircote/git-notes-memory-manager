@@ -58,3 +58,18 @@ tags:
 
 ...add a `--remote` flag that triggers the new `sync_with_remote()` method. This follows the pattern of extending existing commands rather than creating new ones.
 `─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:22:02.756043+00:00'
+summary: '...status.get(''fetch_old'') and not status.get(''fetch_new''):'
+tags:
+- auto-captured
+- post-tool-use
+- file:sync.md
+---
+
+...status.get('fetch_old') and not status.get('fetch_new'):
+        print('**Note**: Old fetch pattern detected. Will be migrated on next session start.')
+else:
+    print('**Status**: Remote sync...
