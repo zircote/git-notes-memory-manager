@@ -843,3 +843,29 @@ Created complete specification for fixing git notes fetch refspec non-fast-forwa
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:48:33.361321+00:00'
+summary: Updated specification with hook-based auto-sync feature
+---
+
+Updated specification with hook-based auto-sync feature
+## Summary
+Added opt-in automatic sync on session boundaries based on user feedback.
+
+## Changes Made
+- Added FR-104 and FR-105 to REQUIREMENTS.md (auto-fetch on start, auto-push on stop)
+- Added Component 6: Hook-Based Auto-Sync to ARCHITECTURE.md
+- Added Phase 4: Hook Auto-Sync to IMPLEMENTATION_PLAN.md (4 new tasks)
+- Added ADR-007: Hook-Based Auto-Sync (Opt-In) to DECISIONS.md
+- Updated estimated effort to 5-7 hours
+- Renumbered Phase 4 (Tests) to Phase 5, added Task 5.4 for hook tests
+- Updated CHANGELOG.md with v1.1.0 changes
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
