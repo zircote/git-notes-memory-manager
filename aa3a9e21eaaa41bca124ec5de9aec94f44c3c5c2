@@ -88,3 +88,18 @@ tags:
         # Check for old vs new fetch pattern
         if sync_status.get("fetch_new"):
             test_pass("Fetch refspec", "Using tracking...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:22:49.446570+00:00'
+summary: '...sync_status.get("fetch_new"):'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...sync_status.get("fetch_new"):
+            test_pass("Fetch refspec", "Using tracking refs pattern (recommended)")
+        elif sync_status.get("fetch_old"):
+            if FIX_ISSUES:...
