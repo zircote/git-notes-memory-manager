@@ -282,3 +282,24 @@ tags:
 
 ...validates the git notes fetch refspec configuration - checking if it uses the old problematic pattern or the new tracking refs pattern, and warning if migration is needed.
 `─────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:31:06.463146+00:00'
+summary: '...Implemented
+
+  **Phase 1: Core Fix** (4 tasks, 1-2 hours)
+
+  - Update fetch refspec to use remote t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Implemented
+
+**Phase 1: Core Fix** (4 tasks, 1-2 hours)
+- Update fetch refspec to use remote tracking refs pattern
+- Add migration detection for old/new patterns
+- Implement `migrate_fetch_config()` method
+-...
