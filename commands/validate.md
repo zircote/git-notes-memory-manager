@@ -172,9 +172,50 @@ except Exception as e:
 print()
 
 # ============================================================================
-# TEST 3: Index Health
+# TEST 3: Git Notes Sync Configuration
 # ============================================================================
-print("## 3. Index Health")
+print("## 3. Remote Sync Configuration")
+print("-" * 40)
+
+try:
+    from git_notes_memory.git_ops import GitOps
+    git_ops = GitOps()
+
+    sync_status = git_ops.is_sync_configured()
+
+    if sync_status.get("fetch") and sync_status.get("push"):
+        # Check for old vs new fetch pattern
+        if sync_status.get("fetch_new"):
+            test_pass("Fetch refspec", "Using tracking refs pattern (recommended)")
+        elif sync_status.get("fetch_old"):
+            if FIX_ISSUES:
+                # Attempt migration
+                if git_ops.migrate_fetch_config():
+                    test_pass("Fetch refspec", "Migrated from old pattern to tracking refs")
+                else:
+                    test_warn("Fetch refspec", "Migration failed - manual intervention needed")
+            else:
+                test_warn("Fetch refspec", "Using old pattern - run with --fix to migrate")
+        else:
+            test_pass("Fetch refspec", "Configured")
+
+        test_pass("Push refspec", "Configured")
+    elif sync_status.get("fetch") or sync_status.get("push"):
+        if not sync_status.get("fetch"):
+            test_warn("Fetch refspec", "Not configured")
+        if not sync_status.get("push"):
+            test_warn("Push refspec", "Not configured")
+    else:
+        test_warn("Remote sync", "Not configured (no remote or run /memory:sync --remote)")
+except Exception as e:
+    test_warn("Remote sync config", f"Could not check: {e}")
+
+print()
+
+# ============================================================================
+# TEST 4: Index Health
+# ============================================================================
+print("## 4. Index Health")
 print("-" * 40)
 
 try:
@@ -216,9 +257,9 @@ except Exception as e:
 print()
 
 # ============================================================================
-# TEST 4: Hook Entry Points
+# TEST 5: Hook Entry Points
 # ============================================================================
-print("## 4. Hook Entry Points")
+print("## 5. Hook Entry Points")
 print("-" * 40)
 
 # Discover plugin root dynamically (version-agnostic)
@@ -254,9 +295,9 @@ for filename, hook_name, description in hooks:
 print()
 
 # ============================================================================
-# TEST 5: Hook Handler Imports
+# TEST 6: Hook Handler Imports
 # ============================================================================
-print("## 5. Hook Handlers")
+print("## 6. Hook Handlers")
 print("-" * 40)
 
 handlers = [
@@ -281,9 +322,9 @@ for module_name, handler_name in handlers:
 print()
 
 # ============================================================================
-# TEST 6: Capture Pipeline
+# TEST 7: Capture Pipeline
 # ============================================================================
-print("## 6. Capture Pipeline")
+print("## 7. Capture Pipeline")
 print("-" * 40)
 
 test_memory_id = None
@@ -319,9 +360,9 @@ except Exception as e:
 print()
 
 # ============================================================================
-# TEST 7: Recall Pipeline
+# TEST 8: Recall Pipeline
 # ============================================================================
-print("## 7. Recall Pipeline")
+print("## 8. Recall Pipeline")
 print("-" * 40)
 
 if test_memory_id:
@@ -371,9 +412,9 @@ else:
 print()
 
 # ============================================================================
-# TEST 8: Cleanup
+# TEST 9: Cleanup
 # ============================================================================
-print("## 8. Cleanup")
+print("## 9. Cleanup")
 print("-" * 40)
 
 if test_memory_id:
@@ -482,6 +523,7 @@ Review the failed tests above. Common fixes:
 |------|---------------|
 | **Core Library** | Python imports, config, index, embedding modules |
 | **Git Repository** | Running in a git repo, git notes accessible |
+| **Remote Sync Config** | Fetch/push refspecs, tracking refs pattern vs old pattern |
 | **Index Health** | Index exists, readable, consistent with git notes |
 | **Hook Entry Points** | All 5 hook files exist and have valid syntax |
 | **Hook Handlers** | Internal handler modules can be imported |
@@ -508,6 +550,8 @@ If validation fails, common remediation steps:
 |---------|-----|
 | Library import | `uv sync` in plugin directory |
 | Not in git repo | Navigate to a git repository |
+| Old fetch pattern | Use `--fix` to migrate, or restart session (auto-migrates) |
+| Remote sync not configured | Run in a repo with origin remote |
 | Index not initialized | `/memory:sync` |
 | Index inconsistency | `/memory:sync repair` or use `--fix` |
 | Hook file missing | Reinstall plugin |

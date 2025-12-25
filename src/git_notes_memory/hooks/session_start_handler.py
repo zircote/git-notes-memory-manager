@@ -23,6 +23,7 @@ Exit codes:
 Environment Variables:
     HOOK_ENABLED: Master switch for hooks (default: true)
     HOOK_SESSION_START_ENABLED: Enable this hook (default: true)
+    HOOK_SESSION_START_FETCH_REMOTE: Fetch notes from remote on start (default: false)
     HOOK_DEBUG: Enable debug logging (default: false)
 """
 
@@ -189,6 +190,27 @@ def main() -> None:
                     )
             except Exception as e:
                 logger.debug("Fetch refspec migration skipped: %s", e)
+
+        # Fetch and merge notes from remote if enabled (opt-in via env var)
+        # This ensures we have the latest memories from collaborators
+        if git_ops is not None and config.session_start_fetch_remote:
+            try:
+                fetch_results = git_ops.fetch_notes_from_remote()
+                merged_count = 0
+                for ns, success in fetch_results.items():
+                    if success and git_ops.merge_notes_from_tracking(ns):
+                        merged_count += 1
+                # Reindex to include fetched memories
+                if merged_count > 0:
+                    from git_notes_memory.sync import get_sync_service as get_sync
+
+                    sync_service = get_sync(repo_path=cwd)
+                    sync_service.reindex()
+                    logger.debug(
+                        "Fetched and merged %d namespaces from remote", merged_count
+                    )
+            except Exception as e:
+                logger.debug("Remote fetch on start skipped: %s", e)
 
         # Build response guidance if enabled
         guidance_xml = ""
