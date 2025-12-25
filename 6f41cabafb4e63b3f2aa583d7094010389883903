@@ -113,3 +113,17 @@ tags:
 ...Overview
 
 This fix addresses the git notes synchronization architecture by changing from a direct-fetch pattern to a remote-tracking-refs pattern. The change affects how notes are fetched from remotes and...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:40:59.907119+00:00'
+summary: '...|--------|-----------|'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...|--------|-----------|
+| Fetch target | `refs/notes/origin/mem/*` | Mirrors `refs/remotes/origin/*` pattern for branches |
+| Force prefix | `+` in refspec | Required for non-fast-forward updates to tracking...
