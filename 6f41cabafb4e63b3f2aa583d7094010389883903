@@ -99,3 +99,17 @@ tags:
 |------|------------|
 | Refspec | A pattern that tells Git how to map refs between local and remote |
 | Remote tracking ref | A ref that...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:40:59.856507+00:00'
+summary: '...Overview'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Overview
+
+This fix addresses the git notes synchronization architecture by changing from a direct-fetch pattern to a remote-tracking-refs pattern. The change affects how notes are fetched from remotes and...
