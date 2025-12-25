@@ -164,3 +164,18 @@ tags:
 | **Remote Sync Config** | Fetch/push refspecs, tracking refs pattern vs old pattern |
 | **Index Health** | Index exists, readable, consistent with git notes |
 | **Hook Entry Points**...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:23:55.178379+00:00'
+summary: '...sync` in plugin directory |'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...sync` in plugin directory |
+| Not in git repo | Navigate to a git repository |
+| Old fetch pattern | Use `--fix` to migrate, or restart session (auto-migrates) |
+| Remote sync not configured...
