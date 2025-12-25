@@ -1323,18 +1323,6 @@ class TestGitOpsDivergedNotesIntegration:
         assert result is True
 
         # Verify note exists in remote
-        result = subprocess.run(
-            [
-                "git",
-                "notes",
-                f"--ref={config.DEFAULT_GIT_NAMESPACE}/decisions",
-                "show",
-                "HEAD",
-            ],
-            cwd=remote_path,
-            capture_output=True,
-            text=True,
-        )
         # Remote won't have HEAD context, but notes should be in refs
         # Check via for-each-ref
         result = subprocess.run(
