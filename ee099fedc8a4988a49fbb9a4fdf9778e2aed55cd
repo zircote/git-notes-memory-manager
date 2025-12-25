@@ -46,3 +46,17 @@ tags:
 ---
 
 ...adds the config, but I now need to check if the fixture's initial config includes the new pattern too. Let me look more carefully - the fixture creates a bare repo with `configure_sync()` not...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:04.802519+00:00'
+summary: '...wildcard. I need to fix the `migrate_fetch_config` method to use `--unset-all`
+  with a proper r...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...wildcard. I need to fix the `migrate_fetch_config` method to use `--unset-all` with a proper regex pattern or use `--fixed-value` (if available in git 2.37+).
+
+Let me check git version and update the...
