@@ -328,3 +328,20 @@ tags:
 | `migrate_fetch_config()` | New | Migrate old pattern to new |
 | `sync_notes_with_remote()` | New | Full fetch→merge→push workflow |
 | `fetch_notes_from_remote...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.696038+00:00'
+summary: '...Overview'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...Overview
+
+This implementation fixes the git notes fetch refspec issue (#18) by:
+1. Changing the fetch pattern to use remote tracking refs
+2. Adding migration for existing installations
+3. Implementing...
