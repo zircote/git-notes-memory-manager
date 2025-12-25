@@ -345,3 +345,19 @@ tags:
             # Escape special regex characters in the pattern for git config --unset
             escaped = re.escape(pattern)
             result = self._run_git(...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:10:49.128710+00:00'
+summary: '...f"^{escaped}$"],'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...f"^{escaped}$"],
+                check=False,
+            )
+            # Return code 5 means pattern not found, which is fine
+            return result.returncode in (0, 5)
