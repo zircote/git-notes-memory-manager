@@ -790,3 +790,19 @@ tags:
 
 ...`master` branch, but modern git uses `main`. Fixed by dynamic branch detection.
 2. **Config Pattern Matching** - Didn't initially account for `--unset` interpreting `*` as regex. Required `--fixed-value...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:46:59.846073+00:00'
+summary: '...Key Learnings'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...Key Learnings
+
+### Technical Learnings
+
+1. **Git Refspec Patterns** - Remote tracking refs pattern (`+refs/notes/mem/*:refs/notes/origin/mem/*`) mirrors how git handles branch tracking (`refs/remotes...
