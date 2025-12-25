@@ -360,3 +360,20 @@ tags:
         # Check fetch refspec uses new tracking refs pattern
         result = subprocess.run(
             ["git", "config", "--get-all", "remote.origin.fetch"],...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.174741+00:00'
+summary: '...)'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...)
+        fetch_lines = result.stdout.strip().split("\n")
+
+        # Should contain the new pattern
+        assert any(
+            "+refs/notes/mem/*:refs/notes/origin/mem/*" in line for line...
