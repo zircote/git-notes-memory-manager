@@ -66,3 +66,14 @@ tags:
 ---
 
 ...planning artifacts are preserved in `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` for future reference.
+
+---
+type: learnings
+timestamp: '2025-12-25T23:12:41.833520+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
