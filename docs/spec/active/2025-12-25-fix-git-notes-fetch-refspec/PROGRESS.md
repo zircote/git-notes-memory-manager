@@ -4,7 +4,7 @@ format_version: "1.0.0"
 project_id: SPEC-2025-12-25-001
 project_name: "Fix Git Notes Fetch Refspec"
 project_status: in-progress
-current_phase: 1
+current_phase: 2
 implementation_started: 2025-12-25T22:12:11Z
 last_session: 2025-12-25T22:12:11Z
 last_updated: 2025-12-25T22:12:11Z
@@ -27,10 +27,10 @@ This document tracks implementation progress against the spec plan.
 
 | ID | Description | Status | Started | Completed | Notes |
 |----|-------------|--------|---------|-----------|-------|
-| 1.1 | Update `configure_sync()` fetch refspec | pending | | | |
-| 1.2 | Update `is_sync_configured()` to detect both patterns | pending | | | |
-| 1.3 | Add `migrate_fetch_config()` method | pending | | | |
-| 1.4 | Call migration from SessionStart handler | pending | | | |
+| 1.1 | Update `configure_sync()` fetch refspec | done | 2025-12-25 | 2025-12-25 | Changed to +refs/notes/mem/*:refs/notes/origin/mem/* |
+| 1.2 | Update `is_sync_configured()` to detect both patterns | done | 2025-12-25 | 2025-12-25 | Detects old/new patterns for migration |
+| 1.3 | Add `migrate_fetch_config()` method | done | 2025-12-25 | 2025-12-25 | Idempotent migration from old to new |
+| 1.4 | Call migration from SessionStart handler | done | 2025-12-25 | 2025-12-25 | Auto-migrates on every session start |
 | 2.1 | Add `fetch_notes_from_remote()` method | pending | | | |
 | 2.2 | Add `merge_notes_from_tracking()` method | pending | | | |
 | 2.3 | Add `push_notes_to_remote()` method | pending | | | |
@@ -54,8 +54,8 @@ This document tracks implementation progress against the spec plan.
 
 | Phase | Name | Progress | Status |
 |-------|------|----------|--------|
-| 1 | Core Fix | 0% | pending |
-| 2 | Remote Sync | 0% | pending |
+| 1 | Core Fix | 100% | done |
+| 2 | Remote Sync | 0% | in-progress |
 | 3 | Commands | 0% | pending |
 | 4 | Hook Auto-Sync | 0% | pending |
 | 5 | Tests & Polish | 0% | pending |
