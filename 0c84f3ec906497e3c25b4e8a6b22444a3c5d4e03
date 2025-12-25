@@ -1,0 +1,145 @@
+---
+type: learnings
+timestamp: '2025-12-25T22:19:51.600395+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Issue #18 is AI-actionable with complete root cau...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Issue #18 is AI-actionable with complete root cause analysis
+## Summary
+The issue precisely identifies the problematic code at `git_ops.py:731-742` where the fetch refspec `f"{base}/*:{base}/*"` fetches directly into local refs instead of remote tracking refs.
+
+## Key Findings
+- Current config: `refs/notes/mem/*:refs/notes/mem/*` (direct fetch)
+- Correct config: `+refs/notes/mem/*:refs/notes/origin/mem/*` (tracking refs)
+- The `+` prefix enables force-update for non-fast-forward cases
+- A proper sync workflow (fetch → merge → push) is needed
+
+## Related Files
+- src/git_notes_memory/git_ops.py:700-766 (configure_sync function)
+- commands/sync.md (only handles local index sync, not remote)
+- commands/validate.md (no refspec validation)
+
+---
+type: learnings
+timestamp: '2025-12-25T22:31:06.153693+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Issue #18 is AI-actionable with complete root cau...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Issue #18 is AI-actionable with complete root cause analysis
+## Summary
+The issue precisely identifies the problematic code at `git_ops.py:731-742` where the fetch refspec `f"{base}/*:{base}/*"` fetches directly into local refs instead of remote tracking refs.
+
+## Key Findings
+- Current config: `refs/notes/mem/*:refs/notes/mem/*` (direct fetch)
+- Correct config: `+refs/notes/mem/*:refs/notes/origin/mem/*` (tracking refs)
+- The `+` prefix enables force-update for non-fast-forward cases
+- A proper sync workflow (fetch → merge → push) is needed
+
+## Related Files
+- src/git_notes_memory/git_ops.py:700-766 (configure_sync function)
+- commands/sync.md (only handles local index sync, not remote)
+- commands/validate.md (no refspec validation)
+
+---
+type: learnings
+timestamp: '2025-12-25T22:33:46.197430+00:00'
+summary: '...local_path)'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...local_path)
+        git.configure_sync()
+
+        # Add local note
+        git.add_note("learnings", "Important learning", "HEAD")
+
+        # Full sync: fetch → merge → push
+        results = git.sync_notes_with_remote...
+
+---
+type: learnings
+timestamp: '2025-12-25T22:33:46.216868+00:00'
+summary: '...note = git.show_note("learnings", "HEAD")'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...note = git.show_note("learnings", "HEAD")
+        assert note is not None
+        assert "Important learning" in note
+
+    def test_migration_from_old_to_new_pattern(
+        self, git_repo_with_remote...
+
+---
+type: learnings
+timestamp: '2025-12-25T22:42:08.866168+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-25T22:43:33.666370+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Issue #18 is AI-actionable with complete root cau...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Issue #18 is AI-actionable with complete root cause analysis
+## Summary
+The issue precisely identifies the problematic code at `git_ops.py:731-742` where the fetch refspec `f"{base}/*:{base}/*"` fetches directly into local refs instead of remote tracking refs.
+
+## Key Findings
+- Current config: `refs/notes/mem/*:refs/notes/mem/*` (direct fetch)
+- Correct config: `+refs/notes/mem/*:refs/notes/origin/mem/*` (tracking refs)
+- The `+` prefix enables force-update for non-fast-forward cases
+- A proper sync workflow (fetch → merge → push) is needed
+
+## Related Files
+- src/git_notes_memory/git_ops.py:700-766 (configure_sync function)
+- commands/sync.md (only handles local index sync, not remote)
+- commands/validate.md (no refspec validation)
+
+---
+type: learnings
+timestamp: '2025-12-25T22:48:33.304128+00:00'
+summary: 'Issue #18 is AI-actionable with complete root cause analysis'
+---
+
+Issue #18 is AI-actionable with complete root cause analysis
+## Summary
+The issue precisely identifies the problematic code at `git_ops.py:731-742` where the fetch refspec `f"{base}/*:{base}/*"` fetches directly into local refs instead of remote tracking refs.
+
+## Key Findings
+- Current config: `refs/notes/mem/*:refs/notes/mem/*` (direct fetch)
+- Correct config: `+refs/notes/mem/*:refs/notes/origin/mem/*` (tracking refs)
+- The `+` prefix enables force-update for non-fast-forward cases
+- A proper sync workflow (fetch → merge → push) is needed
+
+## Related Files
+- src/git_notes_memory/git_ops.py:700-766 (configure_sync function)
+- commands/sync.md (only handles local index sync, not remote)
+- commands/validate.md (no refspec validation)
