@@ -164,3 +164,15 @@ tags:
 ---
 
 I see the pattern - tests use `load_hook_config(env)` with environment variables. Let me add tests for the new...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.176126+00:00'
+summary: This test (around line 545) is testing the old pattern for `is_sync_configured()`.
+  Since the code...
+tags:
+- auto-captured
+- pre-compact
+---
+
+This test (around line 545) is testing the old pattern for `is_sync_configured()`. Since the code now detects both old and new patterns, this test...
