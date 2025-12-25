@@ -517,3 +517,18 @@ tags:
 - [ ] Migration unit tests
 - [ ] Remote sync unit tests
 - [ ] Integration...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:43:30.324318+00:00'
+summary: '...fast-forward the local ref and rejects the fetch with a "non-fast-forward"
+  error.'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...fast-forward the local ref and rejects the fetch with a "non-fast-forward" error.
+
+Git's standard pattern for branches is to fetch to remote tracking refs first (`refs/remotes/origin/*`), then merge...
