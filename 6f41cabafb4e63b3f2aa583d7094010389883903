@@ -481,3 +481,19 @@ tags:
 - [ ] SessionStart auto-migration
 
 ###...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.929882+00:00'
+summary: '...Dependencies**: Task 1.2'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...Dependencies**: Task 1.2
+- **Acceptance Criteria**:
+  - [ ] Reports "incorrect fetch refspec" if old pattern found
+  - [ ] `--fix` triggers `migrate_fetch_config()`
+  - [ ] Shows current refspec configuration...
