@@ -72,7 +72,11 @@ def get_git_version() -> tuple[int, int, int]:
         # Parse "git version 2.43.0" or similar
         match = re.search(r"(\d+)\.(\d+)\.(\d+)", result.stdout)
         if match:
-            _git_version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+            _git_version = (
+                int(match.group(1)),
+                int(match.group(2)),
+                int(match.group(3)),
+            )
         else:
             _git_version = (0, 0, 0)
     except Exception:
