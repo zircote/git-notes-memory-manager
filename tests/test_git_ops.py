@@ -1323,7 +1323,7 @@ class TestGitOpsDivergedNotesIntegration:
         assert result is True
 
         # Verify note exists in remote
-        result = subprocess.run(
+        subprocess.run(
             [
                 "git",
                 "notes",
