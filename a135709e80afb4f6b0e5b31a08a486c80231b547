@@ -1,0 +1,17 @@
+---
+type: decisions
+timestamp: '2025-12-25T22:54:14.085797+00:00'
+summary: 'Confirmed: The `+` prefix in refspec is the standard solution'
+---
+
+Confirmed: The `+` prefix in refspec is the standard solution
+## Summary
+The Git documentation confirms that the `+` prefix in a refspec tells Git to update the reference even if it isn't a fast-forward.
+
+## Rationale
+- Current code: `f"{base}/*:{base}/*"` - fetches directly to local refs, fails on divergence
+- Correct code: `f"+{base}/*:refs/notes/origin/mem/*"` - fetches to remote tracking refs with force-update
+- The `+` prefix allows non-fast-forward updates which is necessary for notes that diverge across machines
+
+## Related Files
+- src/git_notes_memory/git_ops.py:731-742
