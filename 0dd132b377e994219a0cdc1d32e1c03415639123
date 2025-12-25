@@ -141,3 +141,27 @@ The Git documentation confirms that the `+` prefix in a refspec tells Git to upd
 
 ## Related Files
 - src/git_notes_memory/git_ops.py:731-742
+
+---
+type: decisions
+timestamp: '2025-12-25T23:03:33.027624+00:00'
+summary: Approved specification for "Fix Git Notes Fetch Refspec"
+---
+
+Approved specification for "Fix Git Notes Fetch Refspec"
+## Summary
+Comprehensive specification addressing GitHub Issue #18 (git notes fetch refspec causing non-fast-forward errors) has been approved for implementation.
+
+## Rationale
+- **Complete documentation**: 1,876 lines across 6 documents
+- **Clear solution**: Change fetch refspec from `refs/notes/mem/*:refs/notes/mem/*` to `+refs/notes/mem/*:refs/notes/origin/mem/*`
+- **Zero-impact migration**: Auto-migrate on SessionStart hook
+- **Opt-in auto-sync**: NEW hook-based fetch on start + push on stop (FR-104, FR-105)
+- **Well-planned**: 18 tasks across 5 phases with clear dependencies
+- **Test coverage**: Dedicated Phase 5 for comprehensive testing
+- **7 ADRs** documenting all major decisions
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md:5 (status updated)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md:5-10 (approval recorded)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/APPROVAL_RECORD.md (audit trail created)
