@@ -176,3 +176,15 @@ tags:
 ---
 
 This test (around line 545) is testing the old pattern for `is_sync_configured()`. Since the code now detects both old and new patterns, this test...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.218179+00:00'
+summary: These tests are testing existing behavior and they're using the OLD pattern
+  which is still valid ...
+tags:
+- auto-captured
+- pre-compact
+---
+
+These tests are testing existing behavior and they're using the OLD pattern which is still valid for detection purposes (the `is_sync_configured` function detects both...
