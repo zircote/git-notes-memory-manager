@@ -70,3 +70,18 @@ tags:
                 status["fetch"] = True
             # Track which pattern for migration detection
             status["fetch_old"] = old_pattern in fetch_configs...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:33.913469+00:00'
+summary: '...direct fetch to tracking refs pattern.'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...direct fetch to tracking refs pattern.
+
+        This method detects the old fetch refspec pattern that writes directly
+        to local refs (which fails on divergence) and migrates to the...
