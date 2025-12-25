@@ -228,3 +228,31 @@ PR #19 has been updated with the final implementation details and marked as read
 
 ## Related Files
 - https://github.com/zircote/git-notes-memory/pull/19
+
+---
+type: progress
+timestamp: '2025-12-25T23:09:04.564263+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Minor version release 0.11.0 completed
+
+  ## Summa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Minor version release 0.11.0 completed
+## Summary
+Released version 0.11.0 with the git notes fetch refspec fix for multi-machine sync.
+
+## Changes Made
+- Recreated venv (old scripts had stale paths from repo rename)
+- Ran quality checks (all passed: format, lint, typecheck, security, tests)
+- Bumped version 0.10.0 → 0.11.0
+- Rebased onto latest origin/main (picked up dependabot updates)
+- Pushed tags v0.10.0 and v0.11.0
+
+## Related Files
+- pyproject.toml (version bump)
+- PR #19: https://github.com/zircote/git-notes-memory/pull/19
