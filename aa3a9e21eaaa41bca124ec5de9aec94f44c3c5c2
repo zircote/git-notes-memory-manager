@@ -470,3 +470,31 @@ Phase 3 of the git notes fetch refspec fix is complete. The `/memory:sync` and `
 ## Related Files
 - commands/sync.md:68-262 (remote sync support)
 - commands/validate.md:174-211 (refspec validation test)
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:33.920539+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 4: Hook Auto-Sync - opt-in remot...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 4: Hook Auto-Sync - opt-in remote sync via environment variables
+## Summary
+Phase 4 adds automatic remote sync capabilities that are opt-in via environment variables. This allows teams to automatically share memories without manual `/memory:sync --remote` commands.
+
+## Changes Made
+- Added `session_start_fetch_remote` and `stop_push_remote` config options to `config_loader.py`
+- Added environment variable parsing for `HOOK_SESSION_START_FETCH_REMOTE` and `HOOK_STOP_PUSH_REMOTE`
+- Added fetch+merge+reindex logic to `session_start_handler.py` (triggered when `session_start_fetch_remote=true`)
+- Added push logic to `stop_handler.py` (triggered when `stop_push_remote=true`)
+- Updated CLAUDE.md with new "Remote Sync (Team Collaboration)" section
+
+## Related Files
+- src/git_notes_memory/hooks/config_loader.py:131,148 (config options)
+- src/git_notes_memory/hooks/session_start_handler.py:193-214 (fetch+merge)
+- src/git_notes_memory/hooks/stop_handler.py:471-485 (push)
+- CLAUDE.md:193-207 (documentation)
