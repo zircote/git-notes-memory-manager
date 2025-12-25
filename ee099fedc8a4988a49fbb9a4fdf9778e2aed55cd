@@ -442,3 +442,20 @@ tags:
 ---
 
 The CLAUDE.md doesn't have a "Completed Spec Projects" section yet. Let me add one at the end:
+
+---
+type: progress
+timestamp: '2025-12-25T23:09:06.012321+00:00'
+summary: No, it's **not** locked to a single version! The fix I implemented provides
+  **backwards compatibi...
+tags:
+- auto-captured
+- pre-compact
+---
+
+No, it's **not** locked to a single version! The fix I implemented provides **backwards compatibility** for all git versions.
+
+Here's how it works:
+
+```python
+def...
