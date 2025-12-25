@@ -350,3 +350,18 @@ tags:
 - ✅ `README.md` - Status updated to `completed`, added outcome and effort
 - ✅ `CHANGELOG.md` - Final entry with implementation summary
 -...
+
+---
+type: progress
+timestamp: '2025-12-25T23:09:05.423112+00:00'
+summary: '...//github.com/zircote/git-notes-memory/issues/18
+
+  The planning artifacts are preserved in `docs...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...//github.com/zircote/git-notes-memory/issues/18
+
+The planning artifacts are preserved in `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` for future reference.
