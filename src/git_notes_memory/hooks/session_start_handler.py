@@ -167,6 +167,7 @@ def main() -> None:
         )
 
         # Ensure git notes sync is configured for this repository
+        git_ops: GitOps | None = None
         try:
             git_ops = GitOps(repo_path=cwd)
             if git_ops.ensure_sync_configured():
@@ -177,6 +178,17 @@ def main() -> None:
                 )
         except Exception as e:
             logger.debug("Could not configure git notes sync: %s", e)
+
+        # Migrate from old fetch refspec to new tracking refs pattern
+        # This is idempotent and safe to call every session
+        if git_ops is not None:
+            try:
+                if git_ops.migrate_fetch_config():
+                    logger.debug(
+                        "Migrated git notes fetch refspec to tracking refs pattern"
+                    )
+            except Exception as e:
+                logger.debug("Fetch refspec migration skipped: %s", e)
 
         # Build response guidance if enabled
         guidance_xml = ""

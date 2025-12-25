@@ -671,13 +671,24 @@ class GitOps:
         if result.returncode == 0 and base in result.stdout:
             status["push"] = True
 
-        # Check fetch refspec
+        # Check fetch refspec - detect both old and new patterns
+        # Old pattern: refs/notes/mem/*:refs/notes/mem/* (problematic, direct to local)
+        # New pattern: +refs/notes/mem/*:refs/notes/origin/mem/* (correct, tracking refs)
         result = self._run_git(
             ["config", "--get-all", "remote.origin.fetch"],
             check=False,
         )
-        if result.returncode == 0 and base in result.stdout:
-            status["fetch"] = True
+        if result.returncode == 0:
+            fetch_configs = result.stdout.strip()
+            old_pattern = f"{base}/*:{base}/*"
+            new_pattern = f"+{base}/*:refs/notes/origin/mem/*"
+            # Consider configured if either pattern is present
+            # Migration will handle converting old to new
+            if old_pattern in fetch_configs or new_pattern in fetch_configs:
+                status["fetch"] = True
+            # Track which pattern for migration detection
+            status["fetch_old"] = old_pattern in fetch_configs
+            status["fetch_new"] = new_pattern in fetch_configs
 
         # Check rewriteRef
         result = self._run_git(
@@ -728,14 +739,18 @@ class GitOps:
             )
             configured["push"] = result.returncode == 0
 
-        # Configure fetch for all mem/* refs
+        # Configure fetch for all mem/* refs using remote tracking refs pattern
+        # This fetches to refs/notes/origin/mem/* (tracking refs) instead of
+        # directly to refs/notes/mem/* (local refs) to avoid non-fast-forward
+        # rejection when notes diverge between local and remote.
+        # The + prefix forces updates to tracking refs (standard for tracking refs).
         if force or not current["fetch"]:
             result = self._run_git(
                 [
                     "config",
                     "--add",
                     "remote.origin.fetch",
-                    f"{base}/*:{base}/*",
+                    f"+{base}/*:refs/notes/origin/mem/*",
                 ],
                 check=False,
             )
@@ -763,6 +778,62 @@ class GitOps:
             configured["merge"] = result.returncode == 0
 
         return configured
+
+    def migrate_fetch_config(self) -> bool:
+        """Migrate from direct fetch to tracking refs pattern.
+
+        This method detects the old fetch refspec pattern that writes directly
+        to local refs (which fails on divergence) and migrates to the new
+        remote tracking refs pattern.
+
+        Returns:
+            True if migration occurred, False if already migrated or no config.
+
+        Note:
+            This method is idempotent - safe to call multiple times.
+        """
+        base = get_git_namespace()
+        old_pattern = f"{base}/*:{base}/*"
+        new_pattern = f"+{base}/*:refs/notes/origin/mem/*"
+
+        # Check current fetch configs
+        result = self._run_git(
+            ["config", "--get-all", "remote.origin.fetch"],
+            check=False,
+        )
+
+        if result.returncode != 0:
+            # No fetch config at all
+            return False
+
+        configs = result.stdout.strip().split("\n")
+
+        # Check if old pattern exists
+        has_old = any(old_pattern in c for c in configs)
+        has_new = any(new_pattern in c for c in configs)
+
+        if not has_old:
+            # Already migrated or never had old config
+            return False
+
+        if has_new:
+            # New config already exists, just remove old
+            self._run_git(
+                ["config", "--unset", "remote.origin.fetch", old_pattern],
+                check=False,
+            )
+            return True
+
+        # Remove old, add new
+        self._run_git(
+            ["config", "--unset", "remote.origin.fetch", old_pattern],
+            check=False,
+        )
+        self._run_git(
+            ["config", "--add", "remote.origin.fetch", new_pattern],
+            check=False,
+        )
+        return True
 
     def ensure_sync_configured(self) -> bool:
         """Ensure git notes sync is configured for this repository.
