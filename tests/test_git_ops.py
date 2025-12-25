@@ -1269,8 +1269,9 @@ def git_repo_with_remote(tmp_path: Path) -> tuple[Path, Path]:
         cwd=local_path,
         capture_output=True,
         text=True,
+        check=True,
     )
-    branch_name = branch_result.stdout.strip()
+    branch_name = branch_result.stdout.strip() or "main"
 
     subprocess.run(
         ["git", "push", "-u", "origin", branch_name],
