@@ -64,3 +64,17 @@ tags:
 
 | ID | Requirement | Rationale | Acceptance Criteria |
 |----|-------------|...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:39:32.457837+00:00'
+summary: '...`/memory:validate` | Detect misconfigured installs | Reports "incorrect
+  fetch refspec" if old pat'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...`/memory:validate` | Detect misconfigured installs | Reports "incorrect fetch refspec" if old pattern found |
+| FR-102 | Auto-migrate on session start | Seamless upgrade path | SessionStart hook...
