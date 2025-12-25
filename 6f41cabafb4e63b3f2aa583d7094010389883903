@@ -428,3 +428,20 @@ tags:
   - [ ] Detects old pattern and removes it
   - [ ] Adds new pattern if not present
   - [ ] Returns bool indicating if migration...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.851216+00:00'
+summary: '...1.2'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...1.2
+- **Acceptance Criteria**:
+  - [ ] Detects old pattern and removes it
+  - [ ] Adds new pattern if not present
+  - [ ] Returns bool indicating if migration occurred
+  - [ ] Idempotent - safe...
