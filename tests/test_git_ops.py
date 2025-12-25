@@ -1225,6 +1225,19 @@ def git_repo_with_remote(tmp_path: Path) -> tuple[Path, Path]:
         check=True,
         capture_output=True,
     )
+    # Configure git user in bare repo (needed for tests that append notes directly)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=remote_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=remote_path,
+        check=True,
+        capture_output=True,
+    )
 
     # Create local repository
     local_path = tmp_path / "local"
