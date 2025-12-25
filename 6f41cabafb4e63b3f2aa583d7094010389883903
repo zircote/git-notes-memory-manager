@@ -497,3 +497,23 @@ tags:
   - [ ] Reports "incorrect fetch refspec" if old pattern found
   - [ ] `--fix` triggers `migrate_fetch_config()`
   - [ ] Shows current refspec configuration...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.954730+00:00'
+summary: '...**Acceptance Criteria**:'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...**Acceptance Criteria**:
+  - [ ] All existing sync tests pass
+  - [ ] Mocks updated for new refspec pattern
+
+### Phase 4 Deliverables
+
+- [ ] Migration unit tests
+- [ ] Remote sync unit tests
+- [ ] Integration...
