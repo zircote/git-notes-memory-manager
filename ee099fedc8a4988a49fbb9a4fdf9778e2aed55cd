@@ -316,3 +316,17 @@ tags:
 ...now sets up.
 
 Let me update the test to use the new fetch pattern while keeping the old push pattern (since push still uses the same pattern):
+
+---
+type: patterns
+timestamp: '2025-12-25T23:10:49.091177+00:00'
+summary: 'else:'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+else:
+            # Git < 2.37: Use regex to match the exact pattern
+            # Escape special regex characters in the pattern for git config --unset...
