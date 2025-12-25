@@ -202,3 +202,21 @@ tags:
 2. Check for old pattern: `refs/notes/mem/*:refs/notes/mem/*`
 3. If found, remove old pattern
 4. Add new pattern: `+refs/notes...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:41:00.035594+00:00'
+summary: '...values'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...values
+2. Check for old pattern: `refs/notes/mem/*:refs/notes/mem/*`
+3. If found, remove old pattern
+4. Add new pattern: `+refs/notes/mem/*:refs/notes/origin/mem/*`
+5. Return migration status
+
+**Responsibilities...
