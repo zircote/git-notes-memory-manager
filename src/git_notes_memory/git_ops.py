@@ -23,7 +23,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from git_notes_memory.config import NAMESPACES, get_git_namespace
-from git_notes_memory.exceptions import StorageError, ValidationError
+from git_notes_memory.exceptions import (
+    INVALID_NAMESPACE_ERROR,
+    StorageError,
+    ValidationError,
+)
 from git_notes_memory.models import CommitInfo
 
 if TYPE_CHECKING:
@@ -834,6 +838,147 @@ class GitOps:
             check=False,
         )
         return True
+
+    # =========================================================================
+    # Remote Sync Operations
+    # =========================================================================
+
+    def fetch_notes_from_remote(
+        self,
+        namespaces: list[str] | None = None,
+    ) -> dict[str, bool]:
+        """Fetch notes from origin to tracking refs.
+
+        Fetches notes from the remote to refs/notes/origin/mem/* tracking refs.
+        This allows local notes to remain unchanged while remote state is captured.
+
+        Args:
+            namespaces: Specific namespaces to fetch, or None for all.
+
+        Returns:
+            Dict mapping namespace to fetch success.
+        """
+        base = get_git_namespace()
+        ns_list = namespaces if namespaces is not None else list(NAMESPACES)
+        results: dict[str, bool] = {}
+
+        for ns in ns_list:
+            try:
+                local_ref = f"{base}/{ns}"
+                tracking_ref = f"refs/notes/origin/mem/{ns}"
+                result = self._run_git(
+                    ["fetch", "origin", f"+{local_ref}:{tracking_ref}"],
+                    check=False,
+                )
+                results[ns] = result.returncode == 0
+            except Exception:
+                results[ns] = False
+
+        return results
+
+    def merge_notes_from_tracking(
+        self,
+        namespace: str,
+    ) -> bool:
+        """Merge tracking refs into local notes.
+
+        Uses Git's cat_sort_uniq merge strategy to combine notes from the
+        tracking ref (remote state) into the local notes ref.
+
+        Args:
+            namespace: Namespace to merge.
+
+        Returns:
+            True if merge succeeded or no tracking ref exists, False on error.
+        """
+        if namespace not in NAMESPACES:
+            raise INVALID_NAMESPACE_ERROR
+
+        tracking_ref = f"refs/notes/origin/mem/{namespace}"
+
+        # Check if tracking ref exists
+        result = self._run_git(
+            ["rev-parse", tracking_ref],
+            check=False,
+        )
+        if result.returncode != 0:
+            # No tracking ref to merge - not an error
+            return True
+
+        # Merge using configured cat_sort_uniq strategy
+        result = self._run_git(
+            [
+                "notes",
+                f"--ref=mem/{namespace}",
+                "merge",
+                "-s",
+                "cat_sort_uniq",
+                tracking_ref,
+            ],
+            check=False,
+        )
+        return result.returncode == 0
+
+    def push_notes_to_remote(self) -> bool:
+        """Push all notes to origin.
+
+        Pushes local notes to the remote repository. Uses the configured
+        push refspec (refs/notes/mem/*:refs/notes/mem/*).
+
+        Returns:
+            True if push succeeded, False otherwise.
+        """
+        base = get_git_namespace()
+        result = self._run_git(
+            ["push", "origin", f"{base}/*:{base}/*"],
+            check=False,
+        )
+        return result.returncode == 0
+
+    def sync_notes_with_remote(
+        self,
+        namespaces: list[str] | None = None,
+        *,
+        push: bool = True,
+    ) -> dict[str, bool]:
+        """Sync notes with remote using fetch → merge → push workflow.
+
+        This is the primary method for synchronizing notes between local
+        and remote repositories. It:
+        1. Fetches remote notes to tracking refs
+        2. Merges tracking refs into local notes using cat_sort_uniq
+        3. Pushes merged notes back to remote (optional)
+
+        Args:
+            namespaces: Specific namespaces to sync, or None for all.
+            push: Whether to push after merging.
+
+        Returns:
+            Dict mapping namespace to sync success.
+        """
+        ns_list = namespaces if namespaces is not None else list(NAMESPACES)
+        results: dict[str, bool] = {}
+
+        # Step 1: Fetch notes to tracking refs
+        fetch_results = self.fetch_notes_from_remote(ns_list)
+
+        # Step 2: Merge each namespace
+        for ns in ns_list:
+            if fetch_results.get(ns, False):
+                results[ns] = self.merge_notes_from_tracking(ns)
+            else:
+                # Fetch failed - mark as failed but continue with other namespaces
+                results[ns] = False
+
+        # Step 3: Push (if requested and any merges succeeded)
+        if push and any(results.values()):
+            push_success = self.push_notes_to_remote()
+            if not push_success:
+                # Push failed - note that merges still succeeded locally
+                # The notes are safe locally, just not pushed
+                pass
+
+        return results
 
     def ensure_sync_configured(self) -> bool:
         """Ensure git notes sync is configured for this repository.

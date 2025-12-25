@@ -509,6 +509,40 @@ class SyncService:
         logger.info("Repair complete: %d changes made", repairs)
         return repairs
 
+    # =========================================================================
+    # Remote Sync Operations
+    # =========================================================================
+
+    def sync_with_remote(
+        self,
+        *,
+        namespaces: list[str] | None = None,
+        push: bool = True,
+    ) -> dict[str, bool]:
+        """Synchronize notes with remote and reindex.
+
+        This is the primary entry point for remote synchronization. It:
+        1. Calls GitOps.sync_notes_with_remote() for fetch→merge→push workflow
+        2. Reindexes the local SQLite index after successful merges
+
+        Args:
+            namespaces: Specific namespaces to sync, or None for all.
+            push: Whether to push changes to remote.
+
+        Returns:
+            Dict mapping namespace to sync success.
+        """
+        git_ops = self._get_git_ops()
+
+        # Perform remote sync (fetch → merge → push)
+        results = git_ops.sync_notes_with_remote(namespaces, push=push)
+
+        # Reindex after successful sync to include fetched memories
+        if any(results.values()):
+            self.reindex()
+
+        return results
+
 
 # =============================================================================
 # Singleton Access (using ServiceRegistry)
