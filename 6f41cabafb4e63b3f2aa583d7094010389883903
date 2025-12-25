@@ -445,3 +445,22 @@ tags:
   - [ ] Adds new pattern if not present
   - [ ] Returns bool indicating if migration occurred
   - [ ] Idempotent - safe...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.877573+00:00'
+summary: '...all'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...all
+        return False
+
+    configs = result.stdout.strip().split("\n")
+
+    # Check if old pattern exists
+    has_old = any(old_pattern in c for c in configs)
+    has_new = any(new_pattern in...
