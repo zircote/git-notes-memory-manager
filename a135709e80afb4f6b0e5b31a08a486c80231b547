@@ -64,3 +64,20 @@ tags:
 
         Returns:
             True if successfully removed or not found, False on...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:57:21.069713+00:00'
+summary: '...origin.fetch", pattern],'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...origin.fetch", pattern],
+                check=False,
+            )
+            # Return code 5 means pattern not found, which is fine
+            return result.returncode in (0, 5)
+        else:...
