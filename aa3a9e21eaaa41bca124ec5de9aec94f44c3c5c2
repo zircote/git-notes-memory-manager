@@ -679,3 +679,19 @@ tags:
 ...patterns). However, I should update `test_ensure_sync_configured_already_configured` to use the NEW pattern since that's what `configure_sync()` now sets up.
 
 Let me update the test to use the new fetch...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.634896+00:00'
+summary: '...nothing to fetch (no remote notes yet)
+
+  2. `test_migration_from_old_to_new_pattern` - the old p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...nothing to fetch (no remote notes yet)
+2. `test_migration_from_old_to_new_pattern` - the old pattern is still present after migration
+
+Let me check the migration logic in git_ops:
