@@ -592,3 +592,23 @@ tags:
 - ✅ Migration path defined
 - ✅ Test coverage planned (Phase 5)
 - ✅...
+
+---
+type: progress
+timestamp: '2025-12-25T22:46:59.805711+00:00'
+summary: '---'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+---
+document_type: retrospective
+project_id: SPEC-2025-12-25-001
+completed: 2025-12-25T22:46:05Z
+outcome: success
+satisfaction: very_satisfied
+---
+
+# Fix Git Notes Fetch...
