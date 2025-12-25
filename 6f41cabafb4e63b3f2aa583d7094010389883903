@@ -127,3 +127,21 @@ tags:
 ...|--------|-----------|
 | Fetch target | `refs/notes/origin/mem/*` | Mirrors `refs/remotes/origin/*` pattern for branches |
 | Force prefix | `+` in refspec | Required for non-fast-forward updates to tracking...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:40:59.933503+00:00'
+summary: '...Responsibilities**:'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Responsibilities**:
+- Configure fetch refspec for remote tracking refs
+- Detect and migrate old configuration pattern
+- Validate refspec configuration
+
+**Interfaces**:
+- `configure_sync(force: bool)` - Set up...
