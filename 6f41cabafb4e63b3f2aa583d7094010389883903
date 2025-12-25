@@ -277,3 +277,23 @@ tags:
 - Handle edge cases (missing config, partial config)
 
 **Dependencies**:...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:41:00.138191+00:00'
+summary: '...status'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...status
+
+**Responsibilities**:
+- Detect old configuration pattern
+- Remove old pattern safely
+- Add new pattern
+- Handle edge cases (missing config, partial config)
+
+**Dependencies**: None (standalone git...
