@@ -430,3 +430,15 @@ tags:
 ---
 
 ## Step 6: Move to Completed
+
+---
+type: progress
+timestamp: '2025-12-25T23:09:05.973256+00:00'
+summary: 'The CLAUDE.md doesn''t have a "Completed Spec Projects" section yet. Let
+  me add one at the end:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+The CLAUDE.md doesn't have a "Completed Spec Projects" section yet. Let me add one at the end:
