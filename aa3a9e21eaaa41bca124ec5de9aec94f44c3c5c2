@@ -838,3 +838,17 @@ tags:
    - Real-world sync workflows with diverged refs
 
 5. **Service Boundary...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:47:34.588150+00:00'
+summary: '...idempotent migration, complete documentation'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...idempotent migration, complete documentation
+- **What to improve:** Git version assumptions, config pattern matching, status check keys
+- **Key learnings:** Git refspec patterns, progressive integration...
