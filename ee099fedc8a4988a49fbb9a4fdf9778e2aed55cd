@@ -262,3 +262,15 @@ tags:
 ---
 
 ...problem is that the migration adds the NEW pattern but the fixture already had some fetch pattern from the `git push -u` command. Let me investigate:
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.697506+00:00'
+summary: '...old pattern. Let me check if these are in the mocked tests that should
+  be testing the old patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...old pattern. Let me check if these are in the mocked tests that should be testing the old pattern detection (which is correct) or if they're testing the configuration setup:
