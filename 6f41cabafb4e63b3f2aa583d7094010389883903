@@ -183,3 +183,22 @@ tags:
 
 ```python
 def migrate_fetch_config(self) -> bool:...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:41:00.009642+00:00'
+summary: '..."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+..."""
+```
+
+**Migration Logic**:
+1. Read current `remote.origin.fetch` values
+2. Check for old pattern: `refs/notes/mem/*:refs/notes/mem/*`
+3. If found, remove old pattern
+4. Add new pattern: `+refs/notes...
