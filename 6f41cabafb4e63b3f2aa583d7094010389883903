@@ -50,3 +50,18 @@ tags:
 │                                                                             │
 │   Solution: Fetch to tracking refs, then merge using cat_sort_uniq         │
 │...
+
+---
+type: progress
+timestamp: '2025-12-25T21:43:53.724777+00:00'
+summary: '...Findings'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...Findings
+- Root cause: Fetch refspec writes directly to local refs, failing on divergence
+- Solution: Use remote tracking refs pattern (standard Git workflow)
+- Migration: Auto-migrate on session...
