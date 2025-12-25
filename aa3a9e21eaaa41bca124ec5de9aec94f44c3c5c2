@@ -511,3 +511,15 @@ tags:
 ---
 
 I see the issue with migration - the `--unset` with a pattern needs regex escaping. The pattern `refs/notes/mem/*:refs/notes/mem/*` has `*` which is interpreted as a regex. Let me check if...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.086485+00:00'
+summary: '...adds the config, but I now need to check if the fixture''s initial config
+  includes the new patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...adds the config, but I now need to check if the fixture's initial config includes the new pattern too. Let me look more carefully - the fixture creates a bare repo with `configure_sync()` not...
