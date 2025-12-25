@@ -584,3 +584,20 @@ tags:
 
 3. **Logic in command handler**:
    - Why not chosen: Not reusable; harder to test
+
+---
+type: patterns
+timestamp: '2025-12-25T21:43:53.697216+00:00'
+summary: '...documentation'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...documentation
+- Analyzed the root cause of non-fast-forward rejection
+- Identified the correct pattern: `+refs/notes/mem/*:refs/notes/origin/mem/*`
+
+### Key Findings
+- Root cause: Fetch refspec...
