@@ -180,13 +180,31 @@ def capture_service(tmp_path, monkeypatch):
 |----------|-------------|---------|
 | `HOOK_ENABLED` | Master switch for all hooks | `true` |
 | `HOOK_SESSION_START_ENABLED` | Enable SessionStart context injection | `true` |
+| `HOOK_SESSION_START_FETCH_REMOTE` | Fetch notes from remote on session start | `false` |
 | `HOOK_USER_PROMPT_ENABLED` | Enable capture marker detection | `false` |
 | `HOOK_POST_TOOL_USE_ENABLED` | Enable file-contextual memory injection | `true` |
 | `HOOK_PRE_COMPACT_ENABLED` | Enable auto-capture before compaction | `true` |
 | `HOOK_STOP_ENABLED` | Enable Stop hook processing | `true` |
+| `HOOK_STOP_PUSH_REMOTE` | Push notes to remote on session stop | `false` |
 | `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
 | `HOOK_SESSION_START_INCLUDE_GUIDANCE` | Include response guidance templates | `true` |
 | `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance level: minimal/standard/detailed | `standard` |
+
+### Remote Sync (Team Collaboration)
+
+For team environments where multiple developers share memories:
+
+```bash
+# Enable automatic sync with remote (opt-in)
+export HOOK_SESSION_START_FETCH_REMOTE=true  # Fetch from remote on session start
+export HOOK_STOP_PUSH_REMOTE=true            # Push to remote on session stop
+```
+
+With these enabled, memories are automatically synchronized with the origin repository:
+- **Session start**: Fetches and merges remote notes using `cat_sort_uniq` strategy
+- **Session stop**: Pushes local notes to remote
+
+Manual sync is always available via `/memory:sync --remote`.
 
 ## Code Intelligence (LSP)
 
@@ -225,3 +243,14 @@ LSP hooks are configured in `.claude/hooks.json` for immediate feedback on Pytho
 - If hooks report errors, fix them before proceeding to the next task
 - Type errors are blocking in this project (mypy strict mode)
 - Use hook output to guide fixes, not guesswork
+
+
+## Completed Spec Projects
+
+- `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes Fetch Refspec
+  - Completed: 2025-12-25
+  - Outcome: success
+  - GitHub Issue: [#18](https://github.com/zircote/git-notes-memory/issues/18)
+  - Features: Remote tracking refs pattern, idempotent migration, hook-based auto-sync, proper fetch→merge→push workflow
+  - Deliverables: 26 tests, 5 phases, 20 tasks, 7 ADRs, complete documentation (2,648 lines)
+  - Key docs: REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, RETROSPECTIVE.md

@@ -28,6 +28,7 @@ Environment Variables:
     HOOK_STOP_ENABLED: Enable this hook (default: true)
     HOOK_STOP_PROMPT_UNCAPTURED: Prompt for uncaptured content (default: true)
     HOOK_STOP_SYNC_INDEX: Sync index on session end (default: true)
+    HOOK_STOP_PUSH_REMOTE: Push notes to remote on stop (default: false)
     HOOK_DEBUG: Enable debug logging (default: false)
 """
 
@@ -467,6 +468,22 @@ def main() -> None:
                 )
             elif not sync_result.get("success"):
                 logger.warning("Index sync failed: %s", sync_result.get("error"))
+
+        # Push notes to remote if enabled (opt-in via env var)
+        # This ensures local memories are shared with collaborators
+        if config.stop_push_remote:
+            cwd = input_data.get("cwd")
+            if cwd:
+                try:
+                    from git_notes_memory.git_ops import GitOps
+
+                    git_ops = GitOps(repo_path=cwd)
+                    if git_ops.push_notes_to_remote():
+                        logger.debug("Pushed notes to remote on session stop")
+                    else:
+                        logger.debug("Push to remote failed (will retry next session)")
+                except Exception as e:
+                    logger.debug("Remote push on stop skipped: %s", e)
 
         # Output result
         _write_output(

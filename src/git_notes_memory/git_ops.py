@@ -822,15 +822,23 @@ class GitOps:
 
         if has_new:
             # New config already exists, just remove old
+            # Use --fixed-value to match literal asterisks (git 2.37+)
             self._run_git(
-                ["config", "--unset", "remote.origin.fetch", old_pattern],
+                [
+                    "config",
+                    "--unset",
+                    "--fixed-value",
+                    "remote.origin.fetch",
+                    old_pattern,
+                ],
                 check=False,
             )
             return True
 
         # Remove old, add new
+        # Use --fixed-value to match literal asterisks (git 2.37+)
         self._run_git(
-            ["config", "--unset", "remote.origin.fetch", old_pattern],
+            ["config", "--unset", "--fixed-value", "remote.origin.fetch", old_pattern],
             check=False,
         )
         self._run_git(
@@ -1010,8 +1018,11 @@ class GitOps:
         # Check current configuration
         status = self.is_sync_configured()
 
+        # Core config keys that must be True for sync to work
+        core_keys = ["push", "fetch", "rewrite", "merge"]
+
         # If already fully configured, nothing to do
-        if all(status.values()):
+        if all(status.get(k, False) for k in core_keys):
             return True
 
         # Configure missing parts
@@ -1019,7 +1030,7 @@ class GitOps:
 
         # Verify configuration
         final_status = self.is_sync_configured()
-        return all(final_status.values())
+        return all(final_status.get(k, False) for k in core_keys)
 
     # =========================================================================
     # Repository Information
