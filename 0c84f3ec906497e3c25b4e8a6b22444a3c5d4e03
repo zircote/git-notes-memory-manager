@@ -1,0 +1,197 @@
+---
+type: decisions
+timestamp: '2025-12-25T22:19:51.640083+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Confirmed: The `+` prefix in refspec is the stan...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Confirmed: The `+` prefix in refspec is the standard solution
+## Summary
+The Git documentation confirms that the `+` prefix in a refspec tells Git to update the reference even if it isn't a fast-forward.
+
+## Rationale
+- Current code: `f"{base}/*:{base}/*"` - fetches directly to local refs, fails on divergence
+- Correct code: `f"+{base}/*:refs/notes/origin/mem/*"` - fetches to remote tracking refs with force-update
+- The `+` prefix allows non-fast-forward updates which is necessary for notes that diverge across machines
+
+## Related Files
+- src/git_notes_memory/git_ops.py:731-742
+
+---
+type: decisions
+timestamp: '2025-12-25T22:19:51.758107+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Approved specification for "Fix Git Notes Fetch ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Approved specification for "Fix Git Notes Fetch Refspec"
+## Summary
+Comprehensive specification addressing GitHub Issue #18 (git notes fetch refspec causing non-fast-forward errors) has been approved for implementation.
+
+## Rationale
+- **Complete documentation**: 1,876 lines across 6 documents
+- **Clear solution**: Change fetch refspec from `refs/notes/mem/*:refs/notes/mem/*` to `+refs/notes/mem/*:refs/notes/origin/mem/*`
+- **Zero-impact migration**: Auto-migrate on SessionStart hook
+- **Opt-in auto-sync**: NEW hook-based fetch on start + push on stop (FR-104, FR-105)
+- **Well-planned**: 18 tasks across 5 phases with clear dependencies
+- **Test coverage**: Dedicated Phase 5 for comprehensive testing
+- **7 ADRs** documenting all major decisions
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md:5 (status updated)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md:5-10 (approval recorded)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/APPROVAL_RECORD.md (audit trail created)
+
+---
+type: decisions
+timestamp: '2025-12-25T22:31:06.194232+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Confirmed: The `+` prefix in refspec is the stan...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Confirmed: The `+` prefix in refspec is the standard solution
+## Summary
+The Git documentation confirms that the `+` prefix in a refspec tells Git to update the reference even if it isn't a fast-forward.
+
+## Rationale
+- Current code: `f"{base}/*:{base}/*"` - fetches directly to local refs, fails on divergence
+- Correct code: `f"+{base}/*:refs/notes/origin/mem/*"` - fetches to remote tracking refs with force-update
+- The `+` prefix allows non-fast-forward updates which is necessary for notes that diverge across machines
+
+## Related Files
+- src/git_notes_memory/git_ops.py:731-742
+
+---
+type: decisions
+timestamp: '2025-12-25T22:31:06.309471+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Approved specification for "Fix Git Notes Fetch ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Approved specification for "Fix Git Notes Fetch Refspec"
+## Summary
+Comprehensive specification addressing GitHub Issue #18 (git notes fetch refspec causing non-fast-forward errors) has been approved for implementation.
+
+## Rationale
+- **Complete documentation**: 1,876 lines across 6 documents
+- **Clear solution**: Change fetch refspec from `refs/notes/mem/*:refs/notes/mem/*` to `+refs/notes/mem/*:refs/notes/origin/mem/*`
+- **Zero-impact migration**: Auto-migrate on SessionStart hook
+- **Opt-in auto-sync**: NEW hook-based fetch on start + push on stop (FR-104, FR-105)
+- **Well-planned**: 18 tasks across 5 phases with clear dependencies
+- **Test coverage**: Dedicated Phase 5 for comprehensive testing
+- **7 ADRs** documenting all major decisions
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md:5 (status updated)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md:5-10 (approval recorded)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/APPROVAL_RECORD.md (audit trail created)
+
+---
+type: decisions
+timestamp: '2025-12-25T22:43:33.709062+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Confirmed: The `+` prefix in refspec is the stan...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Confirmed: The `+` prefix in refspec is the standard solution
+## Summary
+The Git documentation confirms that the `+` prefix in a refspec tells Git to update the reference even if it isn't a fast-forward.
+
+## Rationale
+- Current code: `f"{base}/*:{base}/*"` - fetches directly to local refs, fails on divergence
+- Correct code: `f"+{base}/*:refs/notes/origin/mem/*"` - fetches to remote tracking refs with force-update
+- The `+` prefix allows non-fast-forward updates which is necessary for notes that diverge across machines
+
+## Related Files
+- src/git_notes_memory/git_ops.py:731-742
+
+---
+type: decisions
+timestamp: '2025-12-25T22:43:33.839858+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Approved specification for "Fix Git Notes Fetch ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Approved specification for "Fix Git Notes Fetch Refspec"
+## Summary
+Comprehensive specification addressing GitHub Issue #18 (git notes fetch refspec causing non-fast-forward errors) has been approved for implementation.
+
+## Rationale
+- **Complete documentation**: 1,876 lines across 6 documents
+- **Clear solution**: Change fetch refspec from `refs/notes/mem/*:refs/notes/mem/*` to `+refs/notes/mem/*:refs/notes/origin/mem/*`
+- **Zero-impact migration**: Auto-migrate on SessionStart hook
+- **Opt-in auto-sync**: NEW hook-based fetch on start + push on stop (FR-104, FR-105)
+- **Well-planned**: 18 tasks across 5 phases with clear dependencies
+- **Test coverage**: Dedicated Phase 5 for comprehensive testing
+- **7 ADRs** documenting all major decisions
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md:5 (status updated)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md:5-10 (approval recorded)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/APPROVAL_RECORD.md (audit trail created)
+
+---
+type: decisions
+timestamp: '2025-12-25T22:48:33.323575+00:00'
+summary: 'Confirmed: The `+` prefix in refspec is the standard solution'
+---
+
+Confirmed: The `+` prefix in refspec is the standard solution
+## Summary
+The Git documentation confirms that the `+` prefix in a refspec tells Git to update the reference even if it isn't a fast-forward.
+
+## Rationale
+- Current code: `f"{base}/*:{base}/*"` - fetches directly to local refs, fails on divergence
+- Correct code: `f"+{base}/*:refs/notes/origin/mem/*"` - fetches to remote tracking refs with force-update
+- The `+` prefix allows non-fast-forward updates which is necessary for notes that diverge across machines
+
+## Related Files
+- src/git_notes_memory/git_ops.py:731-742
+
+---
+type: decisions
+timestamp: '2025-12-25T22:48:33.379883+00:00'
+summary: Approved specification for "Fix Git Notes Fetch Refspec"
+---
+
+Approved specification for "Fix Git Notes Fetch Refspec"
+## Summary
+Comprehensive specification addressing GitHub Issue #18 (git notes fetch refspec causing non-fast-forward errors) has been approved for implementation.
+
+## Rationale
+- **Complete documentation**: 1,876 lines across 6 documents
+- **Clear solution**: Change fetch refspec from `refs/notes/mem/*:refs/notes/mem/*` to `+refs/notes/mem/*:refs/notes/origin/mem/*`
+- **Zero-impact migration**: Auto-migrate on SessionStart hook
+- **Opt-in auto-sync**: NEW hook-based fetch on start + push on stop (FR-104, FR-105)
+- **Well-planned**: 18 tasks across 5 phases with clear dependencies
+- **Test coverage**: Dedicated Phase 5 for comprehensive testing
+- **7 ADRs** documenting all major decisions
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md:5 (status updated)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md:5-10 (approval recorded)
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/APPROVAL_RECORD.md (audit trail created)
