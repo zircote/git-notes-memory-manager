@@ -1,0 +1,854 @@
+---
+type: patterns
+timestamp: '2025-12-25T22:19:51.808691+00:00'
+summary: '...Implemented
+
+  **Phase 1: Core Fix** (4 tasks, 1-2 hours)
+
+  - Update fetch refspec to use remote t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Implemented
+
+**Phase 1: Core Fix** (4 tasks, 1-2 hours)
+- Update fetch refspec to use remote tracking refs pattern
+- Add migration detection for old/new patterns
+- Implement `migrate_fetch_config()` method
+-...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:19:51.847489+00:00'
+summary: '...at line 738 (`f"{base}/*:{base}/*"`) writes directly to local refs. This
+  is the problematic pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...at line 738 (`f"{base}/*:{base}/*"`) writes directly to local refs. This is the problematic pattern that causes "non-fast-forward rejected" errors when notes diverge. The fix changes this to...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:19:51.888482+00:00'
+summary: '...changes this to use remote tracking refs with the `+` force prefix, following
+  Git''s standard p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...changes this to use remote tracking refs with the `+` force prefix, following Git's standard pattern for handling remote refs.
+`─────────────────────────────────────────────────`
+
+Now I'll implement...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:19:51.929219+00:00'
+summary: '...add a `--remote` flag that triggers the new `sync_with_remote()` method.
+  This follows the patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...add a `--remote` flag that triggers the new `sync_with_remote()` method. This follows the pattern of extending existing commands rather than creating new ones.
+`─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:22:02.756043+00:00'
+summary: '...status.get(''fetch_old'') and not status.get(''fetch_new''):'
+tags:
+- auto-captured
+- post-tool-use
+- file:sync.md
+---
+
+...status.get('fetch_old') and not status.get('fetch_new'):
+        print('**Note**: Old fetch pattern detected. Will be migrated on next session start.')
+else:
+    print('**Status**: Remote sync...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:22:49.426215+00:00'
+summary: '...sync_status.get("fetch") and sync_status.get("push"):'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...sync_status.get("fetch") and sync_status.get("push"):
+        # Check for old vs new fetch pattern
+        if sync_status.get("fetch_new"):
+            test_pass("Fetch refspec", "Using tracking...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:22:49.446570+00:00'
+summary: '...sync_status.get("fetch_new"):'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...sync_status.get("fetch_new"):
+            test_pass("Fetch refspec", "Using tracking refs pattern (recommended)")
+        elif sync_status.get("fetch_old"):
+            if FIX_ISSUES:...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:22:49.464816+00:00'
+summary: '...git_ops.migrate_fetch_config():'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...git_ops.migrate_fetch_config():
+                    test_pass("Fetch refspec", "Migrated from old pattern to tracking refs")
+                else:
+                    test_warn("Fetch refspec", "Migration...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:22:49.483546+00:00'
+summary: '...intervention needed")'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...intervention needed")
+            else:
+                test_warn("Fetch refspec", "Using old pattern - run with --fix to migrate")
+        else:
+            test_pass("Fetch refspec", "Configured")...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:23:42.307040+00:00'
+summary: '...repo, git notes accessible |'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...repo, git notes accessible |
+| **Remote Sync Config** | Fetch/push refspecs, tracking refs pattern vs old pattern |
+| **Index Health** | Index exists, readable, consistent with git notes |
+|...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:23:42.326447+00:00'
+summary: '...accessible |'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...accessible |
+| **Remote Sync Config** | Fetch/push refspecs, tracking refs pattern vs old pattern |
+| **Index Health** | Index exists, readable, consistent with git notes |
+| **Hook Entry Points**...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:23:55.178379+00:00'
+summary: '...sync` in plugin directory |'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...sync` in plugin directory |
+| Not in git repo | Navigate to a git repository |
+| Old fetch pattern | Use `--fix` to migrate, or restart session (auto-migrates) |
+| Remote sync not configured...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:27:14.375173+00:00'
+summary: '# Migrate from old fetch refspec to new tracking refs pattern'
+tags:
+- auto-captured
+- post-tool-use
+- file:session_start_handler.py
+---
+
+# Migrate from old fetch refspec to new tracking refs pattern
+        # This is idempotent and safe to call every session
+        if git_ops is not None:...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:30:55.878751+00:00'
+summary: '...test_migrate_old_pattern_to_new(self, tmp_path: Path) -> None:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...test_migrate_old_pattern_to_new(self, tmp_path: Path) -> None:
+        """Test migration from old pattern to new tracking refs."""
+        git = GitOps(tmp_path)
+        config_calls: list[list[str]]...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:30:55.901818+00:00'
+summary: '..."--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+..."--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return old pattern
+                result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            elif "--unset"...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:30:55.924289+00:00'
+summary: '..."--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+..."--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return new pattern (no old pattern)
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:30:55.945049+00:00'
+summary: '...result = git.migrate_fetch_config()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...result = git.migrate_fetch_config()
+            # No migration needed - no old pattern
+            assert result is False
+
+    def test_migrate_both_patterns_removes_old(self, tmp_path:...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:30:55.963680+00:00'
+summary: '...======================================================================='
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...=======================================================================
+# GitOps is_sync_configured Pattern Detection Tests
+# =============================================================================
+
+class...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:31:06.424160+00:00'
+summary: '...validates the git notes fetch refspec configuration - checking if it
+  uses the old problematic ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...validates the git notes fetch refspec configuration - checking if it uses the old problematic pattern or the new tracking refs pattern, and warning if migration is needed.
+`─────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:31:06.463146+00:00'
+summary: '...Implemented
+
+  **Phase 1: Core Fix** (4 tasks, 1-2 hours)
+
+  - Update fetch refspec to use remote t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Implemented
+
+**Phase 1: Core Fix** (4 tasks, 1-2 hours)
+- Update fetch refspec to use remote tracking refs pattern
+- Add migration detection for old/new patterns
+- Implement `migrate_fetch_config()` method
+-...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:31:06.502282+00:00'
+summary: '...at line 738 (`f"{base}/*:{base}/*"`) writes directly to local refs. This
+  is the problematic pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...at line 738 (`f"{base}/*:{base}/*"`) writes directly to local refs. This is the problematic pattern that causes "non-fast-forward rejected" errors when notes diverge. The fix changes this to...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:31:06.539938+00:00'
+summary: '...changes this to use remote tracking refs with the `+` force prefix, following
+  Git''s standard p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...changes this to use remote tracking refs with the `+` force prefix, following Git's standard pattern for handling remote refs.
+`─────────────────────────────────────────────────`
+
+Now I'll implement...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:31:06.578626+00:00'
+summary: '...add a `--remote` flag that triggers the new `sync_with_remote()` method.
+  This follows the patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...add a `--remote` flag that triggers the new `sync_with_remote()` method. This follows the pattern of extending existing commands rather than creating new ones.
+`─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.155499+00:00'
+summary: '...Configure sync'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...Configure sync
+        git.configure_sync()
+
+        # Check fetch refspec uses new tracking refs pattern
+        result = subprocess.run(
+            ["git", "config", "--get-all", "remote.origin.fetch"],...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.174741+00:00'
+summary: '...)'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...)
+        fetch_lines = result.stdout.strip().split("\n")
+
+        # Should contain the new pattern
+        assert any(
+            "+refs/notes/mem/*:refs/notes/origin/mem/*" in line for line...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.236778+00:00'
+summary: '...= git_repo_with_remote'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...= git_repo_with_remote
+        git = GitOps(local_path)
+
+        # Manually configure OLD pattern (simulating pre-migration state)
+        subprocess.run(
+            [
+                "git",...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.256162+00:00'
+summary: '...local_path,'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...local_path,
+            check=True,
+            capture_output=True,
+        )
+
+        # Verify old pattern exists
+        status = git.is_sync_configured()
+        assert status.get("fetch_old") is...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.274761+00:00'
+summary: '...migrated = git.migrate_fetch_config()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...migrated = git.migrate_fetch_config()
+        assert migrated is True
+
+        # Verify new pattern exists and old is gone
+        status = git.is_sync_configured()
+        assert status.get("fetch_new...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:39:14.446103+00:00'
+summary: '...notes/mem/*:refs/notes/mem/*"'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...notes/mem/*:refs/notes/mem/*"
+            elif "remote.origin.fetch" in args_str:
+                # New pattern uses tracking refs
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:39:57.869979+00:00'
+summary: '...elif "--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # New pattern with tracking refs
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:40:14.608592+00:00'
+summary: '...elif "--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # New pattern uses tracking refs
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:33.963947+00:00'
+summary: '...validates the git notes fetch refspec configuration - checking if it
+  uses the old problematic ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...validates the git notes fetch refspec configuration - checking if it uses the old problematic pattern or the new tracking refs pattern, and warning if migration is needed.
+`─────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.004584+00:00'
+summary: I see the issue with migration - the `--unset` with a pattern needs regex
+  escaping. The pattern `...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the issue with migration - the `--unset` with a pattern needs regex escaping. The pattern `refs/notes/mem/*:refs/notes/mem/*` has `*` which is interpreted...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.045163+00:00'
+summary: I see the issue with migration - the `--unset` with a pattern needs regex
+  escaping. The pattern `...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the issue with migration - the `--unset` with a pattern needs regex escaping. The pattern `refs/notes/mem/*:refs/notes/mem/*` has `*` which is interpreted as a regex. Let me check if...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.086485+00:00'
+summary: '...adds the config, but I now need to check if the fixture''s initial config
+  includes the new patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...adds the config, but I now need to check if the fixture's initial config includes the new pattern too. Let me look more carefully - the fixture creates a bare repo with `configure_sync()` not...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.126813+00:00'
+summary: '...wildcard. I need to fix the `migrate_fetch_config` method to use `--unset-all`
+  with a proper r...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...wildcard. I need to fix the `migrate_fetch_config` method to use `--unset-all` with a proper regex pattern or use `--fixed-value` (if available in git 2.37+).
+
+Let me check git version and update the...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.167484+00:00'
+summary: '...Implemented
+
+  **Phase 1: Core Fix** (4 tasks, 1-2 hours)
+
+  - Update fetch refspec to use remote t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Implemented
+
+**Phase 1: Core Fix** (4 tasks, 1-2 hours)
+- Update fetch refspec to use remote tracking refs pattern
+- Add migration detection for old/new patterns
+- Implement `migrate_fetch_config()` method
+-...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.208499+00:00'
+summary: '...at line 738 (`f"{base}/*:{base}/*"`) writes directly to local refs. This
+  is the problematic pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...at line 738 (`f"{base}/*:{base}/*"`) writes directly to local refs. This is the problematic pattern that causes "non-fast-forward rejected" errors when notes diverge. The fix changes this to...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.249728+00:00'
+summary: '...changes this to use remote tracking refs with the `+` force prefix, following
+  Git''s standard p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...changes this to use remote tracking refs with the `+` force prefix, following Git's standard pattern for handling remote refs.
+`─────────────────────────────────────────────────`
+
+Now I'll implement...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.294848+00:00'
+summary: '...add a `--remote` flag that triggers the new `sync_with_remote()` method.
+  This follows the patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...add a `--remote` flag that triggers the new `sync_with_remote()` method. This follows the pattern of extending existing commands rather than creating new ones.
+`─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.344281+00:00'
+summary: '...test again:
+
+  1. Fixture creates repo and pushes initial commit
+
+  2. Test manually adds old fetch ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...test again:
+1. Fixture creates repo and pushes initial commit
+2. Test manually adds old fetch pattern
+3. Test calls `migrate_fetch_config()`
+4. After migration, both old AND new patterns still...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.385799+00:00'
+summary: Using `--unset-all` with a regex pattern works. The issue is that the `*`
+  in git refspecs is bein...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Using `--unset-all` with a regex pattern works. The issue is that the `*` in git refspecs is being interpreted as a regex wildcard....
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.428668+00:00'
+summary: I see the pattern - tests use `load_hook_config(env)` with environment variables.
+  Let me add test...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the pattern - tests use `load_hook_config(env)` with environment variables. Let me add tests for the new...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.472200+00:00'
+summary: This test (around line 545) is testing the old pattern for `is_sync_configured()`.
+  Since the code...
+tags:
+- auto-captured
+- pre-compact
+---
+
+This test (around line 545) is testing the old pattern for `is_sync_configured()`. Since the code now detects both old and new patterns, this test...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.512881+00:00'
+summary: These tests are testing existing behavior and they're using the OLD pattern
+  which is still valid ...
+tags:
+- auto-captured
+- pre-compact
+---
+
+These tests are testing existing behavior and they're using the OLD pattern which is still valid for detection purposes (the `is_sync_configured` function detects both...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.553908+00:00'
+summary: '...patterns). However, I should update `test_ensure_sync_configured_already_configured`
+  to use th...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...patterns). However, I should update `test_ensure_sync_configured_already_configured` to use the NEW pattern since that's what `configure_sync()` now sets up.
+
+Let me update the test to use the new fetch...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.634896+00:00'
+summary: '...nothing to fetch (no remote notes yet)
+
+  2. `test_migration_from_old_to_new_pattern` - the old p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...nothing to fetch (no remote notes yet)
+2. `test_migration_from_old_to_new_pattern` - the old pattern is still present after migration
+
+Let me check the migration logic in git_ops:
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.675561+00:00'
+summary: '...migration, both old AND new patterns still exist
+
+  The problem is that the migration adds the N...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...migration, both old AND new patterns still exist
+
+The problem is that the migration adds the NEW pattern but the fixture already had some fetch pattern from the `git push -u` command. Let me investigate:
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.717319+00:00'
+summary: '...problem is that the migration adds the NEW pattern but the fixture already
+  had some fetch patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...problem is that the migration adds the NEW pattern but the fixture already had some fetch pattern from the `git push -u` command. Let me investigate:
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.758664+00:00'
+summary: '...old pattern. Let me check if these are in the mocked tests that should
+  be testing the old patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...old pattern. Let me check if these are in the mocked tests that should be testing the old pattern detection (which is correct) or if they're testing the configuration setup:
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.800407+00:00'
+summary: '...new patterns, this test should still pass but it would be good to update
+  it to use the new pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...new patterns, this test should still pass but it would be good to update it to use the new pattern and test both detection modes. Let me check what the test at line 627 is:
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.845938+00:00'
+summary: '...since that''s what `configure_sync()` now sets up.
+
+  Let me update the test to use the new fetch...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...since that's what `configure_sync()` now sets up.
+
+Let me update the test to use the new fetch pattern while keeping the old push pattern (since push still uses the same pattern):
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.888121+00:00'
+summary: '...now sets up.
+
+  Let me update the test to use the new fetch pattern while keeping the old push p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...now sets up.
+
+Let me update the test to use the new fetch pattern while keeping the old push pattern (since push still uses the same pattern):
+
+---
+type: patterns
+timestamp: '2025-12-25T22:46:59.826101+00:00'
+summary: '...`master` branch, but modern git uses `main`. Fixed by dynamic branch
+  detection.'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...`master` branch, but modern git uses `main`. Fixed by dynamic branch detection.
+2. **Config Pattern Matching** - Didn't initially account for `--unset` interpreting `*` as regex. Required `--fixed-value...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:46:59.846073+00:00'
+summary: '...Key Learnings'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...Key Learnings
+
+### Technical Learnings
+
+1. **Git Refspec Patterns** - Remote tracking refs pattern (`+refs/notes/mem/*:refs/notes/origin/mem/*`) mirrors how git handles branch tracking (`refs/remotes...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:46:59.865835+00:00'
+summary: '...`*`, git interprets them as regex by default. The `--fixed-value` flag
+  (git 2.37+) treats the pat'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...`*`, git interprets them as regex by default. The `--fixed-value` flag (git 2.37+) treats the pattern as a literal string.
+
+3. **Notes Merge Strategy** - The `cat_sort_uniq` strategy is perfect...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:46:59.885336+00:00'
+summary: '...with mocks didn''t catch:'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...with mocks didn't catch:
+   - Default branch name differences across git versions
+   - Config pattern matching behavior
+   - Real-world sync workflows with diverged refs
+
+5. **Service Boundary...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:47:34.588150+00:00'
+summary: '...idempotent migration, complete documentation'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...idempotent migration, complete documentation
+- **What to improve:** Git version assumptions, config pattern matching, status check keys
+- **Key learnings:** Git refspec patterns, progressive integration...

@@ -1,0 +1,121 @@
+---
+type: patterns
+timestamp: '2025-12-25T22:13:55.604574+00:00'
+summary: '# Configure fetch for all mem/* refs using remote tracking refs pattern'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+# Configure fetch for all mem/* refs using remote tracking refs pattern
+        # This fetches to refs/notes/origin/mem/* (tracking refs) instead of
+        # directly...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:08.345568+00:00'
+summary: '# Check fetch refspec - detect both old and new patterns'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+# Check fetch refspec - detect both old and new patterns
+        # Old pattern: refs/notes/mem/*:refs/notes/mem/* (problematic, direct to local)
+        # New pattern: +refs/notes...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:08.366967+00:00'
+summary: '...Old pattern: refs/notes/mem/*:refs/notes/mem/* (problematic, direct to
+  local)'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...Old pattern: refs/notes/mem/*:refs/notes/mem/* (problematic, direct to local)
+        # New pattern: +refs/notes/mem/*:refs/notes/origin/mem/* (correct, tracking refs)
+        result = self._run_git(...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:08.388044+00:00'
+summary: '...new_pattern = f"+{base}/*:refs/notes/origin/mem/*"'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...new_pattern = f"+{base}/*:refs/notes/origin/mem/*"
+            # Consider configured if either pattern is present
+            # Migration will handle converting old to new
+            if old_pattern...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:08.409795+00:00'
+summary: '...new_pattern in fetch_configs:'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...new_pattern in fetch_configs:
+                status["fetch"] = True
+            # Track which pattern for migration detection
+            status["fetch_old"] = old_pattern in fetch_configs...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:33.913469+00:00'
+summary: '...direct fetch to tracking refs pattern.'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...direct fetch to tracking refs pattern.
+
+        This method detects the old fetch refspec pattern that writes directly
+        to local refs (which fails on divergence) and migrates to the...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:33.933171+00:00'
+summary: '...return False'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+...return False
+
+        configs = result.stdout.strip().split("\n")
+
+        # Check if old pattern exists
+        has_old = any(old_pattern in c for c in configs)
+        has_new = any(new_pattern...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:54.804785+00:00'
+summary: '...configure git notes sync: %s", e)'
+tags:
+- auto-captured
+- post-tool-use
+- file:session_start_handler.py
+---
+
+...configure git notes sync: %s", e)
+
+        # Migrate from old fetch refspec to new tracking refs pattern
+        # This is idempotent and safe to call every session
+        if git_ops is not None:...
