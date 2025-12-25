@@ -237,3 +237,19 @@ tags:
 ..."--get-all" in args_str and "remote.origin.fetch" in args_str:
                 # Return new pattern (no old pattern)
                 result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:30:55.945049+00:00'
+summary: '...result = git.migrate_fetch_config()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...result = git.migrate_fetch_config()
+            # No migration needed - no old pattern
+            assert result is False
+
+    def test_migrate_both_patterns_removes_old(self, tmp_path:...
