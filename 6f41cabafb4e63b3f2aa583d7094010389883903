@@ -164,3 +164,22 @@ tags:
 ### Component 2: Remote Sync Workflow
 
 **Purpose...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:40:59.984186+00:00'
+summary: '...3: Migration Handler'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...3: Migration Handler
+
+**Purpose**: Migrate existing installations from old to new refspec pattern
+
+**Location**: New method in `GitOps` class
+
+```python
+def migrate_fetch_config(self) -> bool:...
