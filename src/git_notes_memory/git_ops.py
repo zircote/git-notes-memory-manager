@@ -41,6 +41,60 @@ __all__ = [
 
 
 # =============================================================================
+# Git Version Detection
+# =============================================================================
+
+# Cached git version tuple (major, minor, patch)
+_git_version: tuple[int, int, int] | None = None
+
+
+def get_git_version() -> tuple[int, int, int]:
+    """Get the installed git version as a tuple.
+
+    Returns:
+        Tuple of (major, minor, patch) version numbers.
+
+    Note:
+        Result is cached after first call.
+    """
+    global _git_version
+    if _git_version is not None:
+        return _git_version
+
+    try:
+        result = subprocess.run(
+            ["git", "--version"],
+            capture_output=True,
+            text=True,
+            timeout=5.0,
+            check=False,
+        )
+        # Parse "git version 2.43.0" or similar
+        match = re.search(r"(\d+)\.(\d+)\.(\d+)", result.stdout)
+        if match:
+            _git_version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        else:
+            _git_version = (0, 0, 0)
+    except Exception:
+        _git_version = (0, 0, 0)
+
+    return _git_version
+
+
+def git_supports_fixed_value() -> bool:
+    """Check if git version supports --fixed-value flag.
+
+    The --fixed-value flag was added in git 2.37.0 to allow matching
+    literal values (not regex) in git config operations.
+
+    Returns:
+        True if git >= 2.37.0, False otherwise.
+    """
+    major, minor, _ = get_git_version()
+    return (major, minor) >= (2, 37)
+
+
+# =============================================================================
 # Path Validation
 # =============================================================================
 
@@ -783,6 +837,57 @@ class GitOps:
 
         return configured
 
+    def _unset_fetch_config(self, pattern: str) -> bool:
+        """Remove a fetch refspec pattern from git config.
+
+        Uses --fixed-value on git 2.37+ for literal matching, falls back
+        to iterating through values on older versions.
+
+        Args:
+            pattern: The exact fetch refspec pattern to remove.
+
+        Returns:
+            True if successfully removed or not found, False on error.
+        """
+        if git_supports_fixed_value():
+            # Git 2.37+: Use --fixed-value for exact literal matching
+            result = self._run_git(
+                ["config", "--unset", "--fixed-value", "remote.origin.fetch", pattern],
+                check=False,
+            )
+            # Return code 5 means pattern not found, which is fine
+            return result.returncode in (0, 5)
+        else:
+            # Git < 2.37: Iterate through values to find and remove
+            # Get all current fetch refspecs
+            result = self._run_git(
+                ["config", "--get-all", "remote.origin.fetch"],
+                check=False,
+            )
+            if result.returncode != 0:
+                return True  # No config exists
+
+            # Remove all fetch configs and re-add those that don't match
+            configs = result.stdout.strip().split("\n")
+            configs_to_keep = [c for c in configs if c != pattern]
+
+            if len(configs_to_keep) == len(configs):
+                return True  # Pattern not found, nothing to do
+
+            # Clear all fetch refspecs
+            self._run_git(
+                ["config", "--unset-all", "remote.origin.fetch"],
+                check=False,
+            )
+
+            # Re-add the ones we want to keep
+            for config in configs_to_keep:
+                self._run_git(
+                    ["config", "--add", "remote.origin.fetch", config],
+                    check=False,
+                )
+            return True
+
     def migrate_fetch_config(self) -> bool:
         """Migrate from direct fetch to tracking refs pattern.
 
@@ -795,6 +900,8 @@ class GitOps:
 
         Note:
             This method is idempotent - safe to call multiple times.
+            Works with git 2.37+ (uses --fixed-value) and older versions
+            (falls back to iterative removal).
         """
         base = get_git_namespace()
         old_pattern = f"{base}/*:{base}/*"
@@ -822,25 +929,11 @@ class GitOps:
 
         if has_new:
             # New config already exists, just remove old
-            # Use --fixed-value to match literal asterisks (git 2.37+)
-            self._run_git(
-                [
-                    "config",
-                    "--unset",
-                    "--fixed-value",
-                    "remote.origin.fetch",
-                    old_pattern,
-                ],
-                check=False,
-            )
+            self._unset_fetch_config(old_pattern)
             return True
 
         # Remove old, add new
-        # Use --fixed-value to match literal asterisks (git 2.37+)
-        self._run_git(
-            ["config", "--unset", "--fixed-value", "remote.origin.fetch", old_pattern],
-            check=False,
-        )
+        self._unset_fetch_config(old_pattern)
         self._run_git(
             ["config", "--add", "remote.origin.fetch", new_pattern],
             check=False,
