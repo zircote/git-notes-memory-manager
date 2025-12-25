@@ -665,3 +665,17 @@ tags:
 ---
 
 These tests are testing existing behavior and they're using the OLD pattern which is still valid for detection purposes (the `is_sync_configured` function detects both...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.553908+00:00'
+summary: '...patterns). However, I should update `test_ensure_sync_configured_already_configured`
+  to use th...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...patterns). However, I should update `test_ensure_sync_configured_already_configured` to use the NEW pattern since that's what `configure_sync()` now sets up.
+
+Let me update the test to use the new fetch...
