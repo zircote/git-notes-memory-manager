@@ -821,3 +821,20 @@ tags:
 ...`*`, git interprets them as regex by default. The `--fixed-value` flag (git 2.37+) treats the pattern as a literal string.
 
 3. **Notes Merge Strategy** - The `cat_sort_uniq` strategy is perfect...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:46:59.885336+00:00'
+summary: '...with mocks didn''t catch:'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...with mocks didn't catch:
+   - Default branch name differences across git versions
+   - Config pattern matching behavior
+   - Real-world sync workflows with diverged refs
+
+5. **Service Boundary...
