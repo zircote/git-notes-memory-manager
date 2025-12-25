@@ -1,0 +1,871 @@
+---
+type: progress
+timestamp: '2025-12-25T22:19:51.677948+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed specification for GitHub Issue #18 fix...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed specification for GitHub Issue #18 fix
+## Summary
+Created complete specification for fixing git notes fetch refspec non-fast-forward rejection.
+
+## Changes Made
+- Created project scaffold at `docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/`
+- Wrote REQUIREMENTS.md with functional/non-functional requirements and acceptance criteria
+- Wrote ARCHITECTURE.md with component design, data flow diagrams, and integration points
+- Wrote IMPLEMENTATION_PLAN.md with 4 phases, 14 tasks, and dependency graph
+- Wrote DECISIONS.md with 6 ADRs documenting key architectural decisions
+- Wrote CHANGELOG.md recording spec creation
+- Updated status to `in-review`
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:19:51.715808+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated specification with hook-based auto-sync ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated specification with hook-based auto-sync feature
+## Summary
+Added opt-in automatic sync on session boundaries based on user feedback.
+
+## Changes Made
+- Added FR-104 and FR-105 to REQUIREMENTS.md (auto-fetch on start, auto-push on stop)
+- Added Component 6: Hook-Based Auto-Sync to ARCHITECTURE.md
+- Added Phase 4: Hook Auto-Sync to IMPLEMENTATION_PLAN.md (4 new tasks)
+- Added ADR-007: Hook-Based Auto-Sync (Opt-In) to DECISIONS.md
+- Updated estimated effort to 5-7 hours
+- Renumbered Phase 4 (Tests) to Phase 5, added Task 5.4 for hook tests
+- Updated CHANGELOG.md with v1.1.0 changes
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:19:51.968984+00:00'
+summary: '...divergences from the original plan
+
+  - Persist state across Claude sessions
+
+  ---
+
+  ### 📦 What Get...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...divergences from the original plan
+- Persist state across Claude sessions
+
+---
+
+### 📦 What Gets Implemented
+
+**Phase 1: Core Fix** (4 tasks, 1-2 hours)
+- Update fetch refspec to use remote tracking...
+
+---
+type: progress
+timestamp: '2025-12-25T22:19:52.010805+00:00'
+summary: Tasks 1.1, 1.2, and 1.3 are implemented. Now let me implement Task 1.4 -
+  adding the migration cal...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Tasks 1.1, 1.2, and 1.3 are implemented. Now let me implement Task 1.4 - adding the migration call to SessionStart handler:
+
+---
+type: progress
+timestamp: '2025-12-25T22:19:52.051166+00:00'
+summary: '...where the fetch refspec is misconfigured
+
+  3. **The `+` prefix** in refspecs is the standard sol...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...where the fetch refspec is misconfigured
+3. **The `+` prefix** in refspecs is the standard solution for non-fast-forward situations
+4. **Remote tracking refs pattern** (`refs/notes/origin/mem/*`)...
+
+---
+type: progress
+timestamp: '2025-12-25T22:19:52.101254+00:00'
+summary: '...planning straightforward. The issue provided:
+
+  - Root cause with exact line numbers
+
+  - Proposed ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...planning straightforward. The issue provided:
+- Root cause with exact line numbers
+- Proposed solution with code snippets
+- Testing methodology
+- Clear acceptance criteria
+
+This is the ideal format...
+
+---
+type: progress
+timestamp: '2025-12-25T22:19:52.158006+00:00'
+summary: '...Quality**:
+
+  - ✅ Problem statement clearly defined
+
+  - ✅ Root cause identified (git_ops.py:731-742...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Quality**:
+- ✅ Problem statement clearly defined
+- ✅ Root cause identified (git_ops.py:731-742)
+- ✅ Solution architecture documented
+- ✅ Migration path defined
+- ✅ Test coverage planned (Phase 5)
+- ✅...
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.233398+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed specification for GitHub Issue #18 fix...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed specification for GitHub Issue #18 fix
+## Summary
+Created complete specification for fixing git notes fetch refspec non-fast-forward rejection.
+
+## Changes Made
+- Created project scaffold at `docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/`
+- Wrote REQUIREMENTS.md with functional/non-functional requirements and acceptance criteria
+- Wrote ARCHITECTURE.md with component design, data flow diagrams, and integration points
+- Wrote IMPLEMENTATION_PLAN.md with 4 phases, 14 tasks, and dependency graph
+- Wrote DECISIONS.md with 6 ADRs documenting key architectural decisions
+- Wrote CHANGELOG.md recording spec creation
+- Updated status to `in-review`
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.271512+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated specification with hook-based auto-sync ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated specification with hook-based auto-sync feature
+## Summary
+Added opt-in automatic sync on session boundaries based on user feedback.
+
+## Changes Made
+- Added FR-104 and FR-105 to REQUIREMENTS.md (auto-fetch on start, auto-push on stop)
+- Added Component 6: Hook-Based Auto-Sync to ARCHITECTURE.md
+- Added Phase 4: Hook Auto-Sync to IMPLEMENTATION_PLAN.md (4 new tasks)
+- Added ADR-007: Hook-Based Auto-Sync (Opt-In) to DECISIONS.md
+- Updated estimated effort to 5-7 hours
+- Renumbered Phase 4 (Tests) to Phase 5, added Task 5.4 for hook tests
+- Updated CHANGELOG.md with v1.1.0 changes
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.347428+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 3: Command Updates - both sync a...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 3: Command Updates - both sync and validate commands updated
+## Summary
+Phase 3 of the git notes fetch refspec fix is complete. The `/memory:sync` and `/memory:validate` commands now support remote sync operations and refspec validation.
+
+## Changes Made
+- Updated `commands/sync.md`:
+  - Added `--remote` flag parsing in Step 1
+  - Added Step 4 for remote sync execution (fetch→merge→push)
+  - Added remote sync dry-run support
+  - Updated "When to Use" table with `--remote` mode
+  - Added examples for remote sync commands
+- Updated `commands/validate.md`:
+  - Added Test 3: Remote Sync Configuration
+  - Detects old vs new fetch refspec patterns
+  - Offers migration via `--fix` flag
+  - Renumbered subsequent tests (4-8 → 5-9)
+  - Updated validation tests table
+  - Added troubleshooting entries for refspec issues
+
+## Related Files
+- commands/sync.md:68-262 (remote sync support)
+- commands/validate.md:174-211 (refspec validation test)
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.385102+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 4: Hook Auto-Sync - opt-in remot...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 4: Hook Auto-Sync - opt-in remote sync via environment variables
+## Summary
+Phase 4 adds automatic remote sync capabilities that are opt-in via environment variables. This allows teams to automatically share memories without manual `/memory:sync --remote` commands.
+
+## Changes Made
+- Added `session_start_fetch_remote` and `stop_push_remote` config options to `config_loader.py`
+- Added environment variable parsing for `HOOK_SESSION_START_FETCH_REMOTE` and `HOOK_STOP_PUSH_REMOTE`
+- Added fetch+merge+reindex logic to `session_start_handler.py` (triggered when `session_start_fetch_remote=true`)
+- Added push logic to `stop_handler.py` (triggered when `stop_push_remote=true`)
+- Updated CLAUDE.md with new "Remote Sync (Team Collaboration)" section
+
+## Related Files
+- src/git_notes_memory/hooks/config_loader.py:131,148 (config options)
+- src/git_notes_memory/hooks/session_start_handler.py:193-214 (fetch+merge)
+- src/git_notes_memory/hooks/stop_handler.py:471-485 (push)
+- CLAUDE.md:193-207 (documentation)
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.617082+00:00'
+summary: '...divergences from the original plan
+
+  - Persist state across Claude sessions
+
+  ---
+
+  ### 📦 What Get...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...divergences from the original plan
+- Persist state across Claude sessions
+
+---
+
+### 📦 What Gets Implemented
+
+**Phase 1: Core Fix** (4 tasks, 1-2 hours)
+- Update fetch refspec to use remote tracking...
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.660699+00:00'
+summary: Tasks 1.1, 1.2, and 1.3 are implemented. Now let me implement Task 1.4 -
+  adding the migration cal...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Tasks 1.1, 1.2, and 1.3 are implemented. Now let me implement Task 1.4 - adding the migration call to SessionStart handler:
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.707428+00:00'
+summary: '...where the fetch refspec is misconfigured
+
+  3. **The `+` prefix** in refspecs is the standard sol...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...where the fetch refspec is misconfigured
+3. **The `+` prefix** in refspecs is the standard solution for non-fast-forward situations
+4. **Remote tracking refs pattern** (`refs/notes/origin/mem/*`)...
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.747222+00:00'
+summary: '...planning straightforward. The issue provided:
+
+  - Root cause with exact line numbers
+
+  - Proposed ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...planning straightforward. The issue provided:
+- Root cause with exact line numbers
+- Proposed solution with code snippets
+- Testing methodology
+- Clear acceptance criteria
+
+This is the ideal format...
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.787780+00:00'
+summary: '...Quality**:
+
+  - ✅ Problem statement clearly defined
+
+  - ✅ Root cause identified (git_ops.py:731-742...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Quality**:
+- ✅ Problem statement clearly defined
+- ✅ Root cause identified (git_ops.py:731-742)
+- ✅ Solution architecture documented
+- ✅ Migration path defined
+- ✅ Test coverage planned (Phase 5)
+- ✅...
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:33.751681+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed specification for GitHub Issue #18 fix...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed specification for GitHub Issue #18 fix
+## Summary
+Created complete specification for fixing git notes fetch refspec non-fast-forward rejection.
+
+## Changes Made
+- Created project scaffold at `docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/`
+- Wrote REQUIREMENTS.md with functional/non-functional requirements and acceptance criteria
+- Wrote ARCHITECTURE.md with component design, data flow diagrams, and integration points
+- Wrote IMPLEMENTATION_PLAN.md with 4 phases, 14 tasks, and dependency graph
+- Wrote DECISIONS.md with 6 ADRs documenting key architectural decisions
+- Wrote CHANGELOG.md recording spec creation
+- Updated status to `in-review`
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:33.796970+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated specification with hook-based auto-sync ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated specification with hook-based auto-sync feature
+## Summary
+Added opt-in automatic sync on session boundaries based on user feedback.
+
+## Changes Made
+- Added FR-104 and FR-105 to REQUIREMENTS.md (auto-fetch on start, auto-push on stop)
+- Added Component 6: Hook-Based Auto-Sync to ARCHITECTURE.md
+- Added Phase 4: Hook Auto-Sync to IMPLEMENTATION_PLAN.md (4 new tasks)
+- Added ADR-007: Hook-Based Auto-Sync (Opt-In) to DECISIONS.md
+- Updated estimated effort to 5-7 hours
+- Renumbered Phase 4 (Tests) to Phase 5, added Task 5.4 for hook tests
+- Updated CHANGELOG.md with v1.1.0 changes
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:33.880376+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 3: Command Updates - both sync a...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 3: Command Updates - both sync and validate commands updated
+## Summary
+Phase 3 of the git notes fetch refspec fix is complete. The `/memory:sync` and `/memory:validate` commands now support remote sync operations and refspec validation.
+
+## Changes Made
+- Updated `commands/sync.md`:
+  - Added `--remote` flag parsing in Step 1
+  - Added Step 4 for remote sync execution (fetch→merge→push)
+  - Added remote sync dry-run support
+  - Updated "When to Use" table with `--remote` mode
+  - Added examples for remote sync commands
+- Updated `commands/validate.md`:
+  - Added Test 3: Remote Sync Configuration
+  - Detects old vs new fetch refspec patterns
+  - Offers migration via `--fix` flag
+  - Renumbered subsequent tests (4-8 → 5-9)
+  - Updated validation tests table
+  - Added troubleshooting entries for refspec issues
+
+## Related Files
+- commands/sync.md:68-262 (remote sync support)
+- commands/validate.md:174-211 (refspec validation test)
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:33.920539+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 4: Hook Auto-Sync - opt-in remot...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 4: Hook Auto-Sync - opt-in remote sync via environment variables
+## Summary
+Phase 4 adds automatic remote sync capabilities that are opt-in via environment variables. This allows teams to automatically share memories without manual `/memory:sync --remote` commands.
+
+## Changes Made
+- Added `session_start_fetch_remote` and `stop_push_remote` config options to `config_loader.py`
+- Added environment variable parsing for `HOOK_SESSION_START_FETCH_REMOTE` and `HOOK_STOP_PUSH_REMOTE`
+- Added fetch+merge+reindex logic to `session_start_handler.py` (triggered when `session_start_fetch_remote=true`)
+- Added push logic to `stop_handler.py` (triggered when `stop_push_remote=true`)
+- Updated CLAUDE.md with new "Remote Sync (Team Collaboration)" section
+
+## Related Files
+- src/git_notes_memory/hooks/config_loader.py:131,148 (config options)
+- src/git_notes_memory/hooks/session_start_handler.py:193-214 (fetch+merge)
+- src/git_notes_memory/hooks/stop_handler.py:471-485 (push)
+- CLAUDE.md:193-207 (documentation)
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:34.594165+00:00'
+summary: '...divergences from the original plan
+
+  - Persist state across Claude sessions
+
+  ---
+
+  ### 📦 What Get...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...divergences from the original plan
+- Persist state across Claude sessions
+
+---
+
+### 📦 What Gets Implemented
+
+**Phase 1: Core Fix** (4 tasks, 1-2 hours)
+- Update fetch refspec to use remote tracking...
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:34.930844+00:00'
+summary: Tasks 1.1, 1.2, and 1.3 are implemented. Now let me implement Task 1.4 -
+  adding the migration cal...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Tasks 1.1, 1.2, and 1.3 are implemented. Now let me implement Task 1.4 - adding the migration call to SessionStart handler:
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:34.972234+00:00'
+summary: '...where the fetch refspec is misconfigured
+
+  3. **The `+` prefix** in refspecs is the standard sol...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...where the fetch refspec is misconfigured
+3. **The `+` prefix** in refspecs is the standard solution for non-fast-forward situations
+4. **Remote tracking refs pattern** (`refs/notes/origin/mem/*`)...
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:35.012359+00:00'
+summary: '...planning straightforward. The issue provided:
+
+  - Root cause with exact line numbers
+
+  - Proposed ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...planning straightforward. The issue provided:
+- Root cause with exact line numbers
+- Proposed solution with code snippets
+- Testing methodology
+- Clear acceptance criteria
+
+This is the ideal format...
+
+---
+type: progress
+timestamp: '2025-12-25T22:43:35.052074+00:00'
+summary: '...Quality**:
+
+  - ✅ Problem statement clearly defined
+
+  - ✅ Root cause identified (git_ops.py:731-742...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Quality**:
+- ✅ Problem statement clearly defined
+- ✅ Root cause identified (git_ops.py:731-742)
+- ✅ Solution architecture documented
+- ✅ Migration path defined
+- ✅ Test coverage planned (Phase 5)
+- ✅...
+
+---
+type: progress
+timestamp: '2025-12-25T22:46:59.805711+00:00'
+summary: '---'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+---
+document_type: retrospective
+project_id: SPEC-2025-12-25-001
+completed: 2025-12-25T22:46:05Z
+outcome: success
+satisfaction: very_satisfied
+---
+
+# Fix Git Notes Fetch...
+
+---
+type: progress
+timestamp: '2025-12-25T22:46:59.905448+00:00'
+summary: '...5-phase plan with 20 tasks matched implementation 1:1:'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...5-phase plan with 20 tasks matched implementation 1:1:
+
+- Phase 1 (Core Fix): 4 tasks → 4 tasks completed
+- Phase 2 (Remote Sync): 5 tasks → 5 tasks completed
+- Phase 3 (Commands): 2 tasks → 2 tasks...
+
+---
+type: progress
+timestamp: '2025-12-25T22:46:59.927020+00:00'
+summary: '...Phase 1 (Core Fix): 4 tasks → 4 tasks completed'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...Phase 1 (Core Fix): 4 tasks → 4 tasks completed
+- Phase 2 (Remote Sync): 5 tasks → 5 tasks completed
+- Phase 3 (Commands): 2 tasks → 2 tasks completed
+- Phase 4 (Hook Auto-Sync): 4 tasks → 4...
+
+---
+type: progress
+timestamp: '2025-12-25T22:46:59.947896+00:00'
+summary: '...Phase 2 (Remote Sync): 5 tasks → 5 tasks completed'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...Phase 2 (Remote Sync): 5 tasks → 5 tasks completed
+- Phase 3 (Commands): 2 tasks → 2 tasks completed
+- Phase 4 (Hook Auto-Sync): 4 tasks → 4 tasks completed
+- Phase 5 (Tests & Polish): 5 tasks...
+
+---
+type: progress
+timestamp: '2025-12-25T22:46:59.968961+00:00'
+summary: '...Phase 3 (Commands): 2 tasks → 2 tasks completed'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...Phase 3 (Commands): 2 tasks → 2 tasks completed
+- Phase 4 (Hook Auto-Sync): 4 tasks → 4 tasks completed
+- Phase 5 (Tests & Polish): 5 tasks → 5 tasks completed
+
+No tasks were added, removed, or...
+
+---
+type: progress
+timestamp: '2025-12-25T22:46:59.989294+00:00'
+summary: '...(Hook Auto-Sync): 4 tasks → 4 tasks completed'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...(Hook Auto-Sync): 4 tasks → 4 tasks completed
+- Phase 5 (Tests & Polish): 5 tasks → 5 tasks completed
+
+No tasks were added, removed, or significantly modified.
+
+## Recommendations for Future Projects
+
+1...
+
+---
+type: progress
+timestamp: '2025-12-25T22:47:00.009295+00:00'
+summary: '...value of comprehensive upfront planning:'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...value of comprehensive upfront planning:
+
+1. **Single-Session Implementation** - All 5 phases completed in <1 hour thanks to detailed IMPLEMENTATION_PLAN.md
+2. **Zero Scope Creep** - 20 planned...
+
+---
+type: progress
+timestamp: '2025-12-25T22:47:00.029362+00:00'
+summary: '...thanks to detailed IMPLEMENTATION_PLAN.md'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...thanks to detailed IMPLEMENTATION_PLAN.md
+2. **Zero Scope Creep** - 20 planned tasks → 20 completed tasks with no additions or cuts
+3. **High Test Quality** - Integration tests caught 3 real-world...
+
+---
+type: progress
+timestamp: '2025-12-25T22:47:13.872748+00:00'
+summary: '...2025-12-25-001'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...2025-12-25-001
+project_name: "Fix Git Notes Fetch Refspec"
+slug: fix-git-notes-fetch-refspec
+status: completed
+created: 2025-12-25T21:35:00Z
+approved: 2025-12-25T22:02:04Z
+started: 2025-12-25T22:12:11Z
+completed...
+
+---
+type: progress
+timestamp: '2025-12-25T22:47:13.896709+00:00'
+summary: '...completed'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...completed
+created: 2025-12-25T21:35:00Z
+approved: 2025-12-25T22:02:04Z
+started: 2025-12-25T22:12:11Z
+completed: 2025-12-25T22:46:05Z
+expires: 2026-03-25T21:35:00Z
+superseded_by: null
+tags: [bug-fix, git-notes,...
+
+---
+type: progress
+timestamp: '2025-12-25T22:47:34.529461+00:00'
+summary: '# Changelog'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+# Changelog
+
+All notable changes to this specification will be documented in this file.
+
+## [COMPLETED] - 2025-12-25
+
+### Project Closed
+- Final status: **success**
+- Actual effort: <1 hour, single...
+
+---
+type: progress
+timestamp: '2025-12-25T22:47:34.549796+00:00'
+summary: '...success**'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...success**
+- Actual effort: <1 hour, single session
+- Outcome: Very satisfied
+- Moved to: `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/`
+
+### Implementation Summary
+- All 5 phases completed...
+
+---
+type: progress
+timestamp: '2025-12-25T22:47:34.568942+00:00'
+summary: '...docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/`'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/`
+
+### Implementation Summary
+- All 5 phases completed (20 tasks)
+- 26 tests added (all passing)
+- 1,834 total tests (all passing)
+- Zero scope changes...
+
+---
+type: progress
+timestamp: '2025-12-25T22:48:33.342273+00:00'
+summary: 'Completed specification for GitHub Issue #18 fix'
+---
+
+Completed specification for GitHub Issue #18 fix
+## Summary
+Created complete specification for fixing git notes fetch refspec non-fast-forward rejection.
+
+## Changes Made
+- Created project scaffold at `docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/`
+- Wrote REQUIREMENTS.md with functional/non-functional requirements and acceptance criteria
+- Wrote ARCHITECTURE.md with component design, data flow diagrams, and integration points
+- Wrote IMPLEMENTATION_PLAN.md with 4 phases, 14 tasks, and dependency graph
+- Wrote DECISIONS.md with 6 ADRs documenting key architectural decisions
+- Wrote CHANGELOG.md recording spec creation
+- Updated status to `in-review`
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:48:33.361321+00:00'
+summary: Updated specification with hook-based auto-sync feature
+---
+
+Updated specification with hook-based auto-sync feature
+## Summary
+Added opt-in automatic sync on session boundaries based on user feedback.
+
+## Changes Made
+- Added FR-104 and FR-105 to REQUIREMENTS.md (auto-fetch on start, auto-push on stop)
+- Added Component 6: Hook-Based Auto-Sync to ARCHITECTURE.md
+- Added Phase 4: Hook Auto-Sync to IMPLEMENTATION_PLAN.md (4 new tasks)
+- Added ADR-007: Hook-Based Auto-Sync (Opt-In) to DECISIONS.md
+- Updated estimated effort to 5-7 hours
+- Renumbered Phase 4 (Tests) to Phase 5, added Task 5.4 for hook tests
+- Updated CHANGELOG.md with v1.1.0 changes
+
+## Related Files
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
+- docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
