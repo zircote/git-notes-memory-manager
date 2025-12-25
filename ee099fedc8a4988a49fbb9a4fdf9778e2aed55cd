@@ -22,3 +22,15 @@ tags:
 ---
 
 I see the issue with migration - the `--unset` with a pattern needs regex escaping. The pattern `refs/notes/mem/*:refs/notes/mem/*` has `*` which is interpreted...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:04.722234+00:00'
+summary: I see the issue with migration - the `--unset` with a pattern needs regex
+  escaping. The pattern `...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the issue with migration - the `--unset` with a pattern needs regex escaping. The pattern `refs/notes/mem/*:refs/notes/mem/*` has `*` which is interpreted as a regex. Let me check if...
