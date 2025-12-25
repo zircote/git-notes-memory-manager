@@ -257,3 +257,23 @@ tags:
 - Remove old pattern safely
 - Add new pattern
 - Handle edge cases (missing config, partial...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:41:00.112693+00:00'
+summary: '...Return migration status'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Return migration status
+
+**Responsibilities**:
+- Detect old configuration pattern
+- Remove old pattern safely
+- Add new pattern
+- Handle edge cases (missing config, partial config)
+
+**Dependencies**:...
