@@ -630,3 +630,23 @@ tags:
 
 ...`/memory:validate` | Detect misconfigured installs | Reports "incorrect fetch refspec" if old pattern found |
 | FR-102 | Auto-migrate on session start | Seamless upgrade path | SessionStart hook...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:57:12.948286+00:00'
+summary: '...**Acceptance Criteria**:'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...**Acceptance Criteria**:
+  - [ ] All existing sync tests pass
+  - [ ] Mocks updated for new refspec pattern
+
+### Phase 5 Deliverables
+
+- [ ] Migration unit tests
+- [ ] Remote sync unit tests
+- [ ] Integration...
