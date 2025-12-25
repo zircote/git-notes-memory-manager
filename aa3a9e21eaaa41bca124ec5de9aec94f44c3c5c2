@@ -68,3 +68,20 @@ tags:
 
         # Full sync: fetch → merge → push
         results = git.sync_notes_with_remote...
+
+---
+type: learnings
+timestamp: '2025-12-25T22:33:46.216868+00:00'
+summary: '...note = git.show_note("learnings", "HEAD")'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...note = git.show_note("learnings", "HEAD")
+        assert note is not None
+        assert "Important learning" in note
+
+    def test_migration_from_old_to_new_pattern(
+        self, git_repo_with_remote...
