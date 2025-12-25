@@ -776,3 +776,17 @@ tags:
 ...now sets up.
 
 Let me update the test to use the new fetch pattern while keeping the old push pattern (since push still uses the same pattern):
+
+---
+type: patterns
+timestamp: '2025-12-25T22:46:59.826101+00:00'
+summary: '...`master` branch, but modern git uses `main`. Fixed by dynamic branch
+  detection.'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...`master` branch, but modern git uses `main`. Fixed by dynamic branch detection.
+2. **Config Pattern Matching** - Didn't initially account for `--unset` interpreting `*` as regex. Required `--fixed-value...
