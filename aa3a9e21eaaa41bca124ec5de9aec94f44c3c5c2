@@ -558,3 +558,15 @@ tags:
 - Add migration detection for old/new patterns
 - Implement `migrate_fetch_config()` method
 -...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.208499+00:00'
+summary: '...at line 738 (`f"{base}/*:{base}/*"`) writes directly to local refs. This
+  is the problematic pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...at line 738 (`f"{base}/*:{base}/*"`) writes directly to local refs. This is the problematic pattern that causes "non-fast-forward rejected" errors when notes diverge. The fix changes this to...
