@@ -798,3 +798,21 @@ tags:
 
 ### Implementation Summary
 - All 5 phases completed...
+
+---
+type: progress
+timestamp: '2025-12-25T22:47:34.568942+00:00'
+summary: '...docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/`'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/`
+
+### Implementation Summary
+- All 5 phases completed (20 tasks)
+- 26 tests added (all passing)
+- 1,834 total tests (all passing)
+- Zero scope changes...
