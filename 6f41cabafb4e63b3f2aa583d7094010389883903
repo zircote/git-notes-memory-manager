@@ -28,3 +28,21 @@ tags:
 ---
 
 ...remote (common in multi-machine or multi-session scenarios). This fix will change the fetch pattern to use remote tracking refs and implement a proper fetch→merge→push workflow, enabling seamless...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:39:32.405220+00:00'
+summary: '...synchronization across multiple machines and sessions by implementing
+  the standard remote trackin'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...synchronization across multiple machines and sessions by implementing the standard remote tracking refs pattern for fetch operations.
+
+### Success Metrics
+
+| Metric | Target | Measurement Method |
+|--------|-----...
