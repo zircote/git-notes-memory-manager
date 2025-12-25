@@ -278,3 +278,23 @@ tags:
 - Clear acceptance criteria
 
 This is the ideal format...
+
+---
+type: progress
+timestamp: '2025-12-25T22:02:12.693310+00:00'
+summary: '...refspec'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...refspec
+status: approved
+created: 2025-12-25T21:35:00Z
+approved: 2025-12-25T22:02:04Z
+started: null
+completed: null
+expires: 2026-03-25T21:35:00Z
+superseded_by: null
+tags: [bug-fix, git-notes, sync, multi-machine...
