@@ -152,3 +152,15 @@ tags:
 ---
 
 Using `--unset-all` with a regex pattern works. The issue is that the `*` in git refspecs is being interpreted as a regex wildcard....
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.135613+00:00'
+summary: I see the pattern - tests use `load_hook_config(env)` with environment variables.
+  Let me add test...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the pattern - tests use `load_hook_config(env)` with environment variables. Let me add tests for the new...
