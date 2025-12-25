@@ -806,3 +806,18 @@ tags:
 ### Technical Learnings
 
 1. **Git Refspec Patterns** - Remote tracking refs pattern (`+refs/notes/mem/*:refs/notes/origin/mem/*`) mirrors how git handles branch tracking (`refs/remotes...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:46:59.865835+00:00'
+summary: '...`*`, git interprets them as regex by default. The `--fixed-value` flag
+  (git 2.37+) treats the pat'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...`*`, git interprets them as regex by default. The `--fixed-value` flag (git 2.37+) treats the pattern as a literal string.
+
+3. **Notes Merge Strategy** - The `cat_sort_uniq` strategy is perfect...
