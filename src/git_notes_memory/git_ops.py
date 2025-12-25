@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import re
 import subprocess
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -86,8 +87,19 @@ def get_git_version() -> tuple[int, int, int]:
                 int(match.group(3)),
             )
         else:
+            warnings.warn(
+                "Could not parse git version from output; "
+                "using regex fallback for config operations",
+                UserWarning,
+                stacklevel=2,
+            )
             _git_version = (0, 0, 0)
     except Exception:
+        warnings.warn(
+            "Git version detection failed; using regex fallback for config operations",
+            UserWarning,
+            stacklevel=2,
+        )
         _git_version = (0, 0, 0)
 
     return _git_version
