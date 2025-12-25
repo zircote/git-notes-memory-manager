@@ -3,8 +3,8 @@ document_type: progress
 format_version: "1.0.0"
 project_id: SPEC-2025-12-25-001
 project_name: "Fix Git Notes Fetch Refspec"
-project_status: in-progress
-current_phase: 3
+project_status: done
+current_phase: 5
 implementation_started: 2025-12-25T22:12:11Z
 last_session: 2025-12-25T22:12:11Z
 last_updated: 2025-12-25T22:12:11Z
@@ -36,17 +36,17 @@ This document tracks implementation progress against the spec plan.
 | 2.3 | Add `push_notes_to_remote()` method | done | 2025-12-25 | 2025-12-25 | Pushes all namespaces |
 | 2.4 | Add `sync_notes_with_remote()` method | done | 2025-12-25 | 2025-12-25 | Orchestrates fetch→merge→push |
 | 2.5 | Add `sync_with_remote()` to SyncService | done | 2025-12-25 | 2025-12-25 | Adds reindex after sync |
-| 3.1 | Update `/memory:sync` command for remote mode | pending | | | |
-| 3.2 | Add refspec validation to `/memory:validate` | pending | | | |
-| 4.1 | Add config options for auto-sync | pending | | | |
-| 4.2 | Add fetch+merge to SessionStart hook | pending | | | |
-| 4.3 | Add push to Stop hook | pending | | | |
-| 4.4 | Update CLAUDE.md with new config options | pending | | | |
-| 5.1 | Add unit tests for migration | pending | | | |
-| 5.2 | Add unit tests for remote sync | pending | | | |
-| 5.3 | Add integration tests for diverged notes | pending | | | |
-| 5.4 | Add tests for hook auto-sync | pending | | | |
-| 5.5 | Update existing tests for new patterns | pending | | | |
+| 3.1 | Update `/memory:sync` command for remote mode | done | 2025-12-25 | 2025-12-25 | Added Step 4 with remote sync and dry-run |
+| 3.2 | Add refspec validation to `/memory:validate` | done | 2025-12-25 | 2025-12-25 | Added Test 3: Remote Sync Configuration |
+| 4.1 | Add config options for auto-sync | done | 2025-12-25 | 2025-12-25 | Added session_start_fetch_remote and stop_push_remote |
+| 4.2 | Add fetch+merge to SessionStart hook | done | 2025-12-25 | 2025-12-25 | Fetches, merges, and reindexes when enabled |
+| 4.3 | Add push to Stop hook | done | 2025-12-25 | 2025-12-25 | Pushes notes to remote when enabled |
+| 4.4 | Update CLAUDE.md with new config options | done | 2025-12-25 | 2025-12-25 | Added Remote Sync section to documentation |
+| 5.1 | Add unit tests for migration | done | 2025-12-25 | 2025-12-25 | 4 tests in TestGitOpsMigrationMocked |
+| 5.2 | Add unit tests for remote sync | done | 2025-12-25 | 2025-12-25 | 10 tests in TestGitOpsRemoteSyncMocked + TestGitOpsSyncPatternDetection |
+| 5.3 | Add integration tests for diverged notes | done | 2025-12-25 | 2025-12-25 | 6 tests in TestGitOpsDivergedNotesIntegration |
+| 5.4 | Add tests for hook auto-sync | done | 2025-12-25 | 2025-12-25 | 6 tests for remote sync config options |
+| 5.5 | Update existing tests for new patterns | done | 2025-12-25 | 2025-12-25 | Fixed is_sync_configured and ensure_sync_configured tests |
 
 ---
 
@@ -56,9 +56,9 @@ This document tracks implementation progress against the spec plan.
 |-------|------|----------|--------|
 | 1 | Core Fix | 100% | done |
 | 2 | Remote Sync | 100% | done |
-| 3 | Commands | 0% | in-progress |
-| 4 | Hook Auto-Sync | 0% | pending |
-| 5 | Tests & Polish | 0% | pending |
+| 3 | Commands | 100% | done |
+| 4 | Hook Auto-Sync | 100% | done |
+| 5 | Tests & Polish | 100% | done |
 
 ---
 

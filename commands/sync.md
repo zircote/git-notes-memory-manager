@@ -1,6 +1,6 @@
 ---
-description: Synchronize the memory index with git notes
-argument-hint: "[full|verify|repair] [--dry-run]"
+description: Synchronize the memory index with git notes (local or remote)
+argument-hint: "[full|verify|repair|--remote] [--dry-run]"
 allowed-tools: ["Bash", "Read"]
 ---
 
@@ -16,22 +16,34 @@ If `$ARGUMENTS` contains `--help` or `-h`:
 SYNC(1)                                              User Commands                                              SYNC(1)
 
 NAME
-    sync - Synchronize the memory index with git notes
+    sync - Synchronize the memory index with git notes (local or remote)
 
 SYNOPSIS
-    /memory:sync [full|verify|repair] [--dry-run]
+    /memory:sync [full|verify|repair|--remote] [--dry-run]
 
 DESCRIPTION
-    Synchronize the memory index with git notes
+    Synchronize the memory index with git notes. Supports both local index
+    synchronization and remote sync with origin repository.
 
 OPTIONS
     --help, -h                Show this help message
+    --remote                  Sync with remote (fetch→merge→push workflow)
+    --dry-run                 Preview changes without applying
+
+MODES
+    (default)                 Incremental local index sync
+    full                      Complete reindex from git notes
+    verify                    Check consistency without changes
+    repair                    Fix detected inconsistencies
+    --remote                  Sync with remote origin repository
 
 EXAMPLES
-    /memory:sync
-    /memory:sync <--dry-run>
-    /memory:sync --dry-run
-    /memory:sync --help
+    /memory:sync              Incremental local sync
+    /memory:sync full         Full reindex
+    /memory:sync verify       Check consistency
+    /memory:sync repair       Fix inconsistencies
+    /memory:sync --remote     Fetch, merge, and push with origin
+    /memory:sync --dry-run    Preview what would change
 
 SEE ALSO
     /memory:* for related commands
@@ -58,8 +70,11 @@ You will help the user synchronize or repair the memory index.
 **Arguments format**: `$ARGUMENTS`
 
 Parse the arguments:
-1. First positional argument is mode: `incremental` (default), `full`, `verify`, or `repair`
-2. Extract `--dry-run` flag if present
+1. Check for `--remote` flag (triggers remote sync mode)
+2. First positional argument is mode: `incremental` (default), `full`, `verify`, or `repair`
+3. Extract `--dry-run` flag if present
+
+**If `--remote` is present, skip to Step 4 (Remote Sync).**
 
 </step>
 
@@ -181,6 +196,71 @@ print('Run without --dry-run to apply changes.')
 
 </step>
 
+<step number="4" name="Remote Sync">
+
+If `--remote` flag is present, synchronize with the remote origin repository.
+
+**Remote Sync** (fetch → merge → push):
+```bash
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
+import time
+from git_notes_memory import get_sync_service
+
+sync = get_sync_service()
+start = time.time()
+
+# Sync with remote (fetch → merge → push)
+results = sync.sync_with_remote()
+duration = time.time() - start
+
+# Count successes
+success_count = sum(1 for v in results.values() if v)
+total_count = len(results)
+
+print('## Remote Sync Complete\n')
+print('| Namespace | Status |')
+print('|-----------|--------|')
+for ns, success in sorted(results.items()):
+    status = '✓ synced' if success else '⚠ no changes'
+    print(f'| {ns} | {status} |')
+print('')
+print(f'**Summary**: {success_count}/{total_count} namespaces synced in {duration:.2f}s')
+"
+```
+
+**Remote Sync Dry Run** (fetch only, no merge/push):
+```bash
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
+uv run --directory "$PLUGIN_ROOT" python3 -c "
+from git_notes_memory.git_ops import GitOps
+
+git_ops = GitOps()
+
+# Check what would be fetched (without merging or pushing)
+print('## Remote Sync Dry Run - No Changes Made\n')
+print('**Would perform:**')
+print('1. Fetch notes from origin to tracking refs')
+print('2. Merge tracking refs into local notes (cat_sort_uniq strategy)')
+print('3. Push merged notes back to origin')
+print('4. Reindex local SQLite index')
+print('')
+
+# Check if sync is configured
+status = git_ops.is_sync_configured()
+if status.get('fetch') and status.get('push'):
+    print('**Status**: Remote sync is configured ✓')
+    if status.get('fetch_old') and not status.get('fetch_new'):
+        print('**Note**: Old fetch pattern detected. Will be migrated on next session start.')
+else:
+    print('**Status**: Remote sync not configured. Run in a git repo with origin remote.')
+print('')
+print('Run without --dry-run to apply changes.')
+"
+```
+
+</step>
+
 ## When to Use Each Mode
 
 | Mode | When to Use |
@@ -189,6 +269,7 @@ print('Run without --dry-run to apply changes.')
 | `full` | After major changes, index seems corrupted |
 | `verify` | To check consistency without changes |
 | `repair` | To fix detected inconsistencies |
+| `--remote` | Sync with collaborators, pull remote memories, push local memories |
 
 ## Examples
 
@@ -206,6 +287,12 @@ print('Run without --dry-run to apply changes.')
 
 **User**: `/memory:sync full --dry-run`
 **Action**: Show what full reindex would do
+
+**User**: `/memory:sync --remote`
+**Action**: Fetch, merge, and push notes with origin repository
+
+**User**: `/memory:sync --remote --dry-run`
+**Action**: Show what remote sync would do without making changes
 
 ## Memory Capture Reminder
 

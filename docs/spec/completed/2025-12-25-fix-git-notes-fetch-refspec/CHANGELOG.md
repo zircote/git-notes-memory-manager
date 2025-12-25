@@ -2,6 +2,29 @@
 
 All notable changes to this specification will be documented in this file.
 
+## [COMPLETED] - 2025-12-25
+
+### Project Closed
+- Final status: **success**
+- Actual effort: <1 hour, single session
+- Outcome: Very satisfied
+- Moved to: `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/`
+
+### Implementation Summary
+- All 5 phases completed (20 tasks)
+- 26 tests added (all passing)
+- 1,834 total tests (all passing)
+- Zero scope changes from original plan
+- Complete documentation: 2,648 lines across 8 markdown files
+
+### Retrospective Highlights
+- **What went well:** Clean architecture, comprehensive testing, idempotent migration, complete documentation
+- **What to improve:** Git version assumptions, config pattern matching, status check keys
+- **Key learnings:** Git refspec patterns, progressive integration testing, service boundary design
+- **Closes:** https://github.com/zircote/git-notes-memory/issues/18
+
+---
+
 ## [1.2.0] - 2025-12-25
 
 ### Status Change

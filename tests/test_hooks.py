@@ -222,6 +222,46 @@ class TestHookConfig:
         config = load_hook_config(env)
         assert config.pre_compact_prompt_first is False
 
+    def test_remote_sync_options_defaults(self) -> None:
+        """Test remote sync options default to False (opt-in)."""
+        config = HookConfig()
+        assert config.session_start_fetch_remote is False
+        assert config.stop_push_remote is False
+
+    def test_load_config_session_start_fetch_remote_enabled(self) -> None:
+        """Test loading session_start_fetch_remote from environment."""
+        env = {"HOOK_SESSION_START_FETCH_REMOTE": "true"}
+        config = load_hook_config(env)
+        assert config.session_start_fetch_remote is True
+
+    def test_load_config_session_start_fetch_remote_disabled(self) -> None:
+        """Test session_start_fetch_remote respects false value."""
+        env = {"HOOK_SESSION_START_FETCH_REMOTE": "false"}
+        config = load_hook_config(env)
+        assert config.session_start_fetch_remote is False
+
+    def test_load_config_stop_push_remote_enabled(self) -> None:
+        """Test loading stop_push_remote from environment."""
+        env = {"HOOK_STOP_PUSH_REMOTE": "true"}
+        config = load_hook_config(env)
+        assert config.stop_push_remote is True
+
+    def test_load_config_stop_push_remote_disabled(self) -> None:
+        """Test stop_push_remote respects false value."""
+        env = {"HOOK_STOP_PUSH_REMOTE": "false"}
+        config = load_hook_config(env)
+        assert config.stop_push_remote is False
+
+    def test_load_config_both_remote_sync_options(self) -> None:
+        """Test loading both remote sync options together."""
+        env = {
+            "HOOK_SESSION_START_FETCH_REMOTE": "true",
+            "HOOK_STOP_PUSH_REMOTE": "true",
+        }
+        config = load_hook_config(env)
+        assert config.session_start_fetch_remote is True
+        assert config.stop_push_remote is True
+
 
 # =============================================================================
 # SignalType Tests

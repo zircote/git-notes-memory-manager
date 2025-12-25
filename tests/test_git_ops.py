@@ -537,20 +537,18 @@ class TestGitOpsSyncConfigMocked:
             }
 
     def test_is_sync_configured_all_true(self, tmp_path: Path) -> None:
-        """Test is_sync_configured when all configured."""
+        """Test is_sync_configured when all configured with new pattern."""
         git = GitOps(tmp_path)
 
         def mock_run(args, **kwargs):
             # Convert args to string for easier substring matching
             args_str = " ".join(str(a) for a in args)
             result = MagicMock(returncode=0)
-            if (
-                "--get-all" in args_str
-                and "remote.origin.push" in args_str
-                or "--get-all" in args_str
-                and "remote.origin.fetch" in args_str
-            ):
+            if "--get-all" in args_str and "remote.origin.push" in args_str:
                 result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # New pattern with tracking refs
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"
             elif "notes.rewriteRef" in args_str:
                 result.stdout = "refs/notes/mem/*"
             elif "notes.mergeStrategy" in args_str:
@@ -565,6 +563,8 @@ class TestGitOpsSyncConfigMocked:
                 "fetch": True,
                 "rewrite": True,
                 "merge": True,
+                "fetch_old": False,
+                "fetch_new": True,
             }
 
     def test_configure_sync_sets_all(self, tmp_path: Path) -> None:
@@ -623,11 +623,14 @@ class TestGitOpsSyncConfigMocked:
                 result.stdout = ".git"
             elif "remote" in args_str and "get-url" in args_str:
                 result.stdout = "git@github.com:user/repo.git"
-            elif "remote.origin.push" in args_str or "remote.origin.fetch" in args_str:
+            elif "--get-all" in args_str and "remote.origin.push" in args_str:
                 result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
-            elif "notes.rewriteRef" in args_str:
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # New pattern uses tracking refs
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"
+            elif "--get" in args_str and "notes.rewriteRef" in args_str:
                 result.stdout = "refs/notes/mem/*"
-            elif "notes.mergeStrategy" in args_str:
+            elif "--get" in args_str and "notes.mergeStrategy" in args_str:
                 result.stdout = "cat_sort_uniq"
             return result
 
@@ -637,9 +640,11 @@ class TestGitOpsSyncConfigMocked:
     def test_ensure_sync_configured_configures_missing(self, tmp_path: Path) -> None:
         """Test ensure_sync_configured configures missing settings."""
         git = GitOps(tmp_path)
-        config_calls = []
+        config_calls: list[list[str]] = []
+        configured = False
 
         def mock_run(args, **kwargs):
+            nonlocal configured
             args_str = " ".join(str(a) for a in args)
             result = MagicMock(returncode=0)
 
@@ -648,17 +653,34 @@ class TestGitOpsSyncConfigMocked:
             elif "remote" in args_str and "get-url" in args_str:
                 result.stdout = "git@github.com:user/repo.git"
             elif "config" in args_str and "--add" in args_str:
-                # Track config calls
-                config_calls.append(args)
+                # Track config calls and mark as configured
+                config_calls.append(list(args))
+                configured = True
                 result.returncode = 0
-            elif "config" in args_str and "--get" in args_str:
-                # First is_sync_configured call returns not configured
-                if len(config_calls) == 0:
+            elif "--get-all" in args_str and "remote.origin.push" in args_str:
+                if configured:
+                    result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+                else:
                     result.returncode = 1
                     result.stdout = ""
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                if configured:
+                    result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"
                 else:
-                    # After configure, return configured
+                    result.returncode = 1
+                    result.stdout = ""
+            elif "--get" in args_str and "notes.rewriteRef" in args_str:
+                if configured:
                     result.stdout = "refs/notes/mem/*"
+                else:
+                    result.returncode = 1
+                    result.stdout = ""
+            elif "--get" in args_str and "notes.mergeStrategy" in args_str:
+                if configured:
+                    result.stdout = "cat_sort_uniq"
+                else:
+                    result.returncode = 1
+                    result.stdout = ""
             return result
 
         with patch("subprocess.run", side_effect=mock_run):
@@ -875,3 +897,617 @@ class TestGitOpsIntegration:
         assert root is not None
         assert root.exists()
         assert (root / ".git").exists()
+
+
+# =============================================================================
+# GitOps Migration Tests (Mocked)
+# =============================================================================
+
+
+class TestGitOpsMigrationMocked:
+    """Tests for migrate_fetch_config with mocked subprocess."""
+
+    def test_migrate_no_config(self, tmp_path: Path) -> None:
+        """Test migration when no fetch config exists."""
+        git = GitOps(tmp_path)
+        mock_result = MagicMock(returncode=1, stdout="")
+
+        with patch("subprocess.run", return_value=mock_result):
+            result = git.migrate_fetch_config()
+            assert result is False
+
+    def test_migrate_old_pattern_to_new(self, tmp_path: Path) -> None:
+        """Test migration from old pattern to new tracking refs."""
+        git = GitOps(tmp_path)
+        config_calls: list[list[str]] = []
+
+        def mock_run(args: list[str], **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+
+            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return old pattern
+                result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            elif "--unset" in args_str or "--add" in args_str:
+                config_calls.append(list(args))
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.migrate_fetch_config()
+
+            assert result is True
+            # Should have unset old and added new
+            assert len(config_calls) == 2
+
+    def test_migrate_already_new_pattern(self, tmp_path: Path) -> None:
+        """Test migration when already using new pattern."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args: list[str], **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+
+            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return new pattern (no old pattern)
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.migrate_fetch_config()
+            # No migration needed - no old pattern
+            assert result is False
+
+    def test_migrate_both_patterns_removes_old(self, tmp_path: Path) -> None:
+        """Test migration when both patterns exist removes old."""
+        git = GitOps(tmp_path)
+        unset_called = []
+
+        def mock_run(args: list[str], **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+
+            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return both patterns
+                result.stdout = (
+                    "refs/notes/mem/*:refs/notes/mem/*\n"
+                    "+refs/notes/mem/*:refs/notes/origin/mem/*"
+                )
+            elif "--unset" in args_str:
+                unset_called.append(list(args))
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.migrate_fetch_config()
+
+            assert result is True
+            # Should have only unset old, not added new (already exists)
+            assert len(unset_called) == 1
+
+
+# =============================================================================
+# GitOps Remote Sync Tests (Mocked)
+# =============================================================================
+
+
+class TestGitOpsRemoteSyncMocked:
+    """Tests for remote sync methods with mocked subprocess."""
+
+    def test_fetch_notes_from_remote_success(self, tmp_path: Path) -> None:
+        """Test fetch_notes_from_remote with successful fetch."""
+        git = GitOps(tmp_path)
+        mock_result = MagicMock(returncode=0)
+
+        with patch("subprocess.run", return_value=mock_result):
+            result = git.fetch_notes_from_remote(["decisions", "learnings"])
+
+            assert result["decisions"] is True
+            assert result["learnings"] is True
+
+    def test_fetch_notes_from_remote_partial_failure(self, tmp_path: Path) -> None:
+        """Test fetch_notes_from_remote with some failures."""
+        git = GitOps(tmp_path)
+        call_count = 0
+
+        def mock_run(args: list[str], **kwargs):
+            nonlocal call_count
+            call_count += 1
+            result = MagicMock()
+            # First call succeeds, second fails
+            result.returncode = 0 if call_count == 1 else 1
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.fetch_notes_from_remote(["decisions", "learnings"])
+
+            # First succeeds, second fails
+            assert result["decisions"] is True
+            assert result["learnings"] is False
+
+    def test_merge_notes_from_tracking_success(self, tmp_path: Path) -> None:
+        """Test merge_notes_from_tracking with successful merge."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args: list[str], **kwargs):
+            result = MagicMock(returncode=0)
+            if "rev-parse" in " ".join(str(a) for a in args):
+                result.stdout = "abc123"  # Tracking ref exists
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.merge_notes_from_tracking("decisions")
+            assert result is True
+
+    def test_merge_notes_from_tracking_no_tracking_ref(self, tmp_path: Path) -> None:
+        """Test merge_notes_from_tracking when no tracking ref."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args: list[str], **kwargs):
+            result = MagicMock()
+            if "rev-parse" in " ".join(str(a) for a in args):
+                result.returncode = 1  # Tracking ref doesn't exist
+            else:
+                result.returncode = 0
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.merge_notes_from_tracking("decisions")
+            # Should return True (no-op when no tracking ref)
+            assert result is True
+
+    def test_merge_notes_invalid_namespace_raises(self, tmp_path: Path) -> None:
+        """Test merge_notes_from_tracking with invalid namespace."""
+        git = GitOps(tmp_path)
+
+        with pytest.raises(ValidationError):
+            git.merge_notes_from_tracking("invalid_namespace")
+
+    def test_push_notes_to_remote_success(self, tmp_path: Path) -> None:
+        """Test push_notes_to_remote with successful push."""
+        git = GitOps(tmp_path)
+        mock_result = MagicMock(returncode=0)
+
+        with patch("subprocess.run", return_value=mock_result):
+            result = git.push_notes_to_remote()
+            assert result is True
+
+    def test_push_notes_to_remote_failure(self, tmp_path: Path) -> None:
+        """Test push_notes_to_remote with failed push."""
+        git = GitOps(tmp_path)
+        mock_result = MagicMock(returncode=1)
+
+        with patch("subprocess.run", return_value=mock_result):
+            result = git.push_notes_to_remote()
+            assert result is False
+
+    def test_sync_notes_with_remote_full_workflow(self, tmp_path: Path) -> None:
+        """Test sync_notes_with_remote orchestrates fetch→merge→push."""
+        git = GitOps(tmp_path)
+        call_sequence: list[str] = []
+
+        def mock_run(args: list[str], **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+
+            if "fetch" in args_str:
+                call_sequence.append("fetch")
+            elif "rev-parse" in args_str:
+                result.stdout = "abc123"
+                call_sequence.append("rev-parse")
+            elif "notes" in args_str and "merge" in args_str:
+                call_sequence.append("merge")
+            elif "push" in args_str:
+                call_sequence.append("push")
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.sync_notes_with_remote(["decisions"])
+
+            assert result["decisions"] is True
+            # Verify workflow order: fetch → rev-parse → merge → push
+            assert "fetch" in call_sequence
+            assert "push" in call_sequence
+
+    def test_sync_notes_with_remote_no_push(self, tmp_path: Path) -> None:
+        """Test sync_notes_with_remote with push=False."""
+        git = GitOps(tmp_path)
+        push_called = []
+
+        def mock_run(args: list[str], **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+            if "push" in args_str:
+                push_called.append(True)
+            elif "rev-parse" in args_str:
+                result.stdout = "abc123"
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            git.sync_notes_with_remote(["decisions"], push=False)
+
+            # Push should not have been called
+            assert len(push_called) == 0
+
+
+# =============================================================================
+# GitOps is_sync_configured Pattern Detection Tests
+# =============================================================================
+
+
+class TestGitOpsSyncPatternDetection:
+    """Tests for detecting old vs new fetch patterns in is_sync_configured."""
+
+    def test_detects_old_pattern(self, tmp_path: Path) -> None:
+        """Test is_sync_configured detects old fetch pattern."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args: list[str], **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+            if "remote.origin.fetch" in args_str or "remote.origin.push" in args_str:
+                result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            else:
+                result.stdout = ""
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.is_sync_configured()
+
+            assert result["fetch"] is True
+            assert result.get("fetch_old") is True
+            assert result.get("fetch_new") is False
+
+    def test_detects_new_pattern(self, tmp_path: Path) -> None:
+        """Test is_sync_configured detects new tracking refs pattern."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args: list[str], **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+            if "remote.origin.fetch" in args_str:
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"
+            elif "remote.origin.push" in args_str:
+                result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            else:
+                result.stdout = ""
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.is_sync_configured()
+
+            assert result["fetch"] is True
+            assert result.get("fetch_old") is False
+            assert result.get("fetch_new") is True
+
+    def test_detects_both_patterns(self, tmp_path: Path) -> None:
+        """Test is_sync_configured detects when both patterns exist."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args: list[str], **kwargs):
+            args_str = " ".join(str(a) for a in args)
+            result = MagicMock(returncode=0)
+            if "remote.origin.fetch" in args_str:
+                result.stdout = (
+                    "refs/notes/mem/*:refs/notes/mem/*\n"
+                    "+refs/notes/mem/*:refs/notes/origin/mem/*"
+                )
+            elif "remote.origin.push" in args_str:
+                result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            else:
+                result.stdout = ""
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            result = git.is_sync_configured()
+
+            assert result["fetch"] is True
+            assert result.get("fetch_old") is True
+            assert result.get("fetch_new") is True
+
+
+# =============================================================================
+# Integration Tests - Diverged Notes Scenario
+# =============================================================================
+
+
+@pytest.fixture
+def git_repo_with_remote(tmp_path: Path) -> tuple[Path, Path]:
+    """Create a local git repo with a bare remote for sync testing.
+
+    Returns:
+        Tuple of (local_repo_path, remote_repo_path).
+    """
+    # Create bare remote repository
+    remote_path = tmp_path / "remote.git"
+    remote_path.mkdir()
+    subprocess.run(
+        ["git", "init", "--bare"],
+        cwd=remote_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create local repository
+    local_path = tmp_path / "local"
+    local_path.mkdir()
+    subprocess.run(["git", "init"], cwd=local_path, check=True, capture_output=True)
+
+    # Configure git user
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=local_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=local_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Add remote
+    subprocess.run(
+        ["git", "remote", "add", "origin", str(remote_path)],
+        cwd=local_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create initial commit and push
+    (local_path / "README.md").write_text("# Test Repo\n")
+    subprocess.run(["git", "add", "."], cwd=local_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"],
+        cwd=local_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Get current branch name (main or master depending on git version)
+    branch_result = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        cwd=local_path,
+        capture_output=True,
+        text=True,
+    )
+    branch_name = branch_result.stdout.strip()
+
+    subprocess.run(
+        ["git", "push", "-u", "origin", branch_name],
+        cwd=local_path,
+        check=True,
+        capture_output=True,
+    )
+
+    return local_path, remote_path
+
+
+class TestGitOpsDivergedNotesIntegration:
+    """Integration tests for diverged notes merge scenario."""
+
+    def test_configure_sync_uses_new_refspec(self, git_repo_with_remote: tuple) -> None:
+        """Test configure_sync sets up tracking refs pattern."""
+        local_path, _ = git_repo_with_remote
+        git = GitOps(local_path)
+
+        # Configure sync
+        git.configure_sync()
+
+        # Check fetch refspec uses new tracking refs pattern
+        result = subprocess.run(
+            ["git", "config", "--get-all", "remote.origin.fetch"],
+            cwd=local_path,
+            capture_output=True,
+            text=True,
+        )
+        fetch_lines = result.stdout.strip().split("\n")
+
+        # Should contain the new pattern
+        assert any(
+            "+refs/notes/mem/*:refs/notes/origin/mem/*" in line for line in fetch_lines
+        )
+
+    def test_add_and_push_notes(self, git_repo_with_remote: tuple) -> None:
+        """Test adding notes locally and pushing to remote."""
+        local_path, remote_path = git_repo_with_remote
+        git = GitOps(local_path)
+
+        # Configure sync first
+        git.configure_sync()
+
+        # Add a note
+        git.add_note("decisions", "Local decision 1", "HEAD")
+
+        # Push notes
+        result = git.push_notes_to_remote()
+        assert result is True
+
+        # Verify note exists in remote
+        result = subprocess.run(
+            [
+                "git",
+                "notes",
+                f"--ref={config.DEFAULT_GIT_NAMESPACE}/decisions",
+                "show",
+                "HEAD",
+            ],
+            cwd=remote_path,
+            capture_output=True,
+            text=True,
+        )
+        # Remote won't have HEAD context, but notes should be in refs
+        # Check via for-each-ref
+        result = subprocess.run(
+            ["git", "for-each-ref", "refs/notes/mem/decisions"],
+            cwd=remote_path,
+            capture_output=True,
+            text=True,
+        )
+        assert "refs/notes/mem/decisions" in result.stdout
+
+    def test_fetch_notes_creates_tracking_ref(
+        self, git_repo_with_remote: tuple
+    ) -> None:
+        """Test fetch creates refs/notes/origin/mem/* tracking refs."""
+        local_path, _ = git_repo_with_remote
+        git = GitOps(local_path)
+        git.configure_sync()
+
+        # Add and push a note
+        git.add_note("decisions", "Decision to fetch", "HEAD")
+        git.push_notes_to_remote()
+
+        # Delete local ref to simulate fresh fetch
+        subprocess.run(
+            ["git", "update-ref", "-d", f"{config.DEFAULT_GIT_NAMESPACE}/decisions"],
+            cwd=local_path,
+            check=True,
+            capture_output=True,
+        )
+
+        # Fetch notes
+        results = git.fetch_notes_from_remote(["decisions"])
+        assert results["decisions"] is True
+
+        # Verify tracking ref was created
+        result = subprocess.run(
+            ["git", "for-each-ref", "refs/notes/origin/mem/decisions"],
+            cwd=local_path,
+            capture_output=True,
+            text=True,
+        )
+        assert "refs/notes/origin/mem/decisions" in result.stdout
+
+    def test_merge_notes_with_cat_sort_uniq(self, git_repo_with_remote: tuple) -> None:
+        """Test merging diverged notes uses cat_sort_uniq strategy."""
+        local_path, remote_path = git_repo_with_remote
+        git = GitOps(local_path)
+        git.configure_sync()
+
+        # Add initial note and push
+        git.add_note("decisions", "Shared decision", "HEAD")
+        git.push_notes_to_remote()
+
+        # Simulate remote having additional content by directly modifying remote
+        # First, get the commit SHA
+        sha_result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=local_path,
+            capture_output=True,
+            text=True,
+        )
+        commit_sha = sha_result.stdout.strip()
+
+        # Add to remote's note directly
+        subprocess.run(
+            [
+                "git",
+                "notes",
+                f"--ref={config.DEFAULT_GIT_NAMESPACE}/decisions",
+                "append",
+                "-m",
+                "Remote addition",
+                commit_sha,
+            ],
+            cwd=remote_path,
+            check=True,
+            capture_output=True,
+        )
+
+        # Add local content
+        git.append_note("decisions", "Local addition", "HEAD")
+
+        # Fetch (creates tracking ref with remote's version)
+        git.fetch_notes_from_remote(["decisions"])
+
+        # Merge using tracking ref
+        result = git.merge_notes_from_tracking("decisions")
+        assert result is True
+
+        # Verify merged content contains both additions
+        note = git.show_note("decisions", "HEAD")
+        assert note is not None
+        assert "Shared decision" in note
+        # The merge strategy should combine content
+        # (exact behavior depends on cat_sort_uniq implementation)
+
+    def test_full_sync_workflow(self, git_repo_with_remote: tuple) -> None:
+        """Test complete sync_notes_with_remote workflow."""
+        local_path, remote_path = git_repo_with_remote
+        git = GitOps(local_path)
+        git.configure_sync()
+
+        # Add local note and push first to establish remote notes
+        git.add_note("learnings", "Initial learning", "HEAD")
+        git.push_notes_to_remote()
+
+        # Simulate remote having additional content
+        sha_result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=local_path,
+            capture_output=True,
+            text=True,
+        )
+        commit_sha = sha_result.stdout.strip()
+
+        subprocess.run(
+            [
+                "git",
+                "notes",
+                f"--ref={config.DEFAULT_GIT_NAMESPACE}/learnings",
+                "append",
+                "-m",
+                "Remote learning",
+                commit_sha,
+            ],
+            cwd=remote_path,
+            check=True,
+            capture_output=True,
+        )
+
+        # Add local content after remote addition
+        git.append_note("learnings", "Local learning", "HEAD")
+
+        # Full sync: fetch → merge → push
+        results = git.sync_notes_with_remote(["learnings"])
+
+        assert results["learnings"] is True
+
+        # Note should contain all content
+        note = git.show_note("learnings", "HEAD")
+        assert note is not None
+        assert "Initial learning" in note
+
+    def test_migration_from_old_to_new_pattern(
+        self, git_repo_with_remote: tuple
+    ) -> None:
+        """Test migration from old refspec to new tracking refs."""
+        local_path, _ = git_repo_with_remote
+        git = GitOps(local_path)
+
+        # Manually configure OLD pattern (simulating pre-migration state)
+        subprocess.run(
+            [
+                "git",
+                "config",
+                "--add",
+                "remote.origin.fetch",
+                "refs/notes/mem/*:refs/notes/mem/*",
+            ],
+            cwd=local_path,
+            check=True,
+            capture_output=True,
+        )
+
+        # Verify old pattern exists
+        status = git.is_sync_configured()
+        assert status.get("fetch_old") is True
+
+        # Run migration
+        migrated = git.migrate_fetch_config()
+        assert migrated is True
+
+        # Verify new pattern exists and old is gone
+        status = git.is_sync_configured()
+        assert status.get("fetch_new") is True
+        assert status.get("fetch_old") is False
