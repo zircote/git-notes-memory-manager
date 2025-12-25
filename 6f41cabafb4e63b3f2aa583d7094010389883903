@@ -550,3 +550,22 @@ Existing installations have the old fetch refspec configured. We need to migrate
 ### Decision
 
 Call `migrate_fetch_config()` from the...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:43:30.375778+00:00'
+summary: '...handles reindexing.'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...handles reindexing.
+
+### Consequences
+
+**Positive:**
+- Consistent with existing `SyncService` pattern
+- Separation of concerns (GitOps = git, SyncService = orchestration)
+- Easy to test via dependency...
