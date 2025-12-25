@@ -414,3 +414,20 @@ tags:
         # Verify old pattern exists
         status = git.is_sync_configured()
         assert status.get("fetch_old") is...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.274761+00:00'
+summary: '...migrated = git.migrate_fetch_config()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...migrated = git.migrate_fetch_config()
+        assert migrated is True
+
+        # Verify new pattern exists and old is gone
+        status = git.is_sync_configured()
+        assert status.get("fetch_new...
