@@ -734,3 +734,15 @@ tags:
 ---
 
 ...old pattern. Let me check if these are in the mocked tests that should be testing the old pattern detection (which is correct) or if they're testing the configuration setup:
+
+---
+type: patterns
+timestamp: '2025-12-25T22:43:34.800407+00:00'
+summary: '...new patterns, this test should still pass but it would be good to update
+  it to use the new pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...new patterns, this test should still pass but it would be good to update it to use the new pattern and test both detection modes. Let me check what the test at line 627 is:
