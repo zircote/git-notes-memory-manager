@@ -46,3 +46,21 @@ tags:
 
 | Metric | Target | Measurement Method |
 |--------|-----...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:39:32.431488+00:00'
+summary: '...existing fetch configuration | Existing users don''t break | Old refspec
+  replaced with new pattern'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...existing fetch configuration | Existing users don't break | Old refspec replaced with new pattern |
+
+### Should Have (P1)
+
+| ID | Requirement | Rationale | Acceptance Criteria |
+|----|-------------|...
