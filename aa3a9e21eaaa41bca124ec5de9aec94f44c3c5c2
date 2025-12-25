@@ -217,3 +217,37 @@ Added opt-in automatic sync on session boundaries based on user feedback.
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/IMPLEMENTATION_PLAN.md
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/DECISIONS.md
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-25T22:31:06.347428+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 3: Command Updates - both sync a...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 3: Command Updates - both sync and validate commands updated
+## Summary
+Phase 3 of the git notes fetch refspec fix is complete. The `/memory:sync` and `/memory:validate` commands now support remote sync operations and refspec validation.
+
+## Changes Made
+- Updated `commands/sync.md`:
+  - Added `--remote` flag parsing in Step 1
+  - Added Step 4 for remote sync execution (fetch→merge→push)
+  - Added remote sync dry-run support
+  - Updated "When to Use" table with `--remote` mode
+  - Added examples for remote sync commands
+- Updated `commands/validate.md`:
+  - Added Test 3: Remote Sync Configuration
+  - Detects old vs new fetch refspec patterns
+  - Offers migration via `--fix` flag
+  - Renumbered subsequent tests (4-8 → 5-9)
+  - Updated validation tests table
+  - Added troubleshooting entries for refspec issues
+
+## Related Files
+- commands/sync.md:68-262 (remote sync support)
+- commands/validate.md:174-211 (refspec validation test)
