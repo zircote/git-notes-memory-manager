@@ -411,3 +411,20 @@ tags:
   - [ ] Detects old pattern: `refs/notes/mem/*:refs/notes/mem/*`
   - [ ] Detects new pattern: `+refs/notes/mem/*:refs/notes/origin/mem/*`
   - [ ] Returns dict with `fetch_old` and `fetch_new`...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.826534+00:00'
+summary: '...Effort**: 30 minutes'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...Effort**: 30 minutes
+- **Dependencies**: Task 1.2
+- **Acceptance Criteria**:
+  - [ ] Detects old pattern and removes it
+  - [ ] Adds new pattern if not present
+  - [ ] Returns bool indicating if migration...
