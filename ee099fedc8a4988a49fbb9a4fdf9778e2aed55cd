@@ -202,3 +202,20 @@ tags:
 ...patterns). However, I should update `test_ensure_sync_configured_already_configured` to use the NEW pattern since that's what `configure_sync()` now sets up.
 
 Let me update the test to use the new fetch...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.500755+00:00'
+summary: "..._ = get_git_version()\n    return (major, minor) >= (2, 37)\n\ndef _unset_fetch_config(self,\
+  \ patt..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+..._ = get_git_version()
+    return (major, minor) >= (2, 37)
+
+def _unset_fetch_config(self, pattern: str) -> bool:
+    if git_supports_fixed_value():
+        # Git 2.37+: Use --fixed-value for...
