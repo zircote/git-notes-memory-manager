@@ -446,3 +446,17 @@ tags:
             elif "remote.origin.fetch" in args_str:
                 # New pattern uses tracking refs
                 result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:39:57.869979+00:00'
+summary: '...elif "--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # New pattern with tracking refs
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
