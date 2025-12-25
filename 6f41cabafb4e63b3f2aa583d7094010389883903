@@ -313,3 +313,18 @@ tags:
 | `configure_sync()` | Modified | Add new fetch refspec pattern |
 | `is_sync_configured()` | Modified | Detect both old and new patterns |
 | `migrate_fetch_config()...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:41:00.189027+00:00'
+summary: '...Modified | Detect both old and new patterns |'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Modified | Detect both old and new patterns |
+| `migrate_fetch_config()` | New | Migrate old pattern to new |
+| `sync_notes_with_remote()` | New | Full fetch→merge→push workflow |
+| `fetch_notes_from_remote...
