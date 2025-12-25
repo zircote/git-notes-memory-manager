@@ -175,3 +175,31 @@ Phase 4 adds automatic remote sync capabilities that are opt-in via environment 
 - src/git_notes_memory/hooks/session_start_handler.py:193-214 (fetch+merge)
 - src/git_notes_memory/hooks/stop_handler.py:471-485 (push)
 - CLAUDE.md:193-207 (documentation)
+
+---
+type: progress
+timestamp: '2025-12-25T23:09:04.486366+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed project close-out for SPEC-2025-12-25-...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed project close-out for SPEC-2025-12-25-001
+## Summary
+Successfully closed out the "Fix Git Notes Fetch Refspec" specification project, moving it from active to completed status with full retrospective documentation.
+
+## Changes Made
+- Created RETROSPECTIVE.md (8.3KB) with completion metrics, learnings, and recommendations
+- Updated README.md frontmatter: status=completed, added completion timestamp and outcome
+- Added final CHANGELOG.md entry with implementation summary
+- Moved project from `docs/spec/active/` to `docs/spec/completed/`
+- Updated CLAUDE.md with completed projects section
+
+## Related Files
+- docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/RETROSPECTIVE.md:1-256
+- docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/README.md:1-62
+- docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md:1-59
+- CLAUDE.md:250-257
