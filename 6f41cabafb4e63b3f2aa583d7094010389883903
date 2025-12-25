@@ -238,3 +238,22 @@ tags:
 
 **Responsibilities**:
 -...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:41:00.088910+00:00'
+summary: '...refs/notes/origin/mem/*`'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...refs/notes/origin/mem/*`
+5. Return migration status
+
+**Responsibilities**:
+- Detect old configuration pattern
+- Remove old pattern safely
+- Add new pattern
+- Handle edge cases (missing config, partial...
