@@ -11,3 +11,17 @@ tags:
 # Configure fetch for all mem/* refs using remote tracking refs pattern
         # This fetches to refs/notes/origin/mem/* (tracking refs) instead of
         # directly...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:14:08.345568+00:00'
+summary: '# Check fetch refspec - detect both old and new patterns'
+tags:
+- auto-captured
+- post-tool-use
+- file:git_ops.py
+---
+
+# Check fetch refspec - detect both old and new patterns
+        # Old pattern: refs/notes/mem/*:refs/notes/mem/* (problematic, direct to local)
+        # New pattern: +refs/notes...
