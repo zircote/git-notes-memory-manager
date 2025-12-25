@@ -235,3 +235,18 @@ tags:
 2. `test_migration_from_old_to_new_pattern` - the old pattern is still present after migration
 
 Let me check the migration logic in git_ops:
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.618157+00:00'
+summary: '...migration, both old AND new patterns still exist
+
+  The problem is that the migration adds the N...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...migration, both old AND new patterns still exist
+
+The problem is that the migration adds the NEW pattern but the fixture already had some fetch pattern from the `git push -u` command. Let me investigate:
