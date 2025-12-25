@@ -330,3 +330,16 @@ tags:
 `─────────────────────────────────────────────────`
 
 Now I'll implement...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:31:06.578626+00:00'
+summary: '...add a `--remote` flag that triggers the new `sync_with_remote()` method.
+  This follows the patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...add a `--remote` flag that triggers the new `sync_with_remote()` method. This follows the pattern of extending existing commands rather than creating new ones.
+`─────────────────────────────────────...
