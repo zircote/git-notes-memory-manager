@@ -134,3 +134,18 @@ tags:
                 test_warn("Fetch refspec", "Using old pattern - run with --fix to migrate")
         else:
             test_pass("Fetch refspec", "Configured")...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:23:42.307040+00:00'
+summary: '...repo, git notes accessible |'
+tags:
+- auto-captured
+- post-tool-use
+- file:validate.md
+---
+
+...repo, git notes accessible |
+| **Remote Sync Config** | Fetch/push refspecs, tracking refs pattern vs old pattern |
+| **Index Health** | Index exists, readable, consistent with git notes |
+|...
