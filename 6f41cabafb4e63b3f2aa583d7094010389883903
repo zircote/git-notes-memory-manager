@@ -34,3 +34,24 @@ The `commands/status.md` and `commands/validate.md` files were using `get_index_
 - commands/validate.md:128,181 (FIXED)
 - src/git_notes_memory/config.py:185-193 (get_index_path - global)
 - src/git_notes_memory/config.py:344-365 (get_project_index_path - project)
+
+---
+type: learnings
+timestamp: '2025-12-25T21:44:33.291130+00:00'
+summary: 'Issue #18 is AI-actionable with complete root cause analysis'
+---
+
+Issue #18 is AI-actionable with complete root cause analysis
+## Summary
+The issue precisely identifies the problematic code at `git_ops.py:731-742` where the fetch refspec `f"{base}/*:{base}/*"` fetches directly into local refs instead of remote tracking refs.
+
+## Key Findings
+- Current config: `refs/notes/mem/*:refs/notes/mem/*` (direct fetch)
+- Correct config: `+refs/notes/mem/*:refs/notes/origin/mem/*` (tracking refs)
+- The `+` prefix enables force-update for non-fast-forward cases
+- A proper sync workflow (fetch → merge → push) is needed
+
+## Related Files
+- src/git_notes_memory/git_ops.py:700-766 (configure_sync function)
+- commands/sync.md (only handles local index sync, not remote)
+- commands/validate.md (no refspec validation)
