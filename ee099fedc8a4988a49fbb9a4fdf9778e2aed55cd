@@ -286,3 +286,18 @@ tags:
 ---
 
 ...new patterns, this test should still pass but it would be good to update it to use the new pattern and test both detection modes. Let me check what the test at line 627 is:
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.777373+00:00'
+summary: '...since that''s what `configure_sync()` now sets up.
+
+  Let me update the test to use the new fetch...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...since that's what `configure_sync()` now sets up.
+
+Let me update the test to use the new fetch pattern while keeping the old push pattern (since push still uses the same pattern):
