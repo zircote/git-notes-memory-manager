@@ -532,3 +532,21 @@ tags:
 ...fast-forward the local ref and rejects the fetch with a "non-fast-forward" error.
 
 Git's standard pattern for branches is to fetch to remote tracking refs first (`refs/remotes/origin/*`), then merge...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:43:30.350704+00:00'
+summary: '...Context'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...Context
+
+Existing installations have the old fetch refspec configured. We need to migrate them to the new pattern without requiring manual intervention.
+
+### Decision
+
+Call `migrate_fetch_config()` from the...
