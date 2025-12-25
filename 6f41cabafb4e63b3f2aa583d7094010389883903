@@ -616,3 +616,17 @@ tags:
 - Solution: Use remote tracking refs pattern (standard Git workflow)
 - Migration: Auto-migrate on session start via SessionStart hook
 -...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:55:40.821501+00:00'
+summary: '...`/memory:validate` | Detect misconfigured installs | Reports "incorrect
+  fetch refspec" if old pat'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...`/memory:validate` | Detect misconfigured installs | Reports "incorrect fetch refspec" if old pattern found |
+| FR-102 | Auto-migrate on session start | Seamless upgrade path | SessionStart hook...
