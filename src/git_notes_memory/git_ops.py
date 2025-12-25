@@ -41,6 +41,14 @@ __all__ = [
 
 
 # =============================================================================
+# Constants
+# =============================================================================
+
+# Core sync config keys that must be True for git notes sync to work
+SYNC_CORE_KEYS: tuple[str, ...] = ("push", "fetch", "rewrite", "merge")
+
+
+# =============================================================================
 # Git Version Detection
 # =============================================================================
 
@@ -862,35 +870,15 @@ class GitOps:
             # Return code 5 means pattern not found, which is fine
             return result.returncode in (0, 5)
         else:
-            # Git < 2.37: Iterate through values to find and remove
-            # Get all current fetch refspecs
+            # Git < 2.37: Use regex to match the exact pattern
+            # Escape special regex characters in the pattern for git config --unset
+            escaped = re.escape(pattern)
             result = self._run_git(
-                ["config", "--get-all", "remote.origin.fetch"],
+                ["config", "--unset", "remote.origin.fetch", f"^{escaped}$"],
                 check=False,
             )
-            if result.returncode != 0:
-                return True  # No config exists
-
-            # Remove all fetch configs and re-add those that don't match
-            configs = result.stdout.strip().split("\n")
-            configs_to_keep = [c for c in configs if c != pattern]
-
-            if len(configs_to_keep) == len(configs):
-                return True  # Pattern not found, nothing to do
-
-            # Clear all fetch refspecs
-            self._run_git(
-                ["config", "--unset-all", "remote.origin.fetch"],
-                check=False,
-            )
-
-            # Re-add the ones we want to keep
-            for config in configs_to_keep:
-                self._run_git(
-                    ["config", "--add", "remote.origin.fetch", config],
-                    check=False,
-                )
-            return True
+            # Return code 5 means pattern not found, which is fine
+            return result.returncode in (0, 5)
 
     def migrate_fetch_config(self) -> bool:
         """Migrate from direct fetch to tracking refs pattern.
@@ -1115,11 +1103,8 @@ class GitOps:
         # Check current configuration
         status = self.is_sync_configured()
 
-        # Core config keys that must be True for sync to work
-        core_keys = ["push", "fetch", "rewrite", "merge"]
-
         # If already fully configured, nothing to do
-        if all(status.get(k, False) for k in core_keys):
+        if all(status.get(k, False) for k in SYNC_CORE_KEYS):
             return True
 
         # Configure missing parts
@@ -1127,7 +1112,7 @@ class GitOps:
 
         # Verify configuration
         final_status = self.is_sync_configured()
-        return all(final_status.get(k, False) for k in core_keys)
+        return all(final_status.get(k, False) for k in SYNC_CORE_KEYS)
 
     # =========================================================================
     # Repository Information
