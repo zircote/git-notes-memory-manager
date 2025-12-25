@@ -101,3 +101,26 @@ Comprehensive specification addressing GitHub Issue #18 (git notes fetch refspec
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/README.md:5 (status updated)
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/CHANGELOG.md:5-10 (approval recorded)
 - docs/spec/active/2025-12-25-fix-git-notes-fetch-refspec/APPROVAL_RECORD.md (audit trail created)
+
+---
+type: decisions
+timestamp: '2025-12-25T22:43:33.709062+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Confirmed: The `+` prefix in refspec is the stan...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Confirmed: The `+` prefix in refspec is the standard solution
+## Summary
+The Git documentation confirms that the `+` prefix in a refspec tells Git to update the reference even if it isn't a fast-forward.
+
+## Rationale
+- Current code: `f"{base}/*:{base}/*"` - fetches directly to local refs, fails on divergence
+- Correct code: `f"+{base}/*:refs/notes/origin/mem/*"` - fetches to remote tracking refs with force-update
+- The `+` prefix allows non-fast-forward updates which is necessary for notes that diverge across machines
+
+## Related Files
+- src/git_notes_memory/git_ops.py:731-742
