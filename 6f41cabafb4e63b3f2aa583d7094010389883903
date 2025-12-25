@@ -396,3 +396,18 @@ tags:
 - **Acceptance Criteria**:
   - [ ] Detects old pattern: `refs/notes/mem/*:refs/notes/mem/*`
   - [ ] Detects new pattern: `+refs/notes/mem/*:refs/notes/origin...
+
+---
+type: patterns
+timestamp: '2025-12-25T21:42:36.800301+00:00'
+summary: '...Criteria**:'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...Criteria**:
+  - [ ] Detects old pattern: `refs/notes/mem/*:refs/notes/mem/*`
+  - [ ] Detects new pattern: `+refs/notes/mem/*:refs/notes/origin/mem/*`
+  - [ ] Returns dict with `fetch_old` and `fetch_new`...
