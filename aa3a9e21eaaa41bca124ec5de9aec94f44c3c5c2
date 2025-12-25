@@ -377,3 +377,21 @@ tags:
         # Should contain the new pattern
         assert any(
             "+refs/notes/mem/*:refs/notes/origin/mem/*" in line for line...
+
+---
+type: patterns
+timestamp: '2025-12-25T22:33:46.236778+00:00'
+summary: '...= git_repo_with_remote'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...= git_repo_with_remote
+        git = GitOps(local_path)
+
+        # Manually configure OLD pattern (simulating pre-migration state)
+        subprocess.run(
+            [
+                "git",...
