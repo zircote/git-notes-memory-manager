@@ -121,3 +121,22 @@ tags:
 
 ...add a `--remote` flag that triggers the new `sync_with_remote()` method. This follows the pattern of extending existing commands rather than creating new ones.
 `─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-25T23:09:05.056504+00:00'
+summary: '...test again:
+
+  1. Fixture creates repo and pushes initial commit
+
+  2. Test manually adds old fetch ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...test again:
+1. Fixture creates repo and pushes initial commit
+2. Test manually adds old fetch pattern
+3. Test calls `migrate_fetch_config()`
+4. After migration, both old AND new patterns still...
