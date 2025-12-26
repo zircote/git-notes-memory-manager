@@ -1,0 +1,1070 @@
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.431064+00:00'
+summary: '...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe
+  access when needed
+
+  Thi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe access when needed
+
+This pattern is consistent with how `status` is handled in the same class.
+`─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.471289+00:00'
+summary: '...idempotency
+
+  The migration for domain needs to add the column and create an index, following
+  t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...idempotency
+
+The migration for domain needs to add the column and create an index, following the exact pattern used for `repo_path` in version 2.
+`─────────────────────────────────────────────────`
+
+Now...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.604663+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The config.py follows a clear pattern:
+
+  1. Secti...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The config.py follows a clear pattern:
+1. Sections organized by category with clear headers
+2. Functions use `get_*` naming convention...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.650964+00:00'
+summary: '...ignore` isn''t sufficient for Pyright. Let me use a better approach -
+  using a sentinel value pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...ignore` isn't sufficient for Pyright. Let me use a better approach - using a sentinel value pattern or `field(default_factory=...)`. Actually, looking at this more carefully, I should use a cleaner...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.743059+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  **Schema Migration Pattern in index.py**:
+
+  1. `S...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+**Schema Migration Pattern in index.py**:
+1. `SCHEMA_VERSION` constant defines target version
+2. `_MIGRATIONS` dict maps...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.786707+00:00'
+summary: '...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and
+  `get_stats()`
+
+  The patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and `get_stats()`
+
+The pattern is simple: add an optional `domain: str | None = None` parameter and include `AND domain =...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.830763+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The query methods follow a consistent pattern: ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The query methods follow a consistent pattern: build SQL with optional filters, use parameterized queries. Adding domain filtering will follow...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.874937+00:00'
+summary: '...optional filters, use parameterized queries. Adding domain filtering
+  will follow the same patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...optional filters, use parameterized queries. Adding domain filtering will follow the same pattern - an optional `domain: str | None = None` parameter and adding `AND domain = ?` when it's set....
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.009654+00:00'
+summary: '...tasks completed.
+
+  **Summary of what was implemented:**
+
+  - `GitOps.for_domain(domain)` - Factory...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...tasks completed.
+
+**Summary of what was implemented:**
+- `GitOps.for_domain(domain)` - Factory pattern with per-domain caching
+- `GitOps.ensure_user_repo_initialized()` - Creates bare git repo for...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.099713+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The CaptureService follows the singleton patter...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The CaptureService follows the singleton pattern via `ServiceRegistry.get()`. It already accepts a `git_ops` parameter and lazily creates one...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.144850+00:00'
+summary: '...────────────────────────`
+
+  The multi-domain search architecture follows a **parallel query + me...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...────────────────────────`
+The multi-domain search architecture follows a **parallel query + merge** pattern:
+1. When `domain=None`, we query both project and user indexes in parallel
+2. Results are merged...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.189511+00:00'
+summary: Good. Now let me check if there are existing tests for models.py that I should
+  follow the pattern...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Good. Now let me check if there are existing tests for models.py that I should follow the pattern of:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.236075+00:00'
+summary: '...Migration for Domain Column. First, let me read the current index.py
+  to understand the migrati...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Migration for Domain Column. First, let me read the current index.py to understand the migration pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.282125+00:00'
+summary: 'Let me see more of the schema creation and understand the full pattern:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Let me see more of the schema creation and understand the full pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.420206+00:00'
+summary: '...requires.
+
+  `─────────────────────────────────────────────────`
+
+  Let me look at the existing ser...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...requires.
+`─────────────────────────────────────────────────`
+
+Let me look at the existing service registry pattern to understand how to implement Task 3.2:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.464564+00:00'
+summary: 'Now I''ll add the `get_user_capture_service()` function following the existing
+  pattern:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I'll add the `get_user_capture_service()` function following the existing pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:51:08.704099+00:00'
+summary: '...2025-12-26 | DOMAIN_MARKERS dict, inline [global]/[user]/[project]/[local]
+  |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...2025-12-26 | DOMAIN_MARKERS dict, inline [global]/[user]/[project]/[local] |
+| 4.2 | Extend Block Pattern for Domain Prefix | done | 2025-12-26 | 2025-12-26 | BLOCK_PATTERN with optional domain prefix...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:43.791390+00:00'
+summary: '...get_by_namespace.side_effect = mock_get_by_namespace'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_context_builder.py
+---
+
+...get_by_namespace.side_effect = mock_get_by_namespace
+
+    # Configure search to return learning and pattern results
+    def mock_search(
+        query: str,
+        k: int = 10,
+        namespace: str...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.433764+00:00'
+summary: '...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe
+  access when needed
+
+  Thi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe access when needed
+
+This pattern is consistent with how `status` is handled in the same class.
+`─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.483523+00:00'
+summary: '...idempotency
+
+  The migration for domain needs to add the column and create an index, following
+  t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...idempotency
+
+The migration for domain needs to add the column and create an index, following the exact pattern used for `repo_path` in version 2.
+`─────────────────────────────────────────────────`
+
+Now...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.579244+00:00'
+summary: I see the issue - the block pattern matching code needs to be updated because
+  the group indices c...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the issue - the block pattern matching code needs to be updated because the group indices changed. With the new pattern:
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.622195+00:00'
+summary: '...pattern matching code needs to be updated because the group indices changed.
+  With the new patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...pattern matching code needs to be updated because the group indices changed. With the new pattern:
+- Group 1: domain prefix (optional)
+- Group 2: namespace keyword
+- Group 3: title
+- Group...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.707828+00:00'
+summary: Now I need to update the detect() method to handle the new block pattern
+  with domain prefix and a...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I need to update the detect() method to handle the new block pattern with domain prefix and also detect inline domain markers. Let me read the detect method again:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.750362+00:00'
+summary: Now I need to update the inline pattern detection to also look for domain
+  markers near signals an...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I need to update the inline pattern detection to also look for domain markers near signals and apply them. Let me update that section:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.791702+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The config.py follows a clear pattern:
+
+  1. Secti...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The config.py follows a clear pattern:
+1. Sections organized by category with clear headers
+2. Functions use `get_*` naming convention...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.833103+00:00'
+summary: '...ignore` isn''t sufficient for Pyright. Let me use a better approach -
+  using a sentinel value pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...ignore` isn't sufficient for Pyright. Let me use a better approach - using a sentinel value pattern or `field(default_factory=...)`. Actually, looking at this more carefully, I should use a cleaner...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.918380+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  **Schema Migration Pattern in index.py**:
+
+  1. `S...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+**Schema Migration Pattern in index.py**:
+1. `SCHEMA_VERSION` constant defines target version
+2. `_MIGRATIONS` dict maps...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.960580+00:00'
+summary: '...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and
+  `get_stats()`
+
+  The patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and `get_stats()`
+
+The pattern is simple: add an optional `domain: str | None = None` parameter and include `AND domain =...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.002373+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The query methods follow a consistent pattern: ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The query methods follow a consistent pattern: build SQL with optional filters, use parameterized queries. Adding domain filtering will follow...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.044856+00:00'
+summary: '...optional filters, use parameterized queries. Adding domain filtering
+  will follow the same patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...optional filters, use parameterized queries. Adding domain filtering will follow the same pattern - an optional `domain: str | None = None` parameter and adding `AND domain = ?` when it's set....
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.180733+00:00'
+summary: '...tasks completed.
+
+  **Summary of what was implemented:**
+
+  - `GitOps.for_domain(domain)` - Factory...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...tasks completed.
+
+**Summary of what was implemented:**
+- `GitOps.for_domain(domain)` - Factory pattern with per-domain caching
+- `GitOps.ensure_user_repo_initialized()` - Creates bare git repo for...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.267830+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The CaptureService follows the singleton patter...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The CaptureService follows the singleton pattern via `ServiceRegistry.get()`. It already accepts a `git_ops` parameter and lazily creates one...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.309732+00:00'
+summary: '...────────────────────────`
+
+  The multi-domain search architecture follows a **parallel query + me...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...────────────────────────`
+The multi-domain search architecture follows a **parallel query + merge** pattern:
+1. When `domain=None`, we query both project and user indexes in parallel
+2. Results are merged...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.351909+00:00'
+summary: '...Add domain marker patterns like `[global]`, `[user]`, `[project]`, `[local]`
+
+  3. Extend block p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Add domain marker patterns like `[global]`, `[user]`, `[project]`, `[local]`
+3. Extend block pattern to support domain prefix like `global:decision`
+
+`★ Insight ─────────────────────────────────────`
+The...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.436303+00:00'
+summary: '...I''ve completed Task 4.1 (Add Domain Markers to SignalDetector) and Task
+  4.2 (Extend Block Patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...I've completed Task 4.1 (Add Domain Markers to SignalDetector) and Task 4.2 (Extend Block Pattern for Domain Prefix) since they were both implemented together. Let me update the PROGRESS.md...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.478523+00:00'
+summary: Good. Now let me check if there are existing tests for models.py that I should
+  follow the pattern...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Good. Now let me check if there are existing tests for models.py that I should follow the pattern of:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.521077+00:00'
+summary: '...Migration for Domain Column. First, let me read the current index.py
+  to understand the migrati...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Migration for Domain Column. First, let me read the current index.py to understand the migration pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.564179+00:00'
+summary: 'Let me see more of the schema creation and understand the full pattern:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Let me see more of the schema creation and understand the full pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.691111+00:00'
+summary: '...requires.
+
+  `─────────────────────────────────────────────────`
+
+  Let me look at the existing ser...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...requires.
+`─────────────────────────────────────────────────`
+
+Let me look at the existing service registry pattern to understand how to implement Task 3.2:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.733327+00:00'
+summary: 'Now I''ll add the `get_user_capture_service()` function following the existing
+  pattern:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I'll add the `get_user_capture_service()` function following the existing pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T02:09:42.517633+00:00'
+summary: '...Domain markers: [global]/[user] → USER domain, [project]/[local] → PROJECT
+  domain'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Domain markers: [global]/[user] → USER domain, [project]/[local] → PROJECT domain
+- Block pattern extended for domain prefix: `global:decision`, `user:learned`
+- CaptureSignal and SuggestedCapture...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:39:41.717779+00:00'
+summary: '...blockers | Auth middleware issue | 0.82 | 2024-01-10 |'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...blockers | Auth middleware issue | 0.82 | 2024-01-10 |
+| 4 | 🌐 | patterns | Token refresh pattern | 0.75 | 2024-01-05 |
+```
+
+**Domain indicators:**
+- 🌐 = User memory (global, cross-project)
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.460180+00:00'
+summary: '...insights are gained from reviewing memories, suggest:'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...insights are gained from reviewing memories, suggest:
+
+```
+**Capture tip**: Did you notice a pattern or gain an insight? Use:
+- `[remember] <pattern or insight>` - Inline capture to project
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.481305+00:00'
+summary: '...suggest:'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...suggest:
+
+```
+**Capture tip**: Did you notice a pattern or gain an insight? Use:
+- `[remember] <pattern or insight>` - Inline capture to project
+- `[global] <pattern or insight>` - Inline capture...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.502243+00:00'
+summary: '...insight? Use:'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...insight? Use:
+- `[remember] <pattern or insight>` - Inline capture to project
+- `[global] <pattern or insight>` - Inline capture to user (cross-project)
+- `/memory:capture patterns <description>`...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.524028+00:00'
+summary: '...Inline capture to user (cross-project)'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...Inline capture to user (cross-project)
+- `/memory:capture patterns <description>` - Project pattern
+- `/memory:capture --global patterns <description>` - User pattern (cross-project)
+```
+
+Search...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.545702+00:00'
+summary: '...<description>` - Project pattern'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...<description>` - Project pattern
+- `/memory:capture --global patterns <description>` - User pattern (cross-project)
+```
+
+Search results often reveal connections worth preserving as new memories.
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:41:51.115582+00:00'
+summary: '...Domain markers: [global]/[user] → USER domain, [project]/[local] → PROJECT
+  domain'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Domain markers: [global]/[user] → USER domain, [project]/[local] → PROJECT domain
+- Block pattern extended for domain prefix: `global:decision`, `user:learned`
+- CaptureSignal and SuggestedCapture...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:39.852547+00:00'
+summary: '...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe
+  access when needed
+
+  Thi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe access when needed
+
+This pattern is consistent with how `status` is handled in the same class.
+`─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:39.910165+00:00'
+summary: '...idempotency
+
+  The migration for domain needs to add the column and create an index, following
+  t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...idempotency
+
+The migration for domain needs to add the column and create an index, following the exact pattern used for `repo_path` in version 2.
+`─────────────────────────────────────────────────`
+
+Now...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.027685+00:00'
+summary: I see the issue - the block pattern matching code needs to be updated because
+  the group indices c...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the issue - the block pattern matching code needs to be updated because the group indices changed. With the new pattern:
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.085417+00:00'
+summary: '...pattern matching code needs to be updated because the group indices changed.
+  With the new patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...pattern matching code needs to be updated because the group indices changed. With the new pattern:
+- Group 1: domain prefix (optional)
+- Group 2: namespace keyword
+- Group 3: title
+- Group...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.145381+00:00'
+summary: '...verbose status section to include user memory statistics, following the
+  same domain-separated ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...verbose status section to include user memory statistics, following the same domain-separated pattern as the basic status. The verbose status needs to show both project and user memory breakdowns.
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.260053+00:00'
+summary: Now I need to update the detect() method to handle the new block pattern
+  with domain prefix and a...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I need to update the detect() method to handle the new block pattern with domain prefix and also detect inline domain markers. Let me read the detect method again:
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.312574+00:00'
+summary: Now I need to update the inline pattern detection to also look for domain
+  markers near signals an...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I need to update the inline pattern detection to also look for domain markers near signals and apply them. Let me update that section:
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.422468+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The config.py follows a clear pattern:
+
+  1. Secti...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The config.py follows a clear pattern:
+1. Sections organized by category with clear headers
+2. Functions use `get_*` naming convention...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.480582+00:00'
+summary: '...ignore` isn''t sufficient for Pyright. Let me use a better approach -
+  using a sentinel value pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...ignore` isn't sufficient for Pyright. Let me use a better approach - using a sentinel value pattern or `field(default_factory=...)`. Actually, looking at this more carefully, I should use a cleaner...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.587280+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  **Schema Migration Pattern in index.py**:
+
+  1. `S...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+**Schema Migration Pattern in index.py**:
+1. `SCHEMA_VERSION` constant defines target version
+2. `_MIGRATIONS` dict maps...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.635947+00:00'
+summary: '...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and
+  `get_stats()`
+
+  The patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and `get_stats()`
+
+The pattern is simple: add an optional `domain: str | None = None` parameter and include `AND domain =...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.684108+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The query methods follow a consistent pattern: ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The query methods follow a consistent pattern: build SQL with optional filters, use parameterized queries. Adding domain filtering will follow...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.741596+00:00'
+summary: '...optional filters, use parameterized queries. Adding domain filtering
+  will follow the same patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...optional filters, use parameterized queries. Adding domain filtering will follow the same pattern - an optional `domain: str | None = None` parameter and adding `AND domain = ?` when it's set....
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.893946+00:00'
+summary: '...tasks completed.
+
+  **Summary of what was implemented:**
+
+  - `GitOps.for_domain(domain)` - Factory...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...tasks completed.
+
+**Summary of what was implemented:**
+- `GitOps.for_domain(domain)` - Factory pattern with per-domain caching
+- `GitOps.ensure_user_repo_initialized()` - Creates bare git repo for...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:41.006596+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The CaptureService follows the singleton patter...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The CaptureService follows the singleton pattern via `ServiceRegistry.get()`. It already accepts a `git_ops` parameter and lazily creates one...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:41.060622+00:00'
+summary: '...────────────────────────`
+
+  The multi-domain search architecture follows a **parallel query + me...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...────────────────────────`
+The multi-domain search architecture follows a **parallel query + merge** pattern:
+1. When `domain=None`, we query both project and user indexes in parallel
+2. Results are merged...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:41.120318+00:00'
+summary: '...Add domain marker patterns like `[global]`, `[user]`, `[project]`, `[local]`
+
+  3. Extend block p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Add domain marker patterns like `[global]`, `[user]`, `[project]`, `[local]`
+3. Extend block pattern to support domain prefix like `global:decision`
+
+`★ Insight ─────────────────────────────────────`
+The...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:41.224392+00:00'
+summary: '...I''ve completed Task 4.1 (Add Domain Markers to SignalDetector) and Task
+  4.2 (Extend Block Patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...I've completed Task 4.1 (Add Domain Markers to SignalDetector) and Task 4.2 (Extend Block Pattern for Domain Prefix) since they were both implemented together. Let me update the PROGRESS.md...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:59:51.045492+00:00'
+summary: '# Pattern to match YAML front matter at the start of content'
+tags:
+- auto-captured
+- post-tool-use
+- file:note_parser.py
+---
+
+# Pattern to match YAML front matter at the start of content
+# Matches: ---\n<yaml>\n--- followed by...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:59:51.067812+00:00'
+summary: '...= re.compile('
+tags:
+- auto-captured
+- post-tool-use
+- file:note_parser.py
+---
+
+...= re.compile(
+    r"^---\s*\n(.*?)^---\s*(?:\n(.*))?$",
+    re.DOTALL | re.MULTILINE,
+)
+
+# Pattern to split multiple notes in a single git note
+# Each note starts with --- on its own line
+_MULTI_NOTE...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:08:10.544314+00:00'
+summary: '..."--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+..."--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return old pattern
+                result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            elif "--unset"...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:08:41.052725+00:00'
+summary: '..."--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+..."--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return new pattern (no old pattern)
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:08:41.077138+00:00'
+summary: '...result = git.migrate_fetch_config()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+...result = git.migrate_fetch_config()
+            # No migration needed - no old pattern
+            assert result is False
+
+    def test_migrate_both_patterns_removes_old(self, tmp_path:...

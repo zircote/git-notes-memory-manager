@@ -1,0 +1,118 @@
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.274669+00:00'
+summary: '...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe
+  access when needed
+
+  Thi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe access when needed
+
+This pattern is consistent with how `status` is handled in the same class.
+`─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.316773+00:00'
+summary: '...idempotency
+
+  The migration for domain needs to add the column and create an index, following
+  t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...idempotency
+
+The migration for domain needs to add the column and create an index, following the exact pattern used for `repo_path` in version 2.
+`─────────────────────────────────────────────────`
+
+Now...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.422450+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The config.py follows a clear pattern:
+
+  1. Secti...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The config.py follows a clear pattern:
+1. Sections organized by category with clear headers
+2. Functions use `get_*` naming convention...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.476364+00:00'
+summary: '...ignore` isn''t sufficient for Pyright. Let me use a better approach -
+  using a sentinel value pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...ignore` isn't sufficient for Pyright. Let me use a better approach - using a sentinel value pattern or `field(default_factory=...)`. Actually, looking at this more carefully, I should use a cleaner...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.569213+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  **Schema Migration Pattern in index.py**:
+
+  1. `S...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+**Schema Migration Pattern in index.py**:
+1. `SCHEMA_VERSION` constant defines target version
+2. `_MIGRATIONS` dict maps...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.612419+00:00'
+summary: Good. Now let me check if there are existing tests for models.py that I should
+  follow the pattern...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Good. Now let me check if there are existing tests for models.py that I should follow the pattern of:
+
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.657780+00:00'
+summary: '...Migration for Domain Column. First, let me read the current index.py
+  to understand the migrati...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Migration for Domain Column. First, let me read the current index.py to understand the migration pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.702194+00:00'
+summary: 'Let me see more of the schema creation and understand the full pattern:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Let me see more of the schema creation and understand the full pattern:
