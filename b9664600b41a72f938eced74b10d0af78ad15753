@@ -2761,3 +2761,19 @@ tags:
 ...`src/git_notes_memory/sync.py:329`
   - Action: Batch fetch instead of per-item queries
   - **Completed:** 2025-12-26 - Added `IndexService.get_existing_ids()` batch method; restructured sync to...
+
+---
+type: progress
+timestamp: '2025-12-26T15:49:13.991761+00:00'
+summary: '...File: `src/git_notes_memory/sync.py:235-261`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...File: `src/git_notes_memory/sync.py:235-261`
+  - Action: Add streaming or batch limits
+  - **Completed:** 2025-12-26 - Added `SyncService.iter_notes()` generator for memory-bounded iteration
+
+-...
