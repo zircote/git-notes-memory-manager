@@ -6515,3 +6515,20 @@ tags:
 | SEC-H-001 | SSRF via OTLP Endpoint | ✅ Completed |
 | SEC-H-002 | API Key Exposure in Error Messages | ✅ Completed |
 | SEC-H-003 | Stale Lock...
+
+---
+type: progress
+timestamp: '2025-12-26T16:55:27.168120+00:00'
+summary: '...SSRF via OTLP Endpoint | ✅ Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...SSRF via OTLP Endpoint | ✅ Completed |
+| SEC-H-002 | API Key Exposure in Error Messages | ✅ Completed |
+| SEC-H-003 | Stale Lock TOCTOU Race | ✅ Completed |
+
+### Performance HIGH (5/5 Complete)
+|...
