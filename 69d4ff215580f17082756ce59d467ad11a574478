@@ -47,3 +47,19 @@ tags:
 1. **detect-secrets**: 27+ pattern detectors + entropy analysis
 2. **Custom PII**: SSN, credit cards, phone numbers
 3. **Hash-Only...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:46:51.449673+00:00'
+summary: '...git_notes_memory/security/pii.py`'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...git_notes_memory/security/pii.py`
+- [ ] PIIDetector class (detect-secrets doesn't cover PII)
+- [ ] SSN pattern (XXX-XX-XXXX)
+- [ ] Credit card pattern with Luhn validation
+- [ ] Phone number patterns (US...
