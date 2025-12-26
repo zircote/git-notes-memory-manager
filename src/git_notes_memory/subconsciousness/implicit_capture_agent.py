@@ -284,7 +284,8 @@ class ImplicitCaptureAgent:
                 source_range = (start, end)
             except (ValueError, TypeError):
                 # Invalid source_lines format - skip source range extraction
-                # This can happen if LLM returns non-integer values
+                # ValueError: LLM returned non-integer values
+                # TypeError: source_lines is None or incompatible type
                 source_range = None
 
         # Parse tags
