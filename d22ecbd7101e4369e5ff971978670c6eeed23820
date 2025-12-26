@@ -1038,3 +1038,17 @@ tags:
                 # Return old pattern
                 result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
             elif "--unset"...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:08:41.052725+00:00'
+summary: '..."--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+..."--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return new pattern (no old pattern)
+                result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"...
