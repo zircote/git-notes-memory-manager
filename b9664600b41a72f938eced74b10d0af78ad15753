@@ -1231,3 +1231,15 @@ tags:
     # CRIT-003: Check if already registered (fast path)
     # Using has() + get() pattern for thread safety.
     # We can't use ServiceRegistry.get() alone because CaptureService...
+
+---
+type: patterns
+timestamp: '2025-12-26T15:29:45.387417+00:00'
+summary: '...I''m using is wrong. I should check if it exists, and if not, create
+  and register. The proper p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...I'm using is wrong. I should check if it exists, and if not, create and register. The proper pattern should use the `try...KeyError` approach or a different mechanism. Let me look at how other...
