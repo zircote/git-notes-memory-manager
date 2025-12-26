@@ -53,8 +53,7 @@ exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
     namespace: memory
-    const_labels:
-      service: git-notes-memory
+    # Note: const_labels removed to avoid duplicate label conflict with resource attributes
 
   # Export traces to Tempo
   otlp/tempo:
