@@ -340,3 +340,21 @@ tags:
 
     Returns:
         True if export succeeded or no endpoint configured, False on...
+
+---
+type: progress
+timestamp: '2025-12-26T03:11:11.118527+00:00'
+summary: '...to the configured OTLP'
+tags:
+- auto-captured
+- post-tool-use
+- file:stop_handler.py
+---
+
+...to the configured OTLP
+    endpoint (if any). Called at session end to ensure telemetry is shipped.
+
+    Returns:
+        Dict with export results.
+    """
+    result: dict[str, Any] = {"traces":...
