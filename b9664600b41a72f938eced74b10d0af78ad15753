@@ -8334,3 +8334,17 @@ Rebase completed successfully. v1.0.0 is now rebased onto origin/v1.0.0.
 
 ```
 aa35822 fix(plugin): correct...
+
+---
+type: progress
+timestamp: '2025-12-26T17:07:44.999279+00:00'
+summary: '- [x] RES-M-003: Rate Limiter Token Refund Race (`rate_limiter.py:243-250`)
+  ✅'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+- [x] RES-M-003: Rate Limiter Token Refund Race (`rate_limiter.py:243-250`) ✅
+  - **Completed:** 2025-12-26 - Added async-safe `refund()` method to TokenBucket class
