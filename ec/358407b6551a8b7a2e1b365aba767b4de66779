@@ -27,3 +27,24 @@ summary: The variable isn't set when developing from source. The fix is to add a
 ---
 
 The variable isn't set when developing from source. The fix is to add a fallback to the current directory. Let me update the command:
+
+---
+type: progress
+timestamp: '2025-12-26T20:45:27.022885+00:00'
+summary: Fixed CLAUDE_PLUGIN_ROOT fallback for all slash commands
+---
+
+Fixed CLAUDE_PLUGIN_ROOT fallback for all slash commands
+## Summary
+Added bash parameter expansion fallback (`${CLAUDE_PLUGIN_ROOT:-.}`) to all 14 command files. When `CLAUDE_PLUGIN_ROOT` is not set (e.g., when developing from source repo), commands now fall back to current directory instead of passing empty string to `--directory` flag.
+
+## Changes Made
+- Updated 14 command files with `${CLAUDE_PLUGIN_ROOT:-.}` pattern
+- Fixes `uv run --directory` error when running from source checkout
+- Maintains compatibility with installed plugin (where CLAUDE_PLUGIN_ROOT is set)
+
+## Related Files
+- commands/metrics.md:77
+- commands/audit-log.md, capture.md, health.md, recall.md, review.md
+- commands/scan-secrets.md, search.md, secrets-allowlist.md
+- commands/status.md, sync.md, test-secret.md, traces.md, validate.md
