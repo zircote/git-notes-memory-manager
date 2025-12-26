@@ -933,3 +933,31 @@ Implemented transcript parsing and chunking for LLM analysis with sliding window
 - src/git_notes_memory/subconsciousness/transcript_chunker.py:1-315
 - tests/subconsciousness/test_transcript_chunker.py:1-348
 - docs/spec/active/2025-12-25-llm-subconsciousness/PROGRESS.md:245-274
+
+---
+type: progress
+timestamp: '2025-12-26T02:13:09.165342+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.4: LLM analysis prompts with JS...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.4: LLM analysis prompts with JSON schemas and builder functions
+## Summary
+Created `prompts.py` module containing structured prompts for memory extraction and adversarial screening. The prompts guide LLM to extract memory-worthy content from transcripts with confidence scoring.
+
+## Changes Made
+- Created `EXTRACTION_SCHEMA` JSON schema for structured memory output
+- Created `ADVERSARIAL_SCHEMA` for threat detection output
+- Implemented `MEMORY_EXTRACTION_PROMPT` with detailed instructions for 5 memory types
+- Implemented `ADVERSARIAL_SCREENING_PROMPT` for security screening
+- Added `AnalysisPrompt` frozen dataclass
+- Added `get_extraction_prompt()` and `get_adversarial_prompt()` builder functions
+- Added 30 tests covering schemas, prompts, and builders
+
+## Related Files
+- src/git_notes_memory/subconsciousness/prompts.py:1-332
+- tests/subconsciousness/test_prompts.py:1-187
