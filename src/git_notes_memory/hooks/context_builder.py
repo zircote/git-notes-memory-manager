@@ -18,7 +18,7 @@ import logging
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from git_notes_memory.config import TOKENS_PER_CHAR, get_project_index_path
+from git_notes_memory.config import TOKENS_PER_CHAR, Domain, get_project_index_path
 from git_notes_memory.exceptions import MemoryIndexError
 from git_notes_memory.hooks.config_loader import (
     BudgetMode,
@@ -342,6 +342,8 @@ class ContextBuilder:
         project: str,  # noqa: ARG002 - Reserved for future project-scoped filtering
         spec_id: str | None,
         token_budget: int,
+        *,
+        include_user_memories: bool = True,
     ) -> WorkingMemory:
         """Build the working memory context.
 
@@ -349,6 +351,9 @@ class ContextBuilder:
         - Active blockers (from "blockers" namespace, recent)
         - Recent decisions (from "decisions" namespace, last 7 days)
         - Pending actions (incomplete tasks, if tracked)
+
+        When include_user_memories is True (default), queries both project and
+        user domains, with project memories taking priority.
         """
         recall = self._get_recall_service()
 
@@ -363,22 +368,29 @@ class ContextBuilder:
         decision_limit = max(3, max_memories // 3)  # ~33%
         action_limit = max(2, max_memories // 6)  # ~17%
 
-        # Get active blockers (most recent first)
+        # Determine domain filter
+        # None = query both domains (project memories prioritized)
+        # Domain.PROJECT = only project memories
+        domain = None if include_user_memories else Domain.PROJECT
+
+        # Get active blockers (most recent first, from both domains)
         blockers = recall.get_by_namespace(
-            "blockers", spec=spec_id, limit=blocker_limit
+            "blockers", spec=spec_id, limit=blocker_limit, domain=domain
         )
         blockers = self.filter_memories(blockers, blocker_budget)
 
-        # Get recent decisions (last 7 days)
+        # Get recent decisions (last 7 days, from both domains)
         decisions = recall.get_by_namespace(
-            "decisions", spec=spec_id, limit=decision_limit
+            "decisions", spec=spec_id, limit=decision_limit, domain=domain
         )
         recent_cutoff = datetime.now(UTC) - timedelta(days=7)
         decisions = [d for d in decisions if d.timestamp >= recent_cutoff]
         decisions = self.filter_memories(decisions, decision_budget)
 
-        # Get pending actions (from progress namespace)
-        actions = recall.get_by_namespace("progress", spec=spec_id, limit=action_limit)
+        # Get pending actions (from progress namespace, both domains)
+        actions = recall.get_by_namespace(
+            "progress", spec=spec_id, limit=action_limit, domain=domain
+        )
         actions = [a for a in actions if a.status in ("pending", "in-progress")]
         actions = self.filter_memories(actions, action_budget)
 
@@ -393,11 +405,16 @@ class ContextBuilder:
         project: str,
         spec_id: str | None,  # noqa: ARG002 - Reserved for future spec-scoped filtering
         token_budget: int,
+        *,
+        include_user_memories: bool = True,
     ) -> SemanticContext:
         """Build the semantic context.
 
         Semantic context contains contextually relevant learnings and patterns
         based on semantic similarity to the project.
+
+        When include_user_memories is True (default), queries both project and
+        user domains, with project memories taking priority at equal relevance.
         """
         recall = self._get_recall_service()
 
@@ -410,10 +427,17 @@ class ContextBuilder:
         learning_limit = max(5, max_memories // 2)  # ~50% for learnings
         pattern_limit = max(2, max_memories // 6)  # ~17% for patterns
 
+        # Determine domain filter
+        # None = query both domains (project memories prioritized at equal relevance)
+        # Domain.PROJECT = only project memories
+        domain = None if include_user_memories else Domain.PROJECT
+
         # Search for relevant learnings and track relevance scores
         learnings: list[Memory] = []
         if project:
-            results = recall.search(project, k=learning_limit, namespace="learnings")
+            results = recall.search(
+                project, k=learning_limit, namespace="learnings", domain=domain
+            )
             for r in results:
                 # Convert distance to similarity (lower distance = higher similarity)
                 # Using 1/(1+distance) for bounded [0,1] range
@@ -424,7 +448,9 @@ class ContextBuilder:
         # Search for relevant patterns and track relevance scores
         patterns: list[Memory] = []
         if project:
-            results = recall.search(project, k=pattern_limit, namespace="patterns")
+            results = recall.search(
+                project, k=pattern_limit, namespace="patterns", domain=domain
+            )
             for r in results:
                 # Convert distance to similarity (lower distance = higher similarity)
                 self._relevance_map[r.memory.id] = 1.0 / (1.0 + r.distance)

@@ -15,7 +15,7 @@ This module tests all aspects of the ContextBuilder, including:
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -152,7 +152,10 @@ def mock_recall_service(
 
     # Configure get_by_namespace to return appropriate memories
     def mock_get_by_namespace(
-        namespace: str, spec: str | None = None, limit: int | None = None
+        namespace: str,
+        spec: str | None = None,
+        limit: int | None = None,
+        domain: Any | None = None,  # Accept domain parameter (Domain enum or None)
     ) -> list[Memory]:
         if namespace == "blockers":
             return [mock_blocker_memory]
@@ -166,7 +169,11 @@ def mock_recall_service(
 
     # Configure search to return learning and pattern results
     def mock_search(
-        query: str, k: int = 10, namespace: str | None = None
+        query: str,
+        k: int = 10,
+        namespace: str | None = None,
+        domain: Any | None = None,  # Accept domain parameter
+        **kwargs: Any,
     ) -> list[MemoryResult]:
         if namespace == "learnings":
             return [MemoryResult(memory=mock_learning_memory, distance=0.5)]
@@ -613,9 +620,9 @@ class TestBuildWorkingMemory:
             token_budget=1000,
         )
 
-        # Verify blockers were retrieved
+        # Verify blockers were retrieved (domain=None means query both domains)
         mock_recall_service.get_by_namespace.assert_any_call(
-            "blockers", spec=None, limit=10
+            "blockers", spec=None, limit=10, domain=None
         )
         assert isinstance(result, WorkingMemory)
         assert len(result.active_blockers) >= 0
@@ -631,7 +638,7 @@ class TestBuildWorkingMemory:
         )
 
         mock_recall_service.get_by_namespace.assert_any_call(
-            "decisions", spec=None, limit=10
+            "decisions", spec=None, limit=10, domain=None
         )
         assert isinstance(result, WorkingMemory)
 
@@ -646,7 +653,7 @@ class TestBuildWorkingMemory:
         )
 
         mock_recall_service.get_by_namespace.assert_any_call(
-            "progress", spec=None, limit=5
+            "progress", spec=None, limit=5, domain=None
         )
         assert isinstance(result, WorkingMemory)
 
@@ -673,7 +680,7 @@ class TestBuildWorkingMemory:
         )
 
         mock_recall_service.get_by_namespace.side_effect = (
-            lambda ns, spec=None, limit=None: (  # noqa: ARG005
+            lambda ns, spec=None, limit=None, domain=None: (  # noqa: ARG005
                 [old_decision, recent_decision] if ns == "decisions" else []
             )
         )
@@ -705,7 +712,7 @@ class TestBuildWorkingMemory:
         )
 
         mock_recall_service.get_by_namespace.side_effect = (
-            lambda ns, spec=None, limit=None: (  # noqa: ARG005
+            lambda ns, spec=None, limit=None, domain=None: (  # noqa: ARG005
                 [mock_progress_memory, completed_action] if ns == "progress" else []
             )
         )
@@ -750,6 +757,42 @@ class TestBuildWorkingMemory:
         # Result should still be valid WorkingMemory
         assert isinstance(result, WorkingMemory)
 
+    def test_include_user_memories_true_queries_both_domains(
+        self, mock_recall_service: MagicMock
+    ) -> None:
+        """Test that include_user_memories=True passes domain=None to query both domains."""
+        builder = ContextBuilder(recall_service=mock_recall_service)
+
+        builder._build_working_memory(
+            project="test-project",
+            spec_id=None,
+            token_budget=1000,
+            include_user_memories=True,  # Default, but explicit
+        )
+
+        # All calls should have domain=None (query both USER and PROJECT domains)
+        for call in mock_recall_service.get_by_namespace.call_args_list:
+            assert call.kwargs.get("domain") is None
+
+    def test_include_user_memories_false_queries_project_only(
+        self, mock_recall_service: MagicMock
+    ) -> None:
+        """Test that include_user_memories=False passes domain=PROJECT."""
+        from git_notes_memory.config import Domain
+
+        builder = ContextBuilder(recall_service=mock_recall_service)
+
+        builder._build_working_memory(
+            project="test-project",
+            spec_id=None,
+            token_budget=1000,
+            include_user_memories=False,  # Only project memories
+        )
+
+        # All calls should have domain=Domain.PROJECT
+        for call in mock_recall_service.get_by_namespace.call_args_list:
+            assert call.kwargs.get("domain") == Domain.PROJECT
+
 
 # =============================================================================
 # Test: _build_semantic_context()
@@ -770,8 +813,9 @@ class TestBuildSemanticContext:
         )
 
         # Default max_memories=30, learning_limit = max(5, 30 // 2) = 15
+        # domain=None means search both USER and PROJECT domains
         mock_recall_service.search.assert_any_call(
-            "test-project", k=15, namespace="learnings"
+            "test-project", k=15, namespace="learnings", domain=None
         )
         assert isinstance(result, SemanticContext)
 
@@ -786,7 +830,7 @@ class TestBuildSemanticContext:
         )
 
         mock_recall_service.search.assert_any_call(
-            "test-project", k=5, namespace="patterns"
+            "test-project", k=5, namespace="patterns", domain=None
         )
         assert isinstance(result, SemanticContext)
 
@@ -832,6 +876,42 @@ class TestBuildSemanticContext:
         )
 
         assert isinstance(result, SemanticContext)
+
+    def test_include_user_memories_true_queries_both_domains(
+        self, mock_recall_service: MagicMock
+    ) -> None:
+        """Test that include_user_memories=True passes domain=None to search both domains."""
+        builder = ContextBuilder(recall_service=mock_recall_service)
+
+        builder._build_semantic_context(
+            project="test-project",
+            spec_id=None,
+            token_budget=1000,
+            include_user_memories=True,
+        )
+
+        # All search calls should have domain=None
+        for call in mock_recall_service.search.call_args_list:
+            assert call.kwargs.get("domain") is None
+
+    def test_include_user_memories_false_queries_project_only(
+        self, mock_recall_service: MagicMock
+    ) -> None:
+        """Test that include_user_memories=False passes domain=PROJECT."""
+        from git_notes_memory.config import Domain
+
+        builder = ContextBuilder(recall_service=mock_recall_service)
+
+        builder._build_semantic_context(
+            project="test-project",
+            spec_id=None,
+            token_budget=1000,
+            include_user_memories=False,
+        )
+
+        # All search calls should have domain=Domain.PROJECT
+        for call in mock_recall_service.search.call_args_list:
+            assert call.kwargs.get("domain") == Domain.PROJECT
 
 
 # =============================================================================

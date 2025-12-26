@@ -24,6 +24,7 @@ Environment Variables:
     HOOK_ENABLED: Master switch for hooks (default: true)
     HOOK_SESSION_START_ENABLED: Enable this hook (default: true)
     HOOK_SESSION_START_FETCH_REMOTE: Fetch notes from remote on start (default: false)
+    HOOK_SESSION_START_FETCH_USER_REMOTE: Fetch user memories from remote on start (default: false)
     HOOK_DEBUG: Enable debug logging (default: false)
 """
 
@@ -87,8 +88,9 @@ def _get_memory_count() -> int:
         row = cursor.fetchone()
         conn.close()
         return int(row[0]) if row else 0
-    except Exception:
-        logger.debug("Failed to get memory count from index", exc_info=True)
+    except (OSError, sqlite3.Error) as e:
+        # QUAL-HIGH-001: Specific exceptions for file/database access
+        logger.debug("Failed to get memory count from index: %s", e)
         return 0
 
 
@@ -211,6 +213,21 @@ def main() -> None:
                     )
             except Exception as e:
                 logger.debug("Remote fetch on start skipped: %s", e)
+
+        # Fetch user memories from remote if enabled (opt-in via env var)
+        if config.session_start_fetch_user_remote:
+            try:
+                from git_notes_memory.config import get_user_memories_remote
+
+                if get_user_memories_remote():
+                    from git_notes_memory.sync import get_sync_service as get_sync
+
+                    sync_service = get_sync(repo_path=cwd)
+                    sync_service.sync_user_memories_with_remote(push=False)
+                    logger.debug("Fetched user memories from remote")
+            except Exception as e:
+                # Don't block session - just log and continue
+                logger.debug("User memory remote fetch skipped: %s", e)
 
         # Build response guidance if enabled
         guidance_xml = ""

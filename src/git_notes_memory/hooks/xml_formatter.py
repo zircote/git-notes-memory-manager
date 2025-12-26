@@ -128,6 +128,9 @@ class XMLBuilder:
             "namespace": memory.namespace,
             "timestamp": memory.timestamp.isoformat(),
         }
+        # Add domain attribute (user=global, project=repo-scoped)
+        if memory.domain:
+            attrs["domain"] = memory.domain
         if memory.spec:
             attrs["spec"] = memory.spec
         if memory.phase:

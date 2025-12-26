@@ -7,6 +7,9 @@ The default model is 'all-MiniLM-L6-v2' which produces 384-dimensional vectors.
 This can be overridden via the MEMORY_PLUGIN_EMBEDDING_MODEL environment variable.
 
 Model files are cached in the XDG data directory (models/ subdirectory).
+
+CRIT-001: Timeout protection is applied to all encode() operations to prevent
+indefinite hangs on GPU memory exhaustion or model corruption.
 """
 
 from __future__ import annotations
@@ -14,6 +17,8 @@ from __future__ import annotations
 import logging
 import os
 from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -33,6 +38,17 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Timeout Constants (CRIT-001)
+# =============================================================================
+
+# Timeout for single embed() operations (seconds)
+EMBED_TIMEOUT_SECONDS = 30.0
+
+# Timeout for batch embed_batch() operations (seconds)
+EMBED_BATCH_TIMEOUT_SECONDS = 120.0
 
 
 # =============================================================================
@@ -180,6 +196,8 @@ class EmbeddingService:
     def embed(self, text: str) -> list[float]:
         """Generate an embedding for a single text.
 
+        CRIT-001: Uses ThreadPoolExecutor timeout to prevent indefinite hangs.
+
         Args:
             text: The text to embed.
 
@@ -187,7 +205,7 @@ class EmbeddingService:
             A list of floats representing the embedding vector.
 
         Raises:
-            EmbeddingError: If embedding generation fails.
+            EmbeddingError: If embedding generation fails or times out.
 
         Examples:
             >>> service = EmbeddingService()
@@ -203,14 +221,27 @@ class EmbeddingService:
 
         try:
             assert self._model is not None  # For type checker
-            embedding = self._model.encode(
-                text,
-                convert_to_numpy=True,
-                normalize_embeddings=True,
-            )
-            result: list[float] = embedding.tolist()
+            model = self._model  # Capture for closure
+
+            def _encode() -> list[float]:
+                emb = model.encode(
+                    text,
+                    convert_to_numpy=True,
+                    normalize_embeddings=True,
+                )
+                return emb.tolist()  # type: ignore[no-any-return]
+
+            # CRIT-001: Apply timeout to prevent indefinite hangs
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_encode)
+                result = future.result(timeout=EMBED_TIMEOUT_SECONDS)
             return result
 
+        except FuturesTimeoutError:
+            raise EmbeddingError(
+                f"Embedding timed out after {EMBED_TIMEOUT_SECONDS}s",
+                "The model may be overloaded or GPU memory exhausted. Restart and retry.",
+            ) from None
         except Exception as e:
             raise EmbeddingError(
                 f"Failed to generate embedding: {e}",
@@ -225,6 +256,8 @@ class EmbeddingService:
     ) -> list[list[float]]:
         """Generate embeddings for multiple texts.
 
+        CRIT-001: Uses ThreadPoolExecutor timeout to prevent indefinite hangs.
+
         Args:
             texts: Sequence of texts to embed.
             batch_size: Number of texts to process in each batch.
@@ -234,7 +267,7 @@ class EmbeddingService:
             A list of embedding vectors, one per input text.
 
         Raises:
-            EmbeddingError: If embedding generation fails.
+            EmbeddingError: If embedding generation fails or times out.
 
         Examples:
             >>> service = EmbeddingService()
@@ -261,24 +294,37 @@ class EmbeddingService:
             return [[0.0] * self.dimensions for _ in texts]
 
         self.load()
+        dims = self.dimensions
 
         try:
             assert self._model is not None  # For type checker
-            embeddings = self._model.encode(
-                non_empty_texts,
-                batch_size=batch_size,
-                show_progress_bar=show_progress,
-                convert_to_numpy=True,
-                normalize_embeddings=True,
-            )
+            model = self._model  # Capture for closure
 
-            # Reconstruct the full result list
-            result: list[list[float]] = [[0.0] * self.dimensions for _ in texts]
-            for i, embedding in zip(non_empty_indices, embeddings, strict=True):
-                result[i] = embedding.tolist()
+            def _encode_batch() -> list[list[float]]:
+                embs = model.encode(
+                    non_empty_texts,
+                    batch_size=batch_size,
+                    show_progress_bar=show_progress,
+                    convert_to_numpy=True,
+                    normalize_embeddings=True,
+                )
+                # Reconstruct the full result list
+                res: list[list[float]] = [[0.0] * dims for _ in texts]
+                for idx, emb in zip(non_empty_indices, embs, strict=True):
+                    res[idx] = emb.tolist()
+                return res
 
+            # CRIT-001: Apply timeout to prevent indefinite hangs
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_encode_batch)
+                result = future.result(timeout=EMBED_BATCH_TIMEOUT_SECONDS)
             return result
 
+        except FuturesTimeoutError:
+            raise EmbeddingError(
+                f"Batch embedding timed out after {EMBED_BATCH_TIMEOUT_SECONDS}s",
+                "The model may be overloaded or GPU memory exhausted. Reduce batch size or restart.",
+            ) from None
         except Exception as e:
             raise EmbeddingError(
                 f"Failed to generate batch embeddings: {e}",

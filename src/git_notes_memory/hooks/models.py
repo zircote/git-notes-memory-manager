@@ -16,6 +16,8 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from git_notes_memory.config import Domain
+
 if TYPE_CHECKING:
     from git_notes_memory.models import Memory
 
@@ -98,6 +100,7 @@ class CaptureSignal:
         context: Surrounding context text.
         suggested_namespace: Inferred namespace for capture.
         position: Character position of match in source text.
+        domain: Target storage domain (USER for global, PROJECT for repo-local).
     """
 
     type: SignalType
@@ -106,6 +109,7 @@ class CaptureSignal:
     context: str
     suggested_namespace: str
     position: int = 0
+    domain: Domain = Domain.PROJECT
 
     def __post_init__(self) -> None:
         """Validate confidence score is in valid range."""
@@ -164,6 +168,7 @@ class SuggestedCapture:
         content: Full content to capture.
         tags: Suggested tags for the memory.
         confidence: Confidence score for the suggestion.
+        domain: Target storage domain (USER for global, PROJECT for repo-local).
     """
 
     namespace: str
@@ -171,6 +176,7 @@ class SuggestedCapture:
     content: str
     tags: tuple[str, ...] = field(default_factory=tuple)
     confidence: float = 0.0
+    domain: Domain = Domain.PROJECT
 
 
 @dataclass(frozen=True)

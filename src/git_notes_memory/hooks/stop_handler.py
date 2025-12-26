@@ -29,6 +29,7 @@ Environment Variables:
     HOOK_STOP_PROMPT_UNCAPTURED: Prompt for uncaptured content (default: true)
     HOOK_STOP_SYNC_INDEX: Sync index on session end (default: true)
     HOOK_STOP_PUSH_REMOTE: Push notes to remote on stop (default: false)
+    HOOK_STOP_PUSH_USER_REMOTE: Push user memories to remote on stop (default: false)
     HOOK_DEBUG: Enable debug logging (default: false)
 """
 
@@ -484,6 +485,22 @@ def main() -> None:
                         logger.debug("Push to remote failed (will retry next session)")
                 except Exception as e:
                     logger.debug("Remote push on stop skipped: %s", e)
+
+        # Push user memories to remote if enabled (opt-in via env var)
+        if config.stop_push_user_remote:
+            try:
+                from git_notes_memory.config import get_user_memories_remote
+
+                if get_user_memories_remote():
+                    cwd = input_data.get("cwd")
+                    from git_notes_memory.sync import get_sync_service as get_sync
+
+                    sync_service = get_sync(repo_path=cwd if cwd else None)
+                    sync_service.sync_user_memories_with_remote(push=True)
+                    logger.debug("Pushed user memories to remote on session stop")
+            except Exception as e:
+                # Don't block session - just log and continue
+                logger.debug("User memory remote push skipped: %s", e)
 
         # Output result
         _write_output(
