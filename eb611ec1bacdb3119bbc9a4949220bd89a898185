@@ -2041,3 +2041,18 @@ tags:
 | Phase | Name | Tasks | Completed | Status |
 |-------|------|-------|-----------|--------|
 | 1 | LLM Foundation | 15 | 15 |...
+
+---
+type: progress
+timestamp: '2025-12-26T02:45:41.720548+00:00'
+summary: '...choices |'
+tags:
+- auto-captured
+- post-tool-use
+- file:SUBCONSCIOUSNESS.md
+---
+
+...choices |
+| `learnings` | "I learned...", "Discovered that...", insights |
+| `progress` | "Completed...", "Implemented...", milestones |
+| `blockers` | "Blocked by...", "Issue with...", problems...
