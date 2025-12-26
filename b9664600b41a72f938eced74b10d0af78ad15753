@@ -7517,3 +7517,18 @@ tags:
   - **Completed:** 2025-12-26 - Added composite index `idx_captures_pending_query (status, expires_at)`
 
 ###...
+
+---
+type: progress
+timestamp: '2025-12-26T17:02:58.119700+00:00'
+summary: '...guidance_standard.md`)'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...guidance_standard.md`)
+- [x] PROMPT-M-002: Unsafe JSON Parsing (`implicit_capture_agent.py`) ✅
+  - **Completed:** 2025-12-26 - Added `_safe_float()` helper for parsing confidence data; wrapped in try-except
+-...
