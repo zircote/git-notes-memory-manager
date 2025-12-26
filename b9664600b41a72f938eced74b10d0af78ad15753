@@ -8433,3 +8433,17 @@ tags:
 ...[x] PROMPT-M-003: Token Budget Not Enforced (`context_builder.py:187-222`) ✅
   - **Status:** IMPLEMENTED - `filter_memories()` method enforces token budget; stops adding memories when budget exceeded
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T17:15:27.052722+00:00'
+summary: '...PROMPT-M-004: Missing Rate Limit Header Handling (`llm_client.py:406-469`)
+  ✅'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...PROMPT-M-004: Missing Rate Limit Header Handling (`llm_client.py:406-469`) ✅
+  - **Status:** IMPLEMENTED - Providers parse `retry-after` headers from rate limit errors; `_parse_retry_after()` methods...
