@@ -319,3 +319,18 @@ tags:
 ## Completed Spec Projects
 
 - `docs/spec/completed/2025-12-25-secrets-filtering/` - Secrets Filtering and...
+
+---
+type: progress
+timestamp: '2025-12-26T03:54:39.415553+00:00'
+summary: '## Completed Spec Projects'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+## Completed Spec Projects
+
+- `docs/spec/completed/2025-12-25-secrets-filtering/` - Secrets Filtering and Sensitive Data Protection
+  - Completed:...
