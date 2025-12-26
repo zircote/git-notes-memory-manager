@@ -991,3 +991,16 @@ tags:
 ---
 
 ...I've completed Task 4.1 (Add Domain Markers to SignalDetector) and Task 4.2 (Extend Block Pattern for Domain Prefix) since they were both implemented together. Let me update the PROGRESS.md...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:59:51.045492+00:00'
+summary: '# Pattern to match YAML front matter at the start of content'
+tags:
+- auto-captured
+- post-tool-use
+- file:note_parser.py
+---
+
+# Pattern to match YAML front matter at the start of content
+# Matches: ---\n<yaml>\n--- followed by...
