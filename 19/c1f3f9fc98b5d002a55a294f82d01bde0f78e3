@@ -145,3 +145,33 @@ Modified all hook handlers and CaptureService to flush metrics to OTLP after eac
 - src/git_notes_memory/hooks/user_prompt_handler.py
 - src/git_notes_memory/hooks/post_tool_use_handler.py
 - src/git_notes_memory/hooks/pre_compact_handler.py
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.102115+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Implemented Issue #28 multi-worktree sync fix
+
+  #...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Implemented Issue #28 multi-worktree sync fix
+## Summary
+Replaced `push_notes_to_remote()` with `sync_notes_with_remote(push=True)` in the Stop hook to prevent race conditions in multi-worktree environments.
+
+## Changes Made
+- Modified `stop_handler.py:473-490` to use fetch→merge→push workflow
+- Updated comments to reference Issue #28
+- Changed logging to show per-namespace sync results
+
+## Verification
+- All 2860 tests pass
+- 85% code coverage
+- All quality checks pass
+
+## Related Files
+- src/git_notes_memory/hooks/stop_handler.py:473-490
