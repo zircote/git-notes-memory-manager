@@ -200,3 +200,23 @@ tags:
 Subtasks:
 - [x] Add configurable timeout per request
 - [x] Support...
+
+---
+type: progress
+timestamp: '2025-12-26T00:58:54.841878+00:00'
+summary: '...1.11: Add usage tracking'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...1.11: Add usage tracking
+- **Status**: ✅ Complete
+- **Started**: 2025-12-26T01:37:00Z
+- **Completed**: 2025-12-26T01:40:00Z
+
+Subtasks:
+- [x] Track tokens per request
+- [x] Track cost per provider
+-...
