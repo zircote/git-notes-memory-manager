@@ -1,0 +1,17 @@
+---
+type: patterns
+timestamp: '2025-12-26T00:45:46.402415+00:00'
+summary: '### 2. DetectSecretsAdapter'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+### 2. DetectSecretsAdapter
+
+**Responsibility**: Wrap detect-secrets library for pattern and entropy detection.
+
+**Location**: `src/git_notes_memory/security/detector.py`
+
+**Implementation*...
