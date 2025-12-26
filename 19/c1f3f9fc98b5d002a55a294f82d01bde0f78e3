@@ -175,3 +175,30 @@ Replaced `push_notes_to_remote()` with `sync_notes_with_remote(push=True)` in th
 
 ## Related Files
 - src/git_notes_memory/hooks/stop_handler.py:473-490
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.143876+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Issue #28 multi-worktree sync fix implemented an...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Issue #28 multi-worktree sync fix implemented and PR created
+## Summary
+Completed the implementation of Issue #28 fix and created PR #34.
+
+## Changes Made
+- Renamed branch from `v1.0.0` to `fix/issue-28-multi-worktree-sync` (tag conflict)
+- Created 2 commits:
+  1. `446189b` - Real-time OTLP metrics flushing (10 files)
+  2. `cf64ea9` - Issue #28 fix: `sync_notes_with_remote(push=True)` in Stop hook
+- Created PR #34: https://github.com/zircote/git-notes-memory/pull/34
+- Updated spec README.md with PR link and completed status
+
+## Related Files
+- src/git_notes_memory/hooks/stop_handler.py:473-490
+- docs/spec/active/2025-12-26-multi-worktree-sync-fix/README.md
