@@ -106,3 +106,11 @@ The code DOES push metrics to OTLP—but only at specific points:
 - src/git_notes_memory/observability/metrics.py:485-502 (singleton pattern)
 - src/git_notes_memory/observability/exporters/otlp.py:552-565 (push function)
 - src/git_notes_memory/hooks/stop_handler.py:541 (Stop hook export)
+
+---
+type: learnings
+timestamp: '2025-12-26T20:47:19.376330+00:00'
+summary: 'Now I understand. Let me check the OTLP export flow:'
+---
+
+Now I understand. Let me check the OTLP export flow:
