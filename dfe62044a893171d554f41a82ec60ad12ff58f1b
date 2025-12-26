@@ -113,3 +113,22 @@ For each identified memory, output JSON matching the Memory Output Schema.
 IMPORTANT:
 - summary must be ≤100 characters and complete (no ellipsis)
 - content should use markdown...
+
+---
+type: learnings
+timestamp: '2025-12-26T00:12:39.375209+00:00'
+summary: Observability research complete - key patterns for implementation
+---
+
+Observability research complete - key patterns for implementation
+## Summary
+Research on Python observability best practices reveals clear patterns for optional dependencies and structured logging.
+
+## Key Findings
+- **OpenTelemetry**: Libraries should only depend on `opentelemetry-api`; SDK is application choice. Use `extras_require` for optional instrumentation.
+- **Prometheus buckets**: Default 15 buckets (5ms-10s) suitable for web services; customize to align with SLOs (hook timeouts: 2s, 5s, 15s, 30s)
+- **Structured logging**: structlog recommended for new projects - supports context binding, processors, and JSON output
+
+## Related Files
+- pyproject.toml (extras configuration)
+- src/git_notes_memory/observability.py (planned)
