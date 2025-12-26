@@ -123,3 +123,22 @@ tags:
 ---
 
 ...optional filters, use parameterized queries. Adding domain filtering will follow the same pattern - an optional `domain: str | None = None` parameter and adding `AND domain = ?` when it's set....
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.009654+00:00'
+summary: '...tasks completed.
+
+  **Summary of what was implemented:**
+
+  - `GitOps.for_domain(domain)` - Factory...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...tasks completed.
+
+**Summary of what was implemented:**
+- `GitOps.for_domain(domain)` - Factory pattern with per-domain caching
+- `GitOps.ensure_user_repo_initialized()` - Creates bare git repo for...
