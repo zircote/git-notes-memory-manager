@@ -25,3 +25,18 @@ tags:
 ...pending_count: Number of memories pending review.
         blocked_count: Number of memories blocked by screening.
         discarded_count: Number of memories discarded (low confidence)....
+
+---
+type: blockers
+timestamp: '2025-12-26T02:45:41.771576+00:00'
+summary: '...that...", insights |'
+tags:
+- auto-captured
+- post-tool-use
+- file:SUBCONSCIOUSNESS.md
+---
+
+...that...", insights |
+| `progress` | "Completed...", "Implemented...", milestones |
+| `blockers` | "Blocked by...", "Issue with...", problems |
+| `patterns` | "Pattern for...", "Best practice...", reusable...
