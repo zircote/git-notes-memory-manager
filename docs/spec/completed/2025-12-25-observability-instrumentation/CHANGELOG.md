@@ -2,25 +2,42 @@
 
 All notable changes to this specification will be documented in this file.
 
-## [Completed] - 2025-12-26
+## [COMPLETED] - 2025-12-26
+
+### Project Closed
+- Final status: **success**
+- Actual effort: ~3 hours (planned: ~4 hours, -25%)
+- Outcome: Very satisfied - exceeded expectations
+- Moved to: `docs/spec/completed/2025-12-25-observability-instrumentation/`
 
 ### Implementation Complete
 - **Phases 1-4 (Core)**: All 20 tasks completed
-- **Phases 5-6 (Optional Tier 3)**: 10 tasks skipped (OpenTelemetry, Docker stack deferred)
+- **Phase 5 (OpenTelemetry SDK)**: Skipped (optional Tier 3)
+- **Phase 6 (Docker Stack)**: Tasks 6.1-6.2 completed, 6.3-6.4 skipped
 
 ### Deliverables
 - `observability/` module with metrics, tracing, structured logging
 - 3 new CLI commands: `/memory:metrics`, `/memory:traces`, `/memory:health`
 - Prometheus text format export (stdlib only, no external deps)
 - JSON export for metrics and traces
+- OTLP HTTP exporter for telemetry push to collectors
 - `get_logger()` structured logging with JSON/text formatters
 - Silent failure tracking with `silent_failures_total` counter
-- 115+ new tests with 87%+ coverage
+- Docker Compose observability stack (OTEL, Prometheus, Grafana, Tempo, Loki)
+- Pre-built Grafana dashboards (memory-operations, hook-performance)
+- 115+ new tests with 87.76% coverage (above 80% threshold)
 
 ### Files Modified
 - 22 Python files instrumented with metrics and tracing
 - 3 new command files in `commands/` directory
-- All 1949 tests passing
+- 1 OTLP exporter with urllib.request (stdlib only)
+- Docker Compose stack with 5 services + 2 Grafana dashboards
+- All 2221 tests passing
+
+### Retrospective Summary
+- **What went well**: Zero-dependency impl, thread-safe metrics, lazy imports, phased approach
+- **What to improve**: Multi-worktree notes sync (filed Issue #28), clearer optional tier definitions
+- **Key learnings**: contextvars for trace propagation, hook performance critical, OTLP push without external libs
 
 ## [Approved] - 2025-12-26T00:31:42Z
 

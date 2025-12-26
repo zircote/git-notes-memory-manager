@@ -287,13 +287,14 @@ LSP hooks are configured in `.claude/hooks.json` for immediate feedback on Pytho
 ## Completed Spec Projects
 
 - `docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability Instrumentation
-  - Completed: 2025-12-26
-  - Outcome: success
+  - Completed: 2025-12-26 (~3 hours, -25% vs estimate)
+  - Outcome: success (very satisfied)
   - GitHub Issue: [#10](https://github.com/zircote/git-notes-memory/issues/10)
-  - Features: Metrics collection, distributed tracing, structured logging, CLI commands (/metrics, /traces, /health)
-  - Deliverables: 115+ tests, 4 phases completed (6 total, 2 optional skipped), 20 tasks, 11 ADRs
-  - Note: Phases 5-6 (OpenTelemetry, Docker stack) skipped as optional Tier 3 enhancements
-  - Key docs: REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, PROGRESS.md
+  - Features: Zero-dependency metrics/tracing, structured logging, OTLP HTTP export, Docker Compose stack, Grafana dashboards
+  - Deliverables: 115+ tests (87.76% coverage), 24/29 tasks (5 skipped optional), 11 ADRs, 6 critical paths instrumented
+  - Phases: 1-4 complete (Core), 5 skipped (OpenTelemetry SDK optional), 6 partial (Docker stack done, docs skipped)
+  - CLI: /memory:metrics, /memory:traces, /memory:health
+  - Key docs: REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, PROGRESS.md, RETROSPECTIVE.md
 
 - `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes Fetch Refspec
   - Completed: 2025-12-25
