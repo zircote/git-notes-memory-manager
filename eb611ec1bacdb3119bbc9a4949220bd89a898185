@@ -169,3 +169,20 @@ tags:
             (
                 "Important learning: The security check can be bypassed by prefixing "
                 "messages with...
+
+---
+type: learnings
+timestamp: '2025-12-26T02:34:46.859856+00:00'
+summary: '...issues",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_adversarial.py
+---
+
+...issues",
+            ),
+            # Learning about security
+            (
+                "I learned that prompt injection is when an attacker tries to "
+                "manipulate the AI by embedding...
