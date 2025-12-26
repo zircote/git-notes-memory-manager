@@ -1128,3 +1128,28 @@ Created the `/memory:review` command for reviewing and approving/rejecting pendi
 
 ## Related Files
 - commands/review.md:1-200+
+
+---
+type: progress
+timestamp: '2025-12-26T02:13:09.518845+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Task 2.12 unit tests in progress - added 7 new t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Task 2.12 unit tests in progress - added 7 new tests
+## Summary
+Added tests for capture store cleanup, factory functions, and hook integration sync wrapper.
+
+## Changes Made
+- Added 3 tests for `cleanup_reviewed()` method
+- Added 2 tests for `get_default_capture_store()` and `reset_default_capture_store()`
+- Added 2 tests for `analyze_session_transcript_sync()` wrapper
+- Total subconsciousness tests: 238 (up from 231)
+
+## Related Files
+- tests/subconsciousness/test_capture_store.py:511-662
+- tests/subconsciousness/test_hook_integration.py:362-412
