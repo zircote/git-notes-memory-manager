@@ -220,3 +220,22 @@ Subtasks:
 - [x] Track tokens per request
 - [x] Track cost per provider
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T00:58:54.864149+00:00'
+summary: '...unit tests for providers'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...unit tests for providers
+- **Status**: ✅ Complete
+- **Started**: 2025-12-26T01:40:00Z
+- **Completed**: 2025-12-26T01:45:00Z
+
+Subtasks:
+- [x] Test Anthropic provider with mocked SDK
+- [x] Test...
