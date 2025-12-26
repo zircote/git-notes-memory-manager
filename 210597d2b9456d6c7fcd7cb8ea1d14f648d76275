@@ -110,3 +110,19 @@ tags:
 ### 1. Thread-Safe Singleton Pattern (CRIT-001)
 
 **Problem**: Security module singletons lacked thread-safe initialization, risking...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:43:56.465436+00:00'
+summary: '...risking race conditions during parallel access.'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_REPORT.md
+---
+
+...risking race conditions during parallel access.
+
+**Solution**: Applied double-checked locking pattern to 5 security singletons:
+- `src/git_notes_memory/security/service.py`
+- `src/git_notes_memory/security...
