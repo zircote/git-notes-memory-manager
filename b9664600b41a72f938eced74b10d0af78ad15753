@@ -1150,3 +1150,27 @@ SessionStart uses a generic project name query that yields low relevance (~0.53)
 - src/git_notes_memory/hooks/templates/guidance_standard.md:99-147
 - src/git_notes_memory/hooks/templates/guidance_detailed.md:154-199
 - tests/test_guidance_builder.py:213-227
+
+---
+type: progress
+timestamp: '2025-12-26T14:57:11.750862+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Local plugin installation verified and metrics c...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Local plugin installation verified and metrics command executed
+## Summary
+Successfully installed memory-capture plugin from local git-notes-memory marketplace. The plugin cache structure was resolved with `source: "./../"` workaround for the schema requirement.
+
+## Changes Made
+- Fixed marketplace.json source path: `"./"` → `"./../"` (schema requires `./` prefix but needs parent traversal)
+- Verified plugin installation from local marketplace
+- Metrics command works but shows empty collectors (expected for fresh session)
+
+## Related Files
+- .claude-plugin/marketplace.json:15
+- .claude-plugin/plugin.json
