@@ -3567,3 +3567,17 @@ tags:
 ...PEN-L-001: Unicode Normalization Bypass Potential ✅
   - **Status:** DOCUMENTED LIMITATION - Pattern matching uses raw strings; Unicode normalization would add complexity
 - [x] PEN-L-002: Git...
+
+---
+type: patterns
+timestamp: '2025-12-26T17:19:51.754148+00:00'
+summary: '...module has default recursion limit; memory protection via content limits'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...module has default recursion limit; memory protection via content limits
+- [x] PEN-L-006: PII Pattern Bypass Potential ✅
+  - **Status:** DOCUMENTED LIMITATION - Pattern-based detection has known...
