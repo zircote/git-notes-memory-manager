@@ -283,3 +283,31 @@ Extended RecallService to support searching across both USER and PROJECT domains
 ## Related Files
 - src/git_notes_memory/recall.py:141-360
 - tests/test_recall.py:1111-1478
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.842563+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 4.4: Extend ContextBuilder for Us...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 4.4: Extend ContextBuilder for User Memories
+## Summary
+Extended the ContextBuilder to support multi-domain memory queries by adding `include_user_memories` parameter to internal build methods. Fixed mock signatures across test files.
+
+## Changes Made
+- Updated `_build_working_memory()` to accept `include_user_memories` param and pass `domain=None` (both domains) or `Domain.PROJECT` (project-only)
+- Updated `_build_semantic_context()` with same pattern for semantic search
+- Added `domain` param to `RecallService.get_by_namespace()` with multi-domain merge logic
+- Fixed all test mocks in `test_context_builder.py` and `test_e2e_hooks.py` to accept `domain` parameter
+- Added 4 new tests for domain filtering in ContextBuilder
+
+## Related Files
+- src/git_notes_memory/hooks/context_builder.py:371-433
+- src/git_notes_memory/recall.py:189-214
+- tests/test_context_builder.py:760-914
+- tests/test_e2e_hooks.py:558,603
