@@ -521,3 +521,28 @@ Significant progress on SPEC-2025-12-25-001 (GitHub Issue #10). Three phases com
 - src/git_notes_memory/hooks/*.py
 - src/git_notes_memory/capture.py, recall.py, index.py, sync.py
 - commands/metrics.md, traces.md, health.md
+
+---
+type: progress
+timestamp: '2025-12-26T03:23:15.647354+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated PROGRESS.md to reflect completed Phases ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated PROGRESS.md to reflect completed Phases 2, 3, and 4
+## Summary
+Synced PROGRESS.md with the actual implementation state from the previous session. All 20 tasks across Phases 1-4 are now correctly marked as "done".
+
+## Changes Made
+- Updated frontmatter: current_phase 2→5, updated timestamps
+- Marked all 16 Phase 2-4 tasks as "done" with completion dates and notes
+- Updated Phase Status table: Phases 2, 3, 4 now show 100% complete
+- Added "Phases 2, 3, 4 Complete" session notes with detailed changelog
+- Marked Phases 5-6 as "(optional)" to indicate Tier 3 status
+
+## Related Files
+- docs/spec/active/2025-12-25-observability-instrumentation/PROGRESS.md:1-129
