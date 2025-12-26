@@ -1020,3 +1020,22 @@ tags:
 ### Context
 
 New CLI commands need consistent naming. Existing commands follow `/memory:*` pattern (e.g., `/memory:capture`, `/memory:recall`). Observability commands could follow the same pattern...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.282307+00:00'
+summary: '...(e.g., `/memory:capture`, `/memory:recall`). Observability commands could
+  follow the same pattern'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...(e.g., `/memory:capture`, `/memory:recall`). Observability commands could follow the same pattern or use a sub-namespace.
+
+### Decision
+
+Use `/memory:*` pattern for observability commands:
+
+-...
