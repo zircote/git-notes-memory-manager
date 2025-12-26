@@ -150,3 +150,18 @@ summary: 'The git commit was successfully completed. You had originally started 
 ---
 
 The git commit was successfully completed. You had originally started a `/git:fr` operation but had to abort due to uncommitted changes....
+
+---
+type: progress
+timestamp: '2025-12-26T04:25:40.281245+00:00'
+summary: '...been created yet in the plugin. The command was defined in the spec but
+  the script wasn''t impleme'
+---
+
+...been created yet in the plugin. The command was defined in the spec but the script wasn't implemented.
+
+**Quick fixes**:
+
+1. **Update plugin cache** (sync with latest):
+   ```bash
+   # Reinstall...
