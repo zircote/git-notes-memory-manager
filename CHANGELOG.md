@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add GitHub release creation to Makefile release workflow
 
+## [0.12.0] - 2025-12-26
+
+### Added
+- Observability instrumentation: metrics collection, distributed tracing, structured logging (closes #10)
+- CLI commands: `/memory:health`, `/memory:metrics`, `/memory:traces` for observability
+- Secrets filtering and sensitive data protection subsystem (closes #12)
+- Custom PII detection: SSN, credit cards (with Luhn validation), phone numbers
+- Four filtering strategies: REDACT, MASK, BLOCK, WARN
+- SOC2/GDPR compliant audit logging with rotation
+- CLI commands: `/memory:scan-secrets`, `/memory:secrets-allowlist`, `/memory:test-secret`, `/memory:audit-log`
+
+### Fixed
+- Fix SQLite connection leak on index initialization failure (CRIT-001)
+- Fix SQLite connection cleanup in session start hook (MED-001)
+- Add warning logging for batch note fetch fallback (LOW-010)
+
+### Changed
+- Add composite index for status+timestamp queries (LOW-004)
+- Add logging import to git_ops module
+
 ## [0.11.0] - 2025-12-25
 
 ### Added
@@ -157,7 +177,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Initial stable release with core memory capture functionality
 
-[Unreleased]: https://github.com/zircote/git-notes-memory/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/zircote/git-notes-memory/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/zircote/git-notes-memory/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/zircote/git-notes-memory/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/zircote/git-notes-memory/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/zircote/git-notes-memory/compare/v0.9.0...v0.9.1
