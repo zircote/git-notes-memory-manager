@@ -1,0 +1,18 @@
+---
+type: patterns
+timestamp: '2025-12-26T04:33:52.274087+00:00'
+summary: '...snapshot = registry.snapshot()'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.py
+---
+
+...snapshot = registry.snapshot()
+
+    # Apply filter if specified
+    if args.filter:
+        pattern = args.filter.lower()
+        snapshot = {
+            "counters": {
+                k: v for...
