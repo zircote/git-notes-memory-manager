@@ -1,0 +1,16 @@
+---
+type: patterns
+timestamp: '2025-12-26T20:26:48.225878+00:00'
+summary: '...original plan but has PLUGIN_ROOT patterns. I''ll need to add that to
+  the divergence log.
+
+  The ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...original plan but has PLUGIN_ROOT patterns. I'll need to add that to the divergence log.
+
+The pattern is consistent across all files:
+1. `PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache...
