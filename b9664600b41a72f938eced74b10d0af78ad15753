@@ -2770,3 +2770,19 @@ tags:
 
 ...tests to use `ServiceRegistry.unregister(UserCaptureService)` instead. The ServiceRegistry pattern provides `unregister()` for exactly this purpose—test isolation.
 `──────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T16:38:57.691459+00:00'
+summary: '...for cleaner lazy imports with caching.'
+tags:
+- auto-captured
+- post-tool-use
+- file:__init__.py
+---
+
+...for cleaner lazy imports with caching.
+# PEP 562 (module-level __getattr__) is the standard pattern for this.
+
+# Mapping of attribute names to their (module_path, attribute_name) tuples
+_LAZY_IMPORTS:...
