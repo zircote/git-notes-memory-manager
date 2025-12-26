@@ -220,3 +220,35 @@ User confirmed scope: Pattern + Entropy detection, PII included, full audit logg
 
 ## Related Files
 - docs/spec/active/2025-12-25-secrets-filtering/README.md
+
+---
+type: decisions
+timestamp: '2025-12-26T00:32:12.976537+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Integration plan for v1.0.0 release
+
+  ## Summary
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Integration plan for v1.0.0 release
+## Summary
+Feature branches will be merged into v1.0.0 on user's schedule after implementation is complete.
+
+## Rationale
+User wants controlled integration of 4 feature branches into v1.0.0:
+
+| Branch | Status | GitHub Issue |
+|--------|--------|--------------|
+| `issue-10-observability` | Pending | #10 |
+| `issue-11-subconsciousness` | Already merged | #11 |
+| `issue-12-secrets-filtering` | Spec complete, awaiting impl | #12 |
+| `issue-13-multi-domain` | Already merged | #13 |
+
+## Related Files
+- docs/spec/active/2025-12-25-secrets-filtering/ (on issue-12 branch)
