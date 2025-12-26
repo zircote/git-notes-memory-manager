@@ -422,3 +422,14 @@ User validated 4 critical design decisions from the open questions in GitHub Iss
 
 ## Related Files
 - GitHub Issue #13: https://github.com/zircote/git-notes-memory/issues/13
+
+---
+type: decisions
+timestamp: '2025-12-26T03:23:43.349497+00:00'
+summary: '...namespace ───`) get 0.99 confidence - explicit structured capture'
+---
+
+...namespace ───`) get 0.99 confidence - explicit structured capture
+2. **Inline patterns** (`[decision]`, natural language) get 0.70-0.98 confidence
+
+The `CaptureSignal` model needs a `domain` field...
