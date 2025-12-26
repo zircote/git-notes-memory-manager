@@ -690,3 +690,20 @@ tags:
 ```
 
 Search...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.545702+00:00'
+summary: '...<description>` - Project pattern'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...<description>` - Project pattern
+- `/memory:capture --global patterns <description>` - User pattern (cross-project)
+```
+
+Search results often reveal connections worth preserving as new memories.
+-...
