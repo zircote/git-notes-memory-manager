@@ -412,3 +412,18 @@ tags:
 ...idx_memories_repo_path ON memories(repo_path)",
     # HIGH-003: Composite index for common query pattern (namespace + spec + ORDER BY timestamp)
     "CREATE INDEX IF NOT EXISTS idx_memories_ns_spec_ts...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:14:11.220622+00:00'
+summary: '...REPLACE for efficient upsert (single query)'
+tags:
+- auto-captured
+- post-tool-use
+- file:index.py
+---
+
+...REPLACE for efficient upsert (single query)
+        # This replaces the previous DELETE + INSERT pattern
+        cursor.execute(
+            "INSERT OR REPLACE INTO vec_memories (id, embedding) VALUES...
