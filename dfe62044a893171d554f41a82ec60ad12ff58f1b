@@ -117,3 +117,22 @@ tags:
 
 #### Task 3.3: Extend RecallService for Multi-Domain Search
 - **Description**: Modify `search()`...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:01:28.011697+00:00'
+summary: '...complete'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...complete
+
+### Tasks
+
+#### Task 4.1: Add Domain Markers to SignalDetector
+- **Description**: Extend pattern matching to recognize domain markers
+- **Acceptance Criteria**:
+  - [ ] `[global]` and `[user]`...
