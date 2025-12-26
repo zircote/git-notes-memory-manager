@@ -2496,3 +2496,19 @@ tags:
 ...from missing arguments, but the registry logic is designed to create instances directly.
 
 The pattern I'm using is wrong. I should check if it exists, and if not, create and register. The proper...
+
+---
+type: patterns
+timestamp: '2025-12-26T16:23:56.381531+00:00'
+summary: '...parameterized query with optional filters'
+tags:
+- auto-captured
+- post-tool-use
+- file:search_engine.py
+---
+
+...parameterized query with optional filters
+                # Use single JOIN to eliminate N+1 query pattern
+                params: list[object] = [blob, k * 3]
+
+                sql = """...
