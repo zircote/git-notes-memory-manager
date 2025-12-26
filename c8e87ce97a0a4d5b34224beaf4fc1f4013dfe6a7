@@ -505,3 +505,17 @@ completed: 2025-12-26T03:24:00Z
 final_effort: "~3 hours"
 expires: 2026-03-25T23:50:00Z
 superseded_by:...
+
+---
+type: progress
+timestamp: '2025-12-26T03:48:19.348150+00:00'
+summary: '- `docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability
+  Instrumentation'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+- `docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability Instrumentation
+  - Completed:...
