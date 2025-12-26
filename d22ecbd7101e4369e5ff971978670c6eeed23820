@@ -1457,3 +1457,34 @@ Added `sync_user_memories()` method to SyncService for syncing user-level memori
 ## Related Files
 - tests/test_sync.py:1295-1449
 - src/git_notes_memory/sync.py:522-638
+
+---
+type: progress
+timestamp: '2025-12-26T02:50:39.527922+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 5.2: Add Optional Remote Sync for...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 5.2: Add Optional Remote Sync for User Memories
+## Summary
+Added remote sync support for user-memories bare repo via `USER_MEMORIES_REMOTE` environment variable and `sync_user_memories_with_remote()` method.
+
+## Changes Made
+- Added `USER_MEMORIES_REMOTE` env var to config.py docstring
+- Added `get_user_memories_remote()` function to config.py
+- Added `get_remote_url()` and `set_remote_url()` to GitOps for remote management
+- Added `sync_user_memories_with_remote()` to SyncService
+- Added `_ensure_user_remote()` helper to configure origin for user-memories
+- Added 5 tests for remote sync in test_sync.py
+- Added 5 tests for remote configuration in test_git_ops.py
+
+## Related Files
+- src/git_notes_memory/config.py:212-224
+- src/git_notes_memory/git_ops.py:1010-1062
+- src/git_notes_memory/sync.py:684-751
+- tests/test_sync.py:1451-1587
+- tests/test_git_ops.py:1133-1228
