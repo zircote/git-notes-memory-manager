@@ -602,3 +602,15 @@ tags:
 ...Memory Decay - Forgetting curves and relevance decay
 - **Phase 5**: Memory Consolidation - Pattern recognition and memory merging
 - **Phase 6**: Proactive Surfacing - Context-aware memory suggestions
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:10.659043+00:00'
+summary: '...ServiceRegistry. First, let me look at the existing `__init__.py` to
+  understand the global sta...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...ServiceRegistry. First, let me look at the existing `__init__.py` to understand the global state pattern:
