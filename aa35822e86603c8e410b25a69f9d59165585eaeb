@@ -1,0 +1,206 @@
+---
+type: patterns
+timestamp: '2025-12-26T04:33:52.274087+00:00'
+summary: '...snapshot = registry.snapshot()'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.py
+---
+
+...snapshot = registry.snapshot()
+
+    # Apply filter if specified
+    if args.filter:
+        pattern = args.filter.lower()
+        snapshot = {
+            "counters": {
+                k: v for...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:33:52.293965+00:00'
+summary: '..."counters": {'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.py
+---
+
+..."counters": {
+                k: v for k, v in snapshot.get("counters", {}).items() if pattern in k.lower()
+            },
+            "histograms": {
+                k: v for k, v in snapshot.get...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:33:52.317670+00:00'
+summary: '..."histograms": {'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.py
+---
+
+..."histograms": {
+                k: v for k, v in snapshot.get("histograms", {}).items() if pattern in k.lower()
+            },
+            "gauges": {
+                k: v for k, v in snapshot.get("gauges...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:33:52.339955+00:00'
+summary: '..."gauges": {'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.py
+---
+
+..."gauges": {
+                k: v for k, v in snapshot.get("gauges", {}).items() if pattern in k.lower()
+            },
+        }
+
+    if args.format == "json":
+        print(json.dumps(snapshot...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:58:26.445819+00:00'
+summary: '...Root Cause Analysis'
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:58:26.465112+00:00'
+summary: '...Issue:**'
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:58:26.483881+00:00'
+summary: '...resolution logic'
+---
+
+...resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+- `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:58:26.503902+00:00'
+summary: '...`commands/health.md:76-77` - Same pattern  '
+---
+
+...`commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+- `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets.md`,...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:59:46.303033+00:00'
+summary: '...Root Cause Analysis'
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:59:46.322193+00:00'
+summary: '...Issue:**'
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:59:46.341048+00:00'
+summary: '...resolution logic'
+---
+
+...resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+- `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:00:47.350846+00:00'
+summary: '...Root Cause Analysis'
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:00:47.369564+00:00'
+summary: '...Issue:**'
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:00:47.388491+00:00'
+summary: '...resolution logic'
+---
+
+...resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+- `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets...
