@@ -55,3 +55,20 @@ tags:
             # Migrate from old fetch refspec to new tracking refs pattern
             # This is idempotent and safe to call every session
             if git_ops is not...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:38:37.262310+00:00'
+summary: '...message'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.md
+---
+
+...message
+    --format=FORMAT       Output format: text (default), json, prometheus
+    --filter=PATTERN      Filter metrics by name pattern (e.g., "capture", "hook")
+
+EXAMPLES
+    /memory:metrics...
