@@ -17,3 +17,23 @@ tags:
 **Action**: Test SSN pattern
 
 **User**: `/memory:test...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:54:31.103931+00:00'
+summary: '...AWS access key pattern'
+tags:
+- auto-captured
+- post-tool-use
+- file:test-secret.md
+---
+
+...AWS access key pattern
+
+**User**: `/memory:test-secret "123-45-6789"`
+**Action**: Test SSN pattern
+
+**User**: `/memory:test-secret "hello world"`
+**Action**: Test non-secret value (should pass)
+
+##...
