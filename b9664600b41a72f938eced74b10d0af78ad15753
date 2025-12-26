@@ -2715,3 +2715,19 @@ tags:
 ...`src/git_notes_memory/capture.py:152-163`
   - Action: Use atomic lock acquisition pattern
   - **Completed:** 2025-12-26 - Removed unsafe mtime-based file deletion; rely on flock auto-release and PID...
+
+---
+type: progress
+timestamp: '2025-12-26T15:49:13.916828+00:00'
+summary: '...File: `src/git_notes_memory/index.py:787-817`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...File: `src/git_notes_memory/index.py:787-817`
+  - Action: Add iterator-based pagination
+  - **Completed:** Already implemented with `limit`/`offset` params and `iter_all_ids()` generator
+
+- [x]...
