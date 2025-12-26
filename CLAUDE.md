@@ -77,6 +77,25 @@ Recall:
       → Memory objects with distance scores
 ```
 
+### Multi-Domain Memory Storage
+
+Memories are organized into two domains:
+
+| Domain | Scope | Storage Location | Use Case |
+|--------|-------|------------------|----------|
+| **PROJECT** | Repo-scoped | `refs/notes/mem/{namespace}` in project repo | Project-specific decisions, progress, learnings |
+| **USER** | Global, cross-project | `~/.local/share/memory-plugin/user-memories/` (bare repo) | Patterns, preferences, cross-project learnings |
+
+**Domain Selection:**
+- Default captures go to PROJECT domain (repo-scoped)
+- Use `[global]` or `[user]` inline markers for USER domain
+- Use domain prefix in blocks: `global:decision`, `user:learned`
+- Commands support `--domain=all|user|project` filter
+
+**Memory ID Format:**
+- Project: `{namespace}:{commit_sha[:7]}:{index}` (e.g., `decisions:abc1234:0`)
+- User: `user:{namespace}:{commit_sha[:7]}:{index}` (e.g., `user:learnings:def5678:0`)
+
 ### Git Notes Storage
 
 Memories are stored under `refs/notes/mem/{namespace}` where namespace is one of:
@@ -90,6 +109,7 @@ timestamp: 2024-01-15T10:30:00Z
 summary: Use PostgreSQL for persistence
 spec: my-project
 tags: [database, architecture]
+domain: project  # or "user" for global memories
 ---
 ## Context
 ...
@@ -157,10 +177,11 @@ Content → PIIDetector → DetectSecretsAdapter → Deduplicate → AllowlistCh
 ### Models
 
 All models are immutable (`@dataclass(frozen=True)`):
-- `Memory` - Core entity with id format `{namespace}:{commit_sha}:{index}`
-- `MemoryResult` - Memory + distance score from vector search
+- `Memory` - Core entity with id format `{namespace}:{commit_sha}:{index}` or `user:{namespace}:{commit_sha}:{index}`
+- `MemoryResult` - Memory + distance score from vector search + domain
 - `CaptureResult` - Operation result with success/warning status
 - `HydrationLevel` - SUMMARY → FULL → FILES progressive loading
+- `Domain` - Enum: `PROJECT` (repo-scoped) or `USER` (global, cross-project)
 
 ### Claude Code Plugin Integration
 
@@ -208,15 +229,18 @@ def capture_service(tmp_path, monkeypatch):
 |----------|-------------|---------|
 | `HOOK_ENABLED` | Master switch for all hooks | `true` |
 | `HOOK_SESSION_START_ENABLED` | Enable SessionStart context injection | `true` |
-| `HOOK_SESSION_START_FETCH_REMOTE` | Fetch notes from remote on session start | `false` |
+| `HOOK_SESSION_START_FETCH_REMOTE` | Fetch project notes from remote on session start | `false` |
+| `HOOK_SESSION_START_FETCH_USER_REMOTE` | Fetch user memories from remote on session start | `false` |
 | `HOOK_USER_PROMPT_ENABLED` | Enable capture marker detection | `false` |
 | `HOOK_POST_TOOL_USE_ENABLED` | Enable file-contextual memory injection | `true` |
 | `HOOK_PRE_COMPACT_ENABLED` | Enable auto-capture before compaction | `true` |
 | `HOOK_STOP_ENABLED` | Enable Stop hook processing | `true` |
-| `HOOK_STOP_PUSH_REMOTE` | Push notes to remote on session stop | `false` |
+| `HOOK_STOP_PUSH_REMOTE` | Push project notes to remote on session stop | `false` |
+| `HOOK_STOP_PUSH_USER_REMOTE` | Push user memories to remote on session stop | `false` |
 | `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
 | `HOOK_SESSION_START_INCLUDE_GUIDANCE` | Include response guidance templates | `true` |
 | `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance level: minimal/standard/detailed | `standard` |
+| `USER_MEMORIES_REMOTE` | Remote URL for user memories sync | (none) |
 
 ### Secrets Filtering Configuration
 
@@ -234,16 +258,31 @@ def capture_service(tmp_path, monkeypatch):
 For team environments where multiple developers share memories:
 
 ```bash
-# Enable automatic sync with remote (opt-in)
-export HOOK_SESSION_START_FETCH_REMOTE=true  # Fetch from remote on session start
-export HOOK_STOP_PUSH_REMOTE=true            # Push to remote on session stop
+# Project memories - sync with origin repository (opt-in)
+export HOOK_SESSION_START_FETCH_REMOTE=true  # Fetch project memories on session start
+export HOOK_STOP_PUSH_REMOTE=true            # Push project memories on session stop
 ```
 
-With these enabled, memories are automatically synchronized with the origin repository:
+With these enabled, project memories are automatically synchronized with the origin repository:
 - **Session start**: Fetches and merges remote notes using `cat_sort_uniq` strategy
 - **Session stop**: Pushes local notes to remote
 
 Manual sync is always available via `/memory:sync --remote`.
+
+### User Memory Remote Sync
+
+For syncing global (user-level) memories across machines:
+
+```bash
+# Configure remote for user memories
+export USER_MEMORIES_REMOTE=git@github.com:username/my-memories.git
+
+# Enable automatic sync (opt-in)
+export HOOK_SESSION_START_FETCH_USER_REMOTE=true  # Fetch user memories on session start
+export HOOK_STOP_PUSH_USER_REMOTE=true            # Push user memories on session stop
+```
+
+User memories are stored in a bare git repo at `~/.local/share/memory-plugin/user-memories/` and can be synced to a personal remote repository for cross-machine access.
 
 ## Code Intelligence (LSP)
 

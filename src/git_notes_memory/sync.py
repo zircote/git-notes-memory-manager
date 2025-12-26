@@ -17,10 +17,15 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from git_notes_memory.config import NAMESPACES, get_project_index_path
-from git_notes_memory.exceptions import RecallError
+from git_notes_memory.config import (
+    NAMESPACES,
+    Domain,
+    get_project_index_path,
+    get_user_index_path,
+    get_user_memories_path,
+)
+from git_notes_memory.exceptions import MemoryIndexError, RecallError, StorageError
 from git_notes_memory.models import Memory, NoteRecord, VerificationResult
-from git_notes_memory.observability.metrics import get_metrics
 
 if TYPE_CHECKING:
     from git_notes_memory.embedding import EmbeddingService
@@ -388,7 +393,8 @@ class SyncService:
         for namespace in NAMESPACES:
             try:
                 notes_list = git_ops.list_notes(namespace)
-            except Exception:
+            except (OSError, StorageError):
+                # QUAL-HIGH-001: Specific exceptions for git/storage operations
                 continue
 
             if not notes_list:
@@ -431,7 +437,6 @@ class SyncService:
 
         # Check for content mismatches (simplified - just check if exists)
         mismatched: list[str] = []
-        metrics = get_metrics()
         for memory_id in expected_ids & indexed_ids:
             try:
                 memory = index.get(memory_id)
@@ -443,16 +448,9 @@ class SyncService:
                     expected_hash = memory_hashes.get(memory_id, "")
                     if current_hash != expected_hash:
                         mismatched.append(memory_id)
-            except Exception as e:
-                logger.warning(
-                    "Failed to verify hash for memory %s: %s",
-                    memory_id,
-                    e,
-                )
-                metrics.increment(
-                    "silent_failures_total",
-                    labels={"location": "sync.hash_verification"},
-                )
+            except (OSError, MemoryIndexError, RecallError):
+                # QUAL-HIGH-001: Specific exceptions for index/storage operations
+                pass
 
         is_consistent = (
             len(missing_in_index) == 0
@@ -518,6 +516,241 @@ class SyncService:
 
         logger.info("Repair complete: %d changes made", repairs)
         return repairs
+
+    # =========================================================================
+    # User Memory Sync Operations
+    # =========================================================================
+
+    def sync_user_memories(self, *, full: bool = False) -> int:
+        """Synchronize user-level memories from user-memories repo.
+
+        The user-memories bare repo is located at ~/.local/share/memory-plugin/user-memories/.
+        This method syncs the user SQLite index with the git notes in that repo.
+
+        Args:
+            full: If True, clears user index first. Otherwise incremental.
+
+        Returns:
+            Number of memories indexed.
+
+        Note:
+            If the user-memories repo doesn't exist, returns 0 gracefully.
+        """
+        # Check if user-memories repo exists
+        user_repo_path = get_user_memories_path(ensure_exists=False)
+        if not user_repo_path.exists():
+            logger.debug("User-memories repo not found at %s", user_repo_path)
+            return 0
+
+        # Get GitOps for user domain
+        from git_notes_memory.git_ops import GitOps
+
+        user_git_ops = GitOps.for_domain(Domain.USER)
+
+        # Get user index
+        from git_notes_memory.index import IndexService
+
+        user_index_path = get_user_index_path(ensure_exists=True)
+        user_index = IndexService(db_path=user_index_path)
+        user_index.initialize()
+
+        # Get embedding service (reuse instance)
+        embedding_service = self._get_embedding_service()
+        parser = self._get_note_parser()
+
+        if full:
+            logger.info("Starting full user memory reindex - clearing existing index")
+            user_index.clear()
+
+        indexed = 0
+        for namespace in NAMESPACES:
+            try:
+                notes_list = user_git_ops.list_notes(namespace)
+            except Exception as e:
+                logger.debug("No user notes in namespace %s: %s", namespace, e)
+                continue
+
+            if not notes_list:
+                continue
+
+            # Batch fetch all notes for this namespace
+            commit_shas = [commit_sha for _note_sha, commit_sha in notes_list]
+            contents = user_git_ops.show_notes_batch(namespace, commit_shas)
+
+            # Collect memories and texts for batch embedding
+            memories_to_index: list[Memory] = []
+            texts_to_embed: list[str] = []
+
+            for _note_sha, commit_sha in notes_list:
+                try:
+                    content = contents.get(commit_sha)
+                    if not content:
+                        continue
+
+                    records = parser.parse_many(content)
+                    for i, record in enumerate(records):
+                        memory = self._record_to_user_memory(
+                            record, commit_sha, namespace, i
+                        )
+
+                        # Skip if already exists and not full reindex
+                        if not full and user_index.exists(memory.id):
+                            continue
+
+                        memories_to_index.append(memory)
+                        texts_to_embed.append(f"{memory.summary}\n{memory.content}")
+
+                except Exception as e:
+                    logger.warning(
+                        "Failed to process user note %s/%s: %s",
+                        namespace,
+                        commit_sha,
+                        e,
+                    )
+
+            if not memories_to_index:
+                continue
+
+            # Batch generate embeddings
+            embeddings: list[list[float]] | list[None] = []
+            try:
+                embeddings = embedding_service.embed_batch(texts_to_embed)
+            except Exception as e:
+                logger.warning(
+                    "Batch embedding failed for user namespace %s: %s",
+                    namespace,
+                    e,
+                )
+                embeddings = [None] * len(memories_to_index)
+
+            # Insert memories with embeddings
+            for memory, embed_vector in zip(memories_to_index, embeddings, strict=True):
+                try:
+                    user_index.insert(memory, embedding=embed_vector)
+                    indexed += 1
+                except Exception as e:
+                    logger.warning(
+                        "Failed to index user memory %s: %s",
+                        memory.id,
+                        e,
+                    )
+
+        logger.info("User memory sync complete: %d memories indexed", indexed)
+        return indexed
+
+    def _record_to_user_memory(
+        self,
+        record: NoteRecord,
+        commit: str,
+        namespace: str,
+        index: int,
+    ) -> Memory:
+        """Convert a NoteRecord to a user-domain Memory with generated ID.
+
+        User memories have a special ID format: user:{namespace}:{commit}:{index}
+
+        Args:
+            record: The parsed note record.
+            commit: Commit SHA the note is attached to.
+            namespace: Memory namespace.
+            index: Index of this record within the note.
+
+        Returns:
+            Memory instance with user domain ID.
+        """
+        from datetime import UTC, datetime
+
+        # Generate user-domain ID (prefixed with "user:")
+        memory_id = f"user:{namespace}:{commit[:7]}:{index}"
+
+        # Parse timestamp or use current time
+        timestamp = record.timestamp
+        if timestamp is None:
+            timestamp = datetime.now(UTC)
+
+        return Memory(
+            id=memory_id,
+            commit_sha=commit,
+            namespace=namespace,
+            timestamp=timestamp,
+            summary=record.summary or "",
+            content=record.body or "",
+            spec=record.spec,
+            tags=tuple(record.tags) if record.tags else (),
+            phase=record.phase,
+            status=record.status or "active",
+            relates_to=tuple(record.relates_to) if record.relates_to else (),
+            domain="user",  # Mark as user domain
+        )
+
+    def sync_user_memories_with_remote(
+        self,
+        *,
+        push: bool = True,
+    ) -> dict[str, bool]:
+        """Sync user memories with configured remote.
+
+        Performs fetch → merge → push workflow for the user-memories bare repo
+        to/from the remote configured via USER_MEMORIES_REMOTE.
+
+        Args:
+            push: Whether to push after merging.
+
+        Returns:
+            Dict mapping namespace to sync success.
+
+        Raises:
+            ValueError: If USER_MEMORIES_REMOTE is not configured.
+        """
+        from git_notes_memory.config import get_user_memories_remote
+
+        remote_url = get_user_memories_remote()
+        if not remote_url:
+            msg = "USER_MEMORIES_REMOTE not configured"
+            raise ValueError(msg)
+
+        user_repo_path = get_user_memories_path(ensure_exists=False)
+        if not user_repo_path.exists():
+            logger.warning("User-memories repo not found at %s", user_repo_path)
+            return {}
+
+        from git_notes_memory.git_ops import GitOps
+
+        user_git_ops = GitOps.for_domain(Domain.USER)
+
+        # Ensure remote is configured
+        self._ensure_user_remote(user_git_ops, remote_url)
+
+        # Perform sync using the existing pattern
+        results = user_git_ops.sync_notes_with_remote(push=push)
+
+        # Reindex after successful sync
+        if any(results.values()):
+            self.sync_user_memories()
+
+        return results
+
+    def _ensure_user_remote(
+        self,
+        git_ops: GitOps,
+        remote_url: str,
+    ) -> None:
+        """Ensure the user-memories remote is configured.
+
+        Adds or updates the 'origin' remote in the user-memories bare repo.
+
+        Args:
+            git_ops: GitOps instance for user domain.
+            remote_url: URL to configure as origin.
+        """
+        current_url = git_ops.get_remote_url("origin")
+        if current_url != remote_url:
+            success = git_ops.set_remote_url("origin", remote_url)
+            if success:
+                if current_url is None:
+                    logger.info("Added user-memories origin: %s", remote_url)
+                else:
+                    logger.info("Updated user-memories origin to %s", remote_url)
 
     # =========================================================================
     # Remote Sync Operations

@@ -17,10 +17,8 @@ Git Notes Architecture:
 
 from __future__ import annotations
 
-import logging
 import re
 import subprocess
-import time
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -37,10 +35,6 @@ from git_notes_memory.exceptions import (
     ValidationError,
 )
 from git_notes_memory.models import CommitInfo
-from git_notes_memory.observability.metrics import get_metrics
-from git_notes_memory.observability.tracing import trace_operation
-
-logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     pass
@@ -105,7 +99,8 @@ def get_git_version() -> tuple[int, int, int]:
                 stacklevel=2,
             )
             _git_version = (0, 0, 0)
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
+        # QUAL-HIGH-001: Specific exceptions for subprocess operations
         warnings.warn(
             "Git version detection failed; using regex fallback for config operations",
             UserWarning,
@@ -287,40 +282,16 @@ class GitOps:
             StorageError: If command fails and check=True, or if timeout is exceeded.
         """
         cmd = ["git", "-C", str(self.repo_path), *args]
-        metrics = get_metrics()
 
-        # Determine git subcommand for tracing
-        git_subcommand = args[0] if args else "unknown"
-
-        start_time = time.perf_counter()
         try:
-            with trace_operation("git.subprocess", labels={"command": git_subcommand}):
-                result = subprocess.run(
-                    cmd,
-                    check=check,
-                    capture_output=capture_output,
-                    text=True,
-                    timeout=timeout,
-                )
-
-            # Record git command execution time
-            duration_ms = (time.perf_counter() - start_time) * 1000
-            metrics.observe(
-                "git_command_duration_ms",
-                duration_ms,
-                labels={"command": git_subcommand},
+            return subprocess.run(
+                cmd,
+                check=check,
+                capture_output=capture_output,
+                text=True,
+                timeout=timeout,
             )
-            metrics.increment(
-                "git_commands_total",
-                labels={"command": git_subcommand, "status": "success"},
-            )
-
-            return result
         except subprocess.CalledProcessError as e:
-            metrics.increment(
-                "git_commands_total",
-                labels={"command": git_subcommand, "status": "error"},
-            )
             # Parse common git errors for better messages
             # SEC-002: Sanitize paths in error messages to prevent info leakage
             stderr = e.stderr or ""
@@ -371,10 +342,6 @@ class GitOps:
                 "Check git status and try again",
             ) from e
         except subprocess.TimeoutExpired as e:
-            metrics.increment(
-                "git_commands_total",
-                labels={"command": git_subcommand, "status": "timeout"},
-            )
             # HIGH-001: Handle timeout to provide clear error message
             raise StorageError(
                 f"Git command timed out after {timeout}s",
@@ -582,8 +549,8 @@ class GitOps:
                 text=True,
                 check=False,
             )
-        except Exception:
-            # Fallback to sequential if batch fails
+        except (OSError, subprocess.SubprocessError):
+            # QUAL-HIGH-001: Fallback to sequential if batch fails
             return {sha: self.show_note(namespace, sha) for sha in commit_shas}
 
         # Parse batch output
@@ -1042,6 +1009,60 @@ class GitOps:
         return True
 
     # =========================================================================
+    # Remote Configuration
+    # =========================================================================
+
+    def get_remote_url(self, remote_name: str = "origin") -> str | None:
+        """Get the URL of a configured remote.
+
+        Args:
+            remote_name: Name of the remote (default: origin).
+
+        Returns:
+            Remote URL if configured, None otherwise.
+        """
+        result = self._run_git(
+            ["remote", "get-url", remote_name],
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return None
+
+    def set_remote_url(self, remote_name: str, url: str) -> bool:
+        """Set or update the URL of a remote.
+
+        If the remote doesn't exist, it will be added.
+        If it exists with a different URL, it will be updated.
+
+        Args:
+            remote_name: Name of the remote.
+            url: URL to set.
+
+        Returns:
+            True if successful, False otherwise.
+        """
+        current_url = self.get_remote_url(remote_name)
+        if current_url == url:
+            # Already configured correctly
+            return True
+
+        if current_url is not None:
+            # Update existing remote
+            result = self._run_git(
+                ["remote", "set-url", remote_name, url],
+                check=False,
+            )
+        else:
+            # Add new remote
+            result = self._run_git(
+                ["remote", "add", remote_name, url],
+                check=False,
+            )
+
+        return result.returncode == 0
+
+    # =========================================================================
     # Remote Sync Operations
     # =========================================================================
 
@@ -1063,7 +1084,6 @@ class GitOps:
         base = get_git_namespace()
         ns_list = namespaces if namespaces is not None else list(NAMESPACES)
         results: dict[str, bool] = {}
-        metrics = get_metrics()
 
         for ns in ns_list:
             try:
@@ -1074,16 +1094,8 @@ class GitOps:
                     check=False,
                 )
                 results[ns] = result.returncode == 0
-            except Exception as e:
-                logger.warning(
-                    "Failed to fetch notes for namespace %s: %s",
-                    ns,
-                    e,
-                )
-                metrics.increment(
-                    "silent_failures_total",
-                    labels={"location": "git_ops.fetch_notes"},
-                )
+            except (OSError, subprocess.SubprocessError):
+                # QUAL-HIGH-001: Specific exceptions for subprocess operations
                 results[ns] = False
 
         return results
@@ -1318,6 +1330,22 @@ class GitOps:
             # Verify it's actually a git repo
             if instance.is_git_repository():
                 return instance
+
+        # SEC-HIGH-001: Verify path is not a symlink to prevent symlink attacks
+        # An attacker could create a symlink at user_path pointing to a sensitive
+        # location, causing git init to modify unintended directories
+        if user_path.is_symlink():
+            raise StorageError(
+                "User memories path is a symlink",
+                f"Remove symlink at {user_path} and retry",
+            )
+
+        # Also verify parent directory is not a symlink
+        if user_path.parent.is_symlink():
+            raise StorageError(
+                "User memories parent directory is a symlink",
+                f"Remove symlink at {user_path.parent} and retry",
+            )
 
         # Initialize bare repository
         cmd = ["git", "init", "--bare", str(user_path)]

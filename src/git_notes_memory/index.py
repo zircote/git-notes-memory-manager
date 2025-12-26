@@ -21,10 +21,10 @@ Architecture:
 
 from __future__ import annotations
 
-import logging
+import contextlib
 import sqlite3
 import struct
-import threading
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -35,11 +35,6 @@ import sqlite_vec
 
 from git_notes_memory.config import EMBEDDING_DIMENSIONS, get_index_path
 from git_notes_memory.exceptions import MemoryIndexError
-from git_notes_memory.observability.decorators import measure_duration
-from git_notes_memory.observability.metrics import get_metrics
-from git_notes_memory.observability.tracing import trace_operation
-
-logger = logging.getLogger(__name__)
 
 
 # PERF-007: Cache compiled struct format for embedding serialization
@@ -98,6 +93,7 @@ CREATE TABLE IF NOT EXISTS memories (
 """
 
 _CREATE_INDICES = [
+    # Single-column indexes for simple lookups
     "CREATE INDEX IF NOT EXISTS idx_memories_namespace ON memories(namespace)",
     "CREATE INDEX IF NOT EXISTS idx_memories_spec ON memories(spec)",
     "CREATE INDEX IF NOT EXISTS idx_memories_commit ON memories(commit_sha)",
@@ -105,8 +101,16 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_memories_status ON memories(status)",
     "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
     "CREATE INDEX IF NOT EXISTS idx_memories_domain ON memories(domain)",
-    # HIGH-004: Composite index for efficient range queries within namespace
-    "CREATE INDEX IF NOT EXISTS idx_memories_namespace_timestamp ON memories(namespace, timestamp DESC)",
+    # PERF-HIGH-004: Composite indexes for common multi-column queries
+    # These optimize the most frequent query patterns:
+    # - Domain + namespace: multi-domain recall filtering
+    # - Spec + namespace: project-scoped namespace queries
+    # - Spec + domain: project-scoped domain queries
+    # - Namespace + domain: namespace listing with domain filter
+    "CREATE INDEX IF NOT EXISTS idx_memories_domain_namespace ON memories(domain, namespace)",
+    "CREATE INDEX IF NOT EXISTS idx_memories_spec_namespace ON memories(spec, namespace)",
+    "CREATE INDEX IF NOT EXISTS idx_memories_spec_domain ON memories(spec, domain)",
+    "CREATE INDEX IF NOT EXISTS idx_memories_namespace_domain ON memories(namespace, domain)",
 ]
 
 # Migration SQL for schema version upgrades
@@ -176,8 +180,14 @@ class IndexService:
         self.db_path = db_path or get_index_path()
         self._conn: sqlite3.Connection | None = None
         self._initialized = False
-        # HIGH-011: Thread lock for concurrent access safety
-        self._lock = threading.Lock()
+        # CRIT-003: Thread lock removed. SQLite with WAL mode (set in initialize())
+        # handles concurrency at the database level:
+        # - Concurrent reads are allowed
+        # - Writes are serialized by SQLite
+        # - check_same_thread=False allows multi-threaded access
+        # Adding Python-level locking would duplicate SQLite's own locking and
+        # could introduce deadlocks. If true multi-threaded writes are needed,
+        # use separate IndexService instances per thread.
 
     @property
     def is_initialized(self) -> bool:
@@ -311,16 +321,8 @@ class IndexService:
 
             # Create indices (ignore if they already exist)
             for index_sql in _CREATE_INDICES:
-                try:
+                with contextlib.suppress(sqlite3.OperationalError):
                     cursor.execute(index_sql)
-                except sqlite3.OperationalError as e:
-                    # Index likely already exists - this is expected on subsequent inits
-                    logger.debug("Index creation skipped (already exists): %s", e)
-                    metrics = get_metrics()
-                    metrics.increment(
-                        "silent_failures_total",
-                        labels={"location": "index.create_index_skipped"},
-                    )
 
             # Create vector table
             cursor.execute(_CREATE_VEC_TABLE)
@@ -384,7 +386,6 @@ class IndexService:
     # Insert Operations
     # =========================================================================
 
-    @measure_duration("index_insert")
     def insert(
         self,
         memory: Memory,
@@ -412,12 +413,8 @@ class IndexService:
             )
 
         now = datetime.now(UTC).isoformat()
-        metrics = get_metrics()
 
-        with (
-            trace_operation("index.insert", labels={"namespace": memory.namespace}),
-            self._cursor() as cursor,
-        ):
+        with self._cursor() as cursor:
             try:
                 # Insert into memories table
                 cursor.execute(
@@ -452,12 +449,6 @@ class IndexService:
                     self._insert_embedding(cursor, memory.id, embedding)
 
                 self._conn.commit()  # type: ignore[union-attr]
-
-                metrics.increment(
-                    "index_inserts_total",
-                    labels={"namespace": memory.namespace},
-                )
-
                 return True
 
             except sqlite3.IntegrityError as e:
@@ -758,40 +749,63 @@ class IndexService:
             cursor.execute(query, params)
             return [self._row_to_memory(row) for row in cursor.fetchall()]
 
-    def get_all_ids(self) -> list[str]:
-        """Get all memory IDs in the index.
-
-        Returns:
-            List of all memory IDs.
-        """
-        with self._cursor() as cursor:
-            cursor.execute("SELECT id FROM memories")
-            return [row[0] for row in cursor.fetchall()]
-
-    def get_all_memories(
+    def get_all_ids(
         self,
-        namespace: str | None = None,
-    ) -> list[Memory]:
-        """Get all memories in the index.
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[str]:
+        """Get memory IDs in the index with optional pagination.
+
+        PERF-HIGH-001: Supports pagination to prevent memory exhaustion
+        with large indices. Use limit/offset for batched processing.
 
         Args:
-            namespace: Optional namespace filter.
+            limit: Maximum number of IDs to return. None for all (use with caution).
+            offset: Number of IDs to skip (for pagination).
 
         Returns:
-            List of all Memory objects.
+            List of memory IDs.
+
+        Examples:
+            >>> index.get_all_ids(limit=100)  # First 100 IDs
+            >>> index.get_all_ids(limit=100, offset=100)  # Next 100 IDs
         """
-        query = "SELECT * FROM memories WHERE 1=1"
-        params: list[object] = []
-
-        if namespace is not None:
-            query += " AND namespace = ?"
-            params.append(namespace)
-
-        query += " ORDER BY timestamp DESC"
+        if limit is not None:
+            query = "SELECT id FROM memories LIMIT ? OFFSET ?"
+            params: tuple[int, ...] = (limit, offset)
+        else:
+            query = "SELECT id FROM memories"
+            params = ()
 
         with self._cursor() as cursor:
             cursor.execute(query, params)
-            return [self._row_to_memory(row) for row in cursor.fetchall()]
+            return [row[0] for row in cursor.fetchall()]
+
+    def iter_all_ids(self, batch_size: int = 1000) -> Iterator[str]:
+        """Iterate over all memory IDs in batches.
+
+        PERF-HIGH-001: Generator-based iteration to prevent memory exhaustion.
+        Yields IDs one at a time, fetching in batches internally.
+
+        Args:
+            batch_size: Number of IDs to fetch per database query.
+
+        Yields:
+            Memory IDs one at a time.
+
+        Examples:
+            >>> for memory_id in index.iter_all_ids():
+            ...     process(memory_id)
+        """
+        offset = 0
+        while True:
+            batch = self.get_all_ids(limit=batch_size, offset=offset)
+            if not batch:
+                break
+            yield from batch
+            offset += len(batch)
+            if len(batch) < batch_size:
+                break
 
     def exists(self, memory_id: str) -> bool:
         """Check if a memory exists in the index.
@@ -1076,7 +1090,6 @@ class IndexService:
     # Search Operations
     # =========================================================================
 
-    @measure_duration("index_search_vector")
     def search_vector(
         self,
         query_embedding: Sequence[float],
@@ -1102,59 +1115,51 @@ class IndexService:
             List of (Memory, distance) tuples sorted by distance ascending.
             Lower distance means more similar.
         """
-        metrics = get_metrics()
+        # PERF-007: Use cached struct format for embedding packing
+        blob = _get_struct_format(len(query_embedding)).pack(*query_embedding)
 
-        with trace_operation("index.search_vector", labels={"k": str(k)}):
-            # PERF-007: Use cached struct format for embedding packing
-            blob = _get_struct_format(len(query_embedding)).pack(*query_embedding)
+        with self._cursor() as cursor:
+            try:
+                # Build parameterized query with optional filters
+                # Use single JOIN to eliminate N+1 query pattern
+                params: list[object] = [blob, k * 3]
 
-            with self._cursor() as cursor:
-                try:
-                    # Build parameterized query with optional filters
-                    # Use single JOIN to eliminate N+1 query pattern
-                    params: list[object] = [blob, k * 3]
+                sql = """
+                    SELECT m.*, v.distance
+                    FROM vec_memories v
+                    JOIN memories m ON v.id = m.id
+                    WHERE v.embedding MATCH ?
+                      AND k = ?
+                """
 
-                    sql = """
-                        SELECT m.*, v.distance
-                        FROM vec_memories v
-                        JOIN memories m ON v.id = m.id
-                        WHERE v.embedding MATCH ?
-                          AND k = ?
-                    """
+                if namespace is not None:
+                    sql += " AND m.namespace = ?"
+                    params.append(namespace)
+                if spec is not None:
+                    sql += " AND m.spec = ?"
+                    params.append(spec)
+                if domain is not None:
+                    sql += " AND m.domain = ?"
+                    params.append(domain)
 
-                    if namespace is not None:
-                        sql += " AND m.namespace = ?"
-                        params.append(namespace)
-                    if spec is not None:
-                        sql += " AND m.spec = ?"
-                        params.append(spec)
-                    if domain is not None:
-                        sql += " AND m.domain = ?"
-                        params.append(domain)
+                sql += " ORDER BY v.distance LIMIT ?"
+                params.append(k)
 
-                    sql += " ORDER BY v.distance LIMIT ?"
-                    params.append(k)
+                cursor.execute(sql, params)
 
-                    cursor.execute(sql, params)
+                results: list[tuple[Memory, float]] = []
+                for row in cursor.fetchall():
+                    memory = self._row_to_memory(row)
+                    distance = row["distance"]
+                    results.append((memory, distance))
 
-                    results: list[tuple[Memory, float]] = []
-                    for row in cursor.fetchall():
-                        memory = self._row_to_memory(row)
-                        distance = row["distance"]
-                        results.append((memory, distance))
+                return results
 
-                    metrics.increment(
-                        "index_searches_total",
-                        labels={"search_type": "vector"},
-                    )
-
-                    return results
-
-                except Exception as e:
-                    raise MemoryIndexError(
-                        f"Vector search failed: {e}",
-                        "Check embedding dimensions and retry",
-                    ) from e
+            except Exception as e:
+                raise MemoryIndexError(
+                    f"Vector search failed: {e}",
+                    "Check embedding dimensions and retry",
+                ) from e
 
     def search_text(
         self,

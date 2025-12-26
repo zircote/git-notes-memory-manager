@@ -8,6 +8,7 @@ Environment Variables:
     MEMORY_PLUGIN_GIT_NAMESPACE: Override the git notes namespace
     MEMORY_PLUGIN_EMBEDDING_MODEL: Override the embedding model name
     MEMORY_PLUGIN_AUTO_CAPTURE: Enable/disable auto-capture (1/true/yes/on)
+    USER_MEMORIES_REMOTE: Remote URL for user-memories bare repo sync
 
 XDG Compliance:
     By default, data is stored in $XDG_DATA_HOME/memory-plugin/ which
@@ -35,6 +36,7 @@ __all__ = [
     "Domain",
     "get_user_memories_path",
     "get_user_index_path",
+    "get_user_memories_remote",
     # Namespaces
     "NAMESPACES",
     # Git Configuration
@@ -205,6 +207,21 @@ def get_user_index_path(ensure_exists: bool = False) -> Path:
     if ensure_exists:
         path.mkdir(parents=True, exist_ok=True)
     return path / INDEX_DB_NAME
+
+
+def get_user_memories_remote() -> str | None:
+    """Get the remote URL for user-memories synchronization.
+
+    This enables syncing global, cross-project memories to a remote git repository.
+    When set, the user-memories bare repo can push/pull notes from this remote.
+
+    Environment override: USER_MEMORIES_REMOTE
+
+    Returns:
+        Remote URL if configured, None otherwise.
+    """
+    remote = os.environ.get("USER_MEMORIES_REMOTE")
+    return remote if remote else None
 
 
 # =============================================================================

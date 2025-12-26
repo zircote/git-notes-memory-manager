@@ -7,14 +7,18 @@ The default model is 'all-MiniLM-L6-v2' which produces 384-dimensional vectors.
 This can be overridden via the MEMORY_PLUGIN_EMBEDDING_MODEL environment variable.
 
 Model files are cached in the XDG data directory (models/ subdirectory).
+
+CRIT-001: Timeout protection is applied to all encode() operations to prevent
+indefinite hangs on GPU memory exhaustion or model corruption.
 """
 
 from __future__ import annotations
 
 import logging
 import os
-import time
 from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -24,9 +28,6 @@ from git_notes_memory.config import (
     get_models_path,
 )
 from git_notes_memory.exceptions import EmbeddingError
-from git_notes_memory.observability.decorators import measure_duration
-from git_notes_memory.observability.metrics import get_metrics
-from git_notes_memory.observability.tracing import trace_operation
 
 if TYPE_CHECKING:
     from sentence_transformers import SentenceTransformer
@@ -37,6 +38,17 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Timeout Constants (CRIT-001)
+# =============================================================================
+
+# Timeout for single embed() operations (seconds)
+EMBED_TIMEOUT_SECONDS = 30.0
+
+# Timeout for batch embed_batch() operations (seconds)
+EMBED_BATCH_TIMEOUT_SECONDS = 120.0
 
 
 # =============================================================================
@@ -122,82 +134,69 @@ class EmbeddingService:
         if self._model is not None:
             return
 
-        metrics = get_metrics()
-        start_time = time.perf_counter()
+        try:
+            # Import here to defer the heavy import
+            from sentence_transformers import SentenceTransformer
 
-        with trace_operation("embedding.load", labels={"model": self._model_name}):
-            try:
-                # Import here to defer the heavy import
-                from sentence_transformers import SentenceTransformer
+            # Ensure cache directory exists
+            self._cache_dir.mkdir(parents=True, exist_ok=True)
 
-                # Ensure cache directory exists
-                self._cache_dir.mkdir(parents=True, exist_ok=True)
+            # Set environment variable for transformers cache
+            # This ensures the model is cached in our directory
+            os.environ.setdefault(
+                "TRANSFORMERS_CACHE",
+                str(self._cache_dir),
+            )
+            os.environ.setdefault(
+                "HF_HOME",
+                str(self._cache_dir),
+            )
 
-                # Set environment variable for transformers cache
-                # This ensures the model is cached in our directory
-                os.environ.setdefault(
-                    "TRANSFORMERS_CACHE",
-                    str(self._cache_dir),
-                )
-                os.environ.setdefault(
-                    "HF_HOME",
-                    str(self._cache_dir),
-                )
+            logger.info(
+                "Loading embedding model '%s' (cache: %s)",
+                self._model_name,
+                self._cache_dir,
+            )
 
-                logger.info(
-                    "Loading embedding model '%s' (cache: %s)",
-                    self._model_name,
-                    self._cache_dir,
-                )
+            self._model = SentenceTransformer(
+                self._model_name,
+                cache_folder=str(self._cache_dir),
+            )
 
-                self._model = SentenceTransformer(
-                    self._model_name,
-                    cache_folder=str(self._cache_dir),
-                )
+            # Verify and cache the actual dimensions
+            self._dimensions = self._model.get_sentence_embedding_dimension()
 
-                # Verify and cache the actual dimensions
-                self._dimensions = self._model.get_sentence_embedding_dimension()
+            logger.info(
+                "Loaded embedding model '%s' (%d dimensions)",
+                self._model_name,
+                self._dimensions,
+            )
 
-                # Record model load time as a gauge
-                load_time_ms = (time.perf_counter() - start_time) * 1000
-                metrics.set_gauge(
-                    "embedding_model_load_time_ms",
-                    load_time_ms,
-                    labels={"model": self._model_name},
-                )
-                metrics.increment("embedding_model_loads_total")
-
-                logger.info(
-                    "Loaded embedding model '%s' (%d dimensions) in %.1fms",
-                    self._model_name,
-                    self._dimensions,
-                    load_time_ms,
-                )
-
-            except MemoryError as e:
+        except MemoryError as e:
+            raise EmbeddingError(
+                "Insufficient memory to load embedding model",
+                "Close other applications or use a smaller model",
+            ) from e
+        except OSError as e:
+            if "corrupt" in str(e).lower() or "invalid" in str(e).lower():
                 raise EmbeddingError(
-                    "Insufficient memory to load embedding model",
-                    "Close other applications or use a smaller model",
+                    "Embedding model cache corrupted",
+                    f"Delete the {self._cache_dir} directory and retry",
                 ) from e
-            except OSError as e:
-                if "corrupt" in str(e).lower() or "invalid" in str(e).lower():
-                    raise EmbeddingError(
-                        "Embedding model cache corrupted",
-                        f"Delete the {self._cache_dir} directory and retry",
-                    ) from e
-                raise EmbeddingError(
-                    f"Failed to load embedding model: {e}",
-                    "Check network connectivity and retry",
-                ) from e
-            except Exception as e:
-                raise EmbeddingError(
-                    f"Failed to load embedding model '{self._model_name}': {e}",
-                    "Check model name and network connectivity",
-                ) from e
+            raise EmbeddingError(
+                f"Failed to load embedding model: {e}",
+                "Check network connectivity and retry",
+            ) from e
+        except Exception as e:
+            raise EmbeddingError(
+                f"Failed to load embedding model '{self._model_name}': {e}",
+                "Check model name and network connectivity",
+            ) from e
 
-    @measure_duration("embedding_generate")
     def embed(self, text: str) -> list[float]:
         """Generate an embedding for a single text.
+
+        CRIT-001: Uses ThreadPoolExecutor timeout to prevent indefinite hangs.
 
         Args:
             text: The text to embed.
@@ -206,7 +205,7 @@ class EmbeddingService:
             A list of floats representing the embedding vector.
 
         Raises:
-            EmbeddingError: If embedding generation fails.
+            EmbeddingError: If embedding generation fails or times out.
 
         Examples:
             >>> service = EmbeddingService()
@@ -220,29 +219,35 @@ class EmbeddingService:
 
         self.load()
 
-        metrics = get_metrics()
+        try:
+            assert self._model is not None  # For type checker
+            model = self._model  # Capture for closure
 
-        with trace_operation("embedding.generate"):
-            try:
-                assert self._model is not None  # For type checker
-                embedding = self._model.encode(
+            def _encode() -> list[float]:
+                emb = model.encode(
                     text,
                     convert_to_numpy=True,
                     normalize_embeddings=True,
                 )
-                result: list[float] = embedding.tolist()
+                return emb.tolist()  # type: ignore[no-any-return]
 
-                metrics.increment("embeddings_generated_total")
+            # CRIT-001: Apply timeout to prevent indefinite hangs
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_encode)
+                result = future.result(timeout=EMBED_TIMEOUT_SECONDS)
+            return result
 
-                return result
+        except FuturesTimeoutError:
+            raise EmbeddingError(
+                f"Embedding timed out after {EMBED_TIMEOUT_SECONDS}s",
+                "The model may be overloaded or GPU memory exhausted. Restart and retry.",
+            ) from None
+        except Exception as e:
+            raise EmbeddingError(
+                f"Failed to generate embedding: {e}",
+                "Check input text and retry",
+            ) from e
 
-            except Exception as e:
-                raise EmbeddingError(
-                    f"Failed to generate embedding: {e}",
-                    "Check input text and retry",
-                ) from e
-
-    @measure_duration("embedding_generate_batch")
     def embed_batch(
         self,
         texts: Sequence[str],
@@ -250,6 +255,8 @@ class EmbeddingService:
         show_progress: bool = False,
     ) -> list[list[float]]:
         """Generate embeddings for multiple texts.
+
+        CRIT-001: Uses ThreadPoolExecutor timeout to prevent indefinite hangs.
 
         Args:
             texts: Sequence of texts to embed.
@@ -260,7 +267,7 @@ class EmbeddingService:
             A list of embedding vectors, one per input text.
 
         Raises:
-            EmbeddingError: If embedding generation fails.
+            EmbeddingError: If embedding generation fails or times out.
 
         Examples:
             >>> service = EmbeddingService()
@@ -287,38 +294,42 @@ class EmbeddingService:
             return [[0.0] * self.dimensions for _ in texts]
 
         self.load()
+        dims = self.dimensions
 
-        metrics = get_metrics()
+        try:
+            assert self._model is not None  # For type checker
+            model = self._model  # Capture for closure
 
-        with trace_operation(
-            "embedding.generate_batch", labels={"batch_size": str(len(texts))}
-        ):
-            try:
-                assert self._model is not None  # For type checker
-                embeddings = self._model.encode(
+            def _encode_batch() -> list[list[float]]:
+                embs = model.encode(
                     non_empty_texts,
                     batch_size=batch_size,
                     show_progress_bar=show_progress,
                     convert_to_numpy=True,
                     normalize_embeddings=True,
                 )
-
                 # Reconstruct the full result list
-                result: list[list[float]] = [[0.0] * self.dimensions for _ in texts]
-                for i, embedding in zip(non_empty_indices, embeddings, strict=True):
-                    result[i] = embedding.tolist()
+                res: list[list[float]] = [[0.0] * dims for _ in texts]
+                for idx, emb in zip(non_empty_indices, embs, strict=True):
+                    res[idx] = emb.tolist()
+                return res
 
-                metrics.increment(
-                    "embeddings_generated_total", amount=float(len(non_empty_texts))
-                )
+            # CRIT-001: Apply timeout to prevent indefinite hangs
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_encode_batch)
+                result = future.result(timeout=EMBED_BATCH_TIMEOUT_SECONDS)
+            return result
 
-                return result
-
-            except Exception as e:
-                raise EmbeddingError(
-                    f"Failed to generate batch embeddings: {e}",
-                    "Check input texts and retry",
-                ) from e
+        except FuturesTimeoutError:
+            raise EmbeddingError(
+                f"Batch embedding timed out after {EMBED_BATCH_TIMEOUT_SECONDS}s",
+                "The model may be overloaded or GPU memory exhausted. Reduce batch size or restart.",
+            ) from None
+        except Exception as e:
+            raise EmbeddingError(
+                f"Failed to generate batch embeddings: {e}",
+                "Check input texts and retry",
+            ) from e
 
     def similarity(
         self, embedding1: Sequence[float], embedding2: Sequence[float]

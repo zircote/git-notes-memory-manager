@@ -1285,3 +1285,303 @@ Body for reindex test.
 
         assert result == 1
         assert real_index_service.exists("decisions:def7890:0")
+
+
+# =============================================================================
+# User Memory Sync Tests
+# =============================================================================
+
+
+class TestSyncUserMemories:
+    """Tests for sync_user_memories method."""
+
+    def test_returns_zero_when_repo_not_exists(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test graceful return when user-memories repo doesn't exist."""
+        # Point to non-existent path
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        service = SyncService(repo_path=tmp_path)
+
+        result = service.sync_user_memories()
+
+        assert result == 0
+
+    def test_syncs_user_memories_from_bare_repo(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test syncing user memories from bare repo with mocked GitOps."""
+        from unittest.mock import patch
+
+        # Create fake user-memories path
+        user_repo = tmp_path / "user-memories"
+        user_repo.mkdir()
+        (user_repo / "HEAD").write_text("ref: refs/heads/main\n")
+
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        # Mock GitOps.for_domain to return a mock with no notes
+        mock_git_ops = MagicMock()
+        mock_git_ops.list_notes.return_value = []
+
+        mock_index = MagicMock()
+        mock_index.exists.return_value = False
+
+        with (
+            patch(
+                "git_notes_memory.git_ops.GitOps.for_domain",
+                return_value=mock_git_ops,
+            ),
+            patch(
+                "git_notes_memory.index.IndexService",
+                return_value=mock_index,
+            ),
+        ):
+            service = SyncService(repo_path=tmp_path)
+            result = service.sync_user_memories()
+
+            # Should return 0 (no notes found)
+            assert result == 0
+            # GitOps.for_domain should have been called
+            mock_git_ops.list_notes.assert_called()
+
+    def test_record_to_user_memory_creates_user_domain_id(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Test that _record_to_user_memory creates user-prefixed IDs."""
+        service = SyncService(repo_path=tmp_path)
+
+        record = make_note_record(
+            commit_sha="abc1234567890",
+            namespace="learnings",
+            summary="Test summary",
+            body="Test body",
+            index=0,
+        )
+
+        memory = service._record_to_user_memory(
+            record=record,
+            commit="abc1234567890",
+            namespace="learnings",
+            index=0,
+        )
+
+        # Verify user-domain ID format
+        assert memory.id == "user:learnings:abc1234:0"
+        assert memory.domain == "user"
+        assert memory.namespace == "learnings"
+        assert memory.summary == "Test summary"
+        assert memory.content == "Test body"
+
+    def test_record_to_user_memory_handles_empty_fields(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Test that _record_to_user_memory handles empty fields."""
+        from git_notes_memory.models import NoteRecord
+
+        service = SyncService(repo_path=tmp_path)
+
+        # Create a minimal NoteRecord with no summary, no tags, no body
+        record = NoteRecord(
+            commit_sha="xyz9876543210",
+            namespace="decisions",
+            index=2,
+            front_matter=(("type", "decisions"),),
+            body="",
+            raw="---\ntype: decisions\n---\n\n",
+        )
+
+        memory = service._record_to_user_memory(
+            record=record,
+            commit="xyz9876543210",
+            namespace="decisions",
+            index=2,
+        )
+
+        # Verify defaults
+        assert memory.id == "user:decisions:xyz9876:2"
+        assert memory.domain == "user"
+        assert memory.summary == ""
+        assert memory.content == ""
+        assert memory.tags == ()
+        assert memory.status == "active"
+
+    def test_full_sync_clears_index_first(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test that full=True clears the user index before syncing."""
+        from unittest.mock import patch
+
+        # Create fake user-memories path
+        user_repo = tmp_path / "user-memories"
+        user_repo.mkdir()
+        (user_repo / "HEAD").write_text("ref: refs/heads/main\n")
+
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        mock_index = MagicMock()
+        mock_git_ops = MagicMock()
+        mock_git_ops.list_notes.return_value = []
+
+        with (
+            patch(
+                "git_notes_memory.index.IndexService",
+                return_value=mock_index,
+            ),
+            patch(
+                "git_notes_memory.git_ops.GitOps.for_domain",
+                return_value=mock_git_ops,
+            ),
+        ):
+            service = SyncService(repo_path=tmp_path)
+            service.sync_user_memories(full=True)
+
+            # Verify clear was called
+            mock_index.clear.assert_called_once()
+
+
+# =============================================================================
+# User Memory Remote Sync Tests
+# =============================================================================
+
+
+class TestSyncUserMemoriesWithRemote:
+    """Tests for sync_user_memories_with_remote method."""
+
+    def test_raises_when_remote_not_configured(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test that ValueError is raised when USER_MEMORIES_REMOTE not set."""
+        # Ensure env var is not set
+        monkeypatch.delenv("USER_MEMORIES_REMOTE", raising=False)
+
+        service = SyncService(repo_path=tmp_path)
+
+        with pytest.raises(ValueError, match="USER_MEMORIES_REMOTE not configured"):
+            service.sync_user_memories_with_remote()
+
+    def test_returns_empty_when_repo_not_exists(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test graceful return when user-memories repo doesn't exist."""
+        monkeypatch.setenv("USER_MEMORIES_REMOTE", "git@github.com:user/memories.git")
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        service = SyncService(repo_path=tmp_path)
+
+        result = service.sync_user_memories_with_remote()
+
+        assert result == {}
+
+    def test_configures_remote_and_syncs(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test that remote is configured and sync is performed."""
+        from unittest.mock import patch
+
+        # Create fake user-memories repo
+        user_repo = tmp_path / "user-memories"
+        user_repo.mkdir()
+        (user_repo / "HEAD").write_text("ref: refs/heads/main\n")
+
+        monkeypatch.setenv("USER_MEMORIES_REMOTE", "git@github.com:user/memories.git")
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        mock_git_ops = MagicMock()
+        mock_git_ops.get_remote_url.return_value = None
+        mock_git_ops.set_remote_url.return_value = True
+        mock_git_ops.sync_notes_with_remote.return_value = {"learnings": True}
+
+        with patch(
+            "git_notes_memory.git_ops.GitOps.for_domain",
+            return_value=mock_git_ops,
+        ):
+            service = SyncService(repo_path=tmp_path)
+            result = service.sync_user_memories_with_remote()
+
+            # Verify remote was configured
+            mock_git_ops.set_remote_url.assert_called_once_with(
+                "origin", "git@github.com:user/memories.git"
+            )
+
+            # Verify sync was called
+            mock_git_ops.sync_notes_with_remote.assert_called_once_with(push=True)
+
+            # Result from sync
+            assert result == {"learnings": True}
+
+    def test_skips_remote_config_if_already_set(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test that remote config is skipped if already correct."""
+        from unittest.mock import patch
+
+        # Create fake user-memories repo
+        user_repo = tmp_path / "user-memories"
+        user_repo.mkdir()
+        (user_repo / "HEAD").write_text("ref: refs/heads/main\n")
+
+        remote_url = "git@github.com:user/memories.git"
+        monkeypatch.setenv("USER_MEMORIES_REMOTE", remote_url)
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        mock_git_ops = MagicMock()
+        mock_git_ops.get_remote_url.return_value = remote_url  # Already configured
+        mock_git_ops.sync_notes_with_remote.return_value = {}
+
+        with patch(
+            "git_notes_memory.git_ops.GitOps.for_domain",
+            return_value=mock_git_ops,
+        ):
+            service = SyncService(repo_path=tmp_path)
+            service.sync_user_memories_with_remote()
+
+            # set_remote_url should not be called since URL matches
+            mock_git_ops.set_remote_url.assert_not_called()
+
+    def test_fetch_only_does_not_push(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test that push=False only fetches."""
+        from unittest.mock import patch
+
+        # Create fake user-memories repo
+        user_repo = tmp_path / "user-memories"
+        user_repo.mkdir()
+        (user_repo / "HEAD").write_text("ref: refs/heads/main\n")
+
+        monkeypatch.setenv("USER_MEMORIES_REMOTE", "git@github.com:user/memories.git")
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        mock_git_ops = MagicMock()
+        mock_git_ops.get_remote_url.return_value = "git@github.com:user/memories.git"
+        mock_git_ops.sync_notes_with_remote.return_value = {}
+
+        with patch(
+            "git_notes_memory.git_ops.GitOps.for_domain",
+            return_value=mock_git_ops,
+        ):
+            service = SyncService(repo_path=tmp_path)
+            service.sync_user_memories_with_remote(push=False)
+
+            # Verify sync was called with push=False
+            mock_git_ops.sync_notes_with_remote.assert_called_once_with(push=False)

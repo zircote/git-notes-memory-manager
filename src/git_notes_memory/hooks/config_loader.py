@@ -16,6 +16,7 @@ Environment Variables:
     HOOK_SESSION_START_MAX_MEMORIES: Maximum memories to retrieve (default: 30)
     HOOK_SESSION_START_AUTO_EXPAND_THRESHOLD: Relevance threshold for auto-expand hints (default: 0.85)
     HOOK_SESSION_START_FETCH_REMOTE: Fetch notes from remote on session start (default: false)
+    HOOK_SESSION_START_FETCH_USER_REMOTE: Fetch user memories from remote on session start (default: false)
     HOOK_CAPTURE_DETECTION_ENABLED: Enable capture signal detection
     HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE: Minimum confidence for suggestions
     HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD: Confidence for auto-capture
@@ -27,6 +28,7 @@ Environment Variables:
     HOOK_STOP_AUTO_CAPTURE_MIN_CONFIDENCE: Minimum confidence for auto-capture (default: 0.8)
     HOOK_STOP_MAX_CAPTURES: Maximum auto-captures per session (default: 5)
     HOOK_STOP_PUSH_REMOTE: Push notes to remote on session stop (default: false)
+    HOOK_STOP_PUSH_USER_REMOTE: Push user memories to remote on session stop (default: false)
     HOOK_POST_TOOL_USE_ENABLED: Enable PostToolUse hook
     HOOK_POST_TOOL_USE_MIN_SIMILARITY: Minimum similarity for memory recall
     HOOK_POST_TOOL_USE_MAX_RESULTS: Maximum memories to inject
@@ -133,6 +135,9 @@ class HookConfig:
     session_start_fetch_remote: bool = (
         False  # Fetch notes from remote on start (opt-in)
     )
+    session_start_fetch_user_remote: bool = (
+        False  # Fetch user memories from remote on start (opt-in)
+    )
 
     # Capture detection settings
     capture_detection_enabled: bool = True  # Enabled by default when plugin is active
@@ -150,6 +155,7 @@ class HookConfig:
     stop_auto_capture_min_confidence: float = 0.8  # Minimum confidence for auto-capture
     stop_max_captures: int = 50  # Maximum auto-captures per session
     stop_push_remote: bool = False  # Push notes to remote on stop (opt-in)
+    stop_push_user_remote: bool = False  # Push user memories to remote on stop (opt-in)
 
     # UserPromptSubmit hook settings
     user_prompt_enabled: bool = True  # Enabled by default when plugin is active
@@ -363,6 +369,10 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
         kwargs["session_start_fetch_remote"] = _parse_bool(
             env["HOOK_SESSION_START_FETCH_REMOTE"]
         )
+    if "HOOK_SESSION_START_FETCH_USER_REMOTE" in env:
+        kwargs["session_start_fetch_user_remote"] = _parse_bool(
+            env["HOOK_SESSION_START_FETCH_USER_REMOTE"]
+        )
 
     # Capture detection settings
     if "HOOK_CAPTURE_DETECTION_ENABLED" in env:
@@ -412,6 +422,8 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
         )
     if "HOOK_STOP_PUSH_REMOTE" in env:
         kwargs["stop_push_remote"] = _parse_bool(env["HOOK_STOP_PUSH_REMOTE"])
+    if "HOOK_STOP_PUSH_USER_REMOTE" in env:
+        kwargs["stop_push_user_remote"] = _parse_bool(env["HOOK_STOP_PUSH_USER_REMOTE"])
 
     # PostToolUse hook settings
     if "HOOK_POST_TOOL_USE_ENABLED" in env:
