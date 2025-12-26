@@ -1404,3 +1404,29 @@ Extended the ContextBuilder to support multi-domain memory queries by adding `in
 - src/git_notes_memory/recall.py:189-214
 - tests/test_context_builder.py:760-914
 - tests/test_e2e_hooks.py:558,603
+
+---
+type: progress
+timestamp: '2025-12-26T02:50:39.359377+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 4.5: Add Domain Labels to XML Out...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 4.5: Add Domain Labels to XML Output
+## Summary
+Extended XMLBuilder.add_memory_element() to include a `domain` attribute on memory elements in the XML output. This enables Claude to distinguish between user-level (global) and project-level (repo-scoped) memories.
+
+## Changes Made
+- Updated `add_memory_element()` to add `domain` attribute when `memory.domain` is non-empty
+- Added 3 new tests for domain attribute in XML output:
+  - test_add_memory_element_includes_domain_attribute (user domain)
+  - test_add_memory_element_includes_project_domain (project domain)
+  - test_add_memory_element_omits_empty_domain (empty domain omitted)
+
+## Related Files
+- src/git_notes_memory/hooks/xml_formatter.py:131-133
+- tests/test_hooks.py:138-216
