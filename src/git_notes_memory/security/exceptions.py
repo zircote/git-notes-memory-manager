@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from git_notes_memory.exceptions import ErrorCategory, MemoryError
+from git_notes_memory.exceptions import ErrorCategory, MemoryPluginError
 
 if TYPE_CHECKING:
     from git_notes_memory.security.models import SecretDetection
@@ -26,7 +26,7 @@ __all__ = [
 SECURITY = ErrorCategory.VALIDATION  # Reuse validation for security errors
 
 
-class SecretsFilteringError(MemoryError):
+class SecretsFilteringError(MemoryPluginError):
     """Base exception for secrets filtering operations.
 
     Common causes:

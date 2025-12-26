@@ -23,6 +23,9 @@ from __future__ import annotations
 __all__ = [
     # Factory functions (lazy-loaded)
     "get_secrets_filtering_service",
+    "get_redactor",
+    "get_allowlist_manager",
+    "get_audit_logger",
     # Enums
     "SecretType",
     "FilterStrategy",
@@ -53,6 +56,27 @@ def __getattr__(name: str) -> object:
 
         return get_secrets_filtering_service
 
+    if name == "get_redactor":
+        from git_notes_memory.security.redactor import (
+            get_default_redactor as get_redactor,
+        )
+
+        return get_redactor
+
+    if name == "get_allowlist_manager":
+        from git_notes_memory.security.allowlist import (
+            get_default_allowlist_manager as get_allowlist_manager,
+        )
+
+        return get_allowlist_manager
+
+    if name == "get_audit_logger":
+        from git_notes_memory.security.audit import (
+            get_default_audit_logger as get_audit_logger,
+        )
+
+        return get_audit_logger
+
     # Enums - lightweight, import directly
     if name in {"SecretType", "FilterStrategy", "FilterAction"}:
         from git_notes_memory.security import models
@@ -60,10 +84,15 @@ def __getattr__(name: str) -> object:
         return getattr(models, name)
 
     # Models - lightweight, import directly
-    if name in {"SecretDetection", "FilterResult", "AllowlistEntry", "AuditEntry"}:
+    if name in {"SecretDetection", "FilterResult", "AllowlistEntry"}:
         from git_notes_memory.security import models
 
         return getattr(models, name)
+
+    if name == "AuditEntry":
+        from git_notes_memory.security.audit import AuditEntry
+
+        return AuditEntry
 
     # Exceptions
     if name in {

@@ -6,10 +6,12 @@ Credit card detection includes Luhn algorithm validation to reduce false positiv
 
 from __future__ import annotations
 
+import bisect
 import hashlib
 import re
 from dataclasses import dataclass
 
+from git_notes_memory.registry import ServiceRegistry
 from git_notes_memory.security.models import SecretDetection, SecretType
 
 __all__ = [
@@ -17,9 +19,6 @@ __all__ = [
     "get_default_pii_detector",
     "luhn_check",
 ]
-
-# Singleton instance
-_detector: PIIDetector | None = None
 
 
 # =============================================================================
@@ -214,6 +213,17 @@ class PIIDetector:
         if not content:
             return ()
 
+        # HIGH-004: Pre-compute line positions for O(n) instead of O(n*m)
+        # Build array of line start positions for binary search
+        line_starts = [0]
+        for i, char in enumerate(content):
+            if char == "\n":
+                line_starts.append(i + 1)
+
+        def get_line_number(position: int) -> int:
+            """Get line number for position using binary search."""
+            return bisect.bisect_right(line_starts, position)
+
         detections: list[SecretDetection] = []
 
         for pattern in self._patterns:
@@ -224,8 +234,8 @@ class PIIDetector:
                 if pattern.validator == "luhn" and not luhn_check(matched_text):
                     continue
 
-                # Calculate line number
-                line_number = content[: match.start()].count("\n") + 1
+                # Calculate line number using pre-computed positions
+                line_number = get_line_number(match.start())
 
                 detection = SecretDetection(
                     secret_type=pattern.secret_type,
@@ -285,21 +295,21 @@ class PIIDetector:
 def get_default_pii_detector() -> PIIDetector:
     """Get the default PIIDetector instance.
 
-    Returns a singleton instance.
+    Returns a singleton instance via ServiceRegistry with thread-safe
+    double-checked locking.
 
     Returns:
         The shared PIIDetector instance.
     """
-    global _detector
-    if _detector is None:
-        _detector = PIIDetector()
-    return _detector
+    return ServiceRegistry.get(PIIDetector)
 
 
 def reset_pii_detector() -> None:
     """Reset the singleton detector instance.
 
     Used for testing to ensure fresh instances.
+    Note: Prefer ServiceRegistry.reset() to reset all services at once.
     """
-    global _detector
-    _detector = None
+    # ServiceRegistry.reset() handles this globally
+    # This function is kept for backward compatibility
+    pass
