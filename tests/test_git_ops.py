@@ -7,6 +7,7 @@ Also includes integration tests that work with real git repositories.
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Generator
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
@@ -14,6 +15,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from git_notes_memory import config
+from git_notes_memory.config import Domain
 from git_notes_memory.exceptions import StorageError, ValidationError
 from git_notes_memory.git_ops import CommitInfo, GitOps, validate_path
 
@@ -1513,3 +1515,205 @@ class TestGitOpsDivergedNotesIntegration:
         status = git.is_sync_configured()
         assert status.get("fetch_new") is True
         assert status.get("fetch_old") is False
+
+
+# =============================================================================
+# GitOps Domain Factory Tests (Task 2.1)
+# =============================================================================
+
+
+class TestGitOpsDomainFactory:
+    """Tests for GitOps.for_domain() factory method."""
+
+    @pytest.fixture(autouse=True)
+    def clear_cache(self) -> Generator[None, None, None]:
+        """Clear domain instance cache before each test."""
+        GitOps.clear_domain_cache()
+        yield
+        GitOps.clear_domain_cache()
+
+    def test_for_domain_project_returns_gitops(self, tmp_path: Path) -> None:
+        """Test for_domain with PROJECT returns GitOps for repo path."""
+        git = GitOps.for_domain(Domain.PROJECT, tmp_path)
+
+        assert isinstance(git, GitOps)
+        assert git.repo_path == tmp_path
+
+    def test_for_domain_project_uses_cwd_when_none(self) -> None:
+        """Test for_domain PROJECT with no path uses current directory."""
+        git = GitOps.for_domain(Domain.PROJECT)
+
+        assert git.repo_path == Path.cwd()
+
+    def test_for_domain_project_cached_per_path(self, tmp_path: Path) -> None:
+        """Test for_domain PROJECT caches instances per path."""
+        path1 = tmp_path / "repo1"
+        path1.mkdir()
+        path2 = tmp_path / "repo2"
+        path2.mkdir()
+
+        git1a = GitOps.for_domain(Domain.PROJECT, path1)
+        git1b = GitOps.for_domain(Domain.PROJECT, path1)
+        git2 = GitOps.for_domain(Domain.PROJECT, path2)
+
+        # Same path returns same instance
+        assert git1a is git1b
+        # Different paths return different instances
+        assert git1a is not git2
+
+    def test_for_domain_user_returns_gitops_for_user_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test for_domain USER returns GitOps for user-memories path."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git = GitOps.for_domain(Domain.USER)
+
+        assert isinstance(git, GitOps)
+        expected_path = tmp_path / "user-memories"
+        assert git.repo_path == expected_path
+
+    def test_for_domain_user_ignores_repo_path_argument(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test for_domain USER ignores repo_path argument."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+        other_path = tmp_path / "other_repo"
+        other_path.mkdir()
+
+        git = GitOps.for_domain(Domain.USER, other_path)
+
+        # Should use user-memories path, not other_path
+        expected_path = tmp_path / "user-memories"
+        assert git.repo_path == expected_path
+
+    def test_for_domain_user_cached_singleton(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test for_domain USER returns same cached instance."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git1 = GitOps.for_domain(Domain.USER)
+        git2 = GitOps.for_domain(Domain.USER)
+
+        assert git1 is git2
+
+    def test_for_domain_user_initializes_bare_repo(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test for_domain USER initializes bare repo if not exists."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git = GitOps.for_domain(Domain.USER)
+
+        # Should have created bare repo
+        assert git.is_git_repository()
+        assert git.is_bare_repository()
+
+    def test_clear_domain_cache_clears_all(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test clear_domain_cache clears all cached instances."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        # Create instances
+        git_project = GitOps.for_domain(Domain.PROJECT, tmp_path)
+        git_user = GitOps.for_domain(Domain.USER)
+
+        # Clear cache
+        GitOps.clear_domain_cache()
+
+        # New instances should be different objects
+        git_project2 = GitOps.for_domain(Domain.PROJECT, tmp_path)
+        git_user2 = GitOps.for_domain(Domain.USER)
+
+        assert git_project is not git_project2
+        assert git_user is not git_user2
+
+
+# =============================================================================
+# GitOps User Repo Initialization Tests (Task 2.2)
+# =============================================================================
+
+
+class TestGitOpsUserRepoInit:
+    """Tests for GitOps.ensure_user_repo_initialized()."""
+
+    @pytest.fixture(autouse=True)
+    def clear_cache(self) -> Generator[None, None, None]:
+        """Clear domain instance cache before each test."""
+        GitOps.clear_domain_cache()
+        yield
+        GitOps.clear_domain_cache()
+
+    def test_ensure_user_repo_creates_bare_repo(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test ensure_user_repo_initialized creates bare repository."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git = GitOps.ensure_user_repo_initialized()
+
+        # Bare repo should exist
+        user_memories_path = tmp_path / "user-memories"
+        assert user_memories_path.exists()
+        assert (user_memories_path / "HEAD").exists()
+        assert git.is_bare_repository()
+
+    def test_ensure_user_repo_idempotent(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test ensure_user_repo_initialized is idempotent."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        # Call twice
+        git1 = GitOps.ensure_user_repo_initialized()
+        git2 = GitOps.ensure_user_repo_initialized()
+
+        # Both should return valid GitOps (not necessarily same instance)
+        assert git1.is_git_repository()
+        assert git2.is_git_repository()
+
+    def test_ensure_user_repo_has_initial_commit(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test ensure_user_repo_initialized creates initial commit."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git = GitOps.ensure_user_repo_initialized()
+
+        # Should have at least one commit (for notes attachment)
+        assert git.has_commits()
+
+    def test_ensure_user_repo_configures_git_identity(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test ensure_user_repo_initialized configures git user."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        GitOps.ensure_user_repo_initialized()
+
+        # Check git config
+        user_memories_path = tmp_path / "user-memories"
+        result = subprocess.run(
+            ["git", "config", "user.email"],
+            cwd=user_memories_path,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0
+        assert "memory-plugin@local" in result.stdout
+
+    def test_is_bare_repository_true_for_bare(self, tmp_path: Path) -> None:
+        """Test is_bare_repository returns True for bare repo."""
+        # Create bare repo
+        bare_path = tmp_path / "bare.git"
+        subprocess.run(["git", "init", "--bare", str(bare_path)], check=True)
+
+        git = GitOps(bare_path)
+        assert git.is_bare_repository() is True
+
+    def test_is_bare_repository_false_for_regular(self, git_repo: Path) -> None:
+        """Test is_bare_repository returns False for regular repo."""
+        git = GitOps(git_repo)
+        assert git.is_bare_repository() is False
