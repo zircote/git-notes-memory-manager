@@ -2626,3 +2626,38 @@ Created separate database rather than extending main memory index schema. This:
 - tests/subconsciousness/test_capture_store.py:1-430
 - src/git_notes_memory/subconsciousness/__init__.py:26-154
 - docs/spec/active/2025-12-25-llm-subconsciousness/PROGRESS.md:228-257
+
+---
+type: progress
+timestamp: '2025-12-26T03:17:08.583924+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.3: Implement transcript chunkin...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.3: Implement transcript chunking
+## Summary
+Implemented transcript parsing and chunking for LLM analysis with sliding window context preservation.
+
+## Changes Made
+- Created `Turn` frozen dataclass with role, content, line tracking, and token estimation
+- Created `TranscriptChunk` frozen dataclass with turns, overlap info, source hash, line range
+- Implemented `TranscriptChunker` with configurable max_tokens, overlap_turns, min_chunk_turns
+- Sliding window chunking preserves context across chunk boundaries
+- `parse_transcript()` handles user:/assistant:/Human:/Claude: formats
+- Source hash (SHA256) enables deduplication
+- Line number tracking for source_range in memories
+- 23 comprehensive tests covering parsing, chunking, edge cases
+
+## Design Decisions
+- Split at turn boundaries only (never mid-message) to preserve coherence
+- Default 4 turn overlap ensures context for memory extraction
+- Token estimation uses 4 chars/token heuristic
+
+## Related Files
+- src/git_notes_memory/subconsciousness/transcript_chunker.py:1-315
+- tests/subconsciousness/test_transcript_chunker.py:1-348
+- docs/spec/active/2025-12-25-llm-subconsciousness/PROGRESS.md:245-274
