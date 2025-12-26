@@ -2641,3 +2641,19 @@ tags:
 - **Completed:** 2025-12-26 - Integrated `SecretsFilteringService` into LLM client
 
 ### CRIT-003: Move User...
+
+---
+type: progress
+timestamp: '2025-12-26T15:48:36.465953+00:00'
+summary: '...ServiceRegistry instead of module global'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...ServiceRegistry instead of module global
+- [x] **Tests:** Verify singleton cleanup works in tests
+- **Completed:** 2025-12-26 - Added `UserCaptureService` subclass and `ServiceRegistry.has()` method
+
+###...
