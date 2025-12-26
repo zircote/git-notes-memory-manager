@@ -963,3 +963,15 @@ Full specification complete with all artifacts: REQUIREMENTS.md (PRD), ARCHITECT
 - docs/spec/active/2025-12-25-secrets-filtering/DECISIONS.md
 - docs/spec/active/2025-12-25-secrets-filtering/CHANGELOG.md
 - CLAUDE.md
+
+---
+type: progress
+timestamp: '2025-12-26T00:32:13.124135+00:00'
+summary: '...plus full remediation capability. Importantly, they want ML extension
+  points designed now but ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...plus full remediation capability. Importantly, they want ML extension points designed now but implemented later - this is a classic "seam" pattern where we design for future capabilities without implementing...
