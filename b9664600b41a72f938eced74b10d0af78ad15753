@@ -3025,3 +3025,19 @@ tags:
 
 *Generated from MAXALL deep-clean code review - 2025-12-26*
 *Remediation session completed: 2025-12-26*
+
+---
+type: progress
+timestamp: '2025-12-26T15:50:52.342187+00:00'
+summary: '...```
+
+  [learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/ind...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
