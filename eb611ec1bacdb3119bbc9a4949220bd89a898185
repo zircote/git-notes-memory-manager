@@ -463,3 +463,19 @@ tags:
 Subtasks:
 - [x] Create dedicated `CaptureStore` with own SQLite database
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T01:43:35.484371+00:00'
+summary: '..."""Result of hook-triggered implicit capture.'
+tags:
+- auto-captured
+- post-tool-use
+- file:hook_integration.py
+---
+
+..."""Result of hook-triggered implicit capture.
+
+    Attributes:
+        success: Whether capture completed without errors.
+        captured_count: Number of memories captured (pending + auto-approved)....
