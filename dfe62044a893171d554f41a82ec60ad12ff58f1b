@@ -222,3 +222,20 @@ tags:
 | Provider | Pattern | Regex | Notes |
 |----------|---------|-------|-------|
 | **OpenAI** | `sk-` prefix (legacy)...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:52.996073+00:00'
+summary: '...Strategy'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...Strategy
+
+**Recommended approach for git-notes-memory**:
+
+1. **Pattern-first**: If a deterministic pattern matches, skip entropy check (already high confidence)
+2. **Entropy as secondary**: Use entropy...
