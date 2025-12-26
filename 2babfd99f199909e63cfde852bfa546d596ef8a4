@@ -16,3 +16,19 @@ tags:
         snapshot = {
             "counters": {
                 k: v for...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:33:52.293965+00:00'
+summary: '..."counters": {'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.py
+---
+
+..."counters": {
+                k: v for k, v in snapshot.get("counters", {}).items() if pattern in k.lower()
+            },
+            "histograms": {
+                k: v for k, v in snapshot.get...
