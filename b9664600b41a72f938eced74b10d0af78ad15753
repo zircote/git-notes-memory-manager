@@ -4962,3 +4962,41 @@ tags:
 ```
 
 The memory system...
+
+---
+type: progress
+timestamp: '2025-12-26T16:31:23.410150+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Created GitHub issue #31 for PLUGIN_ROOT path re...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
