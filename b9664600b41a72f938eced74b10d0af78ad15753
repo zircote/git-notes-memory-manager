@@ -1215,3 +1215,19 @@ tags:
 ---
 
 ...distinguish between the project and user capture services. Let me create a sentinel class pattern or use a different approach:
+
+---
+type: patterns
+timestamp: '2025-12-26T15:15:13.571540+00:00'
+summary: '...ServiceRegistry'
+tags:
+- auto-captured
+- post-tool-use
+- file:capture.py
+---
+
+...ServiceRegistry
+
+    # CRIT-003: Check if already registered (fast path)
+    # Using has() + get() pattern for thread safety.
+    # We can't use ServiceRegistry.get() alone because CaptureService...
