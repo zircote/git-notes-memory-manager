@@ -1508,3 +1508,32 @@ Replaced all hardcoded absolute paths with the `$CLAUDE_PROJECT_DIR` environment
 
 ## Related Files
 - .claude/hooks.json:10,21,32,43,54
+
+---
+type: progress
+timestamp: '2025-12-26T19:10:58.024787+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed CRIT-001: Added circuit breaker to emb...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed CRIT-001: Added circuit breaker to embedding service
+## Summary
+Implemented circuit breaker pattern in EmbeddingService to prevent repeated calls to failing embedding model.
+
+## Changes Made
+- Added `CircuitState` enum (CLOSED, OPEN, HALF_OPEN)
+- Added `CircuitOpenError` exception class
+- Added `EmbeddingCircuitBreaker` dataclass with thread-safe state management
+- Updated `embed()` method with circuit breaker checks and success/failure recording
+- Updated `embed_batch()` method with same circuit breaker logic
+- Added 14 new tests covering all circuit breaker functionality
+
+## Related Files
+- src/git_notes_memory/embedding.py:67-237 (circuit breaker infrastructure)
+- src/git_notes_memory/embedding.py:417-426 (embed() integration)
+- src/git_notes_memory/embedding.py:513-522 (embed_batch() integration)
+- tests/test_embedding.py:420-597 (new tests)
