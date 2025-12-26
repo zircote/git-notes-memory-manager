@@ -614,3 +614,20 @@ tags:
 ---
 
 ...ServiceRegistry. First, let me look at the existing `__init__.py` to understand the global state pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T03:18:52.327746+00:00'
+summary: '...b(?:\d{4}[-.\s]?){3}\d{4}\b"),'
+tags:
+- auto-captured
+- post-tool-use
+- file:hook_utils.py
+---
+
+...b(?:\d{4}[-.\s]?){3}\d{4}\b"),
+        "[REDACTED:card]",
+    ),
+    # API keys and tokens (generic pattern for hex/base64 strings)
+    (
+        re.compile(r"\b(?:sk[-_]|api[-_]?key[-_]?|token[-_]?)[A-Za-z0-9...
