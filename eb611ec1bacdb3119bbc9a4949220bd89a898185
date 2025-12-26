@@ -234,3 +234,17 @@ tags:
             (
                 "Pattern: Always validate user input before processing. "
                 "This prevents common attacks...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:39:37.648115+00:00'
+summary: '...───────────────────────────────────`
+
+  The existing Stop hook uses `SessionAnalyzer` with regex-...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...───────────────────────────────────`
+The existing Stop hook uses `SessionAnalyzer` with regex-based pattern matching - not the LLM-powered subconsciousness. Task 2.10 needs to integrate the new `ImplicitCaptureService...
