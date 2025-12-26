@@ -465,3 +465,22 @@ Multi-worktree notes conflicts occur because stop_handler.py:482 calls `push_not
 ## Related Files
 - src/git_notes_memory/git_ops.py:1222-1281
 - src/git_notes_memory/hooks/stop_handler.py:473-487
+
+---
+type: learnings
+timestamp: '2025-12-26T20:01:53.391755+00:00'
+summary: Telemetry export is batched at session end, not during session
+---
+
+Telemetry export is batched at session end, not during session
+## Summary
+Metrics, traces, and logs are collected during the session but only exported to OTLP when the Stop hook runs at session termination. This is intentional batch export design.
+
+## Context
+- `stop_handler.py:505-597` handles all OTLP exports
+- Metrics accumulate in-memory during session
+- `export_metrics_if_configured()` called only at session end
+- No mid-session push to reduce network overhead
+
+## Related Files
+- src/git_notes_memory/hooks/stop_handler.py:505-597
