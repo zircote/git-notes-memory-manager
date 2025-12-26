@@ -230,3 +230,40 @@ Added 6 new model classes for Phase 2 (Implicit Capture) to support LLM-powered 
 - src/git_notes_memory/subconsciousness/models.py:61-562
 - tests/subconsciousness/test_models.py:245-580
 - docs/spec/active/2025-12-25-llm-subconsciousness/PROGRESS.md:211-240
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:25.466544+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.2: Implement capture store with...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.2: Implement capture store with SQLite persistence
+## Summary
+Implemented a dedicated SQLite-based storage for implicit captures awaiting review.
+
+## Changes Made
+- Created `CaptureStore` class with its own database (`implicit_captures.db`)
+- Schema with `implicit_captures` table storing serialized JSON for nested objects
+- Indexed on status, expires_at, source_hash, namespace, session_id for efficient queries
+- Full CRUD operations: save, get, get_pending (sorted by confidence), update_status, delete
+- Expiration/cleanup methods for maintenance
+- Factory function `get_default_capture_store()` with singleton pattern
+- Helper function `create_capture()` for generating captures with IDs and timestamps
+- 27 comprehensive tests covering all operations
+
+## Design Decision
+Created separate database rather than extending main memory index schema. This:
+- Keeps subconsciousness layer cleanly isolated
+- Allows independent versioning/migration
+- Prevents coupling between temporary review queue and permanent memory storage
+
+## Related Files
+- src/git_notes_memory/subconsciousness/capture_store.py:1-530
+- tests/subconsciousness/test_capture_store.py:1-430
+- src/git_notes_memory/subconsciousness/__init__.py:26-154
+- docs/spec/active/2025-12-25-llm-subconsciousness/PROGRESS.md:228-257
