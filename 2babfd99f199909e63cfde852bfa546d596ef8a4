@@ -141,3 +141,12 @@ Moved git tag v0.12.0 from old commit (566b7a5) to current HEAD (2babfd9) which 
 
 ## Related Files
 - .claude-plugin/plugin.json
+
+---
+type: progress
+timestamp: '2025-12-26T04:23:35.328507+00:00'
+summary: 'The git commit was successfully completed. You had originally started a
+  `/git:fr` operation but had '
+---
+
+The git commit was successfully completed. You had originally started a `/git:fr` operation but had to abort due to uncommitted changes....
