@@ -4892,3 +4892,19 @@ tags:
 ---
 
 ...collecting the remaining agent outputs and proceed with the code review synthesis. All agents have completed - let me gather their findings.
+
+---
+type: progress
+timestamp: '2025-12-26T16:31:23.184799+00:00'
+summary: '...```
+
+  [learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/ind...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
