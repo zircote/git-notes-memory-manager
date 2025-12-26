@@ -359,3 +359,30 @@ Created the `ImplicitCaptureAgent` that orchestrates transcript analysis using L
 ## Related Files
 - src/git_notes_memory/subconsciousness/implicit_capture_agent.py:1-320
 - tests/subconsciousness/test_implicit_capture_agent.py:1-430
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:25.635696+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.6: Adversarial detection with f...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.6: Adversarial detection with fail-closed security
+## Summary
+Created the `AdversarialDetector` that uses an LLM to screen content for security threats before storing as memory. Implements fail-closed behavior by default, blocking content when detection fails to ensure security.
+
+## Changes Made
+- Created `adversarial_detector.py` with `AdversarialDetector` class
+- Implemented async `analyze()` method for threat detection
+- Implemented `analyze_batch()` for processing multiple contents
+- Implemented `_parse_response()` for JSON parsing with threat level inference
+- Added fail-closed mode (block on error) and fail-open option
+- Added 21 tests covering safe/malicious content, error handling, and edge cases
+
+## Related Files
+- src/git_notes_memory/subconsciousness/adversarial_detector.py:1-215
+- tests/subconsciousness/test_adversarial_detector.py:1-340
