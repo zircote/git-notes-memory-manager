@@ -64,8 +64,7 @@ Check if `--verbose` flag is present.
 
 **Basic Status**:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 from git_notes_memory import get_sync_service
 from git_notes_memory.index import IndexService
 from git_notes_memory.config import (
@@ -149,8 +148,7 @@ print(f'| Data Directory | {get_data_path()} |')
 
 **Verbose Status**:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 import subprocess
 from git_notes_memory import get_sync_service
 from git_notes_memory.index import IndexService

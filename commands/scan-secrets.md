@@ -82,10 +82,9 @@ Parse the following flags:
 **Scan all memories** (or filtered by namespace):
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 NAMESPACE="${NAMESPACE:-}"  # Set from parsed arguments or empty
 
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 import sys
 from git_notes_memory import get_recall_service
 from git_notes_memory.security import get_secrets_filtering_service
@@ -157,11 +156,10 @@ print(f'<!-- FINDINGS_COUNT={len(findings)} -->')
 **If `--fix` is specified**, apply remediation:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 NAMESPACE="${NAMESPACE:-}"
 DRY_RUN="${DRY_RUN:-false}"  # Set from --dry-run flag
 
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 import sys
 from git_notes_memory import get_recall_service, get_capture_service
 from git_notes_memory.security import get_secrets_filtering_service, get_audit_logger

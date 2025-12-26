@@ -92,14 +92,13 @@ Parse the following flags:
 **Query with filters**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 SINCE="${SINCE:-}"        # e.g., "24h"
 NAMESPACE="${NAMESPACE:-}"
 EVENT_TYPE="${EVENT_TYPE:-}"
 JSON_OUTPUT="${JSON_OUTPUT:-false}"
 LIMIT="${LIMIT:-50}"
 
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 import json
 import sys
 from datetime import UTC, datetime, timedelta
@@ -205,9 +204,7 @@ else:
 **Show overall statistics**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 from git_notes_memory.security import get_audit_logger
 
 logger = get_audit_logger()

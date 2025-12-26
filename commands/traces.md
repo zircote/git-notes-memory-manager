@@ -76,8 +76,78 @@ Parse the following options:
 
 **Execute the traces collection**:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 "$PLUGIN_ROOT/scripts/traces.py" $ARGUMENTS
+uv run python3 -c "
+import sys
+
+# Parse arguments safely
+operation_filter = None
+status_filter = None
+limit = 10
+
+for arg in sys.argv[1:]:
+    if arg.startswith('--operation='):
+        operation_filter = arg.split('=')[1]
+    elif arg.startswith('--status='):
+        status_filter = arg.split('=')[1]
+    elif arg.startswith('--limit='):
+        limit = int(arg.split('=')[1])
+
+from git_notes_memory.observability.tracing import get_completed_spans
+
+spans = get_completed_spans()
+
+# Apply filters
+if operation_filter:
+    spans = [s for s in spans if operation_filter.lower() in s.operation.lower()]
+if status_filter:
+    spans = [s for s in spans if s.status == status_filter]
+
+# Sort by end time (most recent first) and apply limit
+spans = sorted(spans, key=lambda s: s.end_time or s.start_time, reverse=True)[:limit]
+
+if not spans:
+    print('## Recent Traces
+')
+    print('No traces recorded yet. Traces are captured during:')
+    print('- /memory:capture operations')
+    print('- /memory:recall searches')
+    print('- Hook executions')
+    print('- Index operations')
+    print()
+    print('Run some memory commands to generate traces.')
+else:
+    print('## Recent Traces
+')
+    filter_msg = ' (filtered)' if operation_filter or status_filter else ''
+    print(f'Showing {len(spans)} trace(s){filter_msg}')
+    print()
+    print('| Operation | Duration | Status | Time | Details |')
+    print('|-----------|----------|--------|------|---------|')
+    for span in spans:
+        duration = f'{span.duration_ms:.1f}ms' if span.duration_ms else '-'
+        if span.status == 'ok':
+            status = '✓'
+        elif span.status == 'error':
+            status = '✗'
+        else:
+            status = '○'
+        time_str = span.start_datetime.strftime('%H:%M:%S') if span.start_datetime else '-'
+        details = []
+        for key, value in sorted(span.tags.items()):
+            if len(str(value)) > 20:
+                value = str(value)[:17] + '...'
+            details.append(f'{key}={value}')
+        details_str = ', '.join(details[:3]) if details else '-'
+        print(f'| {span.operation} | {duration} | {status} | {time_str} | {details_str} |')
+    print()
+    total_duration = sum(s.duration_ms or 0 for s in spans)
+    error_count = sum(1 for s in spans if s.status == 'error')
+    print('### Summary')
+    print(f'- Total traces: {len(spans)}')
+    print(f'- Total duration: {total_duration:.1f}ms')
+    if error_count:
+        print(f'- Errors: {error_count}')
+" \$ARGUMENTS
 ```
 
 </step>

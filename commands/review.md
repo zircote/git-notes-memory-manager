@@ -82,8 +82,7 @@ Determine the action:
 First check if subconsciousness is enabled:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 from git_notes_memory.subconsciousness import is_subconsciousness_enabled
 
 if not is_subconsciousness_enabled():
@@ -111,8 +110,7 @@ If not enabled, show the message and stop.
 **For --list or no args (list pending captures)**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 from git_notes_memory.subconsciousness.implicit_capture_service import get_implicit_capture_service
 
 service = get_implicit_capture_service()
@@ -171,11 +169,10 @@ After showing the list, ask the user what they want to do using AskUserQuestion.
 **For --approve <id>**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 CAPTURE_ID="$1"  # Extract from arguments
 # Pass via environment variable to prevent shell injection
 export MEMORY_CAPTURE_ID="$CAPTURE_ID"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 import os
 import sys
 from git_notes_memory.subconsciousness.implicit_capture_service import get_implicit_capture_service
@@ -230,11 +227,10 @@ else:
 **For --reject <id>**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 CAPTURE_ID="$1"
 # Pass via environment variable to prevent shell injection
 export MEMORY_CAPTURE_ID="$CAPTURE_ID"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 import os
 import sys
 from git_notes_memory.subconsciousness.implicit_capture_service import get_implicit_capture_service
@@ -272,8 +268,7 @@ else:
 **For --approve-all**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 from git_notes_memory.subconsciousness.implicit_capture_service import get_implicit_capture_service
 from git_notes_memory import get_capture_service
 
@@ -318,8 +313,7 @@ print(f'Approved: {approved} | Failed: {failed}')
 **For --cleanup**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run python3 -c "
 from git_notes_memory.subconsciousness.implicit_capture_service import get_implicit_capture_service
 
 service = get_implicit_capture_service()
