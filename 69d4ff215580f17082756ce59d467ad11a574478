@@ -63,3 +63,20 @@ tags:
 - [ ] SSN pattern (XXX-XX-XXXX)
 - [ ] Credit card pattern with Luhn validation
 - [ ] Phone number patterns (US...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:46:51.470908+00:00'
+summary: '...class (detect-secrets doesn''t cover PII)'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...class (detect-secrets doesn't cover PII)
+- [ ] SSN pattern (XXX-XX-XXXX)
+- [ ] Credit card pattern with Luhn validation
+- [ ] Phone number patterns (US formats)
+- [ ] luhn_check() static method
+-...
