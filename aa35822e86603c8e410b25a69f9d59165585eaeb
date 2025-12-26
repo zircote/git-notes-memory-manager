@@ -1321,3 +1321,19 @@ tags:
 9. **Architecture:** Clean service layer pattern
 10. **Architecture:** Thread-safe registry with double-checked locking
 11. **Compliance:**...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:21:10.662859+00:00'
+summary: '...executemany'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...executemany
+- [ ] MED-006: Per-migration transaction handling
+- [ ] MED-007: Detect-secrets fallback pattern matching
+- [ ] MED-008: Explicit timeout for session start fetch
+- [ ] MED-009: Git note write...
