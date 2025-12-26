@@ -4926,3 +4926,21 @@ tags:
 ```
 
 Let me also verify...
+
+---
+type: progress
+timestamp: '2025-12-26T16:31:23.298971+00:00'
+summary: '...(13:19:50) ===
+
+  [learnings] Memory index location is project-specific at .memory/index.db  ✓
+
+  [p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...(13:19:50) ===
+[learnings] Memory index location is project-specific at .memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean...
