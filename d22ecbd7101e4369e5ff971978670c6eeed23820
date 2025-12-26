@@ -606,3 +606,21 @@ tags:
 ...Domain markers: [global]/[user] → USER domain, [project]/[local] → PROJECT domain
 - Block pattern extended for domain prefix: `global:decision`, `user:learned`
 - CaptureSignal and SuggestedCapture...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:39:41.717779+00:00'
+summary: '...blockers | Auth middleware issue | 0.82 | 2024-01-10 |'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...blockers | Auth middleware issue | 0.82 | 2024-01-10 |
+| 4 | 🌐 | patterns | Token refresh pattern | 0.75 | 2024-01-05 |
+```
+
+**Domain indicators:**
+- 🌐 = User memory (global, cross-project)
+-...
