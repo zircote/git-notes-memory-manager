@@ -33,3 +33,21 @@ The migration for domain needs to add the column and create an index, following 
 `─────────────────────────────────────────────────`
 
 Now...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.604663+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The config.py follows a clear pattern:
+
+  1. Secti...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The config.py follows a clear pattern:
+1. Sections organized by category with clear headers
+2. Functions use `get_*` naming convention...
