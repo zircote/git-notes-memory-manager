@@ -676,3 +676,21 @@ Investigated and filed comprehensive bug report for path resolution failures in 
 - commands/test-secret.md:87
 - commands/validate.md:69
 - https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:29:38.708535+00:00'
+summary: <self_audit_reminder><![CDATA[
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+<self_audit_reminder><![CDATA[
+## PERIODIC SELF-AUDIT (Check periodically)
+
+Ask yourself:
+- Have I completed significant work without capturing it?
+- Have I made decisions that should be remembered?
+-...
