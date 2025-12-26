@@ -366,3 +366,19 @@ tags:
 
 - `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes Fetch Refspec
   - Completed: 2025-12-25...
+
+---
+type: progress
+timestamp: '2025-12-26T03:54:39.471438+00:00'
+summary: '...`docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git
+  Notes Fetch Refspec'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...`docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes Fetch Refspec
+  - Completed: 2025-12-25
+  - Outcome: success
+  - GitHub Issue: [#18](https://github.com/zircote/git-notes-memory...
