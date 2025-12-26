@@ -495,3 +495,18 @@ secrets_filter:
     providers:
       - openai
       - anthropic...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.357196+00:00'
+summary: '...Operation | Expected Time | Optimization |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...Operation | Expected Time | Optimization |
+|-----------|---------------|--------------|
+| Pattern matching | <1ms per pattern | Compile regex once, reuse |
+| Entropy calculation | <0.1ms |...
