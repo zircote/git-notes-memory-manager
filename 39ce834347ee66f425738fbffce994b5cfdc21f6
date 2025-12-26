@@ -84,3 +84,22 @@ summary: '...Issue:**'
 
 **Pattern repeated across 12+ commands:**
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:29:11.820739+00:00'
+summary: '...Fixing a bug | `"error handling retry logic"` |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...Fixing a bug | `"error handling retry logic"` |
+| Making architectural decisions | `"service pattern dependency injection"` |
+
+### How to Search
+
+```python
+# Use the recall service directly
+from...
