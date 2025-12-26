@@ -841,3 +841,21 @@ tags:
 - [x] Which detection layers in v1? → Pattern + Entropy (confirmed)
 - [x] Include PII? → Yes (confirmed)
 - [x] Default strategy? → REDACT...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:15.887818+00:00'
+summary: '...Management](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...Management](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)
+
+### Secret Pattern Categories
+
+| Category | Examples | Detection Method |
+|----------|----------|------------------|
+|...
