@@ -116,3 +116,25 @@ Only `stop_handler.py` pushes metrics. Other hooks (SessionStart, UserPromptSubm
 
 ## Related Files
 - src/git_notes_memory/hooks/hook_utils.py:334-357 (missing export call)
+
+---
+type: blockers
+timestamp: '2025-12-26T21:18:10.209939+00:00'
+summary: Hooks collect metrics but don't push them to OTLP
+---
+
+Hooks collect metrics but don't push them to OTLP
+## Root Cause
+The `timed_hook_execution` context manager at line 293-357:
+1. ✓ Collects metrics via `metrics.increment()` and `metrics.observe()`
+2. ✗ Does NOT call `export_metrics_if_configured()` to push to OTLP
+
+Only `stop_handler.py` pushes metrics. Other hooks (SessionStart, UserPromptSubmit, PostToolUse) collect but never export.
+
+## Impact
+- Hook metrics exist in Prometheus label index (from historical pushes)
+- Current hook executions produce no data points
+- Dashboard shows empty panels
+
+## Related Files
+- src/git_notes_memory/hooks/hook_utils.py:334-357 (missing export call)
