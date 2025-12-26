@@ -736,3 +736,28 @@ Updated the subconsciousness module to use ServiceRegistry for thread-safe singl
 - src/git_notes_memory/subconsciousness/__init__.py:83-154
 - src/git_notes_memory/subconsciousness/adversarial_detector.py:241-247
 - src/git_notes_memory/subconsciousness/implicit_capture_agent.py:345-351
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:26.198791+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed HIGH-008: Implemented PII scrubbing fo...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed HIGH-008: Implemented PII scrubbing for hook logs
+## Summary
+Added `scrub_pii()` function to remove personally identifiable information from prompts and tool inputs before logging, ensuring GDPR Article 5(1)(c) compliance.
+
+## Changes Made
+- Added pre-compiled regex patterns for 7 PII types (email, phone, SSN, credit card, API key, AWS key, secrets)
+- Added `scrub_pii()` function with proper documentation
+- Integrated scrubbing into `log_hook_input()` for prompts and tool_input
+- Added 20 comprehensive tests for all PII patterns and integration
+
+## Related Files
+- src/git_notes_memory/hooks/hook_utils.py:401-470
+- tests/test_hook_utils.py:738-912
