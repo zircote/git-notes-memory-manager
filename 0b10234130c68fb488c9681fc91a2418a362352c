@@ -83,3 +83,46 @@ The existing architecture provides strong extension points for multi-domain supp
 - src/git_notes_memory/recall.py:72-131 (service initialization)
 - src/git_notes_memory/hooks/signal_detector.py:40-155 (patterns + block markers)
 - src/git_notes_memory/hooks/context_builder.py:340-390 (working memory building)
+
+---
+type: learnings
+timestamp: '2025-12-26T00:33:54.300964+00:00'
+summary: Comprehensive codebase analysis for multi-domain memories feature
+---
+
+Comprehensive codebase analysis for multi-domain memories feature
+## Summary
+The existing architecture provides strong extension points for multi-domain support. Key findings from code review.
+
+## Key Integration Points Identified
+
+**1. CaptureService (capture.py):**
+- Uses `git_ops` property which creates a GitOps for current repo
+- Memory IDs are `{namespace}:{commit_sha}:{index}` - need new format for user memories
+- `_repo_path` property gets current repo root - need to support user-memories path
+
+**2. IndexService (index.py):**
+- Already has `repo_path` column added in SCHEMA_VERSION 2 migration
+- Can use this as discriminator OR add new `domain` column
+- Search methods accept `namespace` and `spec` filters - add `domain` filter
+
+**3. RecallService (recall.py):**
+- `_get_git_ops()` creates single GitOps - need to support both project and user GitOps
+- Search returns MemoryResult objects with distance scores
+- `hydrate_batch()` uses git_ops for content retrieval
+
+**4. Hooks Subsystem:**
+- SignalDetector: Block markers `▶ namespace ───` already supported
+- Need to add domain markers: `[global]`, `[project]`, `[user]`
+- ContextBuilder: Currently queries single index - need to merge user + project results
+
+**5. Sync (sync.py):**
+- Already supports remote fetch/push patterns via completed refspec fix
+- User-memories bare repo can use same patterns
+
+## Related Files
+- src/git_notes_memory/capture.py:1-200
+- src/git_notes_memory/index.py:75-101 (schema + migrations)
+- src/git_notes_memory/recall.py:72-131 (service initialization)
+- src/git_notes_memory/hooks/signal_detector.py:40-155 (patterns + block markers)
+- src/git_notes_memory/hooks/context_builder.py:340-390 (working memory building)
