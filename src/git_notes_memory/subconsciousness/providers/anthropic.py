@@ -44,6 +44,44 @@ __all__ = ["AnthropicProvider"]
 
 
 # =============================================================================
+# Security Helpers
+# =============================================================================
+
+import re
+
+# SEC-H-002: Patterns that may indicate sensitive data in error messages
+_SENSITIVE_PATTERNS = [
+    # API keys (sk-*, ant-*, etc.)
+    (re.compile(r"\b(sk-[a-zA-Z0-9]{20,})", re.IGNORECASE), "[REDACTED_KEY]"),
+    (re.compile(r"\b(ant-[a-zA-Z0-9]{20,})", re.IGNORECASE), "[REDACTED_KEY]"),
+    # Generic long hex/base64 tokens
+    (re.compile(r"\b([a-zA-Z0-9]{32,})\b"), "[REDACTED_TOKEN]"),
+    # URLs with potential tokens in query params
+    (re.compile(r"(https?://[^\s]+[?&](api_key|token|key)=[^\s&]+)"), "[REDACTED_URL]"),
+    # Bearer tokens
+    (re.compile(r"Bearer\s+[a-zA-Z0-9._-]+", re.IGNORECASE), "Bearer [REDACTED]"),
+]
+
+
+def _sanitize_error_message(error: Exception) -> str:
+    """Sanitize error message to remove potential secrets.
+
+    SEC-H-002: Third-party SDK exceptions may include API keys or tokens
+    in their string representation. This function removes sensitive patterns.
+
+    Args:
+        error: The exception to sanitize.
+
+    Returns:
+        Sanitized error message safe for logging.
+    """
+    msg = str(error)
+    for pattern, replacement in _SENSITIVE_PATTERNS:
+        msg = pattern.sub(replacement, msg)
+    return msg
+
+
+# =============================================================================
 # Constants
 # =============================================================================
 
@@ -386,7 +424,8 @@ class AnthropicProvider:
                 ) from e
 
             except anthropic.AuthenticationError as e:
-                msg = f"Authentication failed: {e}"
+                # SEC-H-002: Sanitize error to prevent API key exposure
+                msg = f"Authentication failed: {_sanitize_error_message(e)}"
                 raise LLMAuthenticationError(msg, provider=self.name) from e
 
             except anthropic.APIConnectionError as e:
@@ -402,12 +441,14 @@ class AnthropicProvider:
                         DEFAULT_MAX_BACKOFF_MS,
                     )
                     continue
-                msg = f"Connection failed: {e}"
+                # SEC-H-002: Sanitize error to prevent API key exposure
+                msg = f"Connection failed: {_sanitize_error_message(e)}"
                 raise LLMConnectionError(msg, provider=self.name) from e
 
             except anthropic.APIStatusError as e:
                 last_error = e
-                msg = f"API error: {e}"
+                # SEC-H-002: Sanitize error to prevent API key exposure
+                msg = f"API error: {_sanitize_error_message(e)}"
                 raise LLMProviderError(
                     msg,
                     provider=self.name,

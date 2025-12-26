@@ -502,6 +502,27 @@ def main() -> None:
                 # Don't block session - just log and continue
                 logger.debug("User memory remote push skipped: %s", e)
 
+        # Export metrics and traces to OTLP collector before session ends
+        try:
+            from git_notes_memory.observability.exporters import (
+                export_metrics_if_configured,
+                export_traces_if_configured,
+            )
+            from git_notes_memory.observability.tracing import get_completed_spans
+
+            # Export any collected traces
+            completed_spans = get_completed_spans()
+            if completed_spans:
+                export_traces_if_configured(completed_spans)
+                logger.debug("Exported %d traces to OTLP", len(completed_spans))
+
+            # Export metrics
+            if export_metrics_if_configured():
+                logger.debug("Exported metrics to OTLP")
+        except Exception as e:
+            # Don't block session - telemetry export is best-effort
+            logger.debug("OTLP export skipped: %s", e)
+
         # Output result
         _write_output(
             uncaptured=uncaptured,

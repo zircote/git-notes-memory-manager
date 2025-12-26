@@ -14,6 +14,7 @@ spec into SpecContext objects for comprehensive context retrieval.
 from __future__ import annotations
 
 import logging
+import threading
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -99,6 +100,9 @@ class RecallService:
         self._index_service = index_service
         self._embedding_service = embedding_service
         self._git_ops = git_ops
+        # RES-M-001: Lock for thread-safe user index initialization
+        self._user_index_lock = threading.Lock()
+        self._user_index_service: IndexService | None = None
 
     @property
     def index_path(self) -> Path:
@@ -366,17 +370,25 @@ class RecallService:
     def _get_user_index(self) -> IndexService:
         """Get or create the user domain IndexService instance.
 
+        RES-M-001: Thread-safe lazy initialization using double-checked locking.
+        Prevents race condition where two threads could create separate instances.
+
         Returns:
             IndexService configured for the user domain.
         """
-        if not hasattr(self, "_user_index_service") or self._user_index_service is None:
-            from git_notes_memory.index import IndexService
+        # Fast path: return existing instance without lock
+        if self._user_index_service is not None:
+            return self._user_index_service
 
-            user_index_path = get_user_index_path(ensure_exists=True)
-            self._user_index_service: IndexService | None = IndexService(
-                user_index_path
-            )
-            self._user_index_service.initialize()
+        # Slow path: acquire lock and create if still None
+        with self._user_index_lock:
+            # Double-check after acquiring lock
+            if self._user_index_service is None:
+                from git_notes_memory.index import IndexService
+
+                user_index_path = get_user_index_path(ensure_exists=True)
+                self._user_index_service = IndexService(user_index_path)
+                self._user_index_service.initialize()
         return self._user_index_service
 
     def search_text(
@@ -868,10 +880,20 @@ class RecallService:
         git_ops = self._get_git_ops_for_memory(memory)
         return self._load_files_with_git_ops(memory.commit_sha, git_ops)
 
+    # RES-M-005: Memory limits for file loading
+    _MAX_FILES_PER_COMMIT = 50  # Maximum number of files to load per commit
+    _MAX_FILE_SIZE_BYTES = 512 * 1024  # 512KB max per file
+    _MAX_TOTAL_SIZE_BYTES = 5 * 1024 * 1024  # 5MB total max
+
     def _load_files_with_git_ops(
         self, commit_sha: str, git_ops: GitOps
     ) -> tuple[tuple[str, str], ...]:
         """Load file snapshots using a specific GitOps instance.
+
+        RES-M-005: Applies memory limits to prevent exhaustion:
+        - Maximum 50 files per commit
+        - Maximum 512KB per individual file
+        - Maximum 5MB total content loaded
 
         Args:
             commit_sha: The commit SHA to load files from.
@@ -884,13 +906,48 @@ class RecallService:
             # Get list of changed files in the commit
             changed_files = git_ops.get_changed_files(commit_sha)
 
-            # Load content for each file
+            # RES-M-005: Limit number of files to process
+            if len(changed_files) > self._MAX_FILES_PER_COMMIT:
+                logger.debug(
+                    "Commit %s has %d files, limiting to %d",
+                    commit_sha[:7],
+                    len(changed_files),
+                    self._MAX_FILES_PER_COMMIT,
+                )
+                changed_files = changed_files[: self._MAX_FILES_PER_COMMIT]
+
+            # Load content for each file with size limits
             files: list[tuple[str, str]] = []
+            total_size = 0
             for path in changed_files:
                 try:
                     content = git_ops.get_file_at_commit(path, commit_sha)
-                    if content is not None:
-                        files.append((path, content))
+                    if content is None:
+                        continue
+
+                    content_size = len(content.encode("utf-8", errors="replace"))
+
+                    # RES-M-005: Skip files that are too large
+                    if content_size > self._MAX_FILE_SIZE_BYTES:
+                        logger.debug(
+                            "Skipping large file %s (%d bytes > %d limit)",
+                            path,
+                            content_size,
+                            self._MAX_FILE_SIZE_BYTES,
+                        )
+                        continue
+
+                    # RES-M-005: Stop if total size limit exceeded
+                    if total_size + content_size > self._MAX_TOTAL_SIZE_BYTES:
+                        logger.debug(
+                            "Total size limit reached (%d bytes), stopping file load",
+                            total_size,
+                        )
+                        break
+
+                    files.append((path, content))
+                    total_size += content_size
+
                 except Exception as e:
                     logger.debug(
                         "Failed to load file %s at %s: %s", path, commit_sha, e

@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS implicit_captures (
     summary TEXT NOT NULL,
     content TEXT NOT NULL,
     confidence_json TEXT NOT NULL,
+    confidence_overall REAL NOT NULL DEFAULT 0.0,
     source_hash TEXT NOT NULL,
     source_range_json TEXT,
     rationale TEXT,
@@ -96,6 +97,10 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_captures_source_hash ON implicit_captures(source_hash)",
     "CREATE INDEX IF NOT EXISTS idx_captures_namespace ON implicit_captures(namespace)",
     "CREATE INDEX IF NOT EXISTS idx_captures_session ON implicit_captures(session_id)",
+    # DB-M-004: Composite index for pending query optimization
+    "CREATE INDEX IF NOT EXISTS idx_captures_pending_query ON implicit_captures(status, expires_at)",
+    # DB-M-002: Index on denormalized confidence for efficient ORDER BY
+    "CREATE INDEX IF NOT EXISTS idx_captures_confidence ON implicit_captures(confidence_overall DESC)",
 ]
 
 _CREATE_METADATA_TABLE = """
@@ -175,6 +180,8 @@ class CaptureStore:
             # Enable WAL mode for better concurrent access
             self._conn.execute("PRAGMA journal_mode=WAL")
             self._conn.execute("PRAGMA synchronous=NORMAL")
+            # RES-M-004: Set busy_timeout to prevent "database is locked" errors
+            self._conn.execute("PRAGMA busy_timeout=5000")
 
             # Create schema
             self._create_schema()
@@ -182,6 +189,10 @@ class CaptureStore:
             self._initialized = True
 
         except Exception as e:
+            # DB-M-003: Close connection before setting to None to prevent leaks
+            if self._conn is not None:
+                with contextlib.suppress(Exception):
+                    self._conn.close()
             self._conn = None
             self._initialized = False
             if isinstance(e, CaptureStoreError):
@@ -204,6 +215,9 @@ class CaptureStore:
             # Create captures table
             cursor.execute(_CREATE_CAPTURES_TABLE)
 
+            # DB-M-002: Migration - add confidence_overall column if missing
+            self._migrate_add_confidence_column(cursor)
+
             # Create indices
             for index_sql in _CREATE_INDICES:
                 with contextlib.suppress(sqlite3.OperationalError):
@@ -225,6 +239,31 @@ class CaptureStore:
                 f"Failed to create schema: {e}",
                 "Delete the implicit_captures.db file and retry",
             ) from e
+
+    def _migrate_add_confidence_column(self, cursor: sqlite3.Cursor) -> None:
+        """Add confidence_overall column if missing (DB-M-002 migration).
+
+        Also backfills existing rows by extracting from JSON.
+        """
+        # Check if column exists
+        cursor.execute("PRAGMA table_info(implicit_captures)")
+        columns = {row[1] for row in cursor.fetchall()}
+
+        if "confidence_overall" not in columns:
+            # Add the column
+            cursor.execute(
+                "ALTER TABLE implicit_captures ADD COLUMN confidence_overall REAL NOT NULL DEFAULT 0.0"
+            )
+            # Backfill from JSON
+            cursor.execute(
+                """
+                UPDATE implicit_captures
+                SET confidence_overall = COALESCE(
+                    json_extract(confidence_json, '$.overall'),
+                    0.0
+                )
+                """
+            )
 
     def close(self) -> None:
         """Close the database connection."""
@@ -280,10 +319,10 @@ class CaptureStore:
                     """
                     INSERT INTO implicit_captures (
                         id, namespace, summary, content, confidence_json,
-                        source_hash, source_range_json, rationale, tags_json,
-                        threat_detection_json, status, created_at, expires_at,
-                        session_id, reviewed_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        confidence_overall, source_hash, source_range_json,
+                        rationale, tags_json, threat_detection_json, status,
+                        created_at, expires_at, session_id, reviewed_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         capture.id,
@@ -291,6 +330,7 @@ class CaptureStore:
                         capture.memory.summary,
                         capture.memory.content,
                         self._serialize_confidence(capture.memory.confidence),
+                        capture.memory.confidence.overall,  # DB-M-002: Denormalized
                         capture.memory.source_hash,
                         (
                             json.dumps(list(capture.memory.source_range))
@@ -362,22 +402,24 @@ class CaptureStore:
         """
         with self._cursor() as cursor:
             if include_expired:
+                # DB-M-002: Use denormalized confidence_overall column for efficient ORDER BY
                 cursor.execute(
                     """
                     SELECT * FROM implicit_captures
                     WHERE status = 'pending'
-                    ORDER BY json_extract(confidence_json, '$.overall') DESC
+                    ORDER BY confidence_overall DESC
                     LIMIT ?
                     """,
                     (limit,),
                 )
             else:
+                # DB-M-004: Uses composite index (status, expires_at)
                 now = datetime.now(UTC).isoformat()
                 cursor.execute(
                     """
                     SELECT * FROM implicit_captures
                     WHERE status = 'pending' AND expires_at > ?
-                    ORDER BY json_extract(confidence_json, '$.overall') DESC
+                    ORDER BY confidence_overall DESC
                     LIMIT ?
                     """,
                     (now, limit),

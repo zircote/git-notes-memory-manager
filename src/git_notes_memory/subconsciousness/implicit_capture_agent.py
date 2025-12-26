@@ -24,6 +24,7 @@ from .prompts import get_extraction_prompt
 from .transcript_chunker import TranscriptChunk, chunk_transcript
 
 if TYPE_CHECKING:
+    from .adversarial_detector import AdversarialDetector
     from .llm_client import LLMClient
 
 __all__ = [
@@ -77,12 +78,19 @@ class ImplicitCaptureAgent:
     The agent uses an LLM to analyze transcript chunks and identify
     content worth preserving as long-term memories.
 
+    CRIT-004: Now supports optional adversarial screening to detect
+    prompt injection, memory poisoning, and other attack patterns.
+
     Attributes:
         llm_client: LLM client for completions.
         max_tokens_per_chunk: Maximum tokens per chunk.
         overlap_turns: Turns to overlap between chunks.
         min_confidence: Minimum confidence threshold for memories.
         project_context: Optional context about the project.
+        adversarial_detector: Optional detector for adversarial content.
+            If provided, memories are screened before acceptance.
+        block_on_adversarial: If True and adversarial content is detected,
+            block the memory. Default True.
     """
 
     llm_client: LLMClient
@@ -90,6 +98,8 @@ class ImplicitCaptureAgent:
     overlap_turns: int = 4
     min_confidence: float = 0.5
     project_context: str | None = None
+    adversarial_detector: AdversarialDetector | None = None
+    block_on_adversarial: bool = True
     _seen_hashes: set[str] = field(default_factory=set, repr=False)
 
     async def analyze_transcript(
@@ -180,7 +190,73 @@ class ImplicitCaptureAgent:
         # Parse response
         memories = self._parse_response(response.content, chunk)
 
+        # CRIT-004: Screen memories for adversarial content
+        if self.adversarial_detector and memories:
+            memories = await self._screen_memories(memories)
+
         return memories
+
+    async def _screen_memories(
+        self,
+        memories: list[ImplicitMemory],
+    ) -> list[ImplicitMemory]:
+        """Screen memories for adversarial content.
+
+        CRIT-004: Activates adversarial screening to detect prompt injection,
+        memory poisoning, and other attack patterns.
+
+        Args:
+            memories: List of memories to screen.
+
+        Returns:
+            List of memories that passed screening.
+        """
+        if not self.adversarial_detector:
+            return memories
+
+        screened: list[ImplicitMemory] = []
+        for memory in memories:
+            try:
+                # Analyze both summary and content for threats
+                combined = f"{memory.summary}\n\n{memory.content}"
+                result = await self.adversarial_detector.analyze(combined)
+
+                if result.should_block and self.block_on_adversarial:
+                    logger.warning(
+                        "Blocked adversarial memory (level=%s, patterns=%s): %s",
+                        result.detection.level.value,
+                        result.detection.patterns_found,
+                        memory.summary[:50],
+                    )
+                    continue
+
+                # Log warnings for non-blocking detections
+                if result.detection.level.value not in ("none", "low"):
+                    logger.info(
+                        "Adversarial screening detected (level=%s): %s",
+                        result.detection.level.value,
+                        memory.summary[:50],
+                    )
+
+                screened.append(memory)
+
+            except Exception as e:
+                # On screening error, fail closed (block) or open based on config
+                if self.block_on_adversarial:
+                    logger.warning(
+                        "Screening error, blocking memory as precaution: %s - %s",
+                        memory.summary[:50],
+                        e,
+                    )
+                else:
+                    logger.warning(
+                        "Screening error, allowing memory: %s - %s",
+                        memory.summary[:50],
+                        e,
+                    )
+                    screened.append(memory)
+
+        return screened
 
     def _parse_response(
         self,
@@ -245,14 +321,18 @@ class ImplicitCaptureAgent:
         summary = str(summary_raw)
         content = str(content_raw)
 
-        # Build confidence
-        confidence = CaptureConfidence.from_factors(
-            relevance=float(confidence_data.get("relevance", 0)),
-            actionability=float(confidence_data.get("actionability", 0)),
-            novelty=float(confidence_data.get("novelty", 0)),
-            specificity=float(confidence_data.get("specificity", 0)),
-            coherence=float(confidence_data.get("coherence", 0)),
-        )
+        # Build confidence with safe parsing (PROMPT-M-002)
+        try:
+            confidence = CaptureConfidence.from_factors(
+                relevance=self._safe_float(confidence_data.get("relevance", 0)),
+                actionability=self._safe_float(confidence_data.get("actionability", 0)),
+                novelty=self._safe_float(confidence_data.get("novelty", 0)),
+                specificity=self._safe_float(confidence_data.get("specificity", 0)),
+                coherence=self._safe_float(confidence_data.get("coherence", 0)),
+            )
+        except (TypeError, ValueError) as e:
+            logger.debug("Failed to parse confidence data: %s", e)
+            return None
 
         # Skip low confidence
         if confidence.overall < self.min_confidence:
@@ -305,6 +385,24 @@ class ImplicitCaptureAgent:
             tags=tags,
         )
 
+    def _safe_float(self, value: object) -> float:
+        """Safely convert a value to float.
+
+        PROMPT-M-002: Handles malformed LLM responses gracefully.
+
+        Args:
+            value: Value to convert (typically from JSON parsing).
+
+        Returns:
+            Float value, or 0.0 if conversion fails.
+        """
+        if value is None:
+            return 0.0
+        try:
+            return float(value)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return 0.0
+
     def _compute_source_hash(self, content: str) -> str:
         """Compute a hash for deduplication.
 
@@ -326,8 +424,18 @@ class ImplicitCaptureAgent:
 _agent: ImplicitCaptureAgent | None = None
 
 
-def get_implicit_capture_agent() -> ImplicitCaptureAgent:
+def get_implicit_capture_agent(
+    *,
+    enable_adversarial_screening: bool = True,
+) -> ImplicitCaptureAgent:
     """Get the default implicit capture agent.
+
+    CRIT-004: Now enables adversarial screening by default.
+
+    Args:
+        enable_adversarial_screening: If True, enables adversarial content
+            screening to detect prompt injection and memory poisoning.
+            Default True.
 
     Returns:
         ImplicitCaptureAgent configured from environment.
@@ -339,8 +447,23 @@ def get_implicit_capture_agent() -> ImplicitCaptureAgent:
     global _agent
     if _agent is None:
         from . import get_llm_client
+        from .adversarial_detector import get_adversarial_detector
 
-        _agent = ImplicitCaptureAgent(llm_client=get_llm_client())
+        llm_client = get_llm_client()
+
+        # CRIT-004: Enable adversarial detector by default
+        adversarial_detector = None
+        if enable_adversarial_screening:
+            try:
+                adversarial_detector = get_adversarial_detector()
+            except Exception as e:
+                # Log but don't fail - screening is defense-in-depth
+                logger.warning("Could not initialize adversarial detector: %s", e)
+
+        _agent = ImplicitCaptureAgent(
+            llm_client=llm_client,
+            adversarial_detector=adversarial_detector,
+        )
     return _agent
 
 

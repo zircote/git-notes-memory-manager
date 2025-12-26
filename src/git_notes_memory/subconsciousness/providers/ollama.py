@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import random
 import re
 import time
 from dataclasses import dataclass
@@ -43,6 +44,39 @@ if TYPE_CHECKING:
     pass
 
 __all__ = ["OllamaProvider"]
+
+
+# =============================================================================
+# Security Helpers (ARCH-H-006: Consistent with Anthropic/OpenAI providers)
+# =============================================================================
+
+# SEC-H-002: Patterns that may indicate sensitive data in error messages
+_SENSITIVE_PATTERNS = [
+    # Generic long hex/base64 tokens (even local URLs could have auth tokens)
+    (re.compile(r"\b([a-zA-Z0-9]{32,})\b"), "[REDACTED_TOKEN]"),
+    # URLs with potential tokens in query params
+    (re.compile(r"(https?://[^\s]+[?&](api_key|token|key)=[^\s&]+)"), "[REDACTED_URL]"),
+    # Bearer tokens
+    (re.compile(r"Bearer\s+[a-zA-Z0-9._-]+", re.IGNORECASE), "Bearer [REDACTED]"),
+]
+
+
+def _sanitize_error_message(error: Exception) -> str:
+    """Sanitize error message to remove potential secrets.
+
+    ARCH-H-006: Added for consistency with Anthropic/OpenAI providers.
+    Even local Ollama URLs could contain auth tokens in query params.
+
+    Args:
+        error: The exception to sanitize.
+
+    Returns:
+        Sanitized error message safe for logging.
+    """
+    msg = str(error)
+    for pattern, replacement in _SENSITIVE_PATTERNS:
+        msg = pattern.sub(replacement, msg)
+    return msg
 
 
 # =============================================================================
@@ -343,8 +377,11 @@ class OllamaProvider:
                     )
 
                     if response.status_code != 200:
+                        # ARCH-H-006: Sanitize error text for consistency
                         error_text = response.text
-                        msg = f"Ollama error {response.status_code}: {error_text}"
+                        # Create a placeholder exception to sanitize
+                        sanitized_text = _sanitize_error_message(Exception(error_text))
+                        msg = f"Ollama error {response.status_code}: {sanitized_text}"
                         raise LLMProviderError(
                             msg,
                             provider=self.name,
@@ -366,7 +403,11 @@ class OllamaProvider:
             except httpx_module.ConnectError as e:
                 last_error = e
                 if attempt < self.max_retries - 1:
-                    await asyncio.sleep(backoff_ms / 1000)
+                    # ARCH-H-006: Add jitter to prevent "thundering herd" on connection errors
+                    # Note: random.random() is intentional here - not for crypto
+                    jitter_factor = 0.5 + random.random()  # noqa: S311
+                    jittered_backoff = int(backoff_ms * jitter_factor)
+                    await asyncio.sleep(jittered_backoff / 1000)
                     backoff_ms = min(
                         int(backoff_ms * BACKOFF_MULTIPLIER),
                         DEFAULT_MAX_BACKOFF_MS,
@@ -381,13 +422,18 @@ class OllamaProvider:
             except Exception as e:
                 last_error = e
                 if attempt < self.max_retries - 1:
-                    await asyncio.sleep(backoff_ms / 1000)
+                    # ARCH-H-006: Add jitter to prevent "thundering herd"
+                    # Note: random.random() is intentional here - not for crypto
+                    jitter_factor = 0.5 + random.random()  # noqa: S311
+                    jittered_backoff = int(backoff_ms * jitter_factor)
+                    await asyncio.sleep(jittered_backoff / 1000)
                     backoff_ms = min(
                         int(backoff_ms * BACKOFF_MULTIPLIER),
                         DEFAULT_MAX_BACKOFF_MS,
                     )
                     continue
-                msg = f"Ollama request failed: {e}"
+                # ARCH-H-006: Sanitize error message for consistency
+                msg = f"Ollama request failed: {_sanitize_error_message(e)}"
                 raise LLMProviderError(
                     msg,
                     provider=self.name,

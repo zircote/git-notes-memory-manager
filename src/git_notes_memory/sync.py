@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -269,6 +270,50 @@ class SyncService:
 
         return all_records
 
+    def iter_notes(self) -> Iterator[NoteRecord]:
+        """Iterate over all note records across namespaces.
+
+        PERF-H-003: Generator-based version to avoid memory exhaustion.
+        Use this instead of collect_notes() when processing large repos.
+
+        Yields:
+            NoteRecord objects one at a time.
+        """
+        git_ops = self._get_git_ops()
+        parser = self._get_note_parser()
+
+        for namespace in NAMESPACES:
+            try:
+                notes_list = git_ops.list_notes(namespace)
+            except Exception as e:
+                logger.debug("No notes in namespace %s: %s", namespace, e)
+                continue
+
+            if not notes_list:
+                continue
+
+            # Batch fetch notes for this namespace
+            commit_shas = [commit_sha for _note_sha, commit_sha in notes_list]
+            contents = git_ops.show_notes_batch(namespace, commit_shas)
+
+            for _note_sha, commit_sha in notes_list:
+                try:
+                    content = contents.get(commit_sha)
+                    if content:
+                        records = parser.parse_many(
+                            content,
+                            commit_sha=commit_sha,
+                            namespace=namespace,
+                        )
+                        yield from records
+                except Exception as e:
+                    logger.warning(
+                        "Failed to read note at %s/%s: %s",
+                        namespace,
+                        commit_sha,
+                        e,
+                    )
+
     def reindex(self, *, full: bool = False) -> int:
         """Rebuild the index from git notes.
 
@@ -309,9 +354,8 @@ class SyncService:
             commit_shas = [commit_sha for _note_sha, commit_sha in notes_list]
             contents = git_ops.show_notes_batch(namespace, commit_shas)
 
-            # First pass: collect all memories and texts for batch embedding
-            memories_to_index: list[Memory] = []
-            texts_to_embed: list[str] = []
+            # First pass: collect all candidate memories
+            candidate_memories: list[Memory] = []
 
             for _note_sha, commit_sha in notes_list:
                 try:
@@ -324,13 +368,7 @@ class SyncService:
                         memory = self._record_to_memory(
                             record, commit_sha, namespace, i
                         )
-
-                        # Skip if already exists and not full reindex
-                        if not full and index.exists(memory.id):
-                            continue
-
-                        memories_to_index.append(memory)
-                        texts_to_embed.append(f"{memory.summary}\n{memory.content}")
+                        candidate_memories.append(memory)
 
                 except Exception as e:
                     logger.warning(
@@ -339,6 +377,24 @@ class SyncService:
                         commit_sha,
                         e,
                     )
+
+            if not candidate_memories:
+                continue
+
+            # PERF-H-002: Batch check which IDs already exist (avoid N+1 queries)
+            if full:
+                existing_ids: set[str] = set()
+            else:
+                candidate_ids = [m.id for m in candidate_memories]
+                existing_ids = index.get_existing_ids(candidate_ids)
+
+            # Filter to only new memories
+            memories_to_index: list[Memory] = []
+            texts_to_embed: list[str] = []
+            for memory in candidate_memories:
+                if memory.id not in existing_ids:
+                    memories_to_index.append(memory)
+                    texts_to_embed.append(f"{memory.summary}\n{memory.content}")
 
             if not memories_to_index:
                 continue
@@ -367,6 +423,12 @@ class SyncService:
                         memory.id,
                         e,
                     )
+
+        # DB-M-001: Run ANALYZE after bulk operations to update query planner statistics
+        try:
+            index.vacuum()  # Includes ANALYZE
+        except Exception as e:
+            logger.warning("Post-reindex ANALYZE failed: %s", e)
 
         logger.info("Reindex complete: %d memories indexed", indexed)
         return indexed

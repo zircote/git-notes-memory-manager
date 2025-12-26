@@ -29,9 +29,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-# Lazy imports to avoid loading optional dependencies at import time
-# This ensures the core package remains lightweight and fast to import
-
 __all__ = [
     # Configuration
     "get_config",
@@ -57,94 +54,85 @@ __all__ = [
     "StructuredLogger",
 ]
 
+# =============================================================================
+# Lazy Import System (ARCH-H-003)
+# =============================================================================
+# Use dictionary-based approach for cleaner lazy imports with caching.
+# PEP 562 (module-level __getattr__) is the standard pattern for this.
+
+# Mapping of attribute names to their (module_path, attribute_name) tuples
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    # Config module
+    "get_config": ("git_notes_memory.observability.config", "get_config"),
+    "ObservabilityConfig": (
+        "git_notes_memory.observability.config",
+        "ObservabilityConfig",
+    ),
+    "LogLevel": ("git_notes_memory.observability.config", "LogLevel"),
+    "LogFormat": ("git_notes_memory.observability.config", "LogFormat"),
+    # Metrics module
+    "get_metrics": ("git_notes_memory.observability.metrics", "get_metrics"),
+    "MetricsCollector": ("git_notes_memory.observability.metrics", "MetricsCollector"),
+    # Tracing module
+    "trace_operation": ("git_notes_memory.observability.tracing", "trace_operation"),
+    "get_current_span": ("git_notes_memory.observability.tracing", "get_current_span"),
+    "get_current_trace_id": (
+        "git_notes_memory.observability.tracing",
+        "get_current_trace_id",
+    ),
+    "Span": ("git_notes_memory.observability.tracing", "Span"),
+    # Session module
+    "get_session_info": ("git_notes_memory.observability.session", "get_session_info"),
+    "generate_session_id": (
+        "git_notes_memory.observability.session",
+        "generate_session_id",
+    ),
+    "SessionInfo": ("git_notes_memory.observability.session", "SessionInfo"),
+    # Decorators module
+    "measure_duration": (
+        "git_notes_memory.observability.decorators",
+        "measure_duration",
+    ),
+    # Logging module
+    "get_logger": ("git_notes_memory.observability.logging", "get_logger"),
+    "StructuredLogger": ("git_notes_memory.observability.logging", "StructuredLogger"),
+}
+
+# Cache for resolved lazy imports (prevents re-importing on repeated access)
+_LAZY_CACHE: dict[str, Any] = {}
+
 
 def __getattr__(name: str) -> Any:
     """Lazy import implementation for public API.
 
     This delays loading of submodules until they are actually accessed,
     keeping import time minimal for hook handlers with tight timeouts.
+
+    ARCH-H-003: Refactored from long if-chain to dictionary-based lookup
+    with import caching for better performance and maintainability.
     """
-    if name == "get_config":
-        from git_notes_memory.observability.config import get_config
+    # Check cache first
+    if name in _LAZY_CACHE:
+        return _LAZY_CACHE[name]
 
-        return get_config
+    # Check if this is a known lazy import
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        # Import the module and get the attribute
+        import importlib
 
-    if name == "ObservabilityConfig":
-        from git_notes_memory.observability.config import ObservabilityConfig
-
-        return ObservabilityConfig
-
-    if name == "LogLevel":
-        from git_notes_memory.observability.config import LogLevel
-
-        return LogLevel
-
-    if name == "LogFormat":
-        from git_notes_memory.observability.config import LogFormat
-
-        return LogFormat
-
-    if name == "get_metrics":
-        from git_notes_memory.observability.metrics import get_metrics
-
-        return get_metrics
-
-    if name == "MetricsCollector":
-        from git_notes_memory.observability.metrics import MetricsCollector
-
-        return MetricsCollector
-
-    if name == "trace_operation":
-        from git_notes_memory.observability.tracing import trace_operation
-
-        return trace_operation
-
-    if name == "get_current_span":
-        from git_notes_memory.observability.tracing import get_current_span
-
-        return get_current_span
-
-    if name == "get_current_trace_id":
-        from git_notes_memory.observability.tracing import get_current_trace_id
-
-        return get_current_trace_id
-
-    if name == "Span":
-        from git_notes_memory.observability.tracing import Span
-
-        return Span
-
-    if name == "get_session_info":
-        from git_notes_memory.observability.session import get_session_info
-
-        return get_session_info
-
-    if name == "generate_session_id":
-        from git_notes_memory.observability.session import generate_session_id
-
-        return generate_session_id
-
-    if name == "SessionInfo":
-        from git_notes_memory.observability.session import SessionInfo
-
-        return SessionInfo
-
-    if name == "measure_duration":
-        from git_notes_memory.observability.decorators import measure_duration
-
-        return measure_duration
-
-    if name == "get_logger":
-        from git_notes_memory.observability.logging import get_logger
-
-        return get_logger
-
-    if name == "StructuredLogger":
-        from git_notes_memory.observability.logging import StructuredLogger
-
-        return StructuredLogger
+        module = importlib.import_module(module_path)
+        value = getattr(module, attr_name)
+        # Cache for future access
+        _LAZY_CACHE[name] = value
+        return value
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    """Return list of public attributes including lazy imports."""
+    return list(__all__)
 
 
 if TYPE_CHECKING:

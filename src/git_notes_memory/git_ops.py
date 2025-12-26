@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "GitOps",
+    "GitOpsFactory",
     "CommitInfo",
     "validate_path",
 ]
@@ -176,36 +177,30 @@ def validate_path(path: str) -> None:
 
 
 # =============================================================================
-# GitOps Class
+# GitOpsFactory - Factory for GitOps instances (ARCH-H-002)
 # =============================================================================
 
 
-class GitOps:
-    """Wrapper for Git notes operations.
+class GitOpsFactory:
+    """Factory for creating and caching GitOps instances by domain.
 
-    Handles add, append, show, list, and configuration of Git notes
-    for the memory-capture namespaces.
+    ARCH-H-002: Extracted from GitOps to follow Single Responsibility Principle.
+    GitOps handles git operations; GitOpsFactory handles instance lifecycle.
 
-    Attributes:
-        repo_path: Path to the git repository root.
+    This factory provides:
+    - Cached GitOps instances per domain (USER/PROJECT)
+    - User repository initialization
+    - Cache management for testing
 
     Example:
-        >>> git = GitOps("/path/to/repo")
-        >>> git.append_note("decisions", "## Decision\\nChose PostgreSQL", "HEAD")
-        >>> note = git.show_note("decisions", "HEAD")
+        >>> project_git = GitOpsFactory.for_domain(Domain.PROJECT)
+        >>> user_git = GitOpsFactory.for_domain(Domain.USER)
+        >>> GitOpsFactory.clear_cache()  # Reset for testing
     """
 
     # Class-level cache for domain-specific GitOps instances
     # Key format: "{domain.value}:{repo_path}" for PROJECT, "{domain.value}" for USER
-    _domain_instances: dict[str, GitOps] = {}
-
-    def __init__(self, repo_path: Path | str | None = None) -> None:
-        """Initialize GitOps for a repository.
-
-        Args:
-            repo_path: Path to git repository root. If None, uses cwd.
-        """
-        self.repo_path = Path(repo_path) if repo_path else Path.cwd()
+    _instances: dict[str, GitOps] = {}
 
     @classmethod
     def for_domain(
@@ -234,32 +229,104 @@ class GitOps:
             Cached GitOps instance for the specified domain.
 
         Example:
-            >>> project_git = GitOps.for_domain(Domain.PROJECT)
-            >>> user_git = GitOps.for_domain(Domain.USER)
-            >>> user_git.repo_path  # ~/.local/share/memory-plugin/user-memories/
+            >>> project_git = GitOpsFactory.for_domain(Domain.PROJECT)
+            >>> user_git = GitOpsFactory.for_domain(Domain.USER)
         """
         if domain == Domain.USER:
             cache_key = Domain.USER.value
-            if cache_key not in cls._domain_instances:
-                # User memories use the dedicated bare repo - ensure it's initialized
-                instance = cls.ensure_user_repo_initialized()
-                cls._domain_instances[cache_key] = instance
-            return cls._domain_instances[cache_key]
+            if cache_key not in cls._instances:
+                instance = cls._ensure_user_repo_initialized()
+                cls._instances[cache_key] = instance
+            return cls._instances[cache_key]
         else:
             # PROJECT domain uses the specified repo or cwd
             resolved_path = Path(repo_path) if repo_path else Path.cwd()
             cache_key = f"{Domain.PROJECT.value}:{resolved_path}"
-            if cache_key not in cls._domain_instances:
-                cls._domain_instances[cache_key] = cls(resolved_path)
-            return cls._domain_instances[cache_key]
+            if cache_key not in cls._instances:
+                cls._instances[cache_key] = GitOps(resolved_path)
+            return cls._instances[cache_key]
+
+    @classmethod
+    def clear_cache(cls) -> None:
+        """Clear all cached GitOps instances.
+
+        Useful for testing or when configuration changes require fresh instances.
+        """
+        cls._instances.clear()
+
+    @classmethod
+    def _ensure_user_repo_initialized(cls) -> GitOps:
+        """Ensure the user-memories bare repository is initialized.
+
+        Delegates to GitOps.ensure_user_repo_initialized() which has
+        access to protected methods needed for initialization.
+
+        Returns:
+            GitOps instance for the initialized user-memories repository.
+        """
+        return GitOps.ensure_user_repo_initialized()
+
+
+# =============================================================================
+# GitOps Class
+# =============================================================================
+
+
+class GitOps:
+    """Wrapper for Git notes operations.
+
+    Handles add, append, show, list, and configuration of Git notes
+    for the memory-capture namespaces.
+
+    Attributes:
+        repo_path: Path to the git repository root.
+
+    Example:
+        >>> git = GitOps("/path/to/repo")
+        >>> git.append_note("decisions", "## Decision\\nChose PostgreSQL", "HEAD")
+        >>> note = git.show_note("decisions", "HEAD")
+    """
+
+    # ARCH-H-002: Legacy reference to factory cache for backward compatibility.
+    # New code should use GitOpsFactory directly. Accessing _instances is intentional.
+    _domain_instances: dict[str, GitOps] = GitOpsFactory._instances
+
+    def __init__(self, repo_path: Path | str | None = None) -> None:
+        """Initialize GitOps for a repository.
+
+        Args:
+            repo_path: Path to git repository root. If None, uses cwd.
+        """
+        self.repo_path = Path(repo_path) if repo_path else Path.cwd()
+
+    @classmethod
+    def for_domain(
+        cls,
+        domain: Domain,
+        repo_path: Path | str | None = None,
+    ) -> GitOps:
+        """Get a GitOps instance for a specific domain.
+
+        DEPRECATED: Use GitOpsFactory.for_domain() directly.
+        This method is kept for backward compatibility.
+
+        Args:
+            domain: The memory domain (USER or PROJECT).
+            repo_path: Repository path for PROJECT domain. Ignored for USER.
+
+        Returns:
+            Cached GitOps instance for the specified domain.
+        """
+        return GitOpsFactory.for_domain(domain, repo_path)
 
     @classmethod
     def clear_domain_cache(cls) -> None:
         """Clear all cached domain GitOps instances.
 
-        Useful for testing or when configuration changes require fresh instances.
+        DEPRECATED: Use GitOpsFactory.clear_cache() directly.
+        This method is kept for backward compatibility.
         """
-        cls._domain_instances.clear()
+        GitOpsFactory.clear_cache()
 
     def _run_git(
         self,

@@ -522,7 +522,8 @@ class PatternManager:
             )
 
         # Step 1: Extract terms from all memories
-        term_memory_map: dict[str, set[str]] = defaultdict(set)
+        # QUAL-M-007: Use defaultdict type annotation for accuracy
+        term_memory_map: defaultdict[str, set[str]] = defaultdict(set)
         memory_terms: dict[str, set[str]] = {}
         all_terms: set[str] = set()
 

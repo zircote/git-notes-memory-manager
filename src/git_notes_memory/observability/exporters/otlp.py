@@ -20,12 +20,15 @@ Environment:
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import logging
+import os
 import time
 import urllib.error
 import urllib.request
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlparse
 
 from git_notes_memory.observability.config import get_config
 
@@ -34,6 +37,78 @@ if TYPE_CHECKING:
     from git_notes_memory.observability.tracing import Span
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# SEC-H-001: SSRF Prevention
+# =============================================================================
+
+
+def _is_private_ip(hostname: str) -> bool:
+    """Check if hostname resolves to a private/internal IP address.
+
+    Args:
+        hostname: The hostname or IP address to check.
+
+    Returns:
+        True if the address is private/internal (RFC 1918, loopback, link-local).
+    """
+    try:
+        # Check if it's already an IP address
+        addr = ipaddress.ip_address(hostname)
+        return addr.is_private or addr.is_loopback or addr.is_link_local
+    except ValueError:
+        # It's a hostname, check common internal names
+        lower = hostname.lower()
+        return lower in ("localhost", "127.0.0.1", "::1") or lower.endswith(
+            (".local", ".internal", ".localhost")
+        )
+
+
+def _validate_otlp_endpoint(endpoint: str) -> tuple[bool, str]:
+    """Validate an OTLP endpoint URL for SSRF safety.
+
+    SEC-H-001: Validates endpoint to prevent SSRF attacks via
+    malicious OTLP configuration.
+
+    Args:
+        endpoint: The endpoint URL to validate.
+
+    Returns:
+        Tuple of (is_valid, error_message). If valid, error_message is empty.
+    """
+    try:
+        parsed = urlparse(endpoint)
+
+        # Check scheme
+        if parsed.scheme not in ("http", "https"):
+            return False, f"Invalid scheme '{parsed.scheme}': only http/https allowed"
+
+        # Check hostname exists
+        if not parsed.hostname:
+            return False, "Missing hostname in endpoint URL"
+
+        # Check for private IPs (warn but allow with env var override)
+        if _is_private_ip(parsed.hostname):
+            allow_internal = os.environ.get(
+                "MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL", ""
+            ).lower() in ("true", "1", "yes")
+
+            if not allow_internal:
+                return (
+                    False,
+                    f"Internal endpoint '{parsed.hostname}' blocked for SSRF safety. "
+                    "Set MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true to allow.",
+                )
+            logger.warning(
+                "SEC-H-001: Internal OTLP endpoint '%s' allowed via override",
+                parsed.hostname,
+            )
+
+        return True, ""
+
+    except Exception as e:
+        return False, f"Failed to parse endpoint URL: {e}"
 
 
 class OTLPExporter:
@@ -61,7 +136,17 @@ class OTLPExporter:
         self.endpoint = endpoint or config.otlp_endpoint
         self.timeout = timeout
         self.service_name = service_name or config.service_name
-        self._enabled = self.endpoint is not None
+
+        # SEC-H-001: Validate endpoint for SSRF safety
+        if self.endpoint:
+            is_valid, error = _validate_otlp_endpoint(self.endpoint)
+            if not is_valid:
+                logger.warning("SEC-H-001: OTLP endpoint validation failed: %s", error)
+                self._enabled = False
+            else:
+                self._enabled = True
+        else:
+            self._enabled = False
 
     @property
     def enabled(self) -> bool:

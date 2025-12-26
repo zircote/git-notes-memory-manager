@@ -16,7 +16,7 @@ Available Providers:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from ..config import LLMProvider
@@ -150,23 +150,51 @@ def get_provider(
 
 
 # =============================================================================
-# Lazy Imports
+# Lazy Imports (ARCH-H-006: Consistent with ARCH-H-003 pattern)
 # =============================================================================
+
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "AnthropicProvider": (
+        "git_notes_memory.subconsciousness.providers.anthropic",
+        "AnthropicProvider",
+    ),
+    "OpenAIProvider": (
+        "git_notes_memory.subconsciousness.providers.openai",
+        "OpenAIProvider",
+    ),
+    "OllamaProvider": (
+        "git_notes_memory.subconsciousness.providers.ollama",
+        "OllamaProvider",
+    ),
+}
+
+_LAZY_CACHE: dict[str, Any] = {}
 
 
 def __getattr__(name: str) -> object:
-    """Lazy import for provider classes."""
-    if name == "AnthropicProvider":
-        from .anthropic import AnthropicProvider
+    """Lazy import for provider classes.
 
-        return AnthropicProvider
-    if name == "OpenAIProvider":
-        from .openai import OpenAIProvider
+    ARCH-H-006: Uses dictionary-based lookup with caching for consistency
+    with observability and hooks modules (ARCH-H-003 pattern).
+    """
+    # Check cache first
+    if name in _LAZY_CACHE:
+        return _LAZY_CACHE[name]
 
-        return OpenAIProvider
-    if name == "OllamaProvider":
-        from .ollama import OllamaProvider
+    # Check if this is a known lazy import
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        import importlib
 
-        return OllamaProvider
+        module = importlib.import_module(module_path)
+        value = getattr(module, attr_name)
+        _LAZY_CACHE[name] = value
+        return value
+
     msg = f"module {__name__!r} has no attribute {name!r}"
     raise AttributeError(msg)
+
+
+def __dir__() -> list[str]:
+    """Return list of public attributes including lazy imports."""
+    return list(__all__)

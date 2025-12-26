@@ -150,6 +150,17 @@ class TokenBucket:
             wait_time = min(wait_time, 1.0)  # Cap at 1 second
             await asyncio.sleep(wait_time)
 
+    async def refund(self, tokens: float = 1.0) -> None:
+        """Refund tokens back to the bucket.
+
+        RES-M-003: Thread-safe token refund using async lock.
+
+        Args:
+            tokens: Number of tokens to refund.
+        """
+        async with self._lock:
+            self.tokens = min(self.capacity, self.tokens + tokens)
+
     def available(self) -> float:
         """Get current available tokens (without locking).
 
@@ -242,11 +253,9 @@ class RateLimiter:
                 )
             except RateLimitExceededError as e:
                 e.limit_type = "tpm"
-                # Refund the RPM token since request won't proceed
-                self._rpm_bucket.tokens = min(
-                    self._rpm_bucket.capacity,
-                    self._rpm_bucket.tokens + 1.0,
-                )
+                # RES-M-003: Refund the RPM token since request won't proceed
+                # Use async-safe refund method to prevent race condition
+                await self._rpm_bucket.refund(1.0)
                 raise
 
         return True

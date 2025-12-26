@@ -1,22 +1,10 @@
-"""SQLite + sqlite-vec index service for semantic memory search.
+"""IndexService - main facade for memory index operations.
 
-This module provides the IndexService class for managing a SQLite database
-with vector search capabilities using the sqlite-vec extension. It handles:
+ARCH-H-001: Refactored from monolithic God Object to composed service using:
+- SchemaManager: Database schema and migrations
+- SearchEngine: Vector and text search operations
 
-- Database initialization and schema management
-- Memory CRUD operations (insert, get, update, delete)
-- Vector similarity search (KNN queries)
-- Batch operations for efficiency
-- Statistics and health monitoring
-
-The index stores memory metadata and embeddings, enabling fast semantic search
-across all captured memories. The actual memory content is stored in git notes,
-with the index providing a queryable view.
-
-Architecture:
-    - memories table: Stores memory metadata (id, commit_sha, namespace, etc.)
-    - vec_memories virtual table: Stores embeddings for KNN search
-    - Both tables are kept in sync via insert/update/delete operations
+The public API remains backward compatible.
 """
 
 from __future__ import annotations
@@ -31,126 +19,34 @@ from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import sqlite_vec
-
-from git_notes_memory.config import EMBEDDING_DIMENSIONS, get_index_path
+from git_notes_memory.config import get_index_path
 from git_notes_memory.exceptions import MemoryIndexError
 from git_notes_memory.observability.decorators import measure_duration
 from git_notes_memory.observability.metrics import get_metrics
 from git_notes_memory.observability.tracing import trace_operation
 
-logger = logging.getLogger(__name__)
-
-
-# PERF-007: Cache compiled struct format for embedding serialization
-@lru_cache(maxsize=1)
-def _get_struct_format(dimensions: int) -> struct.Struct:
-    """Get a cached struct.Struct for packing embeddings.
-
-    The embedding dimensions are typically constant (384 for all-MiniLM-L6-v2),
-    so caching the compiled Struct avoids repeated format string parsing.
-
-    Args:
-        dimensions: Number of float values in the embedding.
-
-    Returns:
-        A compiled struct.Struct instance for packing.
-    """
-    return struct.Struct(f"{dimensions}f")
-
+from .schema_manager import SchemaManager
+from .search_engine import SearchEngine
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Sequence
+    from collections.abc import Sequence
 
     from git_notes_memory.models import IndexStats, Memory
 
-__all__ = [
-    "IndexService",
-]
+logger = logging.getLogger(__name__)
+
+__all__ = ["IndexService"]
 
 
 # =============================================================================
-# Constants
+# Helpers
 # =============================================================================
 
-# Schema version for migrations
-SCHEMA_VERSION = 3
 
-# SQL statements for schema creation
-_CREATE_MEMORIES_TABLE = """
-CREATE TABLE IF NOT EXISTS memories (
-    id TEXT PRIMARY KEY,
-    commit_sha TEXT NOT NULL,
-    namespace TEXT NOT NULL,
-    summary TEXT NOT NULL,
-    content TEXT NOT NULL,
-    timestamp TEXT NOT NULL,
-    domain TEXT DEFAULT 'project',
-    repo_path TEXT,
-    spec TEXT,
-    phase TEXT,
-    tags TEXT,
-    status TEXT DEFAULT 'active',
-    relates_to TEXT,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-)
-"""
-
-_CREATE_INDICES = [
-    # Single-column indexes for simple lookups
-    "CREATE INDEX IF NOT EXISTS idx_memories_namespace ON memories(namespace)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_spec ON memories(spec)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_commit ON memories(commit_sha)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_timestamp ON memories(timestamp)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_status ON memories(status)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_domain ON memories(domain)",
-    # Composite indexes for common multi-column queries
-    # These optimize the most frequent query patterns:
-    # - Domain + namespace: multi-domain recall filtering
-    # - Spec + namespace: project-scoped namespace queries
-    # - Spec + domain: project-scoped domain queries
-    # - Namespace + domain: namespace listing with domain filter
-    "CREATE INDEX IF NOT EXISTS idx_memories_domain_namespace ON memories(domain, namespace)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_spec_namespace ON memories(spec, namespace)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_spec_domain ON memories(spec, domain)",
-    "CREATE INDEX IF NOT EXISTS idx_memories_namespace_domain ON memories(namespace, domain)",
-    # Composite index for efficient range queries within namespace
-    "CREATE INDEX IF NOT EXISTS idx_memories_namespace_timestamp ON memories(namespace, timestamp DESC)",
-    # Composite index for status-filtered recency queries
-    "CREATE INDEX IF NOT EXISTS idx_memories_status_timestamp ON memories(status, timestamp DESC)",
-    # Composite index for common query pattern (namespace + spec + ORDER BY timestamp)
-    "CREATE INDEX IF NOT EXISTS idx_memories_ns_spec_ts ON memories(namespace, spec, timestamp DESC)",
-]
-
-# Migration SQL for schema version upgrades
-_MIGRATIONS = {
-    2: [
-        # Add repo_path column for per-repository memory isolation
-        "ALTER TABLE memories ADD COLUMN repo_path TEXT",
-        "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
-    ],
-    3: [
-        # Add domain column for multi-domain memory storage (user vs project)
-        "ALTER TABLE memories ADD COLUMN domain TEXT DEFAULT 'project'",
-        "CREATE INDEX IF NOT EXISTS idx_memories_domain ON memories(domain)",
-    ],
-}
-
-_CREATE_VEC_TABLE = f"""
-CREATE VIRTUAL TABLE IF NOT EXISTS vec_memories USING vec0(
-    id TEXT PRIMARY KEY,
-    embedding FLOAT[{EMBEDDING_DIMENSIONS}]
-)
-"""
-
-_CREATE_METADATA_TABLE = """
-CREATE TABLE IF NOT EXISTS metadata (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL
-)
-"""
+@lru_cache(maxsize=1)
+def _get_struct_format(dimensions: int) -> struct.Struct:
+    """Get a cached struct.Struct for packing embeddings."""
+    return struct.Struct(f"{dimensions}f")
 
 
 # =============================================================================
@@ -161,14 +57,11 @@ CREATE TABLE IF NOT EXISTS metadata (
 class IndexService:
     """SQLite + sqlite-vec database management for memory search.
 
-    Manages a SQLite database with vector search capabilities for semantic
-    memory retrieval. The service handles:
+    ARCH-H-001: Refactored to use composition with extracted components:
+    - SchemaManager: Handles schema creation and migrations
+    - SearchEngine: Handles vector and text search operations
 
-    - Database initialization and schema management
-    - Memory CRUD operations
-    - Vector similarity search (KNN queries)
-    - Batch operations for efficiency
-    - Statistics and health monitoring
+    The public API remains unchanged for backward compatibility.
 
     Attributes:
         db_path: Path to the SQLite database file.
@@ -191,14 +84,8 @@ class IndexService:
         self.db_path = db_path or get_index_path()
         self._conn: sqlite3.Connection | None = None
         self._initialized = False
-        # CRIT-003: Thread lock removed. SQLite with WAL mode (set in initialize())
-        # handles concurrency at the database level:
-        # - Concurrent reads are allowed
-        # - Writes are serialized by SQLite
-        # - check_same_thread=False allows multi-threaded access
-        # Adding Python-level locking would duplicate SQLite's own locking and
-        # could introduce deadlocks. If true multi-threaded writes are needed,
-        # use separate IndexService instances per thread.
+        self._schema_manager: SchemaManager | None = None
+        self._search_engine: SearchEngine | None = None
 
     @property
     def is_initialized(self) -> bool:
@@ -229,153 +116,35 @@ class IndexService:
             )
             self._conn.row_factory = sqlite3.Row
 
-            # MED-005: Enable WAL mode for better concurrent access
-            # WAL allows readers and writers to operate concurrently
+            # Enable WAL mode for better concurrent access
             self._conn.execute("PRAGMA journal_mode=WAL")
             self._conn.execute("PRAGMA synchronous=NORMAL")
+            # RES-M-004: Set busy_timeout to prevent "database is locked" errors
+            self._conn.execute("PRAGMA busy_timeout=5000")
 
-            # Load sqlite-vec extension
-            self._load_vec_extension()
+            # Initialize components
+            self._schema_manager = SchemaManager(self._conn)
+            self._schema_manager.load_vec_extension()
+            self._schema_manager.create_schema()
 
-            # Create schema
-            self._create_schema()
+            # Initialize search engine with row converter callback
+            self._search_engine = SearchEngine(self._conn, self._row_to_memory)
 
             self._initialized = True
 
         except Exception as e:
-            # CRIT-001: Properly close connection before clearing reference
-            # to prevent file handle leaks on initialization failure
             if self._conn is not None:
                 with suppress(Exception):
                     self._conn.close()
             self._conn = None
+            self._schema_manager = None
+            self._search_engine = None
             self._initialized = False
             if isinstance(e, MemoryIndexError):
                 raise
             raise MemoryIndexError(
                 f"Failed to initialize index database: {e}",
                 "Check disk space and permissions, then retry",
-            ) from e
-
-    def _load_vec_extension(self) -> None:
-        """Load the sqlite-vec extension.
-
-        Raises:
-            MemoryIndexError: If the extension cannot be loaded.
-        """
-        if self._conn is None:
-            raise MemoryIndexError(
-                "Database connection not established",
-                "Call initialize() first",
-            )
-
-        try:
-            self._conn.enable_load_extension(True)
-            sqlite_vec.load(self._conn)
-            self._conn.enable_load_extension(False)
-        except Exception as e:
-            raise MemoryIndexError(
-                f"Failed to load sqlite-vec extension: {e}",
-                "Install sqlite-vec: pip install sqlite-vec",
-            ) from e
-
-    def _get_current_schema_version(self) -> int:
-        """Get the current schema version from the database.
-
-        Returns:
-            Current schema version, or 0 if metadata table doesn't exist.
-        """
-        if self._conn is None:
-            return 0
-
-        cursor = self._conn.cursor()
-        try:
-            cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
-            row = cursor.fetchone()
-            return int(row[0]) if row else 1  # Default to v1 for existing DBs
-        except sqlite3.OperationalError:
-            # Metadata table doesn't exist - new database
-            return 0
-
-    def _run_migrations(self, from_version: int, to_version: int) -> None:
-        """Run schema migrations from one version to another.
-
-        Args:
-            from_version: Current schema version.
-            to_version: Target schema version.
-        """
-        if self._conn is None:
-            return
-
-        cursor = self._conn.cursor()
-        for version in range(from_version + 1, to_version + 1):
-            if version in _MIGRATIONS:
-                for sql in _MIGRATIONS[version]:
-                    try:
-                        cursor.execute(sql)
-                    except sqlite3.OperationalError as e:
-                        # Column may already exist from a partial migration
-                        if "duplicate column" not in str(e).lower():
-                            raise
-        self._conn.commit()
-
-    def _create_schema(self) -> None:
-        """Create database tables and indices, running migrations if needed."""
-        if self._conn is None:
-            raise MemoryIndexError(
-                "Database connection not established",
-                "Call initialize() first",
-            )
-
-        cursor = self._conn.cursor()
-        try:
-            # Check current schema version before creating tables
-            current_version = self._get_current_schema_version()
-
-            # Create memories table
-            cursor.execute(_CREATE_MEMORIES_TABLE)
-
-            # Create indices (ignore if they already exist)
-            for index_sql in _CREATE_INDICES:
-                try:
-                    cursor.execute(index_sql)
-                except sqlite3.OperationalError as e:
-                    # Index likely already exists - this is expected on subsequent inits
-                    logger.debug("Index creation skipped (already exists): %s", e)
-                    metrics = get_metrics()
-                    metrics.increment(
-                        "silent_failures_total",
-                        labels={"location": "index.create_index_skipped"},
-                    )
-
-            # Create vector table
-            cursor.execute(_CREATE_VEC_TABLE)
-
-            # Create metadata table
-            cursor.execute(_CREATE_METADATA_TABLE)
-
-            # Run migrations if needed
-            if 0 < current_version < SCHEMA_VERSION:
-                self._run_migrations(current_version, SCHEMA_VERSION)
-
-            # Set schema version
-            cursor.execute(
-                "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
-                ("schema_version", str(SCHEMA_VERSION)),
-            )
-
-            # Set last sync to now (only if not already set)
-            cursor.execute(
-                "INSERT OR IGNORE INTO metadata (key, value) VALUES (?, ?)",
-                ("last_sync", datetime.now(UTC).isoformat()),
-            )
-
-            self._conn.commit()
-        except Exception as e:
-            self._conn.rollback()
-            raise MemoryIndexError(
-                f"Failed to create database schema: {e}",
-                "Delete the index.db file and retry to recreate",
             ) from e
 
     @contextmanager
@@ -404,6 +173,8 @@ class IndexService:
         if self._conn is not None:
             self._conn.close()
             self._conn = None
+        self._schema_manager = None
+        self._search_engine = None
         self._initialized = False
 
     # =========================================================================
@@ -445,7 +216,6 @@ class IndexService:
             self._cursor() as cursor,
         ):
             try:
-                # Insert into memories table
                 cursor.execute(
                     """
                     INSERT INTO memories (
@@ -473,7 +243,6 @@ class IndexService:
                     ),
                 )
 
-                # Insert embedding if provided
                 if embedding is not None:
                     self._insert_embedding(cursor, memory.id, embedding)
 
@@ -535,7 +304,6 @@ class IndexService:
             try:
                 for i, memory in enumerate(memories):
                     try:
-                        # CRIT-002: Include repo_path for per-repository isolation
                         cursor.execute(
                             """
                             INSERT INTO memories (
@@ -592,14 +360,7 @@ class IndexService:
         memory_id: str,
         embedding: Sequence[float],
     ) -> None:
-        """Insert an embedding into the vector table.
-
-        Args:
-            cursor: Active database cursor.
-            memory_id: ID of the memory this embedding belongs to.
-            embedding: The embedding vector.
-        """
-        # PERF-007: Use cached struct format for embedding packing
+        """Insert an embedding into the vector table."""
         blob = _get_struct_format(len(embedding)).pack(*embedding)
         cursor.execute(
             "INSERT INTO vec_memories (id, embedding) VALUES (?, ?)",
@@ -642,7 +403,7 @@ class IndexService:
         with self._cursor() as cursor:
             # placeholders is only "?" chars - safe parameterized query
             cursor.execute(
-                f"SELECT * FROM memories WHERE id IN ({placeholders})",  # nosec B608
+                f"SELECT * FROM memories WHERE id IN ({placeholders})",  # noqa: S608 # nosec B608
                 memory_ids,
             )
             return [self._row_to_memory(row) for row in cursor.fetchall()]
@@ -654,18 +415,7 @@ class IndexService:
         limit: int | None = None,
         domain: str | None = None,
     ) -> list[Memory]:
-        """Get all memories for a specification.
-
-        Args:
-            spec: The specification slug to filter by.
-            namespace: Optional namespace to filter by.
-            limit: Optional maximum number of results.
-            domain: Optional domain filter ('user' or 'project').
-                None searches all domains (default, backward compatible).
-
-        Returns:
-            List of Memory objects matching the criteria.
-        """
+        """Get all memories for a specification."""
         query = "SELECT * FROM memories WHERE spec = ?"
         params: list[object] = [spec]
 
@@ -688,14 +438,7 @@ class IndexService:
             return [self._row_to_memory(row) for row in cursor.fetchall()]
 
     def get_by_commit(self, commit_sha: str) -> list[Memory]:
-        """Get all memories attached to a commit.
-
-        Args:
-            commit_sha: The commit SHA to filter by.
-
-        Returns:
-            List of Memory objects attached to the commit.
-        """
+        """Get all memories attached to a commit."""
         with self._cursor() as cursor:
             cursor.execute(
                 "SELECT * FROM memories WHERE commit_sha = ? ORDER BY timestamp",
@@ -710,18 +453,7 @@ class IndexService:
         limit: int | None = None,
         domain: str | None = None,
     ) -> list[Memory]:
-        """Get all memories in a namespace.
-
-        Args:
-            namespace: The namespace to filter by.
-            spec: Optional specification to filter by.
-            limit: Optional maximum number of results.
-            domain: Optional domain filter ('user' or 'project').
-                None searches all domains (default, backward compatible).
-
-        Returns:
-            List of Memory objects matching the criteria.
-        """
+        """Get all memories in a namespace."""
         query = "SELECT * FROM memories WHERE namespace = ?"
         params: list[object] = [namespace]
 
@@ -750,18 +482,7 @@ class IndexService:
         spec: str | None = None,
         domain: str | None = None,
     ) -> list[Memory]:
-        """Get the most recent memories.
-
-        Args:
-            limit: Maximum number of results.
-            namespace: Optional namespace filter.
-            spec: Optional specification filter.
-            domain: Optional domain filter ('user' or 'project').
-                None searches all domains (default, backward compatible).
-
-        Returns:
-            List of Memory objects ordered by timestamp descending.
-        """
+        """Get the most recent memories."""
         query = "SELECT * FROM memories WHERE 1=1"
         params: list[object] = []
 
@@ -789,22 +510,7 @@ class IndexService:
         limit: int | None = None,
         offset: int = 0,
     ) -> list[str]:
-        """Get memory IDs in the index with optional pagination.
-
-        PERF-HIGH-001: Supports pagination to prevent memory exhaustion
-        with large indices. Use limit/offset for batched processing.
-
-        Args:
-            limit: Maximum number of IDs to return. None for all (use with caution).
-            offset: Number of IDs to skip (for pagination).
-
-        Returns:
-            List of memory IDs.
-
-        Examples:
-            >>> index.get_all_ids(limit=100)  # First 100 IDs
-            >>> index.get_all_ids(limit=100, offset=100)  # Next 100 IDs
-        """
+        """Get memory IDs in the index with optional pagination."""
         if limit is not None:
             query = "SELECT id FROM memories LIMIT ? OFFSET ?"
             params: tuple[int, ...] = (limit, offset)
@@ -817,21 +523,7 @@ class IndexService:
             return [row[0] for row in cursor.fetchall()]
 
     def iter_all_ids(self, batch_size: int = 1000) -> Iterator[str]:
-        """Iterate over all memory IDs in batches.
-
-        PERF-HIGH-001: Generator-based iteration to prevent memory exhaustion.
-        Yields IDs one at a time, fetching in batches internally.
-
-        Args:
-            batch_size: Number of IDs to fetch per database query.
-
-        Yields:
-            Memory IDs one at a time.
-
-        Examples:
-            >>> for memory_id in index.iter_all_ids():
-            ...     process(memory_id)
-        """
+        """Iterate over all memory IDs in batches."""
         offset = 0
         while True:
             batch = self.get_all_ids(limit=batch_size, offset=offset)
@@ -846,14 +538,7 @@ class IndexService:
         self,
         namespace: str | None = None,
     ) -> list[Memory]:
-        """Get all memories in the index.
-
-        Args:
-            namespace: Optional namespace filter.
-
-        Returns:
-            List of all Memory objects.
-        """
+        """Get all memories in the index."""
         query = "SELECT * FROM memories WHERE 1=1"
         params: list[object] = []
 
@@ -868,41 +553,41 @@ class IndexService:
             return [self._row_to_memory(row) for row in cursor.fetchall()]
 
     def exists(self, memory_id: str) -> bool:
-        """Check if a memory exists in the index.
-
-        Args:
-            memory_id: The memory ID to check.
-
-        Returns:
-            True if the memory exists.
-        """
+        """Check if a memory exists in the index."""
         with self._cursor() as cursor:
             cursor.execute("SELECT 1 FROM memories WHERE id = ?", (memory_id,))
             return cursor.fetchone() is not None
 
+    def get_existing_ids(self, memory_ids: list[str]) -> set[str]:
+        """Check which memory IDs exist in the index (batch operation)."""
+        if not memory_ids:
+            return set()
+
+        batch_size = 500
+        existing: set[str] = set()
+
+        for i in range(0, len(memory_ids), batch_size):
+            batch = memory_ids[i : i + batch_size]
+            placeholders = ",".join("?" * len(batch))
+            query = f"SELECT id FROM memories WHERE id IN ({placeholders})"  # noqa: S608 # nosec B608
+
+            with self._cursor() as cursor:
+                cursor.execute(query, batch)
+                existing.update(row[0] for row in cursor.fetchall())
+
+        return existing
+
     def _row_to_memory(self, row: sqlite3.Row) -> Memory:
-        """Convert a database row to a Memory object.
-
-        Args:
-            row: A sqlite3.Row from the memories table.
-
-        Returns:
-            A Memory object.
-        """
+        """Convert a database row to a Memory object."""
         from git_notes_memory.models import Memory
 
-        # Parse tags
         tags_str = row["tags"]
         tags = tuple(tags_str.split(",")) if tags_str else ()
 
-        # Parse relates_to
         relates_str = row["relates_to"]
         relates_to = tuple(relates_str.split(",")) if relates_str else ()
 
-        # Parse timestamp
         timestamp = datetime.fromisoformat(row["timestamp"])
-
-        # Parse domain with backward-compatible default
         domain = row["domain"] if row["domain"] else "project"
 
         return Memory(
@@ -929,18 +614,7 @@ class IndexService:
         memory: Memory,
         embedding: Sequence[float] | None = None,
     ) -> bool:
-        """Update an existing memory.
-
-        Args:
-            memory: The Memory object with updated fields.
-            embedding: Optional new embedding vector.
-
-        Returns:
-            True if the update was successful, False if memory not found.
-
-        Raises:
-            MemoryIndexError: If the update fails.
-        """
+        """Update an existing memory."""
         now = datetime.now(UTC).isoformat()
 
         with self._cursor() as cursor:
@@ -982,7 +656,6 @@ class IndexService:
                 if cursor.rowcount == 0:
                     return False
 
-                # Update embedding if provided
                 if embedding is not None:
                     self._update_embedding(cursor, memory.id, embedding)
 
@@ -1002,21 +675,8 @@ class IndexService:
         memory_id: str,
         embedding: Sequence[float],
     ) -> None:
-        """Update an embedding in the vector table.
-
-        Note: sqlite-vec virtual tables don't support UPDATE or INSERT OR REPLACE,
-        so we must use DELETE + INSERT pattern.
-
-        Args:
-            cursor: Active database cursor.
-            memory_id: ID of the memory this embedding belongs to.
-            embedding: The new embedding vector.
-        """
-        # PERF-007: Use cached struct format for embedding packing
+        """Update an embedding in the vector table."""
         blob = _get_struct_format(len(embedding)).pack(*embedding)
-
-        # sqlite-vec doesn't support UPDATE or INSERT OR REPLACE on virtual tables
-        # Delete existing and insert new (this is the required pattern)
         cursor.execute("DELETE FROM vec_memories WHERE id = ?", (memory_id,))
         cursor.execute(
             "INSERT INTO vec_memories (id, embedding) VALUES (?, ?)",
@@ -1028,15 +688,7 @@ class IndexService:
         memory_id: str,
         embedding: Sequence[float],
     ) -> bool:
-        """Update only the embedding for a memory.
-
-        Args:
-            memory_id: ID of the memory to update.
-            embedding: The new embedding vector.
-
-        Returns:
-            True if successful, False if memory not found.
-        """
+        """Update only the embedding for a memory."""
         if not self.exists(memory_id):
             return False
 
@@ -1057,26 +709,14 @@ class IndexService:
     # =========================================================================
 
     def delete(self, memory_id: str) -> bool:
-        """Delete a memory from the index.
-
-        Args:
-            memory_id: ID of the memory to delete.
-
-        Returns:
-            True if deleted, False if not found.
-        """
+        """Delete a memory from the index."""
         with self._cursor() as cursor:
             try:
-                # Delete from memories table
                 cursor.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
                 deleted = cursor.rowcount > 0
-
-                # Delete from vec_memories table
                 cursor.execute("DELETE FROM vec_memories WHERE id = ?", (memory_id,))
-
                 self._conn.commit()  # type: ignore[union-attr]
                 return deleted
-
             except Exception as e:
                 self._conn.rollback()  # type: ignore[union-attr]
                 raise MemoryIndexError(
@@ -1085,14 +725,7 @@ class IndexService:
                 ) from e
 
     def delete_batch(self, memory_ids: Sequence[str]) -> int:
-        """Delete multiple memories.
-
-        Args:
-            memory_ids: List of memory IDs to delete.
-
-        Returns:
-            Number of memories deleted.
-        """
+        """Delete multiple memories."""
         if not memory_ids:
             return 0
 
@@ -1100,24 +733,19 @@ class IndexService:
 
         with self._cursor() as cursor:
             try:
-                # Delete from memories table
                 # placeholders is only "?" chars - safe parameterized query
                 cursor.execute(
-                    f"DELETE FROM memories WHERE id IN ({placeholders})",  # nosec B608
+                    f"DELETE FROM memories WHERE id IN ({placeholders})",  # noqa: S608 # nosec B608
                     memory_ids,
                 )
                 deleted = cursor.rowcount
-
-                # Delete from vec_memories table
                 # placeholders is only "?" chars - safe parameterized query
                 cursor.execute(
-                    f"DELETE FROM vec_memories WHERE id IN ({placeholders})",  # nosec B608
+                    f"DELETE FROM vec_memories WHERE id IN ({placeholders})",  # noqa: S608 # nosec B608
                     memory_ids,
                 )
-
                 self._conn.commit()  # type: ignore[union-attr]
                 return deleted
-
             except Exception as e:
                 self._conn.rollback()  # type: ignore[union-attr]
                 raise MemoryIndexError(
@@ -1126,11 +754,7 @@ class IndexService:
                 ) from e
 
     def clear(self) -> int:
-        """Delete all memories from the index.
-
-        Returns:
-            Number of memories deleted.
-        """
+        """Delete all memories from the index."""
         with self._cursor() as cursor:
             try:
                 cursor.execute("SELECT COUNT(*) FROM memories")
@@ -1142,7 +766,6 @@ class IndexService:
 
                 self._conn.commit()  # type: ignore[union-attr]
                 return count
-
             except Exception as e:
                 self._conn.rollback()  # type: ignore[union-attr]
                 raise MemoryIndexError(
@@ -1151,10 +774,9 @@ class IndexService:
                 ) from e
 
     # =========================================================================
-    # Search Operations
+    # Search Operations (delegated to SearchEngine)
     # =========================================================================
 
-    @measure_duration("index_search_vector")
     def search_vector(
         self,
         query_embedding: Sequence[float],
@@ -1165,74 +787,16 @@ class IndexService:
     ) -> list[tuple[Memory, float]]:
         """Search for similar memories using vector similarity.
 
-        Uses KNN search via sqlite-vec to find the k nearest neighbors
-        to the query embedding.
-
-        Args:
-            query_embedding: The query embedding vector.
-            k: Number of nearest neighbors to return.
-            namespace: Optional namespace filter.
-            spec: Optional specification filter.
-            domain: Optional domain filter ('user' or 'project').
-                None searches all domains (default, backward compatible).
-
-        Returns:
-            List of (Memory, distance) tuples sorted by distance ascending.
-            Lower distance means more similar.
+        Delegates to SearchEngine component.
         """
-        metrics = get_metrics()
-
-        with trace_operation("index.search_vector", labels={"k": str(k)}):
-            # PERF-007: Use cached struct format for embedding packing
-            blob = _get_struct_format(len(query_embedding)).pack(*query_embedding)
-
-            with self._cursor() as cursor:
-                try:
-                    # Build parameterized query with optional filters
-                    # Use single JOIN to eliminate N+1 query pattern
-                    params: list[object] = [blob, k * 3]
-
-                    sql = """
-                        SELECT m.*, v.distance
-                        FROM vec_memories v
-                        JOIN memories m ON v.id = m.id
-                        WHERE v.embedding MATCH ?
-                          AND k = ?
-                    """
-
-                    if namespace is not None:
-                        sql += " AND m.namespace = ?"
-                        params.append(namespace)
-                    if spec is not None:
-                        sql += " AND m.spec = ?"
-                        params.append(spec)
-                    if domain is not None:
-                        sql += " AND m.domain = ?"
-                        params.append(domain)
-
-                    sql += " ORDER BY v.distance LIMIT ?"
-                    params.append(k)
-
-                    cursor.execute(sql, params)
-
-                    results: list[tuple[Memory, float]] = []
-                    for row in cursor.fetchall():
-                        memory = self._row_to_memory(row)
-                        distance = row["distance"]
-                        results.append((memory, distance))
-
-                    metrics.increment(
-                        "index_searches_total",
-                        labels={"search_type": "vector"},
-                    )
-
-                    return results
-
-                except Exception as e:
-                    raise MemoryIndexError(
-                        f"Vector search failed: {e}",
-                        "Check embedding dimensions and retry",
-                    ) from e
+        if self._search_engine is None:
+            raise MemoryIndexError(
+                "Database not initialized",
+                "Call initialize() before performing operations",
+            )
+        return self._search_engine.search_vector(
+            query_embedding, k, namespace, spec, domain
+        )
 
     def search_text(
         self,
@@ -1242,67 +806,29 @@ class IndexService:
         spec: str | None = None,
         domain: str | None = None,
     ) -> list[Memory]:
-        """Search memories by text in summary and content.
+        """Search memories by text using FTS5.
 
-        Performs a simple LIKE-based text search. For semantic search,
-        use search_vector() with an embedding.
-
-        Args:
-            query: Text to search for.
-            limit: Maximum number of results.
-            namespace: Optional namespace filter.
-            spec: Optional specification filter.
-            domain: Optional domain filter ('user' or 'project').
-                None searches all domains (default, backward compatible).
-
-        Returns:
-            List of matching Memory objects.
+        Delegates to SearchEngine component.
         """
-        search_term = f"%{query}%"
-
-        sql = """
-            SELECT * FROM memories
-            WHERE (summary LIKE ? OR content LIKE ?)
-        """
-        params: list[object] = [search_term, search_term]
-
-        if namespace is not None:
-            sql += " AND namespace = ?"
-            params.append(namespace)
-
-        if spec is not None:
-            sql += " AND spec = ?"
-            params.append(spec)
-
-        if domain is not None:
-            sql += " AND domain = ?"
-            params.append(domain)
-
-        sql += " ORDER BY timestamp DESC LIMIT ?"
-        params.append(limit)
-
-        with self._cursor() as cursor:
-            cursor.execute(sql, params)
-            return [self._row_to_memory(row) for row in cursor.fetchall()]
+        if self._search_engine is None:
+            raise MemoryIndexError(
+                "Database not initialized",
+                "Call initialize() before performing operations",
+            )
+        return self._search_engine.search_text(query, limit, namespace, spec, domain)
 
     # =========================================================================
     # Statistics Operations
     # =========================================================================
 
     def get_stats(self) -> IndexStats:
-        """Get statistics about the index.
-
-        Returns:
-            IndexStats with counts and metadata.
-        """
+        """Get statistics about the index."""
         from git_notes_memory.models import IndexStats
 
         with self._cursor() as cursor:
-            # Total count
             cursor.execute("SELECT COUNT(*) FROM memories")
             total = cursor.fetchone()[0]
 
-            # Count by namespace
             cursor.execute(
                 """
                 SELECT namespace, COUNT(*) as count
@@ -1313,7 +839,6 @@ class IndexService:
             )
             by_namespace = tuple((row[0], row[1]) for row in cursor.fetchall())
 
-            # Count by spec
             cursor.execute(
                 """
                 SELECT spec, COUNT(*) as count
@@ -1325,7 +850,6 @@ class IndexService:
             )
             by_spec = tuple((row[0], row[1]) for row in cursor.fetchall())
 
-            # Count by domain
             cursor.execute(
                 """
                 SELECT domain, COUNT(*) as count
@@ -1336,12 +860,10 @@ class IndexService:
             )
             by_domain = tuple((row[0], row[1]) for row in cursor.fetchall())
 
-            # Last sync time
             cursor.execute("SELECT value FROM metadata WHERE key = 'last_sync'")
             row = cursor.fetchone()
             last_sync = datetime.fromisoformat(row[0]) if row else None
 
-            # Database size
             index_size = self.db_path.stat().st_size if self.db_path.exists() else 0
 
             return IndexStats(
@@ -1359,17 +881,7 @@ class IndexService:
         spec: str | None = None,
         domain: str | None = None,
     ) -> int:
-        """Count memories matching criteria.
-
-        Args:
-            namespace: Optional namespace filter.
-            spec: Optional specification filter.
-            domain: Optional domain filter ('user' or 'project').
-                None counts all domains (default, backward compatible).
-
-        Returns:
-            Number of matching memories.
-        """
+        """Count memories matching criteria."""
         sql = "SELECT COUNT(*) FROM memories WHERE 1=1"
         params: list[object] = []
 
@@ -1404,29 +916,17 @@ class IndexService:
     # =========================================================================
 
     def vacuum(self) -> None:
-        """Optimize the database by vacuuming and updating query planner statistics.
-
-        Performs VACUUM to reclaim space and defragment, then runs ANALYZE
-        to update query planner statistics for optimal index usage.
-        """
+        """Optimize the database by vacuuming and updating statistics."""
         if self._conn is None:
             raise MemoryIndexError(
                 "Database not initialized",
                 "Call initialize() before performing operations",
             )
         self._conn.execute("VACUUM")
-        # MED-004: Update statistics for query planner after schema changes
         self._conn.execute("ANALYZE")
 
     def has_embedding(self, memory_id: str) -> bool:
-        """Check if a memory has an embedding.
-
-        Args:
-            memory_id: The memory ID to check.
-
-        Returns:
-            True if the memory has an embedding in vec_memories.
-        """
+        """Check if a memory has an embedding."""
         with self._cursor() as cursor:
             cursor.execute(
                 "SELECT 1 FROM vec_memories WHERE id = ?",
@@ -1435,14 +935,7 @@ class IndexService:
             return cursor.fetchone() is not None
 
     def get_memories_without_embeddings(self, limit: int | None = None) -> list[str]:
-        """Get IDs of memories that don't have embeddings.
-
-        Args:
-            limit: Optional maximum number to return.
-
-        Returns:
-            List of memory IDs without embeddings.
-        """
+        """Get IDs of memories that don't have embeddings."""
         sql = """
             SELECT m.id FROM memories m
             LEFT JOIN vec_memories v ON m.id = v.id

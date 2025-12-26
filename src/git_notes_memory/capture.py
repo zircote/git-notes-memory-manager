@@ -59,12 +59,22 @@ logger = logging.getLogger(__name__)
 
 
 # =============================================================================
-# File Locking
+# Lock Retry Constants (QUAL-M-006)
 # =============================================================================
 
+# Initial delay between lock acquisition attempts (seconds)
+LOCK_RETRY_BASE_INTERVAL_S = 0.05  # 50ms
 
-# SEC-HIGH-003: Stale lock detection threshold (seconds)
-STALE_LOCK_THRESHOLD_SECONDS = 300  # 5 minutes
+# Maximum delay between lock acquisition attempts (seconds)
+LOCK_RETRY_MAX_INTERVAL_S = 2.0
+
+# Default lock timeout (seconds)
+DEFAULT_LOCK_TIMEOUT_S = 10.0
+
+
+# =============================================================================
+# File Locking
+# =============================================================================
 
 
 def _is_process_alive(pid: int) -> bool:
@@ -124,7 +134,9 @@ def _write_lock_pid(fd: int) -> None:
 
 
 @contextmanager
-def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
+def _acquire_lock(
+    lock_path: Path, timeout: float = DEFAULT_LOCK_TIMEOUT_S
+) -> Iterator[None]:
     """Acquire an exclusive file lock for capture operations.
 
     Uses fcntl advisory locking to prevent concurrent corruption. The lock
@@ -149,19 +161,12 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
     # Ensure parent directory exists
     lock_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # MED-008: Check for stale lock file from crashed process
-    if lock_path.exists():
-        try:
-            lock_age = time.time() - lock_path.stat().st_mtime
-            if lock_age > STALE_LOCK_THRESHOLD_SECONDS:
-                logger.warning(
-                    "Stale lock detected (age: %.1fs), removing: %s",
-                    lock_age,
-                    lock_path,
-                )
-                lock_path.unlink(missing_ok=True)
-        except OSError:
-            pass  # Best effort stale detection
+    # SEC-H-003: REMOVED unsafe mtime-based file deletion (TOCTOU race).
+    # With flock(), deleting a lock file while another process holds it
+    # creates a new inode - allowing two processes to hold "locks" on
+    # different inodes simultaneously. Instead, we rely on:
+    # 1. flock() auto-releasing locks when processes die (fd close)
+    # 2. PID-based stale detection in the retry loop below
 
     fd = None
     stale_warning_logged = False
@@ -177,9 +182,10 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
         # Acquire exclusive lock with timeout using non-blocking retry loop
         # CRIT-001: Prevents indefinite blocking if lock is held
         # Uses exponential backoff with jitter to reduce contention under high concurrency
+        # QUAL-M-006: Uses named constants for retry intervals
         deadline = time.monotonic() + timeout
-        base_interval = 0.05  # Start with 50ms
-        max_interval = 2.0  # Cap at 2 seconds
+        base_interval = LOCK_RETRY_BASE_INTERVAL_S
+        max_interval = LOCK_RETRY_MAX_INTERVAL_S
         attempt = 0
 
         while True:
@@ -1262,18 +1268,42 @@ def get_default_service() -> CaptureService:
     return service
 
 
-# Module-level cache for user capture service singleton
-_user_capture_service: CaptureService | None = None
+# CRIT-003: UserCaptureService wrapper for ServiceRegistry
+# Using a distinct type allows the registry to manage project and user services separately
+
+
+class UserCaptureService(CaptureService):
+    """CaptureService subclass for user-domain (global) memories.
+
+    This class exists solely to provide a distinct type for ServiceRegistry,
+    allowing separate singleton management for project and user capture services.
+
+    CRIT-003: Replaces module-level _user_capture_service global with
+    ServiceRegistry-based singleton management for thread safety and
+    proper test isolation.
+
+    Usage:
+        # Get user capture service via factory function
+        service = get_user_capture_service()
+
+        # Or directly via ServiceRegistry
+        service = ServiceRegistry.get(UserCaptureService, ...)
+    """
+
+    pass
 
 
 def get_user_capture_service() -> CaptureService:
     """Get the user-domain capture service singleton.
 
+    CRIT-003: Now uses ServiceRegistry instead of module-level global.
+    This provides thread safety and proper test isolation via ServiceRegistry.reset().
+
     Returns a CaptureService pre-configured for the USER domain with:
     - GitOps pointing to user-memories bare repo
     - Index service pointing to user index database
 
-    The service is lazily initialized on first use.
+    The service is lazily initialized on first use via ServiceRegistry.
 
     Returns:
         A CaptureService configured for user-domain capture.
@@ -1282,12 +1312,18 @@ def get_user_capture_service() -> CaptureService:
         This service is separate from the project capture service.
         Use get_default_service() for project-scoped memories.
     """
-    global _user_capture_service
+    from git_notes_memory.registry import ServiceRegistry
 
-    if _user_capture_service is not None:
-        return _user_capture_service
+    # CRIT-003: Check if already registered (fast path)
+    # Using has() + get() pattern for thread safety.
+    # We can't use ServiceRegistry.get() alone because CaptureService
+    # accepts optional args, so UserCaptureService() would create an
+    # empty instance without the user-domain configuration we need.
+    if ServiceRegistry.has(UserCaptureService):
+        # Safe to use get() - no auto-creation will occur
+        return ServiceRegistry.get(UserCaptureService)
 
-    # Create user-configured CaptureService on first call
+    # Slow path: create new UserCaptureService with user-domain config
     user_git_ops = GitOps.for_domain(Domain.USER)
 
     # Lazy import to avoid circular dependencies
@@ -1296,9 +1332,11 @@ def get_user_capture_service() -> CaptureService:
 
     user_index = IndexService(db_path=get_user_index_path(ensure_exists=True))
 
-    _user_capture_service = CaptureService(
+    # Create and register with ServiceRegistry
+    user_service = UserCaptureService(
         git_ops=user_git_ops,
         index_service=user_index,
     )
+    ServiceRegistry.register(UserCaptureService, user_service)
 
-    return _user_capture_service
+    return user_service

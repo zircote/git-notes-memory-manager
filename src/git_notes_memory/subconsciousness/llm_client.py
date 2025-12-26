@@ -23,6 +23,14 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
+# CRIT-002: Import secrets filtering service for LLM prompt sanitization
+from git_notes_memory.security.service import (
+    SecretsFilteringService,
+)
+from git_notes_memory.security.service import (
+    get_default_service as get_secrets_service,
+)
+
 from .batcher import RequestBatcher, SequentialBatcher
 from .config import (
     LLMProvider,
@@ -34,6 +42,7 @@ from .config import (
 from .models import (
     LLMAuthenticationError,
     LLMError,
+    LLMMessage,
     LLMProviderError,
     LLMRequest,
     LLMResponse,
@@ -354,6 +363,7 @@ class LLMClient:
     - Usage tracking and limits
     - Timeout and cancellation
     - Circuit breaker for resilience
+    - Secrets filtering for privacy (CRIT-002)
 
     Attributes:
         primary_provider: Main LLM provider to use.
@@ -364,6 +374,7 @@ class LLMClient:
         default_timeout_ms: Default request timeout.
         circuit_breaker_threshold: Failures before opening circuit.
         circuit_breaker_timeout: Seconds before recovery attempt.
+        filter_secrets: Whether to filter secrets from prompts (CRIT-002).
     """
 
     primary_provider: LLMProviderProtocol
@@ -374,6 +385,7 @@ class LLMClient:
     default_timeout_ms: int = 30_000
     circuit_breaker_threshold: int = 5
     circuit_breaker_timeout: float = 60.0
+    filter_secrets: bool = True  # CRIT-002: Enable secrets filtering by default
 
     _batcher: RequestBatcher | SequentialBatcher | None = field(
         default=None,
@@ -381,9 +393,10 @@ class LLMClient:
     )
     _primary_circuit: CircuitBreaker | None = field(default=None, repr=False)
     _fallback_circuit: CircuitBreaker | None = field(default=None, repr=False)
+    _secrets_service: SecretsFilteringService | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
-        """Initialize batcher and circuit breakers."""
+        """Initialize batcher, circuit breakers, and secrets service."""
         if self.batch_requests:
             self._batcher = RequestBatcher(
                 executor=self._execute_batch,
@@ -402,6 +415,10 @@ class LLMClient:
                 failure_threshold=self.circuit_breaker_threshold,
                 recovery_timeout_seconds=self.circuit_breaker_timeout,
             )
+
+        # CRIT-002: Initialize secrets filtering service
+        if self.filter_secrets:
+            self._secrets_service = get_secrets_service()
 
     async def complete(
         self,
@@ -437,6 +454,8 @@ class LLMClient:
     async def complete_request(self, request: LLMRequest) -> LLMResponse:
         """Send a completion request.
 
+        CRIT-002: Filters secrets/PII from messages before sending to LLM provider.
+
         Args:
             request: The LLM request to process.
 
@@ -446,6 +465,10 @@ class LLMClient:
         Raises:
             LLMError: If the request fails.
         """
+        # CRIT-002: Filter secrets from messages before sending to external LLM
+        if self._secrets_service and self._secrets_service.enabled:
+            request = self._filter_request_secrets(request)
+
         # Check usage limits
         if self.usage_tracker:
             self.usage_tracker.check_limits()
@@ -467,6 +490,58 @@ class LLMClient:
             self.usage_tracker.record(response.usage)
 
         return response
+
+    def _filter_request_secrets(self, request: LLMRequest) -> LLMRequest:
+        """Filter secrets from all messages in a request.
+
+        CRIT-002: This ensures no PII or secrets are sent to external LLM providers,
+        addressing GDPR Art. 44-49 compliance for cross-border data transfers.
+
+        Args:
+            request: The original LLM request.
+
+        Returns:
+            A new LLMRequest with filtered message content.
+        """
+        if self._secrets_service is None:
+            return request
+
+        filtered_messages: list[LLMMessage] = []
+        secrets_found = False
+
+        for message in request.messages:
+            result = self._secrets_service.filter(
+                content=message.content,
+                source="llm_request",
+                namespace="subconsciousness",
+            )
+            if result.had_secrets:
+                secrets_found = True
+                logger.info(
+                    "CRIT-002: Filtered %d secrets from %s message before LLM call",
+                    result.detection_count,
+                    message.role.value,
+                )
+
+            # Create new message with filtered content
+            filtered_messages.append(
+                LLMMessage(role=message.role, content=result.content)
+            )
+
+        if not secrets_found:
+            return request
+
+        # Return new request with filtered messages
+        return LLMRequest(
+            messages=tuple(filtered_messages),
+            model=request.model,
+            max_tokens=request.max_tokens,
+            temperature=request.temperature,
+            json_mode=request.json_mode,
+            json_schema=request.json_schema,
+            timeout_ms=request.timeout_ms,
+            request_id=request.request_id,
+        )
 
     async def complete_batch(
         self,
