@@ -1511,3 +1511,18 @@ Investigated and filed comprehensive bug report for path resolution failures in 
 - commands/test-secret.md:87
 - commands/validate.md:69
 - https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:11:33.578187+00:00'
+summary: Skipped committing broken metrics.py script
+---
+
+Skipped committing broken metrics.py script
+## Summary
+Reviewed pending changes and found only one untracked file (`.claude-plugin/scripts/metrics.py`) which uses a non-existent API (`get_metrics_registry`). Per user decision, skipped committing this broken file.
+
+## Context
+- The broken script is related to issue #31 filed earlier
+- Issue #31 recommends using Python module imports instead of scripts
+- The actual API is `get_metrics()` not `get_metrics_registry()`
