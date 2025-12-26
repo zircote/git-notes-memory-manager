@@ -2157,3 +2157,16 @@ tags:
 
 `★ Insight ─────────────────────────────────────`
 The ServiceRegistry uses a double-checked locking pattern for thread-safe singleton creation. The issue is that `get_user_capture_service()` uses a module-level...
+
+---
+type: patterns
+timestamp: '2025-12-26T16:06:40.420132+00:00'
+summary: '...tests to use `ServiceRegistry.unregister(UserCaptureService)` instead.
+  The ServiceRegistry pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...tests to use `ServiceRegistry.unregister(UserCaptureService)` instead. The ServiceRegistry pattern provides `unregister()` for exactly this purpose—test isolation.
+`──────────────────────────────────...
