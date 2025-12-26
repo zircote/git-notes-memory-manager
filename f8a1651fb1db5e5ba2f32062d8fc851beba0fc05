@@ -34,3 +34,22 @@ tags:
         with trace_operation("op1"):
             pass
         with trace_operation("op2")...
+
+---
+type: progress
+timestamp: '2025-12-26T00:50:24.393135+00:00'
+summary: '...spans[1].operation == "op2"'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_tracing.py
+---
+
+...spans[1].operation == "op2"
+
+    def test_clear_completed_spans(self) -> None:
+        """Test clearing completed spans."""
+        with trace_operation("op"):
+            pass
+
+        clear_completed_spans()...
