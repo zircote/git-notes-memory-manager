@@ -1,0 +1,17 @@
+---
+type: patterns
+timestamp: '2025-12-26T00:58:54.689199+00:00'
+summary: '...environment'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...environment
+- [x] Implement retry with exponential backoff
+- [x] Support JSON mode via tool_use pattern
+
+### Task 1.5: Implement OpenAI provider
+- **Status**: ✅ Complete
+- **Started**: 2025-12-26T01:10:00Z...
