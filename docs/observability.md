@@ -187,8 +187,75 @@ Health check includes:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
+| `MEMORY_PLUGIN_OBSERVABILITY_ENABLED` | Master switch for observability | `true` |
+| `MEMORY_PLUGIN_LOG_LEVEL` | Log level: quiet/info/debug/trace | `info` |
+| `MEMORY_PLUGIN_LOG_FORMAT` | Log format: json/text | `json` |
+| `MEMORY_PLUGIN_METRICS_ENABLED` | Enable metrics collection | `true` |
+| `MEMORY_PLUGIN_TRACING_ENABLED` | Enable distributed tracing | `true` |
+| `MEMORY_PLUGIN_OTLP_ENDPOINT` | OTLP HTTP endpoint for telemetry export | (none) |
+| `MEMORY_PLUGIN_SERVICE_NAME` | Service name in telemetry | `git-notes-memory` |
 | `MEMORY_PLUGIN_LOG_DIR` | Log file directory | `~/.local/share/memory-plugin/logs` |
-| `HOOK_DEBUG` | Enable debug logging | `false` |
+| `HOOK_DEBUG` | Enable debug logging (legacy) | `false` |
+
+## OTLP Export (Push Telemetry)
+
+When `MEMORY_PLUGIN_OTLP_ENDPOINT` is set, telemetry is automatically pushed to an OpenTelemetry Collector at session end.
+
+### Quick Setup with Docker
+
+```bash
+# Start the local observability stack
+cd docker && docker compose up -d
+
+# Configure the plugin to send telemetry
+export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+
+# Run Claude Code - telemetry will be exported on session end
+claude
+```
+
+### Configuration
+
+```bash
+# Set the OTLP HTTP endpoint (required for push)
+export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+
+# Optional: Custom service name
+export MEMORY_PLUGIN_SERVICE_NAME=my-project-memory
+```
+
+The exporter pushes:
+- **Traces** to `{endpoint}/v1/traces`
+- **Metrics** to `{endpoint}/v1/metrics`
+
+### Viewing Telemetry
+
+With the Docker stack running:
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| Grafana | http://localhost:3000 | Dashboards and exploration |
+| Prometheus | http://localhost:9090 | Metrics queries |
+| Tempo | http://localhost:3200 | Trace search |
+| Loki | http://localhost:3100 | Log aggregation |
+
+### Programmatic Export
+
+```python
+from git_notes_memory.observability.exporters import OTLPExporter
+
+# Create exporter with custom endpoint
+exporter = OTLPExporter(endpoint="http://localhost:4318")
+
+# Export traces
+from git_notes_memory.observability.tracing import get_completed_spans
+spans = get_completed_spans()
+exporter.export_traces(spans)
+
+# Export metrics
+from git_notes_memory.observability.metrics import get_metrics
+exporter.export_metrics(get_metrics())
+```
 
 ## Best Practices
 

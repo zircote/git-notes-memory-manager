@@ -52,6 +52,14 @@ from git_notes_memory.hooks.hook_utils import (
 )
 from git_notes_memory.hooks.models import CaptureSignal
 from git_notes_memory.observability import get_logger
+from git_notes_memory.observability.exporters.otlp import (
+    export_metrics_if_configured,
+    export_traces_if_configured,
+)
+from git_notes_memory.observability.tracing import (
+    clear_completed_spans,
+    get_completed_spans,
+)
 
 __all__ = ["main"]
 
@@ -231,6 +239,43 @@ def _auto_capture_signals(
         return [], signals
 
     return captured, remaining
+
+
+def _flush_telemetry() -> dict[str, Any]:
+    """Flush accumulated telemetry to OTLP endpoint.
+
+    Exports all collected traces and metrics to the configured OTLP
+    endpoint (if any). Called at session end to ensure telemetry is shipped.
+
+    Returns:
+        Dict with export results.
+    """
+    result: dict[str, Any] = {"traces": False, "metrics": False}
+
+    try:
+        # Export traces
+        spans = get_completed_spans()
+        if spans:
+            if export_traces_if_configured(spans):
+                result["traces"] = True
+                result["trace_count"] = len(spans)
+                clear_completed_spans()
+                logger.debug("Exported %d traces to OTLP", len(spans))
+            else:
+                logger.debug("Trace export skipped (no endpoint or failed)")
+
+        # Export metrics
+        if export_metrics_if_configured():
+            result["metrics"] = True
+            logger.debug("Exported metrics to OTLP")
+        else:
+            logger.debug("Metrics export skipped (no endpoint or failed)")
+
+    except Exception as e:
+        logger.debug("Telemetry flush error: %s", e)
+        result["error"] = str(e)
+
+    return result
 
 
 def _signal_to_dict(signal: CaptureSignal) -> dict[str, Any]:
@@ -490,6 +535,16 @@ def main() -> None:
                             )
                     except Exception as e:
                         logger.debug("Remote push on stop skipped: %s", e)
+
+            # Flush telemetry to OTLP endpoint (if configured)
+            telemetry_result = _flush_telemetry()
+            if telemetry_result.get("traces") or telemetry_result.get("metrics"):
+                hook_logger.info(
+                    "Telemetry flushed: traces=%s (count=%d), metrics=%s",
+                    telemetry_result.get("traces"),
+                    telemetry_result.get("trace_count", 0),
+                    telemetry_result.get("metrics"),
+                )
 
             # Output result
             _write_output(
