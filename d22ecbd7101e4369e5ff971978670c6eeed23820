@@ -77,3 +77,18 @@ Comprehensive specification for GitHub Issue #13 completed planning phase with f
 - docs/spec/active/2025-12-25-multi-domain-memories/README.md:5-8
 - docs/spec/active/2025-12-25-multi-domain-memories/README.md:63
 - docs/spec/active/2025-12-25-multi-domain-memories/CHANGELOG.md:5-10
+
+---
+type: decisions
+timestamp: '2025-12-26T01:43:51.698442+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  **String vs Enum for dataclass fields**: I chos...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+**String vs Enum for dataclass fields**: I chose to store `domain` as a `str` rather than the `Domain` enum because:
+1. **Serialization**: SQLite...
