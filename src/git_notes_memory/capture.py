@@ -716,7 +716,9 @@ class CaptureService:
             with trace_operation("capture.git_append"):
                 try:
                     git_ops.append_note(namespace, note_content, commit_sha)
-                    logger.info("Captured memory: %s (domain=%s)", memory_id, domain.value)
+                    logger.info(
+                        "Captured memory: %s (domain=%s)", memory_id, domain.value
+                    )
                 except Exception as e:
                     raise CaptureError(
                         f"Failed to write git note: {e}",
@@ -731,6 +733,7 @@ class CaptureService:
                 summary=summary,
                 content=content,
                 timestamp=timestamp,
+                domain=domain.value,  # Pass domain value (user/project)
                 spec=spec,
                 phase=phase,
                 tags=tags,
