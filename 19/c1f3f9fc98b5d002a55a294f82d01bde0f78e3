@@ -227,3 +227,15 @@ Created full spec documents for bug fix addressing marketplace plugin installati
 
 ## Related Files
 - docs/spec/active/2025-12-26-plugin-root-path-resolution/
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.265038+00:00'
+summary: The OTLP exporter is actually fully implemented (582 lines)! The issue must
+  be that **it's not be...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The OTLP exporter is actually fully implemented (582 lines)! The issue must be that **it's not being called** anywhere. Let me check the Stop...
