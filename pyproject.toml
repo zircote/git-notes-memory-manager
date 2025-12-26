@@ -43,6 +43,11 @@ dev = [
     "types-PyYAML>=6.0.12",
     "bump-my-version>=1.1.0",
 ]
+subconsciousness = [
+    "anthropic>=0.40.0",
+    "openai>=1.58.0",
+    "httpx>=0.28.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/zircote/git-notes-memory"
@@ -145,6 +150,18 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "detect_secrets.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "anthropic.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "openai.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "httpx.*"
 ignore_missing_imports = true
 
 # pytest - Testing

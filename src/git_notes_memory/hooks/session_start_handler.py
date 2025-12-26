@@ -83,16 +83,13 @@ def _get_memory_count() -> int:
         if not index_path.exists():
             return 0
         # Use direct SQLite query for performance (skip full initialization)
-        # MED-001: Use try/finally to ensure connection cleanup on any error
-        conn = sqlite3.connect(str(index_path))
-        try:
+        # Use context manager to ensure connection cleanup on any error
+        with sqlite3.connect(str(index_path)) as conn:
             cursor = conn.execute("SELECT COUNT(*) FROM memories")
             row = cursor.fetchone()
             return int(row[0]) if row else 0
-        finally:
-            conn.close()
     except (OSError, sqlite3.Error) as e:
-        # QUAL-HIGH-001: Specific exceptions for file/database access
+        # Specific exceptions for file/database access
         logger.debug("Failed to get memory count from index: %s", e)
         return 0
 

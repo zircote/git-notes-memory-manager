@@ -36,6 +36,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import signal
 import sys
 import time
@@ -57,6 +58,7 @@ __all__ = [
     "log_hook_input",
     "log_hook_output",
     "timed_hook_execution",
+    "scrub_pii",
     "MAX_INPUT_SIZE",
     "DEFAULT_TIMEOUT",
 ]
@@ -148,9 +150,9 @@ def log_hook_input(hook_name: str, data: dict[str, Any]) -> None:
         if key in data:
             hook_logger.info("  %s: %s", key, data[key])
 
-    # Log prompt (truncated)
+    # Log prompt (truncated and PII-scrubbed)
     if "prompt" in data:
-        prompt = data["prompt"]
+        prompt = scrub_pii(data["prompt"])
         if len(prompt) > 500:
             hook_logger.info(
                 "  prompt: %s... (truncated, %d chars)", prompt[:500], len(prompt)
@@ -158,11 +160,11 @@ def log_hook_input(hook_name: str, data: dict[str, Any]) -> None:
         else:
             hook_logger.info("  prompt: %s", prompt)
 
-    # Log tool info for PostToolUse
+    # Log tool info for PostToolUse (PII-scrubbed)
     if "tool_name" in data:
         hook_logger.info("  tool_name: %s", data["tool_name"])
     if "tool_input" in data:
-        tool_input_str = json.dumps(data["tool_input"])
+        tool_input_str = scrub_pii(json.dumps(data["tool_input"]))
         if len(tool_input_str) > 500:
             hook_logger.info("  tool_input: %s... (truncated)", tool_input_str[:500])
         else:
@@ -474,3 +476,81 @@ def validate_file_path(
         raise ValueError(msg)
 
     return resolved
+
+
+# =============================================================================
+# PII Scrubbing
+# =============================================================================
+
+# Pre-compiled PII patterns for performance
+# These patterns are designed to catch common PII while minimizing false positives
+_PII_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    # Email addresses
+    (
+        re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
+        "[REDACTED:email]",
+    ),
+    # US Phone numbers (various formats)
+    (
+        re.compile(r"\b(?:\+1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}\b"),
+        "[REDACTED:phone]",
+    ),
+    # US Social Security Numbers
+    (re.compile(r"\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b"), "[REDACTED:ssn]"),
+    # Credit card numbers (major formats with or without separators)
+    (
+        re.compile(r"\b(?:\d{4}[-.\s]?){3}\d{4}\b"),
+        "[REDACTED:card]",
+    ),
+    # API keys and tokens (generic pattern for hex/base64 strings)
+    (
+        re.compile(
+            r"\b(?:sk[-_]|api[-_]?key[-_]?|token[-_]?)[A-Za-z0-9_-]{20,}\b",
+            re.IGNORECASE,
+        ),
+        "[REDACTED:apikey]",
+    ),
+    # AWS access keys
+    (re.compile(r"\bAKIA[0-9A-Z]{16}\b"), "[REDACTED:aws_key]"),
+    # Generic secrets in key=value format
+    (
+        re.compile(
+            r"\b(?:password|secret|token|apikey|api_key|auth)[\s]*[=:]\s*['\"]?[^\s'\"]{8,}['\"]?",
+            re.IGNORECASE,
+        ),
+        "[REDACTED:secret]",
+    ),
+]
+
+
+def scrub_pii(text: str) -> str:
+    """Scrub personally identifiable information from text.
+
+    Removes common PII patterns including:
+    - Email addresses
+    - Phone numbers (US format)
+    - Social Security Numbers
+    - Credit card numbers
+    - API keys and tokens
+    - AWS access keys
+    - Passwords and secrets in key=value format
+
+    Args:
+        text: The text to scrub.
+
+    Returns:
+        Text with PII replaced by [REDACTED:type] placeholders.
+
+    Example::
+
+        >>> scrub_pii("Contact john@example.com or call 555-123-4567")
+        'Contact [REDACTED:email] or call [REDACTED:phone]'
+
+    Note:
+        This function is designed to minimize false positives while catching
+        common PII patterns. It may not catch all forms of PII.
+    """
+    result = text
+    for pattern, replacement in _PII_PATTERNS:
+        result = pattern.sub(replacement, result)
+    return result
