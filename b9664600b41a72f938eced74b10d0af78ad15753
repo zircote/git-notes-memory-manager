@@ -3524,3 +3524,17 @@ tags:
     | When identifying a pattern | ▶ pattern ───       |
 
     SESSION GUIDANCE: Aim for 1 block per 3-5 substantive messages....
+
+---
+type: patterns
+timestamp: '2025-12-26T17:14:12.895613+00:00'
+summary: '...different abstraction layers; duplication is intentional defense-in-depth'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...different abstraction layers; duplication is intentional defense-in-depth
+- [x] QUAL-M-002: Pattern Scoring Complexity (`patterns.py:777-842`) ✅
+  - **Status:** ACCEPTABLE - Method is well-documented,...
