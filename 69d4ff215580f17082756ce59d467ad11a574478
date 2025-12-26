@@ -15,3 +15,19 @@ tags:
 **Location**: `src/git_notes_memory/security/detector.py`
 
 **Implementation*...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:46:04.214081+00:00'
+summary: '### Optimizations'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+### Optimizations
+
+1. **detect-secrets Caching**: Library handles pattern compilation internally
+2. **Lazy Loading**: detect-secrets loaded on first use, not import
+3....
