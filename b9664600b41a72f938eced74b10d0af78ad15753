@@ -2962,3 +2962,18 @@ tags:
 | PERF-H-001 | Paginated get_all_ids | ✅ Already implemented |
 | PERF-H-002 | N+1 Query in Reindex | ✅ Completed |
 | PERF-H-003 | Unbounded collect_notes...
+
+---
+type: progress
+timestamp: '2025-12-26T15:50:48.840043+00:00'
+summary: '...| Paginated get_all_ids | ✅ Already implemented |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...| Paginated get_all_ids | ✅ Already implemented |
+| PERF-H-002 | N+1 Query in Reindex | ✅ Completed |
+| PERF-H-003 | Unbounded collect_notes | ✅ Completed |
+| PERF-H-004 | Cold Start Embedding...
