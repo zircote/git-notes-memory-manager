@@ -376,3 +376,21 @@ SessionStart memory retrieval is limited by design
 
 ## Implication
 Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:26.300684+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
