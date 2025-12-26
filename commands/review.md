@@ -173,12 +173,15 @@ After showing the list, ask the user what they want to do using AskUserQuestion.
 ```bash
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 CAPTURE_ID="$1"  # Extract from arguments
+# Pass via environment variable to prevent shell injection
+export MEMORY_CAPTURE_ID="$CAPTURE_ID"
 uv run --directory "$PLUGIN_ROOT" python3 -c "
+import os
 import sys
 from git_notes_memory.subconsciousness.implicit_capture_service import get_implicit_capture_service
 from git_notes_memory import get_capture_service
 
-capture_id = '$CAPTURE_ID'
+capture_id = os.environ.get('MEMORY_CAPTURE_ID', '')
 if not capture_id:
     print('Error: Please provide a capture ID')
     sys.exit(1)
@@ -229,11 +232,14 @@ else:
 ```bash
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 CAPTURE_ID="$1"
+# Pass via environment variable to prevent shell injection
+export MEMORY_CAPTURE_ID="$CAPTURE_ID"
 uv run --directory "$PLUGIN_ROOT" python3 -c "
+import os
 import sys
 from git_notes_memory.subconsciousness.implicit_capture_service import get_implicit_capture_service
 
-capture_id = '$CAPTURE_ID'
+capture_id = os.environ.get('MEMORY_CAPTURE_ID', '')
 if not capture_id:
     print('Error: Please provide a capture ID')
     sys.exit(1)
