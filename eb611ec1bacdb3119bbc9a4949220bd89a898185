@@ -11,3 +11,17 @@ tags:
 ...auto_approved: Memories that were auto-approved (high confidence).
         blocked: Memories that were blocked by adversarial screening.
         discarded: Memories that were discarded (low confidence)....
+
+---
+type: blockers
+timestamp: '2025-12-26T01:43:35.504633+00:00'
+summary: '...pending_count: Number of memories pending review.'
+tags:
+- auto-captured
+- post-tool-use
+- file:hook_integration.py
+---
+
+...pending_count: Number of memories pending review.
+        blocked_count: Number of memories blocked by screening.
+        discarded_count: Number of memories discarded (low confidence)....
