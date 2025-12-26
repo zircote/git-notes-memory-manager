@@ -1,0 +1,131 @@
+---
+type: decisions
+timestamp: '2025-12-26T04:09:01.256305+00:00'
+summary: '...namespace ───`) get 0.99 confidence - explicit structured capture
+
+  2. **Inline patterns** (`[de...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...namespace ───`) get 0.99 confidence - explicit structured capture
+2. **Inline patterns** (`[decision]`, natural language) get 0.70-0.98 confidence
+
+The `CaptureSignal` model needs a `domain` field...
+
+---
+type: decisions
+timestamp: '2025-12-26T04:09:01.335986+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Confirmed key architectural decisions for multi-...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Confirmed key architectural decisions for multi-domain memories
+## Summary
+User validated 4 critical design decisions from the open questions in GitHub Issue #13.
+
+## Rationale
+- **Storage**: Separate bare git repo at `~/.local/share/memory-plugin/user-memories/` - maintains git notes semantics for both domains
+- **Conflicts**: Project memories override user memories - local context is more specific
+- **Team domain**: Deferred to v2 - keep initial scope focused
+- **Sync**: Optional remote auto-sync - configure remote and sync on session events
+
+## Related Files
+- GitHub Issue #13: https://github.com/zircote/git-notes-memory/issues/13
+
+---
+type: decisions
+timestamp: '2025-12-26T04:09:01.504092+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Approved multi-domain memories specification for...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Approved multi-domain memories specification for implementation
+## Context
+Comprehensive specification for GitHub Issue #13 completed planning phase with full requirements, architecture, implementation plan, and architectural decisions documented.
+
+## Decision Rationale
+- **Complete documentation**: All required documents present (6 files, 1,556 lines)
+- **Well-scoped**: 13 requirements split across 3 priority tiers
+- **Clear architecture**: 7 ADRs document key decisions with user validation
+- **Phased approach**: 5 phases with 24 discrete tasks
+- **Risk mitigation**: Top 4 risks identified with concrete mitigations
+- **Backward compatible**: Existing project memories continue unchanged
+
+## Key Features Approved
+1. Two-domain storage (user + project)
+2. Separate bare git repo for user memories
+3. Project memories override user (conflict resolution)
+4. Optional remote sync for cross-machine use
+5. Domain markers: `[global]` inline and `▶ global:namespace ───` blocks
+6. SessionStart context includes both domains
+7. Team domain deferred to v2
+
+## Related Files
+- docs/spec/active/2025-12-25-multi-domain-memories/README.md:5-8
+- docs/spec/active/2025-12-25-multi-domain-memories/README.md:63
+- docs/spec/active/2025-12-25-multi-domain-memories/CHANGELOG.md:5-10
+
+---
+type: decisions
+timestamp: '2025-12-26T04:09:02.226767+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Multi-Domain Memories implementation complete
+
+  #...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Multi-Domain Memories implementation complete
+## Summary
+All 24 tasks across 5 phases of the Multi-Domain Memories specification (SPEC-2025-12-25-001) are now complete.
+
+## Rationale
+The implementation provides:
+- Two-domain architecture: PROJECT (repo-scoped) vs USER (global, cross-project)
+- User memories stored in bare repo at ~/.local/share/memory-plugin/user-memories/
+- Domain markers in signal detection: [global], [user] → USER; [project], [local] → PROJECT
+- Block pattern domain prefix: `global:decision`, `user:learned`
+- Optional remote sync for user memories via USER_MEMORIES_REMOTE
+- Auto-sync hooks: HOOK_SESSION_START_FETCH_USER_REMOTE, HOOK_STOP_PUSH_USER_REMOTE
+- Domain filtering in /memory:recall and /memory:search commands
+
+## Implementation Stats
+- 24 tasks completed
+- 5 phases (Foundation, Storage, Service, Hooks, Sync & Polish)
+- 1955 tests passing
+- Commands updated: /memory:status, /memory:recall, /memory:search
+
+## Related Files
+- src/git_notes_memory/config.py (Domain enum, user paths)
+- src/git_notes_memory/git_ops.py (for_domain factory, user repo init)
+- src/git_notes_memory/sync.py (user memory sync, remote sync)
+- src/git_notes_memory/hooks/config_loader.py (user remote hooks)
+- commands/status.md, recall.md, search.md (domain filtering)
+
+---
+type: decisions
+timestamp: '2025-12-26T04:09:02.858095+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  **String vs Enum for dataclass fields**: I chos...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+**String vs Enum for dataclass fields**: I chose to store `domain` as a `str` rather than the `Domain` enum because:
+1. **Serialization**: SQLite...
