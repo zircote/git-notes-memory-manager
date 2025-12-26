@@ -45,10 +45,10 @@ This plan implements multi-domain memory storage in 5 phases, building from foun
 #### Task 1.2: Extend Memory Model with Domain Field
 - **Description**: Add `domain` field to `Memory` dataclass with backward-compatible default
 - **Acceptance Criteria**:
-  - [ ] `Memory.domain: Domain = Domain.PROJECT` field added
-  - [ ] Existing code continues to work without changes
-  - [ ] `Memory.id` property handles both formats
-- **Notes**: Frozen dataclass, must maintain immutability
+  - [x] `Memory.domain: Domain = Domain.PROJECT` field added (stored as string with enum property)
+  - [x] Existing code continues to work without changes
+  - [x] `Memory.id` property handles both formats
+- **Notes**: Frozen dataclass, must maintain immutability. Used string storage with `domain_enum` property for serialization compatibility.
 
 #### Task 1.3: Create Schema Migration for Domain Column
 - **Description**: Add migration to SCHEMA_VERSION 3 in `index.py`
