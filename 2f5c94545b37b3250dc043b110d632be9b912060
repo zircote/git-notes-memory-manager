@@ -14,3 +14,18 @@ tags:
 - Added detect-secrets>=1.4.0 dependency
 - Implemented DetectSecretsAdapter wrapping Yelp's detect-secrets library
   - Maps 27+ detector types to...
+
+---
+type: progress
+timestamp: '2025-12-26T01:14:52.240349+00:00'
+summary: '...overlapping detections (prefers specific over entropy)'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...overlapping detections (prefers specific over entropy)
+  - SHA-256 hashing for allowlist matching
+- Implemented PIIDetector for SSN, credit cards, phone numbers
+  - Luhn algorithm validation for credit...
