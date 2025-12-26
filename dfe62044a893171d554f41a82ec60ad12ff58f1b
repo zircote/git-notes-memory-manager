@@ -142,3 +142,21 @@ completed: null
 expires: 2026-03-25T23:47:00Z
 superseded_by: null
 github_issue: https://github.com/zircote/git...
+
+---
+type: progress
+timestamp: '2025-12-26T00:06:34.068875+00:00'
+summary: '...re-captured in each project'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...re-captured in each project
+- No distinction between global and local context
+
+## Proposed Solution
+
+Implement two memory domains:
+- **User domain**: Global, cross-project memories stored in...
