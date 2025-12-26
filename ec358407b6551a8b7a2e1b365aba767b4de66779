@@ -602,3 +602,14 @@ tags:
 ---
 
 test content
+
+---
+type: learnings
+timestamp: '2025-12-26T22:19:21.605953+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
