@@ -1378,3 +1378,20 @@ tags:
 
 **Pattern repeated across 12+ commands:**
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:27:40.586245+00:00'
+summary: "...resolution logic\n- `commands/health.md:76-77` - Same pattern  \n- `commands/traces.md:79-80`\
+  \ - ..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+- `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets...
