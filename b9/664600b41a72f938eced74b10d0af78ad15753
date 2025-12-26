@@ -149,3 +149,27 @@ Original findings: 4 CRIT, 23 HIGH (3 SEC, 5 PERF, 8 ARCH, 7 TEST), 42 MED, 28 L
 
 ## Related Files
 - All security/performance fixes completed and tested
+
+---
+type: decisions
+timestamp: '2025-12-26T16:31:24.597268+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Prioritizing remediation based on impact vs effo...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Prioritizing remediation based on impact vs effort
+## Context
+Original findings: 4 CRIT, 23 HIGH (3 SEC, 5 PERF, 8 ARCH, 7 TEST), 42 MED, 28 LOW
+
+## Rationale
+1. **CRIT/SEC/PERF-HIGH: DONE** - Highest impact security and performance fixes
+2. **ARCH-HIGH: Defer** - Refactoring (IndexService 37 methods, 5 DI patterns) - large effort, low urgency
+3. **TEST-HIGH: Partially addressed** - Handler tests exist, provider tests need mocking external APIs
+4. **MEDIUM findings: Sample fixes** - Selective based on impact
+
+## Related Files
+- All security/performance fixes completed and tested
