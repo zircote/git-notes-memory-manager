@@ -1,0 +1,16 @@
+---
+type: patterns
+timestamp: '2025-12-26T00:56:02.274669+00:00'
+summary: '...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe
+  access when needed
+
+  Thi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`domain_enum`, `is_user_domain`, `is_project_domain` provide type-safe access when needed
+
+This pattern is consistent with how `status` is handled in the same class.
+`─────────────────────────────────────...
