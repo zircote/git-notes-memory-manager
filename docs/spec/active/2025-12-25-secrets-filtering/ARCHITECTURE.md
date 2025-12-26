@@ -8,43 +8,42 @@ This document describes the technical architecture for implementing secrets filt
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     Memory Capture Flow                          │
+│                     Memory Capture Flow                         │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  User Input                                                      │
-│      │                                                           │
-│      ▼                                                           │
-│  CaptureService.capture()                                        │
-│      │                                                           │
-│      ├── validate_namespace()                                    │
-│      ├── validate_summary()                                      │
-│      ├── validate_content()                                      │
-│      │                                                           │
-│      ▼                                                           │
+│                                                                 │
+│  User Input                                                     │
+│      │                                                          │
+│      ▼                                                          │
+│  CaptureService.capture()                                       │
+│      │                                                          │
+│      ├── validate_namespace()                                   │
+│      ├── validate_summary()                                     │
+│      ├── validate_content()                                     │
+│      │                                                          │
+│      ▼                                                          │
 │  ┌─────────────────────────────────────────┐                    │
-│  │     SecretsFilteringService            │ ◄── NEW             │
-│  │  ┌─────────────────────────────────┐   │                     │
-│  │  │ PatternDetector                 │   │                     │
-│  │  │ EntropyAnalyzer                 │   │                     │
-│  │  │ PIIDetector                     │   │                     │
-│  │  │ AllowlistManager                │   │                     │
-│  │  │ Redactor                        │   │                     │
-│  │  │ AuditLogger                     │   │                     │
-│  │  └─────────────────────────────────┘   │                     │
+│  │     SecretsFilteringService             │ ◄── NEW            │
+│  │  ┌─────────────────────────────────┐    │                    │
+│  │  │ DetectSecretsAdapter (wrapper)  │    │                    │
+│  │  │ PIIDetector (custom)            │    │                    │
+│  │  │ AllowlistManager                │    │                    │
+│  │  │ Redactor                        │    │                    │
+│  │  │ AuditLogger                     │    │                    │
+│  │  └─────────────────────────────────┘    │                    │
 │  └─────────────────────────────────────────┘                    │
-│      │                                                           │
-│      ▼                                                           │
-│  serialize_note()                                                │
-│      │                                                           │
-│      ▼                                                           │
+│      │                                                          │
+│      ▼                                                          │
+│  serialize_note()                                               │
+│      │                                                          │
+│      ▼                                                          │
 │  EmbeddingService.embed()  ◄── Uses filtered content            │
-│      │                                                           │
-│      ▼                                                           │
+│      │                                                          │
+│      ▼                                                          │
 │  GitOps.append_note()                                           │
-│      │                                                           │
-│      ▼                                                           │
+│      │                                                          │
+│      ▼                                                          │
 │  IndexService.insert()                                          │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -97,102 +96,79 @@ class SecretsFilteringService:
     ) -> tuple[SecretDetection, ...]: ...
 ```
 
-### 2. PatternDetector
+### 2. DetectSecretsAdapter
 
-**Responsibility**: Detect secrets using compiled regex patterns.
+**Responsibility**: Wrap detect-secrets library for pattern and entropy detection.
 
-**Location**: `src/git_notes_memory/security/patterns.py`
-
-**Patterns Included**:
-
-| Category | Pattern Name | Example Match |
-|----------|--------------|---------------|
-| API Keys | OpenAI | `sk-proj-...`, `sk-...` |
-| API Keys | Anthropic | `sk-ant-...` |
-| API Keys | GitHub | `ghp_...`, `gho_...`, `ghu_...`, `ghs_...`, `ghr_...` |
-| API Keys | AWS Access Key | `AKIA...` |
-| API Keys | AWS Secret Key | 40-char base64 after `aws_secret` |
-| API Keys | Stripe | `sk_live_...`, `pk_live_...` |
-| API Keys | Slack | `xoxb-...`, `xoxp-...`, `xoxa-...` |
-| Credentials | Generic Password | `password=...`, `passwd:...` |
-| Credentials | Basic Auth | `://user:pass@` |
-| Credentials | Bearer Token | `Bearer ...` |
-| Keys | RSA Private | `-----BEGIN RSA PRIVATE KEY-----` |
-| Keys | DSA Private | `-----BEGIN DSA PRIVATE KEY-----` |
-| Keys | EC Private | `-----BEGIN EC PRIVATE KEY-----` |
-| Keys | OpenSSH | `-----BEGIN OPENSSH PRIVATE KEY-----` |
-| Connection | Database URL | `postgres://...`, `mysql://...`, `mongodb://...` |
+**Location**: `src/git_notes_memory/security/detector.py`
 
 **Implementation**:
 ```python
-@dataclass(frozen=True)
-class PatternRule:
-    """A detection pattern rule."""
-    name: str
-    pattern: re.Pattern[str]
-    secret_type: SecretType
-    confidence: float
-    description: str
+from detect_secrets import SecretsCollection
+from detect_secrets.settings import default_settings
 
-class PatternDetector:
-    def __init__(self) -> None:
-        self._patterns: tuple[PatternRule, ...] = self._compile_patterns()
+class DetectSecretsAdapter:
+    """Adapter wrapping Yelp's detect-secrets library."""
 
-    def detect(self, text: str) -> tuple[SecretDetection, ...]: ...
+    def __init__(self, plugins: list[str] | None = None) -> None:
+        self._plugins = plugins or self._default_plugins()
+
+    def detect(self, text: str) -> tuple[SecretDetection, ...]:
+        """Scan text for secrets using detect-secrets."""
+        secrets = SecretsCollection()
+        with default_settings():
+            # Scan in-memory content
+            for plugin in self._get_active_plugins():
+                for secret in plugin.analyze_string(text):
+                    yield self._convert_to_detection(secret)
 
     @staticmethod
-    def _compile_patterns() -> tuple[PatternRule, ...]:
-        # Compiled at init, cached for performance
-        ...
+    def _default_plugins() -> list[str]:
+        return [
+            "AWSKeyDetector",
+            "ArtifactoryDetector",
+            "AzureStorageKeyDetector",
+            "Base64HighEntropyString",
+            "BasicAuthDetector",
+            "CloudantDetector",
+            "DiscordBotTokenDetector",
+            "GitHubTokenDetector",
+            "HexHighEntropyString",
+            "IbmCloudIamDetector",
+            "IbmCosHmacDetector",
+            "JwtTokenDetector",
+            "KeywordDetector",
+            "MailchimpDetector",
+            "NpmDetector",
+            "PrivateKeyDetector",
+            "SendGridDetector",
+            "SlackDetector",
+            "SoftlayerDetector",
+            "SquareOAuthDetector",
+            "StripeDetector",
+            "TwilioKeyDetector",
+        ]
 ```
 
-### 3. EntropyAnalyzer
+**Built-in Detectors** (via detect-secrets):
 
-**Responsibility**: Detect high-entropy strings that may be secrets.
+| Category | Detector | Coverage |
+|----------|----------|----------|
+| API Keys | AWSKeyDetector | AWS access/secret keys |
+| API Keys | GitHubTokenDetector | ghp_, gho_, ghu_, ghs_, ghr_ |
+| API Keys | StripeDetector | sk_live_, pk_live_ |
+| API Keys | SlackDetector | xoxb-, xoxp-, xoxa- |
+| API Keys | TwilioKeyDetector | Twilio API keys |
+| Entropy | Base64HighEntropyString | High-entropy base64 |
+| Entropy | HexHighEntropyString | High-entropy hex |
+| Credentials | BasicAuthDetector | ://user:pass@ |
+| Credentials | KeywordDetector | password=, secret=, etc. |
+| Keys | PrivateKeyDetector | RSA, DSA, EC, OpenSSH |
+| Tokens | JwtTokenDetector | JWT tokens |
+| Cloud | AzureStorageKeyDetector | Azure keys |
+| Cloud | IbmCloudIamDetector | IBM Cloud tokens |
 
-**Location**: `src/git_notes_memory/security/entropy.py`
-
-**Algorithm**:
-```python
-def shannon_entropy(data: str) -> float:
-    """Calculate Shannon entropy of a string."""
-    if not data:
-        return 0.0
-
-    frequency = {}
-    for char in data:
-        frequency[char] = frequency.get(char, 0) + 1
-
-    length = len(data)
-    entropy = 0.0
-    for count in frequency.values():
-        probability = count / length
-        entropy -= probability * math.log2(probability)
-
-    return entropy
-```
-
-**Thresholds**:
-| String Type | Threshold | Rationale |
-|-------------|-----------|-----------|
-| Base64-like | 4.5 | Random base64 averages ~5.17 |
-| Hex | 3.0 | Random hex averages ~4.0 |
-| Alphanumeric | 4.0 | Balanced threshold |
-
-**Configuration**:
-```python
-class EntropyAnalyzer:
-    def __init__(
-        self,
-        base64_threshold: float = 4.5,
-        hex_threshold: float = 3.0,
-        min_length: int = 16,
-    ) -> None: ...
-
-    def analyze(self, text: str) -> tuple[SecretDetection, ...]: ...
-```
-
-### 4. PIIDetector
+### 3. PIIDetector
 
 **Responsibility**: Detect personally identifiable information.
 
@@ -224,7 +200,7 @@ class PIIDetector:
         return checksum % 10 == 0
 ```
 
-### 5. AllowlistManager
+### 4. AllowlistManager
 
 **Responsibility**: Manage hash-based allowlist for known-safe values.
 
@@ -277,7 +253,7 @@ class AllowlistManager:
         ...
 ```
 
-### 6. Redactor
+### 5. Redactor
 
 **Responsibility**: Apply filtering strategies to detected secrets.
 
@@ -311,7 +287,7 @@ class Redactor:
 | BLOCK | `sk-proj-abc123xyz` | (raises BlockedContentError) |
 | WARN | `sk-proj-abc123xyz` | `sk-proj-abc123xyz` (logs warning) |
 
-### 7. AuditLogger
+### 6. AuditLogger
 
 **Responsibility**: Log all detection events for compliance.
 
@@ -443,9 +419,8 @@ src/git_notes_memory/
 ├── security/
 │   ├── __init__.py         # Public exports
 │   ├── service.py          # SecretsFilteringService
-│   ├── patterns.py         # PatternDetector
-│   ├── entropy.py          # EntropyAnalyzer
-│   ├── pii.py              # PIIDetector
+│   ├── detector.py         # DetectSecretsAdapter (wraps detect-secrets)
+│   ├── pii.py              # PIIDetector (custom, not in detect-secrets)
 │   ├── allowlist.py        # AllowlistManager
 │   ├── redactor.py         # Redactor
 │   ├── audit.py            # AuditLogger
@@ -458,6 +433,16 @@ src/git_notes_memory/
 │   ├── test_secret.py      # /memory:test-secret
 │   └── audit_log.py        # /memory:audit-log
 └── capture.py              # Modified to integrate filtering
+```
+
+**Dependencies**:
+```toml
+# pyproject.toml
+[project]
+dependencies = [
+    "detect-secrets>=1.4.0",  # Yelp's secrets detection
+    # ... existing dependencies
+]
 ```
 
 ---
@@ -570,9 +555,9 @@ except SecretsFilteringError as e:
 
 ### Optimizations
 
-1. **Compiled Regex**: All patterns compiled at service initialization
-2. **Lazy Loading**: Patterns loaded on first use, not import
-3. **Short-Circuit**: Skip entropy analysis if pattern already matched
+1. **detect-secrets Caching**: Library handles pattern compilation internally
+2. **Lazy Loading**: detect-secrets loaded on first use, not import
+3. **Short-Circuit**: Skip PII detection if secrets already found (configurable)
 4. **Caching**: LRU cache for allowlist hash lookups
 
 ### Benchmarks
@@ -590,10 +575,11 @@ except SecretsFilteringError as e:
 
 ### Defense in Depth
 
-1. **Multiple Detectors**: Pattern + Entropy + PII
-2. **Hash-Only Allowlist**: Never store plaintext secrets
-3. **Audit Everything**: Full trail for compliance
-4. **Fail Secure**: BLOCK on uncertainty (configurable)
+1. **detect-secrets**: 27+ pattern detectors + entropy analysis
+2. **Custom PII**: SSN, credit cards, phone numbers
+3. **Hash-Only Allowlist**: Never store plaintext secrets
+4. **Audit Everything**: Full trail for compliance
+5. **Fail Secure**: BLOCK on uncertainty (configurable)
 
 ### Known Limitations
 

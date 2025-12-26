@@ -7,15 +7,25 @@ All notable changes to this project specification will be documented in this fil
 ### Added
 - Initial specification created from GitHub Issue #12
 - REQUIREMENTS.md with 14 P0, 6 P1, 5 P2 requirements
-- ARCHITECTURE.md with 7 components
-- IMPLEMENTATION_PLAN.md with 5 phases, 31 tasks
+- ARCHITECTURE.md with 6 components
+- IMPLEMENTATION_PLAN.md with 5 phases, 30 tasks
 - DECISIONS.md with 12 ADRs
 
+### Changed
+- **ADR-001 Revised**: Switched from pure Python to detect-secrets library
+  - Yelp's detect-secrets provides 27+ battle-tested detectors
+  - Entropy detection included (Base64/Hex high entropy)
+  - Reduces implementation scope by ~70% for detection layer
+  - Still pure Python (pip install), no binary dependencies
+- **ADR-004 Superseded**: Entropy thresholds now managed by detect-secrets
+- Architecture simplified: DetectSecretsAdapter replaces PatternDetector + EntropyAnalyzer
+- Implementation plan reduced from 31 to 30 tasks with lower complexity
+
 ### Decisions Made
-- ADR-001: Pure Python implementation (no external dependencies)
+- ADR-001: Use detect-secrets library (revised from pure Python)
 - ADR-002: Default REDACT strategy
 - ADR-003: Filter before embedding generation
-- ADR-004: Entropy thresholds (4.5 base64, 3.0 hex)
+- ADR-004: Entropy thresholds (superseded - detect-secrets handles this)
 - ADR-005: Hash-based allowlist storage
 - ADR-006: Full audit logging for SOC2 compliance
 - ADR-007: Include PII detection in v1
@@ -26,10 +36,10 @@ All notable changes to this project specification will be documented in this fil
 - ADR-012: Redact file content (don't skip files)
 
 ### Requirements Elicitation
-- Confirmed detection layers: Pattern + Entropy (ML extension points for future)
+- Confirmed detection layers: detect-secrets + custom PII (ML extension points for future)
 - Confirmed default strategy: REDACT
 - Confirmed retrospective scanning with full remediation
-- Confirmed pure Python implementation
+- Confirmed using detect-secrets library (user feedback)
 - Confirmed PII detection inclusion
 - Confirmed full audit trail for compliance
 - Confirmed CLI + config file for allowlist management
