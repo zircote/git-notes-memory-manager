@@ -1576,3 +1576,33 @@ Task 5.5 complete. Both `/memory:recall` and `/memory:search` commands now suppo
 - commands/recall.md:143-177 (results format with domain indicators)
 - commands/search.md:1-57 (help section with domain docs)
 - commands/search.md:91-183 (search execution with domain)
+
+---
+type: progress
+timestamp: '2025-12-26T02:50:39.738753+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Multi-Domain Memories implementation complete - ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Multi-Domain Memories implementation complete - all 24 tasks across 5 phases done
+## Summary
+Task 5.6 (Update Documentation) complete. The entire Multi-Domain Memories specification (SPEC-2025-12-25-001) is now fully implemented.
+
+## Changes Made
+- Added "Multi-Domain Memory Storage" section to CLAUDE.md
+- Documented Domain enum (PROJECT vs USER) with storage locations
+- Documented domain selection syntax ([global], [user], domain prefixes)
+- Added USER_MEMORIES_REMOTE and related hook env vars to config table
+- Added User Memory Remote Sync section
+- Updated Models section with Domain enum
+
+## Related Files
+- CLAUDE.md:80-98 (Multi-Domain section)
+- CLAUDE.md:150-157 (Models with Domain)
+- CLAUDE.md:197-214 (Hook Configuration with new env vars)
+- CLAUDE.md:229-244 (User Memory Remote Sync)
+- docs/spec/active/2025-12-25-multi-domain-memories/PROGRESS.md (updated to complete)
