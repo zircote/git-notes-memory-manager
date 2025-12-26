@@ -285,3 +285,15 @@ Added `export_metrics_if_configured()` call to `timed_hook_execution.__exit__()`
 
 ## Related Files
 - src/git_notes_memory/hooks/hook_utils.py:359-367
+
+---
+type: progress
+timestamp: '2025-12-26T21:08:39.840181+00:00'
+summary: The variable isn't set when developing from source. The fix is to add a fallback
+  to the current d...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The variable isn't set when developing from source. The fix is to add a fallback to the current directory. Let me update the command:
