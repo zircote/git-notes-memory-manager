@@ -39,3 +39,18 @@ tags:
 `─────────────────────────────────────────────────`
 
 Now...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:23:16.405956+00:00'
+summary: "...embedding duration  \n3. `embed_batch()` - Batch embedding with count\
+  \ tracking\nThe lazy loading..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...embedding duration
+3. `embed_batch()` - Batch embedding with count tracking
+The lazy loading pattern means we track *when* the model is loaded, which is expensive (100s of ms).
+`───────────────────────...
