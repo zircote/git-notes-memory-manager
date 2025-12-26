@@ -2054,3 +2054,41 @@ Successfully completed the `/claude-spec:deep-clean --focus MAXALL` code review 
 - src/git_notes_memory/patterns.py:1-50
 - src/git_notes_memory/subconsciousness/capture_store.py:190-200
 - docs/code-review/2025/12/26/REMEDIATION_TASKS.md (full)
+
+---
+type: progress
+timestamp: '2025-12-26T19:10:58.948401+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed observability stack - data now flowing to ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed observability stack - data now flowing to Grafana dashboards
+## Summary
+The observability stack was fully functional but required correct environment variable configuration. The docker-compose.yml documentation was incorrect, leading to confusion about how to enable telemetry export.
+
+## Root Cause
+1. **Documentation Error**: `docker/docker-compose.yml` referenced incorrect env var `OTEL_EXPORTER_OTLP_ENDPOINT` instead of the actual `MEMORY_PLUGIN_OTLP_ENDPOINT`
+2. **SSRF Protection**: SEC-H-001 blocks localhost/internal endpoints by default, requiring `MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true` override
+
+## Changes Made
+1. Updated `docker/docker-compose.yml` with correct environment variable names and usage instructions
+2. Added comprehensive "Observability Configuration (OTLP)" section to `CLAUDE.md` documenting:
+   - Required environment variables
+   - Shell profile persistence instructions
+   - Docker stack startup commands
+   - Dashboard access URLs
+
+## Verified Working
+- Prometheus: `memory_memories_captured_total`, `memory_capture_duration_ms_*` metrics ingested
+- Tempo: 4 traces visible including `capture`, `recall.search`, test operations
+- All 138 observability tests passing
+- Grafana dashboards (Memory Operations, Hook Performance) now queryable
+
+## Related Files
+- docker/docker-compose.yml:1-22
+- CLAUDE.md:256-281
+- src/git_notes_memory/observability/exporters/otlp.py:68-112 (SSRF validation)
