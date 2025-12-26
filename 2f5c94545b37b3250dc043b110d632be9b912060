@@ -1,0 +1,16 @@
+---
+type: progress
+timestamp: '2025-12-26T01:14:52.222408+00:00'
+summary: '...(mypy, ruff)'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...(mypy, ruff)
+
+### 2025-12-26 - Phase 2 Complete
+- Added detect-secrets>=1.4.0 dependency
+- Implemented DetectSecretsAdapter wrapping Yelp's detect-secrets library
+  - Maps 27+ detector types to...
