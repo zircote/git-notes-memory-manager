@@ -26,7 +26,7 @@ This document tracks implementation progress against the spec plan.
 
 | ID | Description | Status | Started | Completed | Notes |
 |----|-------------|--------|---------|-----------|-------|
-| 1.1 | Add Domain Enum to Config | pending | | | |
+| 1.1 | Add Domain Enum to Config | done | 2025-12-26 | 2025-12-26 | |
 | 1.2 | Extend Memory Model with Domain Field | pending | | | |
 | 1.3 | Create Schema Migration for Domain Column | pending | | | |
 | 1.4 | Update IndexService for Domain | pending | | | |
@@ -57,7 +57,7 @@ This document tracks implementation progress against the spec plan.
 
 | Phase | Name | Progress | Status |
 |-------|------|----------|--------|
-| 1 | Foundation | 0% | pending |
+| 1 | Foundation | 25% | in-progress |
 | 2 | Storage Layer | 0% | pending |
 | 3 | Service Layer | 0% | pending |
 | 4 | Hooks Integration | 0% | pending |

@@ -36,10 +36,10 @@ This plan implements multi-domain memory storage in 5 phases, building from foun
 #### Task 1.1: Add Domain Enum to Config
 - **Description**: Create `Domain` enum and path helper functions in `config.py`
 - **Acceptance Criteria**:
-  - [ ] `Domain` enum with `USER` and `PROJECT` values
-  - [ ] `get_user_memories_path()` returns `~/.local/share/memory-plugin/user-memories/`
-  - [ ] `get_user_index_path()` returns `~/.local/share/memory-plugin/user/index.db`
-  - [ ] Functions create directories if they don't exist
+  - [x] `Domain` enum with `USER` and `PROJECT` values
+  - [x] `get_user_memories_path()` returns `~/.local/share/memory-plugin/user-memories/`
+  - [x] `get_user_index_path()` returns `~/.local/share/memory-plugin/user/index.db`
+  - [x] Functions create directories if they don't exist (via `ensure_exists=True` parameter)
 - **Notes**: Use existing XDG pattern from `get_index_path()`
 
 #### Task 1.2: Extend Memory Model with Domain Field
