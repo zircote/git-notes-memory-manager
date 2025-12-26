@@ -636,3 +636,38 @@ Committed deep-clean remediation changes, pushed to worktree branch, and marked 
 
 ## Related Files
 - PR: https://github.com/zircote/git-notes-memory/pull/24
+
+---
+type: progress
+timestamp: '2025-12-26T03:23:15.820356+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Addressed PR #24 review comments: security fixes...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Addressed PR #24 review comments: security fixes and code restructuring
+## Summary
+Fixed all PR review comments by divesting inline Python from command markdown files into separate scripts.
+
+## Changes Made
+- Created `scripts/metrics.py` - safe argument parsing via argparse
+- Created `scripts/traces.py` - safe argument parsing via argparse
+- Created `scripts/health.py` - safe argument parsing via argparse
+- Updated `commands/metrics.md` - now calls script instead of inline Python
+- Updated `commands/traces.md` - now calls script instead of inline Python
+- Updated `commands/health.md` - now calls script instead of inline Python
+- Fixed `exporters/__init__.py` - explicit imports to resolve undefined export warnings
+
+## Security Issue Fixed
+The previous implementation embedded `$ARGUMENTS` directly into Python string literals (`args = '$ARGUMENTS'.split()`), which allowed command injection. The new scripts pass arguments safely via `sys.argv`.
+
+## Related Files
+- scripts/metrics.py:1-93
+- scripts/traces.py:1-120
+- scripts/health.py:1-245
+- commands/metrics.md:72-80
+- commands/traces.md:75-82
+- commands/health.md:72-79
