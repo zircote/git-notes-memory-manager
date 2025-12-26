@@ -758,3 +758,16 @@ The migration for domain needs to add the column and create an index, following 
 `─────────────────────────────────────────────────`
 
 Now...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.027685+00:00'
+summary: I see the issue - the block pattern matching code needs to be updated because
+  the group indices c...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the issue - the block pattern matching code needs to be updated because the group indices changed. With the new pattern:
+-...
