@@ -575,3 +575,15 @@ tags:
 ---
 
 Those unreachable warnings are for the final `return None` statements which are correct pattern for exhaustive enum handling. Now let me create the models.py file:
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:10.481055+00:00'
+summary: '...`eval()` as an example of malicious code injection. Let me rewrite this
+  without that specific ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`eval()` as an example of malicious code injection. Let me rewrite this without that specific pattern:
