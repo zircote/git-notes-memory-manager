@@ -113,7 +113,9 @@ class TestPIIDetector:
 
         detections = detector.detect(content)
 
-        cc_detections = [d for d in detections if d.secret_type == SecretType.PII_CREDIT_CARD]
+        cc_detections = [
+            d for d in detections if d.secret_type == SecretType.PII_CREDIT_CARD
+        ]
         assert len(cc_detections) == 1
         assert cc_detections[0].confidence == 0.9  # Luhn validated
 
@@ -124,7 +126,9 @@ class TestPIIDetector:
 
         detections = detector.detect(content)
 
-        cc_detections = [d for d in detections if d.secret_type == SecretType.PII_CREDIT_CARD]
+        cc_detections = [
+            d for d in detections if d.secret_type == SecretType.PII_CREDIT_CARD
+        ]
         assert len(cc_detections) == 1
 
     def test_detect_amex(self):
@@ -134,7 +138,9 @@ class TestPIIDetector:
 
         detections = detector.detect(content)
 
-        cc_detections = [d for d in detections if d.secret_type == SecretType.PII_CREDIT_CARD]
+        cc_detections = [
+            d for d in detections if d.secret_type == SecretType.PII_CREDIT_CARD
+        ]
         assert len(cc_detections) == 1
 
     def test_reject_invalid_credit_card(self):
@@ -144,7 +150,9 @@ class TestPIIDetector:
 
         detections = detector.detect(content)
 
-        cc_detections = [d for d in detections if d.secret_type == SecretType.PII_CREDIT_CARD]
+        cc_detections = [
+            d for d in detections if d.secret_type == SecretType.PII_CREDIT_CARD
+        ]
         assert len(cc_detections) == 0
 
     def test_detect_phone_with_parens(self):
@@ -154,7 +162,9 @@ class TestPIIDetector:
 
         detections = detector.detect(content)
 
-        phone_detections = [d for d in detections if d.secret_type == SecretType.PII_PHONE]
+        phone_detections = [
+            d for d in detections if d.secret_type == SecretType.PII_PHONE
+        ]
         assert len(phone_detections) == 1
 
     def test_detect_phone_with_dashes(self):
@@ -164,7 +174,9 @@ class TestPIIDetector:
 
         detections = detector.detect(content)
 
-        phone_detections = [d for d in detections if d.secret_type == SecretType.PII_PHONE]
+        phone_detections = [
+            d for d in detections if d.secret_type == SecretType.PII_PHONE
+        ]
         assert len(phone_detections) == 1
 
     def test_detect_phone_with_dots(self):
@@ -174,7 +186,9 @@ class TestPIIDetector:
 
         detections = detector.detect(content)
 
-        phone_detections = [d for d in detections if d.secret_type == SecretType.PII_PHONE]
+        phone_detections = [
+            d for d in detections if d.secret_type == SecretType.PII_PHONE
+        ]
         assert len(phone_detections) == 1
 
     def test_detect_phone_with_country_code(self):
@@ -184,7 +198,9 @@ class TestPIIDetector:
 
         detections = detector.detect(content)
 
-        phone_detections = [d for d in detections if d.secret_type == SecretType.PII_PHONE]
+        phone_detections = [
+            d for d in detections if d.secret_type == SecretType.PII_PHONE
+        ]
         assert len(phone_detections) == 1
 
     def test_empty_content(self):
