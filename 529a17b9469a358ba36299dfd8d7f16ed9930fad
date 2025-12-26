@@ -326,3 +326,30 @@ Added comprehensive observability instrumentation to the CaptureService class.
 ## Related Files
 - src/git_notes_memory/capture.py:354 (decorator on capture method)
 - src/git_notes_memory/capture.py:480-581 (trace_operation spans in _do_capture)
+
+---
+type: progress
+timestamp: '2025-12-26T02:48:41.573648+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.2: Instrumented RecallService w...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.2: Instrumented RecallService with observability
+## Summary
+Added observability instrumentation to semantic and text search methods.
+
+## Changes Made
+- Added `@measure_duration("memory_search")` decorator to `search()` method
+- Added `@measure_duration("memory_search_text")` decorator to `search_text()` method
+- Added `trace_operation("search")` root spans with `search_type` label
+- Added nested spans for: embed_query, vector_search
+- Added `memories_retrieved_total` counter with search_type label
+- All 56 existing tests pass
+
+## Related Files
+- src/git_notes_memory/recall.py:140 (semantic search instrumentation)
+- src/git_notes_memory/recall.py:233 (text search instrumentation)
