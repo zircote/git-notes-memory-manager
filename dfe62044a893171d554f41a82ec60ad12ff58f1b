@@ -1421,3 +1421,17 @@ tags:
 
 ...(https://github.com/zircote/git-notes-memory/issues/12)
   - Features: Multi-layer secret detection (pattern + entropy), PII detection, configurable filtering strategies, allowlist management, SOC2 audit...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:32:13.075596+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The user''s choices are security-forward: Patter...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The user's choices are security-forward: Pattern + Entropy detection with Redact as default, plus full remediation capability. Importantly,...
