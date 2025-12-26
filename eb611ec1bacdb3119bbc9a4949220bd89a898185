@@ -515,3 +515,15 @@ tags:
 
 ...───────────────`
 The code review found 16+ global variables across 5 subconsciousness modules. This pattern creates thread-safety issues and makes testing difficult. The ServiceRegistry pattern provides...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:10.182629+00:00'
+summary: '...This pattern creates thread-safety issues and makes testing difficult.
+  The ServiceRegistry pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...This pattern creates thread-safety issues and makes testing difficult. The ServiceRegistry pattern provides thread-safe singleton management with a clean reset mechanism for tests. However,...
