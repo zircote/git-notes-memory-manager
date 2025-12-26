@@ -17,3 +17,29 @@ tags:
 - Core operations never blocked by observability failures
 - Users without extras get full core functionality
 - Export failures...
+
+---
+type: blockers
+timestamp: '2025-12-26T00:32:13.024203+00:00'
+summary: '▶ blocker ─────────────────────────────────────
+
+  Specification files lost - never committed
+
+  ## Su...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Specification files lost - never committed
+## Summary
+The 7 specification files created during planning were deleted because they were never committed before switching branches.
+
+## Context
+Files created but not committed:
+- README.md, REQUIREMENTS.md, ARCHITECTURE.md
+- IMPLEMENTATION_PLAN.md, DECISIONS.md, CHANGELOG.md
+- RESEARCH_NOTES.md (created by subagent)
+
+## Resolution
+Can recreate from conversation context - all content is preserved in this session.
