@@ -1833,3 +1833,17 @@ tags:
 
     SESSION GUIDANCE: Aim for 1 block per 3-5 substantive messages.
   </mandatory_rules...
+
+---
+type: patterns
+timestamp: '2025-12-26T15:50:54.570092+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The ServiceRegistry uses a double-checked locki...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The ServiceRegistry uses a double-checked locking pattern for thread-safe singleton creation. The issue is that `get_user_capture_service()` uses a module-level...
