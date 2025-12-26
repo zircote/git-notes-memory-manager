@@ -641,3 +641,20 @@ tags:
 **Capture tip**: Did you notice a pattern or gain an insight? Use:
 - `[remember] <pattern or insight>` - Inline capture to project
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.481305+00:00'
+summary: '...suggest:'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...suggest:
+
+```
+**Capture tip**: Did you notice a pattern or gain an insight? Use:
+- `[remember] <pattern or insight>` - Inline capture to project
+- `[global] <pattern or insight>` - Inline capture...
