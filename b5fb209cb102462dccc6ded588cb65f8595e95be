@@ -453,3 +453,33 @@ Task 5.4 complete. The `/memory:status` command now displays both project memori
 - commands/status.md:150-288 (verbose status)
 - commands/status.md:293-305 (recommendations)
 - commands/status.md:328-345 (capture reminder)
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.138389+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Added domain filtering to /memory:recall and /me...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Added domain filtering to /memory:recall and /memory:search commands
+## Summary
+Task 5.5 complete. Both `/memory:recall` and `/memory:search` commands now support `--domain` argument for filtering search scope.
+
+## Changes Made
+- Added `--domain=all|user|project` argument to recall command
+- Updated recall help text with domain documentation
+- Added domain indicators (🌐/📁) to search results display
+- Updated `/memory:search` with same domain filtering capability
+- Updated examples in both commands with domain usage patterns
+- Updated memory capture reminders to include global capture syntax
+
+## Related Files
+- commands/recall.md:1-60 (help section with domain docs)
+- commands/recall.md:66-140 (argument parsing and search execution)
+- commands/recall.md:143-177 (results format with domain indicators)
+- commands/search.md:1-57 (help section with domain docs)
+- commands/search.md:91-183 (search execution with domain)
