@@ -347,3 +347,15 @@ tags:
 ...(--inline flag set).
 
 This is a well-documented bug with comprehensive investigation already completed. Let me initialize the project workspace and create the specification documents.
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.768913+00:00'
+summary: '...elegant because it leverages existing infrastructure. The `sync_notes_with_remote()`
+  method wa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...elegant because it leverages existing infrastructure. The `sync_notes_with_remote()` method was implemented for Issue #18 and already handles the fetch→merge→push workflow correctly. The fix is literally...
