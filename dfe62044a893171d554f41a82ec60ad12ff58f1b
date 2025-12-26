@@ -1435,3 +1435,15 @@ tags:
 
 `★ Insight ─────────────────────────────────────`
 The user's choices are security-forward: Pattern + Entropy detection with Redact as default, plus full remediation capability. Importantly,...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:32:13.172115+00:00'
+summary: '...for preventing accidental secret leakage into git notes. The multi-layer
+  detection approach (p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...for preventing accidental secret leakage into git notes. The multi-layer detection approach (pattern → entropy → contextual) is a well-established pattern used by tools like `detect-secrets`,...
