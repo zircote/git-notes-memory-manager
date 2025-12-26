@@ -441,3 +441,16 @@ tags:
 
 ...───────────────────────────────────`
 The existing Stop hook uses `SessionAnalyzer` with regex-based pattern matching - not the LLM-powered subconsciousness. Task 2.10 needs to integrate the new `ImplicitCaptureService...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:09.760535+00:00'
+summary: '...has explicit completion criteria that prevent moving forward with incomplete
+  foundations - a p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...has explicit completion criteria that prevent moving forward with incomplete foundations - a pattern from the CognitiveSubstrate research emphasizing "don't trust, verify."
+3. **85 tasks across...
