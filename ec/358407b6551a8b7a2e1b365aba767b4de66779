@@ -256,3 +256,32 @@ The observability pipeline IS functioning correctly. Metrics pushed via OTLP rea
 ## Related Files
 - docker/otel-collector-config.yaml:53-55 (prometheus exporter with `namespace: memory`)
 - src/git_notes_memory/observability/exporters/otlp.py:552 (export function)
+
+---
+type: progress
+timestamp: '2025-12-26T21:08:39.756482+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed hook metrics not pushing to OTLP
+
+  ## Summa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed hook metrics not pushing to OTLP
+## Summary
+Added `export_metrics_if_configured()` call to `timed_hook_execution.__exit__()` so all hooks now push metrics after execution.
+
+## Changes Made
+- Added OTLP export call in `timed_hook_execution.__exit__()` after metrics collection
+- Wrapped in try/except to prevent hook failure if export fails
+
+## Verification
+- Test hook pushed metrics to OTLP
+- Metric appeared in Prometheus: `memory_hook_executions_total{hook="TestHook"}: 1`
+- 17-second wait confirmed scrape cycle picked it up
+
+## Related Files
+- src/git_notes_memory/hooks/hook_utils.py:359-367
