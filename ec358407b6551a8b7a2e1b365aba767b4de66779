@@ -46,3 +46,29 @@ Only `stop_handler.py` pushes metrics. Other hooks (SessionStart, UserPromptSubm
 
 ## Related Files
 - src/git_notes_memory/hooks/hook_utils.py:334-357 (missing export call)
+
+---
+type: blockers
+timestamp: '2025-12-26T21:08:39.798898+00:00'
+summary: '▶ blocker ─────────────────────────────────────
+
+  3 of 5 hook handlers lack metrics instrumentation...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+3 of 5 hook handlers lack metrics instrumentation
+## Summary
+Only `post_tool_use_handler.py` and `pre_compact_handler.py` use `timed_hook_execution`. These handlers are missing it:
+- `session_start_handler.py`
+- `stop_handler.py`
+- `user_prompt_handler.py`
+
+## Impact
+SessionStart and UserPromptSubmit hooks fire but produce no metrics.
+
+## Related Files
+- src/git_notes_memory/hooks/session_start_handler.py
+- src/git_notes_memory/hooks/stop_handler.py
+- src/git_notes_memory/hooks/user_prompt_handler.py
