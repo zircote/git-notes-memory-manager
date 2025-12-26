@@ -2777,3 +2777,19 @@ tags:
   - **Completed:** 2025-12-26 - Added `SyncService.iter_notes()` generator for memory-bounded iteration
 
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T15:49:14.015286+00:00'
+summary: '...`src/git_notes_memory/embedding.py:125-173`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...`src/git_notes_memory/embedding.py:125-173`
+  - Action: Add background preload option
+  - **Completed:** 2025-12-26 - Added `EmbeddingService.warmup()` method to pre-load model and trigger JIT
+
+-...
