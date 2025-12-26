@@ -232,3 +232,30 @@ tags:
 ---
 
 The fix is likely to add `resource_to_telemetry_conversion` setting. Let me update the collector config:
+
+---
+type: progress
+timestamp: '2025-12-26T20:11:07.643045+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed OTEL duplicate label issue by removing res...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed OTEL duplicate label issue by removing resource processor
+## Summary
+The test metric `memory_test_counter_total` successfully reached Prometheus with the namespace label. The duplicate label errors shown are from before the restart (17:51).
+
+## Changes Made
+- Removed `resource` processor from all pipelines in docker/otel-collector-config.yaml
+- Python's OTLP exporter already sets resource attributes, so the processor was duplicating them
+
+## Verification
+- Export returned True
+- Metric visible in Prometheus with correct labels
+- No new duplicate errors after restart
+
+## Related Files
+- docker/otel-collector-config.yaml:88,93,98
