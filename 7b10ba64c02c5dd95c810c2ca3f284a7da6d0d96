@@ -208,3 +208,15 @@ tags:
 ...format: text (default), json, prometheus
     --filter=PATTERN      Filter metrics by name pattern (e.g., "capture", "hook")
     --export              Export metrics/traces to OTLP endpoint...
+
+---
+type: patterns
+timestamp: '2025-12-26T19:10:59.038258+00:00'
+summary: '...I''m using is wrong. I should check if it exists, and if not, create
+  and register. The proper p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...I'm using is wrong. I should check if it exists, and if not, create and register. The proper pattern should use the `try...KeyError` approach or a different mechanism. Let me look at how other...
