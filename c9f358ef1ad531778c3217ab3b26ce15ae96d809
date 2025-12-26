@@ -184,3 +184,12 @@ summary: The conflicts show main has the completed work, while the feature branc
 ---
 
 The conflicts show main has the completed work, while the feature branch has the initial state. I'll take the completed (HEAD) version:
+
+---
+type: progress
+timestamp: '2025-12-26T03:51:14.527129+00:00'
+summary: '...main has the completed work, while the feature branch has the initial
+  state. I''ll take the comple'
+---
+
+...main has the completed work, while the feature branch has the initial state. I'll take the completed (HEAD) version:
