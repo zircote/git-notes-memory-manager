@@ -755,3 +755,36 @@ Created comprehensive specification documents for implementing an LLM-powered su
 - docs/spec/active/2025-12-25-llm-subconsciousness/DECISIONS.md
 - docs/spec/active/2025-12-25-llm-subconsciousness/README.md
 - docs/spec/active/2025-12-25-llm-subconsciousness/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-26T02:13:08.869934+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated ARCHITECTURE.md with LLM output template...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated ARCHITECTURE.md with LLM output templates and pushed to v1.0.0 branch
+## Summary
+Added explicit LLM output templates section to ARCHITECTURE.md ensuring backend LLM uses standard memory format with YAML frontmatter and progressive hydration levels.
+
+## Changes Made
+- Added "LLM Output Templates" section to ARCHITECTURE.md (~200 lines)
+  - Memory Output JSON Schema matching `serialize_note()` format
+  - Progressive hydration level requirements (SUMMARY, FULL, FILES)
+  - Implicit capture prompt template
+  - Consolidation prompt template
+  - Surfacing context template
+  - Template loading from `subconsciousness/templates/` directory
+
+## Git Operations
+- Committed 6 spec files (3,253 insertions)
+- Pushed `issue-11-subconsciousness` branch to origin
+- Merged into `v1.0.0` branch
+- Pushed `v1.0.0` to origin
+
+## Related Files
+- docs/spec/active/2025-12-25-llm-subconsciousness/ARCHITECTURE.md:746-950
