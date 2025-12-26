@@ -839,3 +839,19 @@ tags:
 
         assert "IMPORTANT: Respond ONLY with valid JSON" in result[0]["content"]
         assert result[0]["content"].startswith...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:56:48.498454+00:00'
+summary: '...assert len(result) == 2'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_providers.py
+---
+
+...assert len(result) == 2
+        assert result[0]["role"] == "system"
+        assert "IMPORTANT: Respond ONLY with valid JSON" in result[0]["content"]
+
+    def test_extract_json_object(self)...
