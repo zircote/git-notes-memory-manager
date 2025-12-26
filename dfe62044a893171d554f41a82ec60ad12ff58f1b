@@ -33,3 +33,20 @@ tags:
 
 | Dependency | Type | Notes |
 |------------|------|--...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:01:27.869261+00:00'
+summary: '...user/index.db`'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...user/index.db`
+  - [ ] Functions create directories if they don't exist
+- **Notes**: Use existing XDG pattern from `get_index_path()`
+
+#### Task 1.2: Extend Memory Model with Domain Field
+- **Description**:...
