@@ -598,3 +598,26 @@ tags:
 - Works with `anthropic` SDK
 - Graceful degradation if SDK not installed
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:07:20.152204+00:00'
+summary: '...triggers'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...triggers
+- [ ] File access trigger
+- [ ] Error message trigger
+- [ ] Topic mention trigger
+- [ ] Pattern match trigger
+
+**Acceptance Criteria**:
+- Multiple triggers
+- Configurable
+- Fast detection
+
+####...
