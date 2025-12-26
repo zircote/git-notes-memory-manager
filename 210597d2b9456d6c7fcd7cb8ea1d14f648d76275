@@ -167,3 +167,21 @@ tags:
 **Flagged As**: Using new IndexService instead of singleton.
 
 **Actual Design**: Per-repository...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:43:56.530361+00:00'
+summary: '...already implements double-checked locking:'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_REPORT.md
+---
+
+...already implements double-checked locking:
+```python
+# ServiceRegistry.get() already uses this pattern
+class ServiceRegistry:
+    _lock: ClassVar[threading.Lock] = threading.Lock()
+
+    @classmethod...
