@@ -1,0 +1,13 @@
+---
+type: blockers
+timestamp: '2025-12-26T01:39:09.166766+00:00'
+summary: '...auto_approved: Memories that were auto-approved (high confidence).'
+tags:
+- auto-captured
+- post-tool-use
+- file:implicit_capture_service.py
+---
+
+...auto_approved: Memories that were auto-approved (high confidence).
+        blocked: Memories that were blocked by adversarial screening.
+        discarded: Memories that were discarded (low confidence)....
