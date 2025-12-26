@@ -30,3 +30,24 @@ The SyncService uses `get_project_index_path(repo_path)` which resolves to `.mem
 ## Related Files
 - src/git_notes_memory/sync.py:88
 - src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T17:42:44.060913+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
