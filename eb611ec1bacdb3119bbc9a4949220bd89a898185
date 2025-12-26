@@ -501,3 +501,17 @@ tags:
 The command follows the existing pattern in this codebase:
 1. **YAML frontmatter** with `description`, `argument-hint`, and `allowed-tools`
 2...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:10.133370+00:00'
+summary: '...───────────────`
+
+  The code review found 16+ global variables across 5 subconsciousness modules....'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...───────────────`
+The code review found 16+ global variables across 5 subconsciousness modules. This pattern creates thread-safety issues and makes testing difficult. The ServiceRegistry pattern provides...
