@@ -432,3 +432,14 @@ tags:
 3. Gracefully handles missing user-memories repo
 
 The key insight is that user memories live in a separate bare repo at `~/.local/share/memory-plugin/user-memories/`,...
+
+---
+type: learnings
+timestamp: '2025-12-26T03:09:21.951612+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
