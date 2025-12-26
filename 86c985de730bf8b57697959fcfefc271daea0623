@@ -48,3 +48,24 @@ Updated all specification documents to include user's additional requirements fo
 - docs/spec/active/2025-12-25-observability-instrumentation/DECISIONS.md:459-575
 - docs/spec/active/2025-12-25-observability-instrumentation/CHANGELOG.md:1-37
 - docs/spec/active/2025-12-25-observability-instrumentation/README.md:41-62
+
+---
+type: progress
+timestamp: '2025-12-26T02:37:10.575886+00:00'
+summary: '...result = subprocess.run(cmd, ..., timeout=timeout)'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_REPORT.md
+---
+
+...result = subprocess.run(cmd, ..., timeout=timeout)
+```
+
+**Status**: No fix needed - already implemented.
+
+---
+
+### CRIT-003: SQLite Connection Leak (Already Handled)
+
+**Finding**: "SQLite connections...
