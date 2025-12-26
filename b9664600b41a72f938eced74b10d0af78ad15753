@@ -6581,3 +6581,18 @@ tags:
 | PERF-H-002 | N+1 Query in Reindex | ✅ Completed |
 | PERF-H-003 | Unbounded collect_notes | ✅ Completed |
 | PERF-H-004 | Cold Start Embedding...
+
+---
+type: progress
+timestamp: '2025-12-26T16:55:27.264708+00:00'
+summary: '...PERF-H-002 | N+1 Query in Reindex | ✅ Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...PERF-H-002 | N+1 Query in Reindex | ✅ Completed |
+| PERF-H-003 | Unbounded collect_notes | ✅ Completed |
+| PERF-H-004 | Cold Start Embedding | ✅ Completed |
+| PERF-H-005 | FTS5 Text Search | ✅...
