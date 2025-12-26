@@ -348,3 +348,35 @@ Metrics are only exported when a session ends (Stop hook). Since this session is
 ## Related Files
 - src/git_notes_memory/observability/exporters/otlp.py:422-479 (export_metrics)
 - src/git_notes_memory/hooks/stop_handler.py:505-538 (OTLP export trigger)
+
+---
+type: progress
+timestamp: '2025-12-26T20:11:07.850939+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Added real-time metrics export to all hooks and ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Added real-time metrics export to all hooks and captures
+## Summary
+Modified all hook handlers and CaptureService to flush metrics to OTLP after each operation, enabling real-time observability instead of session-end-only export.
+
+## Changes Made
+- Added `flush_metrics_to_otlp()` helper to `hook_utils.py`
+- Modified `capture.py:809-816` to export after each memory capture
+- Modified `session_start_handler.py` to flush before exit
+- Modified `user_prompt_handler.py` to flush before exit
+- Modified `post_tool_use_handler.py` to flush before exit
+- Modified `pre_compact_handler.py` to flush before exit
+- `stop_handler.py` already had OTLP export
+
+## Related Files
+- src/git_notes_memory/hooks/hook_utils.py (new function)
+- src/git_notes_memory/capture.py:809-816
+- src/git_notes_memory/hooks/session_start_handler.py
+- src/git_notes_memory/hooks/user_prompt_handler.py
+- src/git_notes_memory/hooks/post_tool_use_handler.py
+- src/git_notes_memory/hooks/pre_compact_handler.py
