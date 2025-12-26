@@ -694,3 +694,20 @@ tags:
 Implement two-tier adversarial detection:
 1. **Fast path (regex)**: Pattern match for known injection patterns
 2. **Slow path (LLM)**: Deep analysis for contradictions,...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:08:59.091683+00:00'
+summary: '...**Negative**: Regex can''t catch novel attacks'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...**Negative**: Regex can't catch novel attacks
+- **Negative**: False positives possible with pattern matching
+
+**Alternatives Considered**:
+1. **LLM-only**: Too slow for every capture
+2. **No...
