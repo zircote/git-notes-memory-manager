@@ -397,3 +397,24 @@ Rebase completed successfully. v1.0.0 is now rebased onto origin/v1.0.0.
 
 ```
 aa35822 fix(plugin): correct...
+
+---
+type: progress
+timestamp: '2025-12-26T14:45:48.675459+00:00'
+summary: '...installation path
+
+  - Doesn''t require scripts/ directory
+
+  - Already proven working (we used this ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...installation path
+- Doesn't require scripts/ directory
+- Already proven working (we used this workaround earlier)
+- More robust across different plugin installations
+
+**Option 3: Hybrid approach**
+```bash...
