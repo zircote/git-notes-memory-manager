@@ -2092,3 +2092,36 @@ The observability stack was fully functional but required correct environment va
 - docker/docker-compose.yml:1-22
 - CLAUDE.md:256-281
 - src/git_notes_memory/observability/exporters/otlp.py:68-112 (SSRF validation)
+
+---
+type: progress
+timestamp: '2025-12-26T19:10:58.992942+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed OTEL collector duplicate label conflict - ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed OTEL collector duplicate label conflict - dashboards now receive data
+## Summary
+The OTEL collector was rejecting metrics due to a `const_labels` conflict with resource attributes.
+
+## Root Cause
+```
+error: duplicate label names in constant and variable labels for metric "memory_memories_captured_total"
+```
+The `prometheus` exporter in `otel-collector-config.yaml` had `const_labels: service: git-notes-memory` which conflicted with the `service.name` resource attribute added by the `resource` processor.
+
+## Fix Applied
+Removed `const_labels` from the prometheus exporter config in `docker/otel-collector-config.yaml:56-57`.
+
+## Verification
+- Prometheus now shows: decisions=3, learnings=3, progress=3, blockers=3, patterns=3
+- Traces exported successfully (3 spans)
+- No duplicate label errors in collector logs
+
+## Related Files
+- docker/otel-collector-config.yaml:52-56
+- src/git_notes_memory/hooks/stop_handler.py:505-541 (added OTLP logging)
