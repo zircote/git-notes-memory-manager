@@ -3581,3 +3581,21 @@ tags:
 ...────────────────────────────────────────────`
 
 The `embed()` method already has the circuit breaker implemented correctly. Now I need to add the same circuit breaker logic to `embed_batch()`. Let me update it:
+
+---
+type: progress
+timestamp: '2025-12-26T15:50:54.369754+00:00'
+summary: 'Rebase completed successfully. v1.0.0 is now rebased onto origin/v1.0.0.
+
+  ```
+
+  aa35822 fix(plugin)...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Rebase completed successfully. v1.0.0 is now rebased onto origin/v1.0.0.
+
+```
+aa35822 fix(plugin): correct...
