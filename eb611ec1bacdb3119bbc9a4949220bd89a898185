@@ -1631,3 +1631,32 @@ Created `prompts.py` module containing structured prompts for memory extraction 
 ## Related Files
 - src/git_notes_memory/subconsciousness/prompts.py:1-332
 - tests/subconsciousness/test_prompts.py:1-187
+
+---
+type: progress
+timestamp: '2025-12-26T02:39:37.122059+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.5: ImplicitCaptureAgent with LL...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.5: ImplicitCaptureAgent with LLM-based memory extraction
+## Summary
+Created the `ImplicitCaptureAgent` that orchestrates transcript analysis using LLMs. The agent chunks transcripts, sends each chunk to the LLM with extraction prompts, parses structured JSON responses, and returns `ImplicitMemory` objects sorted by confidence.
+
+## Changes Made
+- Created `implicit_capture_agent.py` with `ImplicitCaptureAgent` class
+- Implemented async `analyze_transcript()` method for transcript processing
+- Implemented `_process_chunk()` for single chunk LLM analysis
+- Implemented `_parse_response()` for JSON parsing and memory conversion
+- Implemented `_parse_memory_item()` with validation and type conversion
+- Added confidence threshold filtering (default 0.5)
+- Added deduplication via source_hash (16-char SHA256)
+- Added 20 tests covering agent behavior, error handling, and edge cases
+
+## Related Files
+- src/git_notes_memory/subconsciousness/implicit_capture_agent.py:1-320
+- tests/subconsciousness/test_implicit_capture_agent.py:1-430
