@@ -3553,3 +3553,17 @@ tags:
 ...QUAL-M-001 | Validation Logic Duplicated | ✅ BY DESIGN (defense-in-depth) |
 | QUAL-M-002 | Pattern Scoring Complexity | ✅ ACCEPTABLE (TF-IDF, documented) |
 | QUAL-M-003 | 11-Parameter Method...
+
+---
+type: patterns
+timestamp: '2025-12-26T17:19:51.709183+00:00'
+summary: '...PEN-L-001: Unicode Normalization Bypass Potential ✅'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...PEN-L-001: Unicode Normalization Bypass Potential ✅
+  - **Status:** DOCUMENTED LIMITATION - Pattern matching uses raw strings; Unicode normalization would add complexity
+- [x] PEN-L-002: Git...
