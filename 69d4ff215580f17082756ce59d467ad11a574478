@@ -31,3 +31,19 @@ tags:
 1. **detect-secrets Caching**: Library handles pattern compilation internally
 2. **Lazy Loading**: detect-secrets loaded on first use, not import
 3....
+
+---
+type: patterns
+timestamp: '2025-12-26T00:46:07.659018+00:00'
+summary: '### Defense in Depth'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+### Defense in Depth
+
+1. **detect-secrets**: 27+ pattern detectors + entropy analysis
+2. **Custom PII**: SSN, credit cards, phone numbers
+3. **Hash-Only...
