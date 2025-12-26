@@ -873,3 +873,21 @@ tags:
             context=None,
             line_number=5,
             suggested_namespace...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:02:48.524957+00:00'
+summary: '...service.search.assert_called_once()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_novelty_checker.py
+---
+
+...service.search.assert_called_once()
+        args, _ = mock_recall_service.search.call_args
+        assert "I learned that SQLite is fast" in args[0]
+
+    def test_uses_suggested_namespace(
+        self,
+        checker:...
