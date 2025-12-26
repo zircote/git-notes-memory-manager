@@ -755,3 +755,18 @@ tags:
 ---
 
 Let me check if the test hook finished and verify the OTLP export happened:
+
+---
+type: progress
+timestamp: '2025-12-26T23:20:07.181029+00:00'
+summary: '...that doesn''t inherit your shell''s environment variables like `MEMORY_PLUGIN_OTLP_ENDPOINT`.
+
+  T...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...that doesn't inherit your shell's environment variables like `MEMORY_PLUGIN_OTLP_ENDPOINT`.
+
+The fix is to source your shell profile in `run-hook.sh` or read config from a file. Let me add support...
