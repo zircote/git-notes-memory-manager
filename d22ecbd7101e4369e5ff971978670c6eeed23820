@@ -871,3 +871,19 @@ tags:
 **Schema Migration Pattern in index.py**:
 1. `SCHEMA_VERSION` constant defines target version
 2. `_MIGRATIONS` dict maps...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.635947+00:00'
+summary: '...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and
+  `get_stats()`
+
+  The patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and `get_stats()`
+
+The pattern is simple: add an optional `domain: str | None = None` parameter and include `AND domain =...
