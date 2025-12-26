@@ -4453,3 +4453,35 @@ Split changes into logical commits following conventional commit format.
 - feat(hooks): security scanning and path fixes
 - docs: CHANGELOG v0.12.0 entry
 - docs: code review artifacts
+
+---
+type: progress
+timestamp: '2025-12-26T16:20:38.866612+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Added proactive memory search guidance to Sessio...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Added proactive memory search guidance to SessionStart templates
+## Summary
+Updated all three guidance templates (minimal, standard, detailed) with RULE 5 encouraging Claude to search for relevant memories BEFORE modifying code, rather than relying solely on the ~5 generic memories injected at session start.
+
+## Changes Made
+- Added RULE 5: PROACTIVE MEMORY SEARCH to `guidance_standard.md` with when/how to search
+- Added expanded RULE 5 to `guidance_detailed.md` with tables and code examples
+- Added brief proactive search note to `guidance_minimal.md`
+- Added failure mode warning for skipping proactive search in all templates
+- Updated self-audit reminders to include proactive search check
+- Updated test thresholds: standard 1500→1700 tokens, detailed 2500→2800 tokens
+
+## Context
+SessionStart uses a generic project name query that yields low relevance (~0.53). Task-specific queries yield much better results (~0.77+). This guidance encourages Claude to search for memories related to specific components/files before modifying them.
+
+## Related Files
+- src/git_notes_memory/hooks/templates/guidance_minimal.md:33-37
+- src/git_notes_memory/hooks/templates/guidance_standard.md:99-147
+- src/git_notes_memory/hooks/templates/guidance_detailed.md:154-199
+- tests/test_guidance_builder.py:213-227
