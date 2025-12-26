@@ -1602,3 +1602,15 @@ tags:
 ...- File: `src/git_notes_memory/capture.py:152-163`
   - Action: Use atomic lock acquisition pattern
   - **Completed:** 2025-12-26 - Removed unsafe mtime-based file deletion; rely on flock auto-release...
+
+---
+type: patterns
+timestamp: '2025-12-26T15:50:53.669449+00:00'
+summary: '...I''m using is wrong. I should check if it exists, and if not, create
+  and register. The proper p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...I'm using is wrong. I should check if it exists, and if not, create and register. The proper pattern should use the `try...KeyError` approach or a different mechanism. Let me look at how other...
