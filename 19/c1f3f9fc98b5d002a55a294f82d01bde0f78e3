@@ -389,3 +389,18 @@ tags:
 ---
 
 Based on the completed spec project from CLAUDE.md, I see that observability was implemented in `docs/spec/completed/2025-12-25-observability-instrumentation/` but **Phases 5-6 (OpenTelemetry...
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.896012+00:00'
+summary: '...stack) were skipped as optional**. This means:
+
+  **The OTLP export functionality hasn''t been im...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...stack) were skipped as optional**. This means:
+
+**The OTLP export functionality hasn't been implemented yet** - only the metrics collection, CLI commands, and internal instrumentation were completed....
