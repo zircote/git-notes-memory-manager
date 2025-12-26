@@ -16,3 +16,21 @@ class TestCompletedSpans:
     def setup_method(self) -> None:
         """Clear spans."""
         clear_completed...
+
+---
+type: progress
+timestamp: '2025-12-26T00:50:24.371715+00:00'
+summary: '...reset_config()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_tracing.py
+---
+
+...reset_config()
+
+    def test_get_completed_spans(self) -> None:
+        """Test getting completed spans."""
+        with trace_operation("op1"):
+            pass
+        with trace_operation("op2")...
