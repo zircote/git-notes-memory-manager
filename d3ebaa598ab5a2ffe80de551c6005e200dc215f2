@@ -904,3 +904,25 @@ tags:
 `★ Insight ─────────────────────────────────────`
 The `CaptureStore` is well-implemented with all CRUD operations needed for Task 2.8:
 - `save()`, `get()`, `get_pending()` for queue_for_review...
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:26.770140+00:00'
+summary: '...what was accomplished:
+
+  ## Remediation Summary
+
+  ### Critical Priority (2/2)
+
+  - **CRIT-001**: Im...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...what was accomplished:
+
+## Remediation Summary
+
+### Critical Priority (2/2)
+- **CRIT-001**: Implemented circuit breaker pattern for LLM provider calls with 3 states (CLOSED, OPEN, HALF_OPEN), configurable...
