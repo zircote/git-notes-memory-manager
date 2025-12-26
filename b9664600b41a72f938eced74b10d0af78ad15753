@@ -2625,3 +2625,19 @@ tags:
 - **Completed:** 2025-12-26 - Added `EmbeddingCircuitBreaker` class with CLOSED/OPEN/HALF_OPEN states
 
 ###...
+
+---
+type: progress
+timestamp: '2025-12-26T15:48:36.442030+00:00'
+summary: '...sending to LLM'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...sending to LLM
+- [x] **Tests:** Add test verifying secrets are filtered from LLM requests
+- **Completed:** 2025-12-26 - Integrated `SecretsFilteringService` into LLM client
+
+### CRIT-003: Move User...
