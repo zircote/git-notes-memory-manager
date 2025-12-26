@@ -207,3 +207,21 @@ tags:
 ---
 
 Let me see more of the schema creation and understand the full pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.420206+00:00'
+summary: '...requires.
+
+  `─────────────────────────────────────────────────`
+
+  Let me look at the existing ser...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...requires.
+`─────────────────────────────────────────────────`
+
+Let me look at the existing service registry pattern to understand how to implement Task 3.2:
