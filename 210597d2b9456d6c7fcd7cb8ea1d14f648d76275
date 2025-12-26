@@ -90,3 +90,23 @@ tags:
 
 - [x] **CRIT-002**: Add test for lock acquisition timeout
   -...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:43:56.445789+00:00'
+summary: '...safety, locks | Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_REPORT.md
+---
+
+...safety, locks | Completed |
+
+---
+
+## Critical Fixes Applied
+
+### 1. Thread-Safe Singleton Pattern (CRIT-001)
+
+**Problem**: Security module singletons lacked thread-safe initialization, risking...
