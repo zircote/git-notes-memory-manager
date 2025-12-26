@@ -23,3 +23,15 @@ tags:
 ---
 
 The test shows that the API key pattern matches the generic `secret` pattern first. I need to update the test to expect `[REDACTED:secret]`...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:26.447613+00:00'
+summary: The test shows that the API key pattern matches the generic `secret` pattern
+  first. I need to upd...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The test shows that the API key pattern matches the generic `secret` pattern first. I need to update the test to expect `[REDACTED:secret]` since `API_KEY=value` is matching...
