@@ -551,3 +551,15 @@ tags:
 ---
 
 All pattern tests pass. Now let me move to HIGH-002 and HIGH-003 which are related to database optimizations....
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:10.340186+00:00'
+summary: Now let me fix the N+1 pattern in `update_embedding`. The comment says "sqlite-vec
+  doesn't suppor...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now let me fix the N+1 pattern in `update_embedding`. The comment says "sqlite-vec doesn't support UPDATE well" so I'll use...
