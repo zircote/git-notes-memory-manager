@@ -1,0 +1,23 @@
+---
+type: patterns
+timestamp: '2025-12-26T00:44:38.277629+00:00'
+summary: '...Enums'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_models.py
+---
+
+...Enums
+    HydrationLevel,
+    IndexStats,
+    Memory,
+    MemoryResult,
+    NoteRecord,
+    # Pattern Models
+    Pattern,
+    PatternStatus,
+    PatternType,
+    SpecContext,
+    VerificationResult,
+)
