@@ -222,3 +222,11 @@ summary: '...completed_spans()` function returns the spans, but there''s no CLI 
 ---
 
 ...completed_spans()` function returns the spans, but there's no CLI script yet. Let me create a simple inline solution to display the traces:
+
+---
+type: progress
+timestamp: '2025-12-26T04:52:59.404658+00:00'
+summary: Test memory for metrics demo
+---
+
+This is a test memory captured to demonstrate the metrics system.
