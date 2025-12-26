@@ -712,6 +712,31 @@ class IndexService:
             cursor.execute("SELECT id FROM memories")
             return [row[0] for row in cursor.fetchall()]
 
+    def get_all_memories(
+        self,
+        namespace: str | None = None,
+    ) -> list[Memory]:
+        """Get all memories in the index.
+
+        Args:
+            namespace: Optional namespace filter.
+
+        Returns:
+            List of all Memory objects.
+        """
+        query = "SELECT * FROM memories WHERE 1=1"
+        params: list[object] = []
+
+        if namespace is not None:
+            query += " AND namespace = ?"
+            params.append(namespace)
+
+        query += " ORDER BY timestamp DESC"
+
+        with self._cursor() as cursor:
+            cursor.execute(query, params)
+            return [self._row_to_memory(row) for row in cursor.fetchall()]
+
     def exists(self, memory_id: str) -> bool:
         """Check if a memory exists in the index.
 
