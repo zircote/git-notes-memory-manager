@@ -2685,3 +2685,19 @@ tags:
 ...observability/exporters/otlp.py:61`
   - Action: Validate OTLP endpoint URLs against allowlist
   - **Completed:** 2025-12-26 - Added `_validate_otlp_endpoint()` with private IP blocking, `MEMORY_PLUGIN_OTLP_ALLOW...
+
+---
+type: progress
+timestamp: '2025-12-26T15:48:54.099862+00:00'
+summary: '...memory/subconsciousness/llm_client.py:688-700`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...memory/subconsciousness/llm_client.py:688-700`
+  - Action: Sanitize error messages before logging
+  - **Completed:** 2025-12-26 - Added `_sanitize_error_message()` helper to both Anthropic and OpenAI providers
+
+-...
