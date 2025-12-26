@@ -1,0 +1,352 @@
+---
+type: patterns
+timestamp: '2025-12-26T13:13:35.978665+00:00'
+summary: '...Root Cause Analysis'
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:13:35.998066+00:00'
+summary: '...Issue:**'
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:14:54.712290+00:00'
+summary: '...Root Cause Analysis'
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:14:54.736393+00:00'
+summary: '...Issue:**'
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:19:02.441005+00:00'
+summary: '...Root Cause Analysis'
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:19:02.464011+00:00'
+summary: '...Issue:**'
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:29:11.820739+00:00'
+summary: '...Fixing a bug | `"error handling retry logic"` |'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+...Fixing a bug | `"error handling retry logic"` |
+| Making architectural decisions | `"service pattern dependency injection"` |
+
+### How to Search
+
+```python
+# Use the recall service directly
+from...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:30:24.500984+00:00'
+summary: '...this work?'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...this work?
+- [ ] Did we learn something in a previous session that applies?
+- [ ] Is there a pattern I should follow or avoid?
+
+**SEARCH FIRST, THEN ACT.** Prior context prevents contradicting...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:17.985938+00:00'
+summary: '...Root Cause Analysis
+
+  **The issue occurs due to a mismatch between the expected plugin path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.037095+00:00'
+summary: '...Issue:**
+
+  - `commands/metrics.md:76-77` - Path resolution logic
+
+  - `commands/health.md:76-77` - ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.094259+00:00'
+summary: "...resolution logic\n- `commands/health.md:76-77` - Same pattern  \n- `commands/traces.md:79-80`\
+  \ - ..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+- `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.141919+00:00'
+summary: "...`commands/health.md:76-77` - Same pattern  \n- `commands/traces.md:79-80`\
+  \ - Same pattern\n\n**Pat..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+- `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets.md`,...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.186425+00:00'
+summary: '...capture/*/`
+
+  3. **Actual path**: `~/.claude/plugins/cache/zircote-claude-marketplace/memory-cap...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...capture/*/`
+3. **Actual path**: `~/.claude/plugins/cache/zircote-claude-marketplace/memory-capture/`
+4. Pattern doesn't match → `PLUGIN_ROOT=""` (empty string)
+5. `uv run --directory ""` fails with "a value...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.233263+00:00'
+summary: '...capture
+
+  /Users/AllenR1_1/.claude/plugins/cache/zircote-claude-marketplace/memory-capture
+
+  # Th...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...capture
+/Users/AllenR1_1/.claude/plugins/cache/zircote-claude-marketplace/memory-capture
+
+# The glob pattern expects:
+~/.claude/plugins/cache/git-notes-memory/memory-capture/*/
+#...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.278744+00:00'
+summary: '...but should use Python module imports instead
+
+  ### Suggested Approach
+
+  **Option 1: Fix path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...but should use Python module imports instead
+
+### Suggested Approach
+
+**Option 1: Fix path pattern (short-term)**
+```bash
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/*/memory-capture...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.330428+00:00'
+summary: '...investigation context including:
+
+  ### What was included:
+
+  1. **Root Cause Analysis**: Hardcode...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...investigation context including:
+
+### What was included:
+
+1. **Root Cause Analysis**: Hardcoded path pattern `git-notes-memory/` doesn't match marketplace install path `zircote-claude-marketplace/`
+
+2....
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.381400+00:00'
+summary: '...`zircote-claude-marketplace/`
+
+  2. **Affected Files**: All 12+ command files with the same brok...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`zircote-claude-marketplace/`
+
+2. **Affected Files**: All 12+ command files with the same broken pattern:
+   - `commands/metrics.md:76-77`
+   - `commands/health.md:76-77`
+   - `commands/traces.md:79-80`...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.433513+00:00'
+summary: "...vs expected filesystem paths\n\n4. **Three Solution Options**:\n   -\
+  \ **Option 1**: Quick glob pat..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...vs expected filesystem paths
+
+4. **Three Solution Options**:
+   - **Option 1**: Quick glob pattern fix
+   - **Option 2**: Python module imports (recommended)
+   - **Option 3**: Robust hybrid...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.575520+00:00'
+summary: "...|\n    | When hitting a blocker     | ▶ blocker ───       |\n    | When\
+  \ identifying a pattern | ..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...|
+    | When hitting a blocker     | ▶ blocker ───       |
+    | When identifying a pattern | ▶ pattern ───       |
+
+    SESSION GUIDANCE: Aim for 1 block per 3-5 substantive messages....
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.621755+00:00'
+summary: "...| When hitting a blocker     | ▶ blocker ───       |\n    | When identifying\
+  \ a pattern | ▶ patt..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...| When hitting a blocker     | ▶ blocker ───       |
+    | When identifying a pattern | ▶ pattern ───       |
+
+    SESSION GUIDANCE: Aim for 1 block per 3-5 substantive messages.
+  </mandatory_rules...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.666967+00:00'
+summary: '...Now I understand the full issue. Let me check other commands to see if
+  they use a different pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Now I understand the full issue. Let me check other commands to see if they use a different pattern:
