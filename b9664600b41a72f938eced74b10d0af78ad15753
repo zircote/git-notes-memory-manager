@@ -4104,3 +4104,30 @@ Added SSRF protection to OTLPExporter to prevent server-side request forgery att
 ## Related Files
 - src/git_notes_memory/observability/exporters/otlp.py:42-112, 140-149
 - tests/test_observability/test_otlp_exporter.py:177-222
+
+---
+type: progress
+timestamp: '2025-12-26T16:06:39.303190+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed PERF-H-002: N+1 Query in Reindex
+
+  ## S...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed PERF-H-002: N+1 Query in Reindex
+## Summary
+Fixed N+1 query issue in sync reindex by adding batch existence checking.
+
+## Changes Made
+- Added `IndexService.get_existing_ids()` batch method to `index.py:883-910`
+- Restructured `sync.py:312-352` to collect all candidates first, then batch check
+- Added 2 tests for new batch method
+
+## Related Files
+- src/git_notes_memory/index.py:883-910
+- src/git_notes_memory/sync.py:312-352
+- tests/test_index.py:642-672
