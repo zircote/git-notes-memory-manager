@@ -823,3 +823,21 @@ tags:
 ---
 
 Now I need to update the inline pattern detection to also look for domain markers near signals and apply them. Let me update that section:
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:40.422468+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The config.py follows a clear pattern:
+
+  1. Secti...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The config.py follows a clear pattern:
+1. Sections organized by category with clear headers
+2. Functions use `get_*` naming convention...
