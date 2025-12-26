@@ -845,3 +845,11 @@ The original issue was that hook execution counters weren't accumulating because
 - src/git_notes_memory/observability/persistent_metrics.py (new)
 - src/git_notes_memory/observability/config.py:209-211
 - src/git_notes_memory/hooks/hook_utils.py:329-342, 379-387
+
+---
+type: progress
+timestamp: '2025-12-26T23:42:47.662283+00:00'
+summary: 'Let me check if the test hook finished and verify the OTLP export happened:'
+---
+
+Let me check if the test hook finished and verify the OTLP export happened:
