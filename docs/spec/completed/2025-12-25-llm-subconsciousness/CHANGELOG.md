@@ -2,6 +2,31 @@
 
 All notable changes to this specification will be documented in this file.
 
+## [COMPLETED] - 2025-12-26
+
+### Project Closed
+- Final status: Success ✅
+- Actual effort: ~14 hours (planned: ~80-100 hours)
+- Scope delivered: Phases 1-2 (30/85 tasks) - LLM Foundation + Implicit Capture
+- Moved to: docs/spec/completed/2025-12-25-llm-subconsciousness
+
+### Retrospective Summary
+- **What went well**: Rapid prototyping, excellent test coverage (134 tests), security-first approach (caught command injection bug), clean provider-agnostic architecture
+- **What to improve**: Phased delivery planning (MVP scoping), integration testing with real LLM providers, performance benchmarking, user documentation
+
+### Implementation Delivered
+- **Phase 1 (LLM Foundation)**: Provider-agnostic client supporting Anthropic/OpenAI/Ollama with rate limiting, retry logic, and JSON mode support
+- **Phase 2 (Implicit Capture)**: LLM-based memory extraction with confidence scoring, approval queue, and hook integration
+- **Tests**: 134 tests with 87%+ coverage
+- **Security**: Fixed critical command injection vulnerability (shell interpolation → env var pattern)
+- **PR**: #26 (open, ready for merge) - 36 files changed, 7,429 additions
+
+### Deferred to Future
+- Phase 3: Semantic Linking
+- Phase 4: Memory Decay
+- Phase 5: Consolidation
+- Phase 6: Proactive Surfacing
+
 ## [1.0.0] - 2025-12-26
 
 ### Approved

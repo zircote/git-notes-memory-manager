@@ -328,6 +328,17 @@ These hooks mirror the CI workflow (`.github/workflows/ci.yml`) to catch issues 
 
 ## Completed Spec Projects
 
+- `docs/spec/completed/2025-12-25-llm-subconsciousness/` - LLM-Powered Subconsciousness for Intelligent Memory Management
+  - Completed: 2025-12-26
+  - Outcome: success
+  - GitHub Issue: [#11](https://github.com/zircote/git-notes-memory/issues/11)
+  - GitHub PR: [#26](https://github.com/zircote/git-notes-memory/pull/26) (open, ready for merge)
+  - Features: Provider-agnostic LLM client (Anthropic/OpenAI/Ollama), implicit memory capture with confidence scoring, approval queue, hook integration
+  - Deliverables: Phases 1-2 completed (30/85 tasks), 134 tests with 87%+ coverage, 13 ADRs, security fix (command injection)
+  - Scope: LLM Foundation + Implicit Capture delivered; Phases 3-6 deferred (Semantic Linking, Memory Decay, Consolidation, Proactive Surfacing)
+  - Effort: ~14 hours (planned: ~80-100 hours, -86% under budget)
+  - Key docs: REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, RETROSPECTIVE.md, PROGRESS.md
+
 - `docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability Instrumentation
   - Completed: 2025-12-26
   - Outcome: success
