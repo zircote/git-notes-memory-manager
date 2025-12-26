@@ -711,3 +711,18 @@ tags:
 **Alternatives Considered**:
 1. **LLM-only**: Too slow for every capture
 2. **No...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:08:59.116593+00:00'
+summary: '...formula with weighted factors |'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...formula with weighted factors |
+| 009 | 2025-12-26 | Accepted | Adversarial detection with pattern matching first |
+| 010 | 2025-12-26 | Accepted | Proactive surfacing rate limiting |
+| 011...
