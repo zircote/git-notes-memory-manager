@@ -1505,3 +1505,21 @@ tags:
 ...from missing arguments, but the registry logic is designed to create instances directly.
 
 The pattern I'm using is wrong. I should check if it exists, and if not, create and register. The proper...
+
+---
+type: patterns
+timestamp: '2025-12-26T15:29:46.482584+00:00'
+summary: '...capture service!
+
+  `★ Insight ─────────────────────────────────────`
+
+  The `ServiceRegistry.get()...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...capture service!
+
+`★ Insight ─────────────────────────────────────`
+The `ServiceRegistry.get()` pattern assumes services can be default-constructed. Since `CaptureService` accepts all optional args,...
