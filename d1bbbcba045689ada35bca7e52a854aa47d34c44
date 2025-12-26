@@ -54,3 +54,17 @@ tags:
 3. `embed_batch()` - Batch embedding with count tracking
 The lazy loading pattern means we track *when* the model is loaded, which is expensive (100s of ms).
 `───────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:23:16.453240+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The hooks system uses a consistent pattern acro...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The hooks system uses a consistent pattern across 5 handlers. The `hook_utils.py` module provides shared utilities that each handler imports....
