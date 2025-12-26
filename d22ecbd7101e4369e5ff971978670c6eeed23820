@@ -690,3 +690,33 @@ Completed Phase 1 of multi-domain memories implementation with schema migration 
 - src/git_notes_memory/config.py:155-190
 - src/git_notes_memory/models.py:90-110
 - src/git_notes_memory/index.py:80-120
+
+---
+type: progress
+timestamp: '2025-12-26T01:57:47.282120+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 2: Storage Layer (Tasks 2.1-2.4)...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 2: Storage Layer (Tasks 2.1-2.4) for multi-domain memories
+## Summary
+Implemented the complete storage layer for multi-domain memory support, enabling separation of user-level (global) and project-level memories.
+
+## Changes Made
+- **Task 2.1**: Added `GitOps.for_domain()` factory method with domain-specific caching
+- **Task 2.2**: Implemented `ensure_user_repo_initialized()` for bare git repo at `~/.local/share/memory-plugin/user-memories/`
+- **Task 2.3**: Added domain filter to `search_vector()` and `search_text()`
+- **Task 2.4**: Added domain filter to `get_by_spec()`, `get_by_namespace()`, `list_recent()`, `count()`, and `get_stats()`
+- Extended `IndexStats` model with `by_domain` field and `by_domain_dict` property
+- Added 27 new tests (14 GitOps, 13 domain filter)
+
+## Related Files
+- src/git_notes_memory/git_ops.py:85-250 (factory, cache, bare repo init)
+- src/git_notes_memory/index.py:598-730, 1154-1216 (domain filtering)
+- src/git_notes_memory/models.py:392-427 (IndexStats by_domain)
+- tests/test_git_ops.py:850-960 (14 new tests)
+- tests/test_index.py:832-1808 (13 new domain tests)
