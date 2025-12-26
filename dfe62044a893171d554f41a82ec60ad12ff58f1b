@@ -758,3 +758,20 @@ tags:
 ...analysis | Understand JSON/YAML structure | Parse structured formats for keys |
 | FR-203 | Custom pattern file | Organization-specific patterns | Load patterns from external YAML |
 | FR-204 | Metrics/telemetry...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:15.753400+00:00'
+summary: '...Performance'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...Performance
+
+- **Filtering latency**: <10ms per capture operation
+- **Memory overhead**: <50MB for pattern compilation
+- **Startup time**: Lazy initialization, no impact on import time
+- **Batch scanning**:...
