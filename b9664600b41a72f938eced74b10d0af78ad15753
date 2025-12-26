@@ -1353,3 +1353,24 @@ tags:
 # The glob pattern expects:
 ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/
 #...
+
+---
+type: patterns
+timestamp: '2025-12-26T15:29:45.796599+00:00'
+summary: '...but should use Python module imports instead
+
+  ### Suggested Approach
+
+  **Option 1: Fix path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...but should use Python module imports instead
+
+### Suggested Approach
+
+**Option 1: Fix path pattern (short-term)**
+```bash
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/*/memory-capture...
