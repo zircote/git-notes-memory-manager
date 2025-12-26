@@ -527,3 +527,17 @@ tags:
   - Completed: 2025-12-26
   - Outcome: success
   - GitHub Issue: [#10](https://github.com/zircote/git-notes-memory...
+
+---
+type: progress
+timestamp: '2025-12-26T02:16:52.594219+00:00'
+summary: '...logging, CLI commands (/metrics, /traces, /health)'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...logging, CLI commands (/metrics, /traces, /health)
+  - Deliverables: 115+ tests, 4 phases completed (6 total, 2 optional skipped), 20 tasks, 11 ADRs
+  - Note: Phases 5-6 (OpenTelemetry, Docker...
