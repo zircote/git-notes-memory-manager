@@ -6433,3 +6433,19 @@ tags:
 ### Critical (4/4 Complete)
 | ID | Finding | Status |
 |----|---------|--------|...
+
+---
+type: progress
+timestamp: '2025-12-26T16:55:27.053537+00:00'
+summary: '...Status |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...Status |
+|----|---------|--------|
+| CRIT-001 | Circuit Breaker for Embedding Service | ✅ Completed |
+| CRIT-002 | Secrets Filtering for LLM Prompts | ✅ Completed |
+| CRIT-003 | User Capture...
