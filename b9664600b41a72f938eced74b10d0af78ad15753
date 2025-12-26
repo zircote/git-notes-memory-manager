@@ -6499,3 +6499,19 @@ tags:
 | ID | Finding | Status |
 |----|---------|--------|
 |...
+
+---
+type: progress
+timestamp: '2025-12-26T16:55:27.144956+00:00'
+summary: '...ID | Finding | Status |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...ID | Finding | Status |
+|----|---------|--------|
+| SEC-H-001 | SSRF via OTLP Endpoint | ✅ Completed |
+| SEC-H-002 | API Key Exposure in Error Messages | ✅ Completed |
+| SEC-H-003 | Stale Lock...
