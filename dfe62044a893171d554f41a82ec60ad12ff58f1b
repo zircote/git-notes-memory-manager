@@ -469,3 +469,29 @@ Input Content
 [Layer 1: Deterministic Pattern Matching]
     |-- OpenAI, Anthropic, GitHub, AWS, Slack, etc.
     |-- Private keys (BEGIN...PRIVATE...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.327836+00:00'
+summary: '...content)'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...content)
+```
+
+### 7.2 Recommended Default Configuration
+
+```yaml
+secrets_filter:
+  enabled: true
+
+  # Pattern detection
+  patterns:
+    enabled: true
+    providers:
+      - openai
+      - anthropic...
