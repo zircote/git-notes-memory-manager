@@ -125,3 +125,19 @@ tags:
 The codebase uses a versioned schema migration pattern:
 1. **SCHEMA_VERSION** constant tracks the current version
 2. **_MIGRATIONS** dict maps version...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:27.075376+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The command follows the existing pattern in thi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The command follows the existing pattern in this codebase:
+1. **YAML frontmatter** with `description`, `argument-hint`, and `allowed-tools`
+2...
