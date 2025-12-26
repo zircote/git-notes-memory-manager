@@ -1344,3 +1344,19 @@ tags:
 1. **Lazy initialization**: Don't load patterns until first use
 2. **Pattern compilation**: Pre-compile all regex at init
 3. **Early exit**: Skip entropy if pattern already...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:10.797187+00:00'
+summary: '...**Pattern compilation**: Pre-compile all regex at init'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...**Pattern compilation**: Pre-compile all regex at init
+3. **Early exit**: Skip entropy if pattern already matched
+4. **Batch processing**: Share compiled patterns across captures
+
+## Testing...
