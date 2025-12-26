@@ -290,12 +290,15 @@ LSP hooks are configured in `.claude/hooks.json` for immediate feedback on Pytho
 
 ### Installed Hooks
 
-| Hook | Trigger | Action |
-|------|---------|--------|
-| `format-on-edit` | PostToolUse (Write/Edit) | Runs `ruff format` on changed files |
-| `lint-check-on-edit` | PostToolUse (Write/Edit) | Runs `ruff check` on changed files |
-| `typecheck-on-edit` | PostToolUse (Write/Edit) | Runs `mypy` on changed files |
-| `pre-commit-quality-gate` | PreToolUse (git commit) | Runs full `make quality` before commit |
+These hooks mirror the CI workflow (`.github/workflows/ci.yml`) to catch issues before push:
+
+| Hook | Trigger | CI Equivalent | Action |
+|------|---------|---------------|--------|
+| `format-on-edit` | PostToolUse (Write/Edit) | `ruff format` | Auto-formats Python files |
+| `lint-check-on-edit` | PostToolUse (Write/Edit) | `ruff check` | Reports lint violations |
+| `typecheck-on-edit` | PostToolUse (Write/Edit) | `mypy src/` | Type checks with strict mode |
+| `security-scan-on-edit` | PostToolUse (Write/Edit) | `bandit -r src/ -ll` | Scans for security issues |
+| `pre-commit-quality-gate` | PreToolUse (git commit) | Full CI | Runs `make quality` (blocking) |
 
 ### Navigation & Understanding
 
