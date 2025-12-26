@@ -656,3 +656,24 @@ tags:
 Implement a provider-agnostic LLM client using Python's Protocol pattern:
 - `LLMProvider` protocol defines the interface
 - `AnthropicProvider`, `OpenAIProvider`, `OllamaProvider...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:08:59.037818+00:00'
+summary: '...**Manual archival only**: No automation benefit'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...**Manual archival only**: No automation benefit
+
+---
+
+## ADR-009: Adversarial Detection with Pattern Matching First
+
+**Status**: Accepted
+
+**Context**:
+Memory poisoning is a security concern (per...
