@@ -1337,3 +1337,23 @@ tags:
 - [ ] MED-007: Detect-secrets fallback pattern matching
 - [ ] MED-008: Explicit timeout for session start fetch
 - [ ] MED-009: Git note write...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:27:40.471982+00:00'
+summary: '...Root Cause Analysis
+
+  **The issue occurs due to a mismatch between the expected plugin path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
