@@ -145,3 +145,25 @@ tags:
 import threading
 _service_lock = threading.Lock()
 _service: Service |...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:43:56.509621+00:00'
+summary: '...configuration'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_REPORT.md
+---
+
+...configuration
+
+---
+
+## False Positives Identified
+
+### CRIT-009 & HIGH-008: SyncService IndexService Pattern
+
+**Flagged As**: Using new IndexService instead of singleton.
+
+**Actual Design**: Per-repository...
