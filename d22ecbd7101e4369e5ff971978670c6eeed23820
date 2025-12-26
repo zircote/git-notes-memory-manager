@@ -673,3 +673,20 @@ tags:
 - `[remember] <pattern or insight>` - Inline capture to project
 - `[global] <pattern or insight>` - Inline capture to user (cross-project)
 - `/memory:capture patterns <description>`...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.524028+00:00'
+summary: '...Inline capture to user (cross-project)'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...Inline capture to user (cross-project)
+- `/memory:capture patterns <description>` - Project pattern
+- `/memory:capture --global patterns <description>` - User pattern (cross-project)
+```
+
+Search...
