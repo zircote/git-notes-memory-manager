@@ -1,0 +1,213 @@
+---
+type: progress
+timestamp: '2025-12-26T03:56:12.673591+00:00'
+summary: '## Completed Spec Projects'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+## Completed Spec Projects
+
+- `docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability...
+
+---
+type: progress
+timestamp: '2025-12-26T03:56:12.689622+00:00'
+summary: '## Completed Spec Projects'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+## Completed Spec Projects
+
+- `docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability Instrumentation
+  - Completed:...
+
+---
+type: progress
+timestamp: '2025-12-26T03:56:12.708343+00:00'
+summary: '...`docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability
+  Instrumentation'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...`docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability Instrumentation
+  - Completed: 2025-12-26
+  - Outcome: success
+  - GitHub Issue: [#10](https://github.com/zircote/git-notes-memory...
+
+---
+type: progress
+timestamp: '2025-12-26T03:56:12.727114+00:00'
+summary: '...logging, CLI commands (/metrics, /traces, /health)'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...logging, CLI commands (/metrics, /traces, /health)
+  - Deliverables: 115+ tests, 4 phases completed (6 total, 2 optional skipped), 20 tasks, 11 ADRs
+  - Note: Phases 5-6 (OpenTelemetry, Docker...
+
+---
+type: progress
+timestamp: '2025-12-26T03:56:12.745459+00:00'
+summary: '...REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md,
+  PROGRESS.md'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, PROGRESS.md
+
+- `docs/spec/completed/2025-12-25-secrets-filtering/` - Secrets Filtering and Sensitive Data Protection
+  - Completed:...
+
+---
+type: progress
+timestamp: '2025-12-26T03:56:12.763961+00:00'
+summary: '...spec/completed/2025-12-25-secrets-filtering/` - Secrets Filtering and
+  Sensitive Data Protection'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...spec/completed/2025-12-25-secrets-filtering/` - Secrets Filtering and Sensitive Data Protection
+  - Completed: 2025-12-25
+  - Outcome: success
+  - GitHub Issue: [#12](https://github.com/zircote/git-notes-memory...
+
+---
+type: progress
+timestamp: '2025-12-26T03:56:12.782114+00:00'
+summary: '...REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md,
+  RETROSPECTIVE.md'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, RETROSPECTIVE.md
+
+- `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes Fetch Refspec
+
+---
+type: progress
+timestamp: '2025-12-26T04:15:05.769296+00:00'
+summary: Fixed plugin.json repository URLs pointing to wrong repo
+---
+
+Fixed plugin.json repository URLs pointing to wrong repo
+## Summary
+The marketplace wasn't updating because `plugin.json` had incorrect URLs pointing to `git-notes-memory-manager` instead of `git-notes-memory`.
+
+## Changes Made
+- Fixed `homepage` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Fixed `repository` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Created PR #30 targeting main
+
+## Related Files
+- .claude-plugin/plugin.json:9-10
+
+---
+type: progress
+timestamp: '2025-12-26T04:15:05.793512+00:00'
+summary: 'The git commit was successfully completed. You had originally started a
+  `/git:fr` operation but had '
+---
+
+The git commit was successfully completed. You had originally started a `/git:fr` operation but had to abort due to uncommitted changes....
+
+---
+type: progress
+timestamp: '2025-12-26T04:19:05.692320+00:00'
+summary: Fixed plugin.json repository URLs pointing to wrong repo
+---
+
+Fixed plugin.json repository URLs pointing to wrong repo
+## Summary
+The marketplace wasn't updating because `plugin.json` had incorrect URLs pointing to `git-notes-memory-manager` instead of `git-notes-memory`.
+
+## Changes Made
+- Fixed `homepage` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Fixed `repository` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Created PR #30 targeting main
+
+## Related Files
+- .claude-plugin/plugin.json:9-10
+
+---
+type: progress
+timestamp: '2025-12-26T04:19:05.711812+00:00'
+summary: 'The git commit was successfully completed. You had originally started a
+  `/git:fr` operation but had '
+---
+
+The git commit was successfully completed. You had originally started a `/git:fr` operation but had to abort due to uncommitted changes....
+
+---
+type: progress
+timestamp: '2025-12-26T04:19:42.133102+00:00'
+summary: Fixed plugin.json repository URLs pointing to wrong repo
+---
+
+Fixed plugin.json repository URLs pointing to wrong repo
+## Summary
+The marketplace wasn't updating because `plugin.json` had incorrect URLs pointing to `git-notes-memory-manager` instead of `git-notes-memory`.
+
+## Changes Made
+- Fixed `homepage` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Fixed `repository` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Created PR #30 targeting main
+
+## Related Files
+- .claude-plugin/plugin.json:9-10
+
+---
+type: progress
+timestamp: '2025-12-26T04:19:42.156874+00:00'
+summary: 'The git commit was successfully completed. You had originally started a
+  `/git:fr` operation but had '
+---
+
+The git commit was successfully completed. You had originally started a `/git:fr` operation but had to abort due to uncommitted changes....
+
+---
+type: progress
+timestamp: '2025-12-26T04:20:40.083547+00:00'
+summary: Fixed plugin.json repository URLs pointing to wrong repo
+---
+
+Fixed plugin.json repository URLs pointing to wrong repo
+## Summary
+The marketplace wasn't updating because `plugin.json` had incorrect URLs pointing to `git-notes-memory-manager` instead of `git-notes-memory`.
+
+## Changes Made
+- Fixed `homepage` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Fixed `repository` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Created PR #30 targeting main
+
+## Related Files
+- .claude-plugin/plugin.json:9-10
+
+---
+type: progress
+timestamp: '2025-12-26T04:20:40.106047+00:00'
+summary: 'The git commit was successfully completed. You had originally started a
+  `/git:fr` operation but had '
+---
+
+The git commit was successfully completed. You had originally started a `/git:fr` operation but had to abort due to uncommitted changes....
