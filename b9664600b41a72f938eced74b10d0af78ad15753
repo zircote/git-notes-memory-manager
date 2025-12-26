@@ -1,0 +1,13 @@
+---
+type: blockers
+timestamp: '2025-12-26T15:34:25.068795+00:00'
+summary: '...test_internal_endpoint_blocked_by_default(self) -> None:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_otlp_exporter.py
+---
+
+...test_internal_endpoint_blocked_by_default(self) -> None:
+        """Internal endpoints should be blocked by default for SSRF safety."""
+        exporter = OTLPExporter(endpoint="http://localhost:4318")...
