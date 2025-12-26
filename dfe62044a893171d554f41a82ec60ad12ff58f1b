@@ -1447,3 +1447,16 @@ tags:
 ---
 
 ...for preventing accidental secret leakage into git notes. The multi-layer detection approach (pattern → entropy → contextual) is a well-established pattern used by tools like `detect-secrets`,...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:32:13.220595+00:00'
+summary: '...The multi-layer detection approach (pattern → entropy → contextual) is
+  a well-established patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...The multi-layer detection approach (pattern → entropy → contextual) is a well-established pattern used by tools like `detect-secrets`, `gitleaks`, and `truffleHog`.
+`────────────────────────────────...
