@@ -7455,3 +7455,20 @@ Rebase completed successfully. v1.0.0 is now rebased onto origin/v1.0.0.
 
 ```
 aa35822 fix(plugin): correct...
+
+---
+type: progress
+timestamp: '2025-12-26T17:02:58.009774+00:00'
+summary: '...2-3)'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...2-3)
+
+### Database
+- [x] DB-M-001: Missing ANALYZE After Bulk Ops (`sync.py:272-372`) ✅
+  - **Completed:** 2025-12-26 - Added `index.vacuum()` call after reindex (includes ANALYZE)
+- [x] DB-M-002:...
