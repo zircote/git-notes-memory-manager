@@ -92,3 +92,19 @@ tags:
 `★ Insight ─────────────────────────────────────`
 **String vs Enum for dataclass fields**: I chose to store `domain` as a `str` rather than the `Domain` enum because:
 1. **Serialization**: SQLite...
+
+---
+type: decisions
+timestamp: '2025-12-26T01:57:46.756801+00:00'
+summary: '...namespace ───`) get 0.99 confidence - explicit structured capture
+
+  2. **Inline patterns** (`[de...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...namespace ───`) get 0.99 confidence - explicit structured capture
+2. **Inline patterns** (`[decision]`, natural language) get 0.70-0.98 confidence
+
+The `CaptureSignal` model needs a `domain` field...
