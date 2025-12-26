@@ -8510,3 +8510,18 @@ tags:
 
 *Generated from MAXALL deep-clean code review - 2025-12-26*
 *Remediation session completed: 2025-12-26*
+
+---
+type: progress
+timestamp: '2025-12-26T17:19:51.731081+00:00'
+summary: '...recreate'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...recreate
+- [x] PEN-L-004: API Key Logging Exposure ✅
+  - **Status:** ALREADY FIXED - SEC-H-002 implemented `_sanitize_error_message()` in all providers
+- [x] PEN-L-005: JSON Nesting Depth Limit ✅...
