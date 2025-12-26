@@ -1203,3 +1203,15 @@ tags:
 ---
 
 Let me check the circuit_breaker test file to understand the testing pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T15:09:27.867650+00:00'
+summary: '...distinguish between the project and user capture services. Let me create
+  a sentinel class patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...distinguish between the project and user capture services. Let me create a sentinel class pattern or use a different approach:
