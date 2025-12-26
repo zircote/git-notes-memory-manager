@@ -92,3 +92,14 @@ summary: Now I understand the tracing system. The `get_completed_spans()` functi
 ---
 
 Now I understand the tracing system. The `get_completed_spans()` function returns the spans, but there's no...
+
+---
+type: learnings
+timestamp: '2025-12-26T04:33:30.171305+00:00'
+summary: '...relevant memory context |'
+---
+
+...relevant memory context |
+| UserPromptSubmit | User sends message | Detects `[decision]`, `[learned]` markers |
+| PostToolUse | After Read/Write/Edit | Surfaces related memories |
+| PreCompact...
