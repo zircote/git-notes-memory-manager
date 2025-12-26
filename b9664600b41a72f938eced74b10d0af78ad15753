@@ -490,3 +490,19 @@ tags:
    - **Option 1**: Quick glob pattern fix
    - **Option 2**: Python module imports (recommended)
    - **Option 3**: Robust hybrid...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:50:56.102404+00:00'
+summary: "...|\n    | When hitting a blocker     | ▶ blocker ───       |\n    | When\
+  \ identifying a pattern | ..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...|
+    | When hitting a blocker     | ▶ blocker ───       |
+    | When identifying a pattern | ▶ pattern ───       |
+
+    SESSION GUIDANCE: Aim for 1 block per 3-5 substantive messages....
