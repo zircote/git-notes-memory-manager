@@ -1094,3 +1094,17 @@ tags:
 1. **Decorator-based timing** - Universal pattern
 2. **Optional dependencies** - Standard for plugins/libraries
 3. **Graceful degradation** -...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:04.360058+00:00'
+summary: '...**Learnings** - Technical insights, debugging discoveries, "TIL" moments'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...**Learnings** - Technical insights, debugging discoveries, "TIL" moments
+3. **Patterns** - Reusable approaches, best practices, anti-patterns
+4. **Blockers** - Problems encountered and their...
