@@ -7486,3 +7486,18 @@ tags:
 ...ANALYZE)
 - [x] DB-M-002: JSON Extraction in ORDER BY (`capture_store.py:369-373`) ✅
   - **Completed:** 2025-12-26 - Added `confidence_overall` column, denormalized from JSON; added index for...
+
+---
+type: progress
+timestamp: '2025-12-26T17:02:58.053982+00:00'
+summary: '...BY'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...BY
+- [x] DB-M-003: Connection Not Closed on Init Failure (`capture_store.py:184-192`) ✅
+  - **Completed:** 2025-12-26 - Added `conn.close()` before setting `_conn = None` in exception handler
+-...
