@@ -54,3 +54,32 @@ Export returned True and Prometheus query shows the data.
 ## Related Files
 - src/git_notes_memory/observability/metrics.py
 - docker/otel-collector-config.yaml
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:47.936397+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Issue #28 spec documentation - all 5 d...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Issue #28 spec documentation - all 5 documents ready for review
+## Summary
+Created complete specification for multi-worktree sync fix bug (GitHub Issue #28).
+
+## Changes Made
+- Created ARCHITECTURE.md with race condition diagrams and fix design
+- Created IMPLEMENTATION_PLAN.md with 6-task checklist
+- Created DECISIONS.md with 5 ADRs
+- Updated README.md status to `in-review`
+- Updated CHANGELOG.md with version entry
+
+## Related Files
+- docs/spec/active/2025-12-26-multi-worktree-sync-fix/REQUIREMENTS.md
+- docs/spec/active/2025-12-26-multi-worktree-sync-fix/ARCHITECTURE.md
+- docs/spec/active/2025-12-26-multi-worktree-sync-fix/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-26-multi-worktree-sync-fix/DECISIONS.md
+- docs/spec/active/2025-12-26-multi-worktree-sync-fix/README.md
