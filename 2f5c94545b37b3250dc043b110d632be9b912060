@@ -11,3 +11,18 @@ tags:
 ...actually passes Luhn (0 mod 10 = 0)
         # but won't be detected as a credit card due to pattern constraints
         assert luhn_check("1111111111111111") is False
+
+---
+type: patterns
+timestamp: '2025-12-26T01:14:52.259687+00:00'
+summary: '...- Luhn algorithm validation for credit cards (reduces false positives)'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...- Luhn algorithm validation for credit cards (reduces false positives)
+  - Lenient phone pattern for US formats
+  - Position-based deduplication
+- 35 tests in tests/security/ (11 detector + 24 PII)
