@@ -226,3 +226,18 @@ After reviewing the complete specification for the multi-worktree sync fix (Issu
 ## Related Files
 - docs/spec/active/2025-12-26-multi-worktree-sync-fix/README.md (status: approved)
 - docs/spec/active/2025-12-26-multi-worktree-sync-fix/CHANGELOG.md (approval recorded)
+
+---
+type: decisions
+timestamp: '2025-12-26T20:32:43.470850+00:00'
+summary: '...input.'
+---
+
+...input.
+
+**Current design:**
+- UserPromptSubmit hook → processes **your** messages for markers like `[decision]`
+- My memory blocks (`▶ learned ───`) → just formatted text, not processed
+
+**What WOULD work:**
+-...
