@@ -1177,3 +1177,21 @@ tags:
         }
 
     def detect(self, text: str) -> list[Detection]:...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:10.533717+00:00'
+summary: '...PATTERNS.items()'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...PATTERNS.items()
+        }
+
+    def detect(self, text: str) -> list[Detection]:
+        """Scan text for pattern matches."""
+        detections = []
+        for name, compiled in self._compiled.items():...
