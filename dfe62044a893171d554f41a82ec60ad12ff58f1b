@@ -526,3 +526,21 @@ tags:
 | Pattern matching | <1ms per pattern | Compile regex once, reuse |
 | Entropy calculation | <0.1ms | Cache charset lookups |
 | Full...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.415403+00:00'
+summary: '...and Privacy Controls'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...and Privacy Controls
+   - AU-2: Event Logging
+   - AU-3: Content of Audit Records
+
+### 8.3 Pattern Sources
+
+1. **gitleaks.toml** (v8.25.0): https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks...
