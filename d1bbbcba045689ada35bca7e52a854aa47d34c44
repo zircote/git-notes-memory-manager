@@ -546,3 +546,36 @@ Synced PROGRESS.md with the actual implementation state from the previous sessio
 
 ## Related Files
 - docs/spec/active/2025-12-25-observability-instrumentation/PROGRESS.md:1-129
+
+---
+type: progress
+timestamp: '2025-12-26T03:23:15.689136+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed SPEC-2025-12-25-001 Observability Inst...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed SPEC-2025-12-25-001 Observability Instrumentation project
+## Summary
+Successfully completed Phases 1-4 of observability instrumentation. Phases 5-6 were marked as skipped (optional Tier 3).
+
+## Deliverables
+- `observability/` module with metrics, tracing, structured logging
+- 3 new CLI commands: `/memory:metrics`, `/memory:traces`, `/memory:health`
+- Prometheus text format export (stdlib only)
+- JSON export for metrics and traces
+- Structured logging with `get_logger()`
+- Silent failure tracking with metrics
+
+## Final Stats
+- Tasks: 20 done, 10 skipped (optional)
+- Phases: 4 complete, 2 skipped (optional)
+- All 1949 tests passing
+- 87%+ code coverage
+
+## Related Files
+- docs/spec/active/2025-12-25-observability-instrumentation/PROGRESS.md
+- PR #24: https://github.com/zircote/git-notes-memory/pull/24
