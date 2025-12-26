@@ -40,3 +40,18 @@ The existing research documents provide deep theoretical grounding and industry 
 ## Related Files
 - /Users/AllenR1_1/Projects/zircote/git-notes-memory/docs/research/CognitiveSubstrate/ARCHITECTURE_BRIEF.md
 - /Users/AllenR1_1/Projects/zircote/git-notes-memory/docs/research/CognitiveSubstrate/REFERENCES.md
+
+---
+type: learnings
+timestamp: '2025-12-26T01:42:23.211184+00:00'
+summary: '..."summary": "High confidence decision",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_implicit_capture_service.py
+---
+
+..."summary": "High confidence decision",
+                    "content": "Important content",
+                    "confidence": {
+                        "relevance": 0.9,...
