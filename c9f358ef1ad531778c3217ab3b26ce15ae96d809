@@ -350,3 +350,19 @@ tags:
   - Completed: 2025-12-25
   - Outcome: success
   - GitHub Issue: [#12](https://github.com/zircote/git-notes-memory...
+
+---
+type: progress
+timestamp: '2025-12-26T03:54:39.452390+00:00'
+summary: '...REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md,
+  RETROSPECTIVE.md'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, RETROSPECTIVE.md
+
+- `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes Fetch Refspec
+  - Completed: 2025-12-25...
