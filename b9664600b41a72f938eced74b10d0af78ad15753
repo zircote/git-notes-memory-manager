@@ -676,3 +676,23 @@ tags:
 
 CRIT-001: Circuit breaker pattern prevents repeated calls to a failing model.
 Timeout protection is applied to all encode() operations...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:57:11.843577+00:00'
+summary: '...Root Cause Analysis
+
+  **The issue occurs due to a mismatch between the expected plugin path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
