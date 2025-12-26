@@ -1687,3 +1687,18 @@ Added secrets filtering to LLMClient to prevent PII from being sent to external 
 - src/git_notes_memory/subconsciousness/llm_client.py:466-468 (integration)
 - src/git_notes_memory/subconsciousness/llm_client.py:492-542 (filter method)
 - tests/subconsciousness/test_llm_secrets_filtering.py (new tests)
+
+---
+type: progress
+timestamp: '2025-12-26T15:09:26.714284+00:00'
+summary: '...────────────────────────────────────────────`
+
+  The `embed()` method already has the circuit br...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...────────────────────────────────────────────`
+
+The `embed()` method already has the circuit breaker implemented correctly. Now I need to add the same circuit breaker logic to `embed_batch()`. Let me update it:
