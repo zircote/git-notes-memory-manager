@@ -640,3 +640,24 @@ tags:
 - [ ] QUAL-M-001: Validation Logic Duplicated (3 places)
 - [ ] QUAL-M-002: Pattern Scoring Complexity (`patterns.py:777-842`)
 - [ ] QUAL-M-003: 11-Parameter Method (`capture.py:663-679...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:53:57.734647+00:00'
+summary: '...PEN-L-004: API Key Logging Exposure'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...PEN-L-004: API Key Logging Exposure
+- [ ] PEN-L-005: JSON Nesting Depth Limit
+- [ ] PEN-L-006: PII Pattern Bypass Potential
+
+---
+
+## Verification Checklist
+
+After all remediations:
+- [ ] `make quality`...
