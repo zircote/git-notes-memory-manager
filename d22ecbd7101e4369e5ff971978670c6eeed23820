@@ -624,3 +624,20 @@ tags:
 **Domain indicators:**
 - 🌐 = User memory (global, cross-project)
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:40:01.460180+00:00'
+summary: '...insights are gained from reviewing memories, suggest:'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...insights are gained from reviewing memories, suggest:
+
+```
+**Capture tip**: Did you notice a pattern or gain an insight? Use:
+- `[remember] <pattern or insight>` - Inline capture to project
+-...
