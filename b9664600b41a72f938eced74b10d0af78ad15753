@@ -821,3 +821,21 @@ tags:
 ---
 
 test content
+
+---
+type: learnings
+timestamp: '2025-12-26T15:56:48.473969+00:00'
+summary: '..."Query"},'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_providers.py
+---
+
+..."Query"},
+        ]
+
+        result = provider._add_json_instruction(messages)
+
+        assert "IMPORTANT: Respond ONLY with valid JSON" in result[0]["content"]
+        assert result[0]["content"].startswith...
