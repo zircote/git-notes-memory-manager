@@ -1013,7 +1013,6 @@ class TestDomainAwareCapture:
         self, mock_capture_service: CaptureService
     ) -> None:
         """Test capture defaults to PROJECT domain."""
-        from git_notes_memory.config import Domain
 
         result = mock_capture_service.capture(
             namespace="decisions",
@@ -1058,7 +1057,9 @@ class TestDomainAwareCapture:
         mock_user_git_ops.get_commit_info.return_value = MagicMock(sha="user789abc")
         mock_user_git_ops.show_note.return_value = None
         monkeypatch.setattr(
-            GitOps, "for_domain", classmethod(lambda cls, d: mock_user_git_ops)
+            GitOps,
+            "for_domain",
+            classmethod(lambda cls, d: mock_user_git_ops),  # noqa: ARG005
         )
 
         result = mock_capture_service.capture(
@@ -1146,13 +1147,13 @@ class TestGetUserCaptureService:
         # Mock GitOps.for_domain to return a mock GitOps
         mock_git_ops = MagicMock()
         mock_git_ops.ensure_user_repo_initialized.return_value = None
-        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)
+        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)  # noqa: ARG005
 
         # Mock get_user_index_path to use temp path
         monkeypatch.setattr(
             config_module,
             "get_user_index_path",
-            lambda ensure_exists=False: tmp_path / "user" / "index.db",
+            lambda ensure_exists=False: tmp_path / "user" / "index.db",  # noqa: ARG005
         )
 
         service = get_user_capture_service()
@@ -1172,13 +1173,13 @@ class TestGetUserCaptureService:
 
         # Mock GitOps.for_domain to return a mock GitOps
         mock_git_ops = MagicMock()
-        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)
+        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)  # noqa: ARG005
 
         # Mock get_user_index_path to use temp path
         monkeypatch.setattr(
             config_module,
             "get_user_index_path",
-            lambda ensure_exists=False: tmp_path / "user" / "index.db",
+            lambda ensure_exists=False: tmp_path / "user" / "index.db",  # noqa: ARG005
         )
 
         service1 = get_user_capture_service()
@@ -1212,7 +1213,7 @@ class TestGetUserCaptureService:
         monkeypatch.setattr(
             config_module,
             "get_user_index_path",
-            lambda ensure_exists=False: tmp_path / "user" / "index.db",
+            lambda ensure_exists=False: tmp_path / "user" / "index.db",  # noqa: ARG005
         )
 
         _ = get_user_capture_service()
@@ -1236,14 +1237,14 @@ class TestGetUserCaptureService:
 
         # Mock GitOps.for_domain
         mock_git_ops = MagicMock()
-        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)
+        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)  # noqa: ARG005
 
         # Mock get_user_index_path to use temp path
         user_index_path = tmp_path / "user" / "index.db"
         monkeypatch.setattr(
             config_module,
             "get_user_index_path",
-            lambda ensure_exists=False: user_index_path,
+            lambda ensure_exists=False: user_index_path,  # noqa: ARG005
         )
 
         service = get_user_capture_service()

@@ -41,12 +41,12 @@ def main():
     except ImportError as e:
         # Library not installed - graceful degradation
         print(json.dumps({"continue": True}))
-        print("[memory-hook] SessionStart unavailable: {}".format(e), file=sys.stderr)
+        print(f"[memory-hook] SessionStart unavailable: {e}", file=sys.stderr)
         sys.exit(0)
     except Exception as e:
         # Any unexpected error - fail gracefully with logging
         print(json.dumps({"continue": True}))
-        print("[memory-hook] SessionStart error: {}".format(e), file=sys.stderr)
+        print(f"[memory-hook] SessionStart error: {e}", file=sys.stderr)
         sys.exit(0)
 
 

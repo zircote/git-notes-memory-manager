@@ -212,7 +212,7 @@ class TestXMLBuilder:
 
         # Verify domain attribute is NOT present when empty
         assert 'domain=""' not in xml
-        assert 'domain=' not in xml.split('namespace="blockers"')[0].split(">")[0]
+        assert "domain=" not in xml.split('namespace="blockers"')[0].split(">")[0]
 
 
 # =============================================================================
