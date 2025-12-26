@@ -36,3 +36,19 @@ Original findings: 4 CRIT, 23 HIGH (3 SEC, 5 PERF, 8 ARCH, 7 TEST), 42 MED, 28 L
 
 ## Related Files
 - All security/performance fixes completed and tested
+
+---
+type: decisions
+timestamp: '2025-12-26T16:02:48.458544+00:00'
+summary: '...capture signal."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_novelty_checker.py
+---
+
+...capture signal."""
+    return CaptureSignal(
+        type=SignalType.DECISION,
+        match="I decided to use SQLite",
+        context="After evaluating options, I decided to use SQLite for storage.",...
