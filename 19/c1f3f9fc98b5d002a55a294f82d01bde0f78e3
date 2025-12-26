@@ -303,3 +303,18 @@ tags:
 ...implemented yet** - only the metrics collection, CLI commands, and internal instrumentation were completed. The Docker stack exists but the Python code doesn't export to OTLP yet.
 
 From the retrospective...
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.515581+00:00'
+summary: '...exists but the Python code doesn''t export to OTLP yet.
+
+  From the retrospective notes, Phase 4 ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...exists but the Python code doesn't export to OTLP yet.
+
+From the retrospective notes, Phase 4 completed metrics collection and CLI, but Phase 5 (OTLP export) was explicitly skipped. So when you're...
