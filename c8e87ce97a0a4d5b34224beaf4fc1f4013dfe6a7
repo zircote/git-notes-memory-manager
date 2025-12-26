@@ -76,3 +76,26 @@ All 6 specification documents written and finalized for GitHub Issue #10.
 - docs/spec/active/2025-12-25-observability-instrumentation/IMPLEMENTATION_PLAN.md:1-450
 - docs/spec/active/2025-12-25-observability-instrumentation/DECISIONS.md:1-320
 - docs/spec/active/2025-12-25-observability-instrumentation/RESEARCH_NOTES.md:1-280
+
+---
+type: progress
+timestamp: '2025-12-26T03:32:53.361858+00:00'
+summary: Completed specification updates for Docker Compose, session identification,
+  and provider documentati
+---
+
+Completed specification updates for Docker Compose, session identification, and provider documentation
+## Summary
+Updated all specification documents to include user's additional requirements for multi-tenant observability support.
+
+## Changes Made
+- **IMPLEMENTATION_PLAN.md**: Added Phase 6 (Local Stack & Docs) with 4 tasks, Task 1.5 (SessionIdentifier), updated task count to 29
+- **DECISIONS.md**: Added ADR-010 (Session Identification Strategy), ADR-011 (Local Observability Stack)
+- **CHANGELOG.md**: Documented v1.1.0 changes with all new additions
+- **README.md**: Updated metrics (6 phases, 29 tasks, 11 ADRs, 5 Docker services, 7 provider docs)
+
+## Related Files
+- docs/spec/active/2025-12-25-observability-instrumentation/IMPLEMENTATION_PLAN.md:1-639
+- docs/spec/active/2025-12-25-observability-instrumentation/DECISIONS.md:459-575
+- docs/spec/active/2025-12-25-observability-instrumentation/CHANGELOG.md:1-37
+- docs/spec/active/2025-12-25-observability-instrumentation/README.md:41-62
