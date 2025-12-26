@@ -101,3 +101,15 @@ tags:
 ...───────────────────────────────────────────────`
 
 Let me read one of the handlers to understand the pattern they follow:
+
+---
+type: patterns
+timestamp: '2025-12-26T02:48:43.881620+00:00'
+summary: I see the current pattern - `logger = logging.getLogger(__name__)`. Let me
+  update this to use the...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I see the current pattern - `logger = logging.getLogger(__name__)`. Let me update this to use the structured logger:
