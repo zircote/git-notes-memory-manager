@@ -21,3 +21,15 @@ summary: '...POSITIVES**. The `__getattr__` function provides lazy imports for t
 ...POSITIVES**. The `__getattr__` function provides lazy imports for these names - a standard Python pattern for avoiding import-time overhead.
 
 3. **Exception pass block (1 finding)**: **VALID - ACCEPT**....
+
+---
+type: patterns
+timestamp: '2025-12-26T14:39:06.540966+00:00'
+summary: '...interpolation (`''$VAR''`) enables escape attacks'
+---
+
+...interpolation (`'$VAR'`) enables escape attacks
+
+**Pattern for Lazy Imports:**
+The `__getattr__` pattern for deferred imports is common in Python to:
+- Avoid import-time overhead (embedding models,...
