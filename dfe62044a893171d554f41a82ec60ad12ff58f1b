@@ -1195,3 +1195,20 @@ tags:
         """Scan text for pattern matches."""
         detections = []
         for name, compiled in self._compiled.items():...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:10.564544+00:00'
+summary: '...matches."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...matches."""
+        detections = []
+        for name, compiled in self._compiled.items():
+            pattern = self.PATTERNS[name]
+            for match in compiled.finditer(text):
+                detections.append...
