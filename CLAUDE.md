@@ -127,6 +127,7 @@ domain: project  # or "user" for global memories
 | `note_parser.py` | YAML front matter parsing/serialization |
 | `models.py` | Frozen dataclasses for all domain objects |
 | `sync.py` | Index synchronization with git notes |
+| `security/` | Secrets filtering and PII protection subsystem |
 
 ### Hooks Subsystem
 
@@ -147,6 +148,32 @@ Supporting modules:
 - `config_loader.py` - Environment-based hook configuration
 - `namespace_styles.py` - ANSI colors and emojis for namespace display
 
+### Security Subsystem
+
+The `security/` module provides secrets filtering and PII protection:
+
+| Module | Responsibility |
+|--------|---------------|
+| `config.py` | Environment-based configuration for filtering behavior |
+| `detector.py` | `DetectSecretsAdapter` wrapping detect-secrets library |
+| `pii.py` | `PIIDetector` for SSN, credit cards, phone numbers |
+| `redactor.py` | `Redactor` applies strategies (redact/mask/block/warn) |
+| `allowlist.py` | `AllowlistManager` for false positive management |
+| `service.py` | `SecretsFilteringService` orchestrating the pipeline |
+| `audit.py` | `AuditLogger` for compliance logging (SOC2/GDPR) |
+| `models.py` | `SecretDetection`, `FilterResult`, `FilterAction` types |
+
+**Filtering Strategies**:
+- `REDACT`: Replace with `[REDACTED:type]`
+- `MASK`: Show partial content `abc...xyz`
+- `BLOCK`: Raise `BlockedContentError`
+- `WARN`: Log but pass through unchanged
+
+**Detection Flow**:
+```
+Content → PIIDetector → DetectSecretsAdapter → Deduplicate → AllowlistCheck → Redactor → FilterResult
+```
+
 ### Models
 
 All models are immutable (`@dataclass(frozen=True)`):
@@ -160,6 +187,7 @@ All models are immutable (`@dataclass(frozen=True)`):
 
 The `plugin.json` and hooks in `hooks/` directory define the plugin:
 - Commands: `/memory:capture`, `/memory:recall`, `/memory:search`, `/memory:sync`, `/memory:status`
+- Secrets Commands: `/memory:scan-secrets`, `/memory:secrets-allowlist`, `/memory:test-secret`, `/memory:audit-log`
 - Hooks: SessionStart, UserPromptSubmit, PostToolUse, PreCompact, Stop
 - Skills: `memory-recall` for semantic search
 
@@ -213,6 +241,17 @@ def capture_service(tmp_path, monkeypatch):
 | `HOOK_SESSION_START_INCLUDE_GUIDANCE` | Include response guidance templates | `true` |
 | `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance level: minimal/standard/detailed | `standard` |
 | `USER_MEMORIES_REMOTE` | Remote URL for user memories sync | (none) |
+
+### Secrets Filtering Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SECRETS_FILTER_ENABLED` | Enable/disable secrets filtering | `true` |
+| `SECRETS_FILTER_STRATEGY` | Default strategy: redact, mask, block, warn | `redact` |
+| `SECRETS_FILTER_ENTROPY_ENABLED` | Enable entropy-based detection | `true` |
+| `SECRETS_FILTER_PII_ENABLED` | Enable PII detection (SSN, credit cards, phones) | `true` |
+| `SECRETS_FILTER_AUDIT_ENABLED` | Enable audit logging | `true` |
+| `SECRETS_FILTER_AUDIT_DIR` | Audit log directory | `~/.local/share/memory-plugin/audit/` |
 
 ### Remote Sync (Team Collaboration)
 
