@@ -86,3 +86,18 @@ tags:
 
 `★ Insight ─────────────────────────────────────`
 The `contextlib.suppress()` pattern is convenient but creates invisible failure points. Converting it to explicit try/except with...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:48:43.722806+00:00'
+summary: '...───────────────────────────────────────────────`
+
+  Let me read one of the handlers to understan...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...───────────────────────────────────────────────`
+
+Let me read one of the handlers to understand the pattern they follow:
