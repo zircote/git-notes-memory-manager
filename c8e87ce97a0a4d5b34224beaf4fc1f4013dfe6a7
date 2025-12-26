@@ -354,3 +354,17 @@ tags:
 
 ### Documentation & Design
 - **11 ADRs captured**: All key...
+
+---
+type: progress
+timestamp: '2025-12-26T03:47:00.572614+00:00'
+summary: '...flush_telemetry()` to export on session end'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...flush_telemetry()` to export on session end
+- **Docker Compose stack**: Originally Phase 6 (optional), implemented per user request
+- **Grafana dashboards**: Pre-built memory-operations.json and hook-performance.json...
