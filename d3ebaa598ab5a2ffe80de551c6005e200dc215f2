@@ -682,3 +682,30 @@ Found and fixed 2 mypy errors and 16 ruff linting issues in test files. All qual
 ## Related Files
 - tests/subconsciousness/test_capture_store.py:5,26
 - tests/subconsciousness/test_implicit_capture_service.py:6,85
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:26.111747+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Implemented CircuitBreaker pattern for LLM provi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Implemented CircuitBreaker pattern for LLM provider resilience
+## Summary
+Added circuit breaker implementation to prevent cascading failures when LLM providers experience outages. The circuit opens after a configurable failure threshold and allows test requests after a recovery timeout.
+
+## Changes Made
+- Added `CircuitBreaker` class with three states: CLOSED, OPEN, HALF_OPEN
+- Added `CircuitState` enum for state tracking
+- Added `CircuitOpenError` exception for blocked requests
+- Integrated circuit breakers into `LLMClient._execute_single()` method
+- Updated `LLMClient.status()` to include circuit breaker status
+- Created comprehensive test file with 22 tests
+
+## Related Files
+- src/git_notes_memory/subconsciousness/llm_client.py:189-335
+- tests/subconsciousness/test_circuit_breaker.py:1-395
