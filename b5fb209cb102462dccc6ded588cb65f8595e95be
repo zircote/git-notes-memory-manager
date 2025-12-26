@@ -237,3 +237,20 @@ tags:
 The multi-domain search architecture follows a **parallel query + merge** pattern:
 1. When `domain=None`, we query both project and user indexes in parallel
 2. Results are merged...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:03.332633+00:00'
+summary: '...Add domain marker patterns like `[global]`, `[user]`, `[project]`, `[local]`
+
+  3. Extend block p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Add domain marker patterns like `[global]`, `[user]`, `[project]`, `[local]`
+3. Extend block pattern to support domain prefix like `global:decision`
+
+`★ Insight ─────────────────────────────────────`
+The...
