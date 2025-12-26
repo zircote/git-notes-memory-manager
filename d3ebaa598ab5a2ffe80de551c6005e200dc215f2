@@ -556,3 +556,28 @@ Completed 5 tasks of Phase 2 (Implicit Capture / Dream Harvesting): auto-capture
 - commands/review.md
 - tests/subconsciousness/test_capture_store.py
 - tests/subconsciousness/test_hook_integration.py
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:25.932512+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Task 2.13 integration tests complete with 21 tes...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Task 2.13 integration tests complete with 21 tests passing
+## Summary
+Completed comprehensive integration test suite for the subconsciousness implicit capture flow. Fixed 3 mypy errors (type annotations and redundant conditional check).
+
+## Changes Made
+- Fixed line 683: Removed redundant conditional `if status != ReviewStatus.PENDING else None` inside if block that already checked `status != ReviewStatus.PENDING`
+- Added `memory_factory: "MemoryFactory"` type annotation to `test_detector_exception_continues`
+- Added `memory_factory: "MemoryFactory"` type annotation to `test_concurrent_store_access`
+
+## Related Files
+- tests/subconsciousness/test_integration.py:683 (conditional fix)
+- tests/subconsciousness/test_integration.py:854-858 (type annotation)
+- tests/subconsciousness/test_integration.py:902-904 (type annotation)
