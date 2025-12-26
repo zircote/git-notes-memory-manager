@@ -1488,3 +1488,32 @@ Added remote sync support for user-memories bare repo via `USER_MEMORIES_REMOTE`
 - src/git_notes_memory/sync.py:684-751
 - tests/test_sync.py:1451-1587
 - tests/test_git_ops.py:1133-1228
+
+---
+type: progress
+timestamp: '2025-12-26T02:50:39.581305+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 5.3: Add Auto-Sync Hooks for User...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 5.3: Add Auto-Sync Hooks for User Memories
+## Summary
+Added opt-in auto-sync hooks for user memories via `HOOK_SESSION_START_FETCH_USER_REMOTE` and `HOOK_STOP_PUSH_USER_REMOTE` environment variables.
+
+## Changes Made
+- Added `session_start_fetch_user_remote` config field (default: false)
+- Added `stop_push_user_remote` config field (default: false)
+- Added env var parsing for both new config fields
+- Integrated user memory fetch into session_start_handler
+- Integrated user memory push into stop_handler
+- Both hooks fail gracefully (errors logged but don't block session)
+- Updated docstrings with new env vars
+
+## Related Files
+- src/git_notes_memory/hooks/config_loader.py:19,31,136-138,155-156,372-375,425-426
+- src/git_notes_memory/hooks/session_start_handler.py:27,215-228
+- src/git_notes_memory/hooks/stop_handler.py:32,488-502
