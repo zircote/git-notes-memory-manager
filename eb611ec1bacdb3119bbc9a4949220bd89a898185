@@ -15,3 +15,20 @@ tags:
 ### Task 1.5: Implement OpenAI provider
 - **Status**: ✅ Complete
 - **Started**: 2025-12-26T01:10:00Z...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:52:32.142784+00:00'
+summary: '...AskUserQuestion'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...AskUserQuestion
+- [x] Check subconsciousness enabled before operations
+
+**Note**: Command follows existing pattern with step-based workflow. Uses Python scripts invoked via `uv run` for actual operations.
+
+###...
