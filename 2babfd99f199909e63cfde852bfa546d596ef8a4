@@ -60,3 +60,21 @@ The marketplace wasn't updating because `plugin.json` had incorrect URLs pointin
 
 ## Related Files
 - .claude-plugin/plugin.json:9-10
+
+---
+type: progress
+timestamp: '2025-12-26T04:22:55.746074+00:00'
+summary: Fixed plugin.json version and repository URLs for marketplace
+---
+
+Fixed plugin.json version and repository URLs for marketplace
+## Summary
+Synced main branch after PR #30 merge. Plugin.json now correctly shows v0.12.0 and points to the correct `git-notes-memory` repository.
+
+## Changes Made
+- Version updated: 0.11.0 → 0.12.0
+- Repository URL fixed: `git-notes-memory-manager` → `git-notes-memory`
+- Homepage URL fixed: `git-notes-memory-manager` → `git-notes-memory`
+
+## Related Files
+- .claude-plugin/plugin.json:3,9-10
