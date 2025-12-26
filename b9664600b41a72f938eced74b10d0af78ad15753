@@ -698,3 +698,25 @@ tags:
 ---
 
 test content
+
+---
+type: learnings
+timestamp: '2025-12-26T15:50:52.746790+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
