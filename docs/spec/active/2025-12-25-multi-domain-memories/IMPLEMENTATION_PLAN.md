@@ -91,49 +91,49 @@ This plan implements multi-domain memory storage in 5 phases, building from foun
 #### Task 2.1: Create GitOps Factory for Domain
 - **Description**: Add `GitOps.for_domain(domain: Domain)` class method
 - **Acceptance Criteria**:
-  - [ ] Factory returns appropriate GitOps instance for domain
-  - [ ] USER domain uses `get_user_memories_path()`
-  - [ ] PROJECT domain uses current repo (existing behavior)
-  - [ ] Instance cached per domain
-- **Notes**: Consider singleton pattern per domain
+  - [x] Factory returns appropriate GitOps instance for domain
+  - [x] USER domain uses `get_user_memories_path()`
+  - [x] PROJECT domain uses current repo (existing behavior)
+  - [x] Instance cached per domain
+- **Notes**: Implemented with clear_domain_cache() for testing. Added 8 tests.
 
 #### Task 2.2: Initialize User-Memories Bare Repo
 - **Description**: Create and initialize bare git repo for user memories
 - **Acceptance Criteria**:
-  - [ ] `_ensure_user_repo()` creates bare repo if not exists
-  - [ ] Runs `git init --bare` in user-memories path
-  - [ ] Creates initial empty commit for notes refs
-  - [ ] Idempotent - safe to call multiple times
-- **Notes**: Similar to existing repo initialization patterns
+  - [x] `_ensure_user_repo()` creates bare repo if not exists
+  - [x] Runs `git init --bare` in user-memories path
+  - [x] Creates initial empty commit for notes refs
+  - [x] Idempotent - safe to call multiple times
+- **Notes**: Named ensure_user_repo_initialized(). Also added is_bare_repository(). Added 6 tests.
 
 #### Task 2.3: Add Domain Filter to IndexService Search
 - **Description**: Extend `search_vector()` and `search_text()` with domain filter
 - **Acceptance Criteria**:
-  - [ ] `search_vector(..., domain: Domain | None = None)`
-  - [ ] `domain=None` searches all domains (existing behavior)
-  - [ ] `domain=USER` filters to user memories only
-  - [ ] `domain=PROJECT` filters to project memories only
-  - [ ] SQL query uses parameterized domain filter
-- **Notes**: Maintain backward compatibility with existing callers
+  - [x] `search_vector(..., domain: Domain | None = None)`
+  - [x] `domain=None` searches all domains (existing behavior)
+  - [x] `domain=USER` filters to user memories only
+  - [x] `domain=PROJECT` filters to project memories only
+  - [x] SQL query uses parameterized domain filter
+- **Notes**: Added 4 tests for both search methods with domain filtering.
 
 #### Task 2.4: Add Domain Filter to Other Index Methods
 - **Description**: Extend `get_by_namespace()`, `get_by_spec()`, `list_recent()` with domain filter
 - **Acceptance Criteria**:
-  - [ ] All query methods accept optional `domain` parameter
-  - [ ] Consistent filtering behavior across methods
-  - [ ] `get_stats()` returns counts by domain
-- **Notes**: Follow same pattern as Task 2.3
+  - [x] All query methods accept optional `domain` parameter
+  - [x] Consistent filtering behavior across methods
+  - [x] `get_stats()` returns counts by domain
+- **Notes**: Also added domain filter to count(). Added by_domain field to IndexStats model. Added 9 tests.
 
 ### Phase 2 Deliverables
-- [ ] GitOps domain factory
-- [ ] User-memories bare repo initialization
-- [ ] Domain filtering in all index queries
-- [ ] Tests for storage layer
+- [x] GitOps domain factory
+- [x] User-memories bare repo initialization
+- [x] Domain filtering in all index queries
+- [x] Tests for storage layer
 
 ### Phase 2 Exit Criteria
-- [ ] User-memories repo can be created and accessed
-- [ ] Index queries filter correctly by domain
-- [ ] All tests pass
+- [x] User-memories repo can be created and accessed
+- [x] Index queries filter correctly by domain
+- [x] All tests pass (1885 total, 89% coverage)
 
 ---
 
