@@ -1108,3 +1108,22 @@ tags:
 ...**Learnings** - Technical insights, debugging discoveries, "TIL" moments
 3. **Patterns** - Reusable approaches, best practices, anti-patterns
 4. **Blockers** - Problems encountered and their...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:04.413745+00:00'
+summary: '...related memories:'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...related memories:
+{cluster_memories}
+
+Create a meta-memory that:
+1. Captures the essential pattern or theme
+2. Preserves key details from each source
+3. Uses SUMMARY level for quick recall
+4....
