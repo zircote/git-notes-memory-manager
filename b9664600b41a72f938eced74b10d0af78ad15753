@@ -3155,3 +3155,44 @@ Reviewed pending changes and found only one untracked file (`.claude-plugin/scri
 - The broken script is related to issue #31 filed earlier
 - Issue #31 recommends using Python module imports instead of scripts
 - The actual API is `get_metrics()` not `get_metrics_registry()`
+
+---
+type: progress
+timestamp: '2025-12-26T15:50:52.646314+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Deep-clean code review and remediation complete ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Deep-clean code review and remediation complete - all findings resolved
+## Summary
+Completed comprehensive `/claude-spec:deep-clean --focus MAXALL` with 9 parallel specialist agents (Security, Performance, Test Coverage, Database, Code Quality, Documentation, Architecture, Resilience, Compliance). All critical and high-priority findings remediated, full verification passing.
+
+## Changes Made
+- **CRIT-001**: Fixed SQLite connection leak in `index.py` - added proper cleanup with `contextlib.suppress(Exception)` on initialization failure
+- **MED-001**: Fixed session hook connection cleanup in `session_start_handler.py` - added `try/finally` block
+- **LOW-004**: Added composite index for `status+timestamp` queries in `index.py`
+- **LOW-010**: Added warning logging for batch note fetch fallback in `git_ops.py`
+- **HIGH-006**: Created comprehensive `docs/ENV.md` with all environment variables documented
+- **HIGH-007**: Added CHANGELOG v0.12.0 entry with observability and secrets filtering features
+- **Test Fix**: Fixed `domain=domain.value` parameter in Memory creation in `capture.py`
+- **Lint Fix**: Moved logger initialization after imports in `git_ops.py`
+
+## Verification Results
+- **Tests**: 2,342 passed (100%)
+- **Coverage**: 88.21% (exceeds 80% requirement)
+- **Formatting**: PASS
+- **Linting**: PASS (ruff)
+- **Type checking**: PASS (mypy strict)
+- **Security**: PASS (bandit)
+
+## Related Files
+- src/git_notes_memory/index.py:243-253
+- src/git_notes_memory/git_ops.py:18-43
+- src/git_notes_memory/hooks/session_start_handler.py:85-93
+- src/git_notes_memory/capture.py:727-740
+- docs/ENV.md (created)
+- CHANGELOG.md:9-28
