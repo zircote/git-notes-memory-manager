@@ -180,3 +180,29 @@ All 6 tasks in Phase 1 are complete with 19 files changed (+3718 lines). The obs
 - src/git_notes_memory/observability/exporters/prometheus.py
 - src/git_notes_memory/observability/exporters/json_exporter.py
 - tests/test_observability/*
+
+---
+type: progress
+timestamp: '2025-12-26T03:23:15.188520+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.1: Instrumented CaptureService ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.1: Instrumented CaptureService with observability
+## Summary
+Added comprehensive observability instrumentation to the CaptureService class.
+
+## Changes Made
+- Added `@measure_duration("memory_capture")` decorator to `capture()` method
+- Wrapped `_do_capture()` internals with `trace_operation("capture")` root span
+- Added nested spans for: resolve_commit, count_existing, git_append, index, embed
+- Added `memories_captured_total` counter with namespace label
+- All 49 existing tests pass
+
+## Related Files
+- src/git_notes_memory/capture.py:354 (decorator on capture method)
+- src/git_notes_memory/capture.py:480-581 (trace_operation spans in _do_capture)
