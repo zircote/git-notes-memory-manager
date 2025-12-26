@@ -84,3 +84,20 @@ tags:
         type=SignalType.DECISION,
         match="I decided to use SQLite",
         context="After evaluating options, I decided to use SQLite for storage.",...
+
+---
+type: decisions
+timestamp: '2025-12-26T16:03:11.201852+00:00'
+summary: '...SignalType.DECISION,'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_novelty_checker.py
+---
+
+...SignalType.DECISION,
+        match="I decided to use SQLite",
+        context="After evaluating options, I decided to use SQLite for storage.",
+        suggested_namespace="decisions",
+        confidence=0.9,
+    )
