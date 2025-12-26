@@ -6204,3 +6204,26 @@ Fixed multiple performance issues in the codebase.
 - src/git_notes_memory/embedding.py:391-426
 - tests/test_index.py:642-672
 - tests/test_embedding.py:229-272
+
+---
+type: progress
+timestamp: '2025-12-26T16:45:19.402083+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed TEST-H-004: Added 37 xml_formatter tes...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed TEST-H-004: Added 37 xml_formatter tests
+## Summary
+Created comprehensive test suite for `xml_formatter.py` covering XMLBuilder class and escape_xml_text function.
+
+## Changes Made
+- Fixed sample_memory fixture to include `commit_sha` parameter
+- Fixed test_memory_without_optional_fields with `commit_sha` and `content=""` (not None)
+- All 37 tests passing: initialization, add_element, add_memory_element, add_instruction, add_section, to_string, clear, escape_xml_text, integration
+
+## Related Files
+- tests/hooks/test_xml_formatter.py:1-444
