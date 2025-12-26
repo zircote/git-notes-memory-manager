@@ -2992,3 +2992,19 @@ tags:
 | PERF-H-003 | Unbounded collect_notes | ✅ Completed |
 | PERF-H-004 | Cold Start Embedding | ✅ Completed |
 | PERF-H-005 | FTS5 Text Search | ⏸️...
+
+---
+type: progress
+timestamp: '2025-12-26T15:50:48.884984+00:00'
+summary: '...PERF-H-003 | Unbounded collect_notes | ✅ Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...PERF-H-003 | Unbounded collect_notes | ✅ Completed |
+| PERF-H-004 | Cold Start Embedding | ✅ Completed |
+| PERF-H-005 | FTS5 Text Search | ⏸️ Deferred (enhancement) |
+
+### Test Coverage HIGH (1/7...
