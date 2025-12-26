@@ -41,3 +41,15 @@ tags:
 ---
 
 Pattern matches! So the block format is correct. Let me check if previous sessions exported successfully:
+
+---
+type: patterns
+timestamp: '2025-12-26T20:11:08.235148+00:00'
+summary: 'Auto-capture is enabled by default (True). Let me verify the block pattern
+  matches what I''m writing:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Auto-capture is enabled by default (True). Let me verify the block pattern matches what I'm writing:
