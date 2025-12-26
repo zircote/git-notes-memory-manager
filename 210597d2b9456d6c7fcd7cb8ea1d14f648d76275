@@ -170,3 +170,20 @@ tags:
   - Status: **Already Implemented** - Logging exists in embedding service
 
 - [x] **HIGH-006**: Propagate errors in SyncService.sync_namespace...
+
+---
+type: progress
+timestamp: '2025-12-26T02:42:58.124194+00:00'
+summary: '...HIGH-016**: Add SECRETS_FILTER_* env vars to CLAUDE.md'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...HIGH-016**: Add SECRETS_FILTER_* env vars to CLAUDE.md
+  - File: `CLAUDE.md`
+  - Status: **Fixed** - Completed as part of CRIT-005
+
+- [x] **HIGH-017**: Standardize docstrings to Google style
+  - Files:...
