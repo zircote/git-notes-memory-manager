@@ -7139,3 +7139,31 @@ Added error message sanitization to prevent API keys from leaking into logs/exce
 ## Related Files
 - src/git_notes_memory/subconsciousness/providers/anthropic.py:66-81, 426-457
 - src/git_notes_memory/subconsciousness/providers/openai.py:61-76, 351-378
+
+---
+type: progress
+timestamp: '2025-12-26T16:56:10.645502+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed SEC-H-001 SSRF via OTLP Endpoint fix
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed SEC-H-001 SSRF via OTLP Endpoint fix
+## Summary
+Added SSRF protection to OTLPExporter to prevent server-side request forgery attacks via malicious OTLP endpoint configuration.
+
+## Changes Made
+- Added `_is_private_ip()` helper to detect RFC1918/loopback/link-local addresses
+- Added `_validate_otlp_endpoint()` to validate URL scheme and block internal endpoints
+- Integrated validation into `OTLPExporter.__init__()` - exporter disabled on validation failure
+- Added `MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL` env var override for testing/development
+- Added 6 new tests in `TestSSRFProtection` class
+
+## Related Files
+- src/git_notes_memory/observability/exporters/otlp.py:42-112, 140-149
+- tests/test_observability/test_otlp_exporter.py:177-222
