@@ -465,3 +465,15 @@ tags:
 Now I understand the system. I need to:
 1. Import the secrets filtering service in llm_client.py
 2. Add secrets...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:27.972080+00:00'
+summary: Now I understand the model. I need to filter the content of each message
+  before sending it to the...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I understand the model. I need to filter the content of each message before sending it to the LLM. Let...
