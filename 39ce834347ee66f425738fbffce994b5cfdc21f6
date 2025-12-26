@@ -103,3 +103,19 @@ tags:
 ```python
 # Use the recall service directly
 from...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:30:24.500984+00:00'
+summary: '...this work?'
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_detailed.md
+---
+
+...this work?
+- [ ] Did we learn something in a previous session that applies?
+- [ ] Is there a pattern I should follow or avoid?
+
+**SEARCH FIRST, THEN ACT.** Prior context prevents contradicting...
