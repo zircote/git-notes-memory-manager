@@ -70,3 +70,21 @@ tags:
 Subtasks:
 - [x] Define `LLMProvider` Protocol class
 - [x] Add `complete()`...
+
+---
+type: progress
+timestamp: '2025-12-26T00:58:54.667734+00:00'
+summary: '...Implement Anthropic provider'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Implement Anthropic provider
+- **Status**: ✅ Complete
+- **Started**: 2025-12-26T01:00:00Z
+- **Completed**: 2025-12-26T01:10:00Z
+
+Subtasks:
+- [x] Create `src/git_notes_memory/subconsciousness/providers/anthropic...
