@@ -517,3 +517,41 @@ Phase 2 of the Observability Instrumentation project is now complete. All core s
 - src/git_notes_memory/git_ops.py:1011
 - src/git_notes_memory/sync.py:444
 - src/git_notes_memory/index.py:306-316
+
+---
+type: progress
+timestamp: '2025-12-26T02:48:41.977954+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 3 (Structured Logging) - All 4 t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 3 (Structured Logging) - All 4 tasks finished
+## Summary
+Phase 3 of the Observability Instrumentation project is now complete. All hook handlers and supporting modules have been migrated to use the StructuredLogger with trace context injection.
+
+## Changes Made
+- Task 3.1 & 3.2: Already implemented in Phase 1 (StructuredLogger + JsonFormatter/TextFormatter)
+- Task 3.3: Migrated 5 hook handlers to use `get_logger()` from observability
+- Task 3.4: Migrated 7 supporting modules to use structured logging:
+  - hook_utils.py
+  - guidance_builder.py
+  - session_analyzer.py
+  - novelty_checker.py
+  - capture_decider.py
+  - signal_detector.py
+  - context_builder.py
+  - project_detector.py
+
+## Technical Details
+- Updated StructuredLogger to support `*args` for backwards compatibility with `%s` format strings
+- All `logger = logging.getLogger(__name__)` replaced with `logger = get_logger(__name__)`
+- Removed unused `import logging` from migrated files
+- `get_hook_logger()` intentionally kept using standard logging for file-based debug logs
+
+## Related Files
+- src/git_notes_memory/observability/logging.py:97-148
+- src/git_notes_memory/hooks/*.py (all handler and supporting modules)
