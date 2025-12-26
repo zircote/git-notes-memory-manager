@@ -361,3 +361,21 @@ tags:
 ...`blockers` | "Blocked by...", "Issue with...", problems |
 | `patterns` | "Pattern for...", "Best practice...", reusable approaches |
 | `research` | "Found that...", "Research shows...", external findings...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:45:41.839535+00:00'
+summary: '..."Blocked by...", "Issue with...", problems |'
+tags:
+- auto-captured
+- post-tool-use
+- file:SUBCONSCIOUSNESS.md
+---
+
+..."Blocked by...", "Issue with...", problems |
+| `patterns` | "Pattern for...", "Best practice...", reusable approaches |
+| `research` | "Found that...", "Research shows...", external findings |
+
+---
+
+##...
