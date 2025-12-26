@@ -982,3 +982,19 @@ tags:
 ### 2025-12-26 - Phase 4 Complete
 - Completed all Phase 4 tasks (4.1-4.5)
 - Domain markers: [global]/[user] → USER domain, [project]/[local]...
+
+---
+type: progress
+timestamp: '2025-12-26T02:37:42.725887+00:00'
+summary: '...Always use connection pooling in production to prevent...'
+tags:
+- auto-captured
+- post-tool-use
+- file:recall.md
+---
+
+...Always use connection pooling in production to prevent...
+
+### 3. 📁 Progress: Database schema completed
+**Relevance**: 0.78 | **Captured**: 2024-01-08
+> Database migrations are in migrations/ directory.....
