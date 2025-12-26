@@ -581,3 +581,31 @@ Successfully pushed the complete specification for Issue #13 (multi-domain memor
 - docs/spec/active/2025-12-25-multi-domain-memories/IMPLEMENTATION_PLAN.md
 - docs/spec/active/2025-12-25-multi-domain-memories/DECISIONS.md
 - docs/spec/active/2025-12-25-multi-domain-memories/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-26T01:57:47.078935+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Task 1.1 complete: Add Domain Enum to Config
+
+  ##...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Task 1.1 complete: Add Domain Enum to Config
+## Summary
+Created Domain enum and user memory path functions in config.py.
+
+## Changes Made
+- Added `Domain` enum with `USER` and `PROJECT` values
+- Added `get_user_memories_path(ensure_exists=False)` for bare repo location
+- Added `get_user_index_path(ensure_exists=False)` for user index DB
+- Added 17 new tests for domain configuration
+- Updated IMPLEMENTATION_PLAN.md checkboxes
+
+## Related Files
+- src/git_notes_memory/config.py:149-207
+- tests/test_config.py:56-175
