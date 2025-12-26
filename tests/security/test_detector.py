@@ -30,7 +30,9 @@ class TestDetectSecretsAdapter:
         detections = adapter.detect(content)
 
         # Should detect at least the AWS key
-        aws_detections = [d for d in detections if d.secret_type == SecretType.AWS_ACCESS_KEY]
+        aws_detections = [
+            d for d in detections if d.secret_type == SecretType.AWS_ACCESS_KEY
+        ]
         assert len(aws_detections) >= 1
 
         aws = aws_detections[0]
@@ -59,7 +61,9 @@ MIIEpAIBAAKCAQEA...
         detections = adapter.detect(content)
 
         # Should detect private key
-        pk_detections = [d for d in detections if d.secret_type == SecretType.PRIVATE_KEY]
+        pk_detections = [
+            d for d in detections if d.secret_type == SecretType.PRIVATE_KEY
+        ]
         assert len(pk_detections) >= 1
 
     def test_detect_high_entropy(self):
@@ -108,7 +112,9 @@ Line 4: another_key = AKIAIOSFODNN7EXAMPL2
 """
 
         detections = adapter.detect(content)
-        aws_detections = [d for d in detections if d.secret_type == SecretType.AWS_ACCESS_KEY]
+        aws_detections = [
+            d for d in detections if d.secret_type == SecretType.AWS_ACCESS_KEY
+        ]
 
         # Should find both AWS keys
         assert len(aws_detections) >= 2

@@ -181,6 +181,73 @@ class TestAcquireLock:
         # A should complete before B starts
         assert results == ["A_start", "A_end", "B_start", "B_end"]
 
+    def test_lock_acquisition_timeout(self, tmp_path: Path) -> None:
+        """Test that lock acquisition times out when held by another thread.
+
+        CRIT-002: Verifies the timeout mechanism prevents indefinite blocking.
+        """
+        import fcntl
+        import os
+
+        lock_path = tmp_path / "timeout.lock"
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Acquire the lock in the main thread and hold it
+        fd = os.open(str(lock_path), os.O_RDWR | os.O_CREAT, 0o600)
+        fcntl.flock(fd, fcntl.LOCK_EX)
+
+        try:
+            # Try to acquire with a short timeout - should raise CaptureError
+            with pytest.raises(CaptureError) as exc_info:
+                with _acquire_lock(lock_path, timeout=0.3):
+                    pass  # Should never reach here
+
+            assert "timed out" in exc_info.value.message.lower()
+            assert "0.3s" in exc_info.value.message
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+
+    def test_lock_acquisition_oserror(self, tmp_path: Path) -> None:
+        """Test that OSError during lock acquisition is handled properly.
+
+        CRIT-003: Verifies proper error handling for OS-level failures.
+        """
+        import fcntl
+
+        lock_path = tmp_path / "oserror.lock"
+
+        # Mock fcntl.flock to raise OSError (simulates I/O error, invalid fd, etc.)
+        original_flock = fcntl.flock
+
+        def mock_flock(fd: int, operation: int) -> None:
+            if operation == (fcntl.LOCK_EX | fcntl.LOCK_NB):
+                raise OSError(5, "I/O error during lock")
+            return original_flock(fd, operation)
+
+        with patch("fcntl.flock", side_effect=mock_flock):
+            with pytest.raises(CaptureError) as exc_info:
+                with _acquire_lock(lock_path, timeout=1.0):
+                    pass
+
+            assert "Failed to acquire" in exc_info.value.message
+            assert "I/O error" in exc_info.value.message
+
+    def test_lock_cleanup_on_exception(self, tmp_path: Path) -> None:
+        """Test that lock is released even when exception occurs in block.
+
+        Verifies the finally block properly cleans up resources.
+        """
+        lock_path = tmp_path / "exception.lock"
+
+        with pytest.raises(ValueError):
+            with _acquire_lock(lock_path):
+                raise ValueError("Test exception")
+
+        # Lock should be released - we can acquire it again immediately
+        with _acquire_lock(lock_path, timeout=0.5):
+            pass  # Should succeed without timeout
+
 
 # =============================================================================
 # CaptureService Tests
