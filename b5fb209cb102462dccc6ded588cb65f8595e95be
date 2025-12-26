@@ -226,3 +226,30 @@ Implemented the complete storage layer for multi-domain memory support, enabling
 - src/git_notes_memory/models.py:392-427 (IndexStats by_domain)
 - tests/test_git_ops.py:850-960 (14 new tests)
 - tests/test_index.py:832-1808 (13 new domain tests)
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.756798+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 3.1: Extend CaptureService for Do...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 3.1: Extend CaptureService for Domain
+## Summary
+Added domain parameter to CaptureService.capture() method enabling multi-domain memory storage.
+
+## Changes Made
+- Added `domain: Domain = Domain.PROJECT` parameter to `capture()` method
+- Updated `_do_capture()` to use `GitOps.for_domain(domain)` for USER domain
+- Implemented correct memory ID format: `user:{namespace}:{sha}:{idx}` for USER domain
+- Memory object now includes domain value for proper storage
+
+## Related Files
+- src/git_notes_memory/capture.py:350-540
+- tests/test_capture.py:934-1061 (5 new tests)
+- docs/spec/active/2025-12-25-multi-domain-memories/PROGRESS.md
+- docs/spec/active/2025-12-25-multi-domain-memories/IMPLEMENTATION_PLAN.md
