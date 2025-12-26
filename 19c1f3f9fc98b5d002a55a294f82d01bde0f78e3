@@ -52,3 +52,15 @@ tags:
 ---
 
 Pattern matches! So the block format is correct. Let me check if previous sessions exported successfully:
+
+---
+type: patterns
+timestamp: '2025-12-26T20:26:49.029714+00:00'
+summary: 'Let me examine a sample command to understand the current pattern and design
+  the replacement:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Let me examine a sample command to understand the current pattern and design the replacement:
