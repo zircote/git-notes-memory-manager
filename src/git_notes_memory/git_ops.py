@@ -17,6 +17,7 @@ Git Notes Architecture:
 
 from __future__ import annotations
 
+import logging
 import re
 import subprocess
 import warnings
@@ -38,6 +39,8 @@ from git_notes_memory.models import CommitInfo
 
 if TYPE_CHECKING:
     pass
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "GitOps",
@@ -549,8 +552,14 @@ class GitOps:
                 text=True,
                 check=False,
             )
-        except (OSError, subprocess.SubprocessError):
+        except (OSError, subprocess.SubprocessError) as e:
             # QUAL-HIGH-001: Fallback to sequential if batch fails
+            # LOW-010: Log warning with exception details for debugging
+            logger.warning(
+                "Batch note fetch failed (%s), falling back to sequential: %s",
+                type(e).__name__,
+                e,
+            )
             return {sha: self.show_note(namespace, sha) for sha in commit_shas}
 
         # Parse batch output
