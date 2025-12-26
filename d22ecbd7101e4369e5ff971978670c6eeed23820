@@ -903,3 +903,15 @@ tags:
 ...2.4.
 
 Let me first read the current state of the index.py and test file to see exactly what was implemented:
+
+---
+type: progress
+timestamp: '2025-12-26T01:57:48.902270+00:00'
+summary: '...SignalDetector) and Task 4.2 (Extend Block Pattern for Domain Prefix)
+  since they were both imp...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...SignalDetector) and Task 4.2 (Extend Block Pattern for Domain Prefix) since they were both implemented together. Let me update the PROGRESS.md and todo list:
