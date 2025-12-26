@@ -513,3 +513,38 @@ Task 5.6 (Update Documentation) complete. The entire Multi-Domain Memories speci
 - CLAUDE.md:197-214 (Hook Configuration with new env vars)
 - CLAUDE.md:229-244 (User Memory Remote Sync)
 - docs/spec/active/2025-12-25-multi-domain-memories/PROGRESS.md (updated to complete)
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.273301+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed deep-clean MAXALL remediation: 8 HIGH ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed deep-clean MAXALL remediation: 8 HIGH priority findings fixed, all tests passing
+## Summary
+Successfully remediated 8 critical and high-priority findings from the comprehensive code review. All 1,955 tests pass, linting is clean, and type checking passes.
+
+## Changes Made
+- **CRIT-001**: Added ThreadPoolExecutor timeout (30s/120s) to embedding operations in `embedding.py`
+- **CRIT-003**: Removed unused thread lock in `index.py`, documented SQLite WAL concurrency
+- **SEC-HIGH-001**: Added symlink verification before user-memories git init in `git_ops.py`
+- **SEC-HIGH-002**: Added 64KB YAML size limit to prevent billion laughs attack in `note_parser.py`
+- **SEC-HIGH-003**: Implemented PID-based stale lock detection in `capture.py`
+- **PERF-HIGH-001**: Added pagination (limit/offset) and generator to `get_all_ids()` in `index.py`
+- **PERF-HIGH-004**: Added 4 composite indexes for common query patterns in `index.py`
+- **QUAL-HIGH-001**: Replaced 10 broad `except Exception:` handlers with specific types
+
+## Related Files
+- src/git_notes_memory/embedding.py:220-248, 302-327
+- src/git_notes_memory/index.py:94-113, 176-183, 751-807
+- src/git_notes_memory/git_ops.py:1332-1346
+- src/git_notes_memory/note_parser.py:70-73, 214-219
+- src/git_notes_memory/capture.py:60-113, 580-582
+- src/git_notes_memory/recall.py:335-337, 453-455, 578-580
+- src/git_notes_memory/sync.py:396-398, 451-453
+- docs/code-review/2025/12/25/REMEDIATION_TASKS.md
