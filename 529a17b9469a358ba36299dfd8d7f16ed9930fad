@@ -591,3 +591,53 @@ Phase 4 of the Observability Instrumentation project is now complete. Three new 
 - commands/health.md
 - src/git_notes_memory/observability/exporters/prometheus.py:119-185
 - src/git_notes_memory/observability/exporters/__init__.py
+
+---
+type: progress
+timestamp: '2025-12-26T02:48:42.092818+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phases 2, 3, and 4 of Observability In...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phases 2, 3, and 4 of Observability Instrumentation
+## Summary
+Significant progress on SPEC-2025-12-25-001 (GitHub Issue #10). Three phases completed with 16 tasks total.
+
+## Phase 2: Instrumentation (Tasks 2.1-2.7) - COMPLETE
+- All 6 core services instrumented with metrics and tracing
+- 5 hook handlers wrapped with `timed_hook_execution` for timing
+- 5 silent failure points fixed with logging and `silent_failures_total` counter
+
+## Phase 3: Structured Logging (Tasks 3.1-3.4) - COMPLETE
+- StructuredLogger updated to support both `*args` and `**kwargs`
+- All hook handlers migrated to `get_logger()` from observability
+- 8 supporting hook modules migrated to structured logging
+
+## Phase 4: CLI & Export (Tasks 4.1-4.5) - COMPLETE
+- `/memory:metrics` command with text/json/prometheus formats
+- `/memory:traces` command for debugging trace spans
+- `/memory:health` command with `--timing` for latency percentiles
+- `PrometheusExporter` class added to prometheus.py
+- Commands auto-discovered from commands/ directory
+
+## Files Modified
+- 22 Python files modified
+- 3 new command files created
+
+## Tests
+- All 1949 tests passing
+- No regressions introduced
+
+## Remaining Work
+- Phase 5: OpenTelemetry Integration (optional, Tier 3)
+- Phase 6: Local Observability Stack (optional, Tier 3)
+
+## Related Files
+- src/git_notes_memory/observability/*.py
+- src/git_notes_memory/hooks/*.py
+- src/git_notes_memory/capture.py, recall.py, index.py, sync.py
+- commands/metrics.md, traces.md, health.md
