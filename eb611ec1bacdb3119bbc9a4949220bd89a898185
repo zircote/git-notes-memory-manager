@@ -187,3 +187,17 @@ tags:
         ],
     )
     @pytest.mark.asyncio...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:34:46.839266+00:00'
+summary: '..."We should implement rate limiting to prevent abuse. "'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_adversarial.py
+---
+
+..."We should implement rate limiting to prevent abuse. "
+                "The pattern involves checking request frequency and blocking "
+                "if it exceeds 100 requests...
