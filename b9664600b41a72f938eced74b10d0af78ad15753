@@ -8462,3 +8462,17 @@ tags:
 - [x] DOC-M-005: Security Module Docs Incomplete ✅
   - **Status:** DOCUMENTED - `docs/spec/completed/2025-12-25-secrets-filtering/` has comprehensive ARCHITECTURE.md and REQUIREMENTS.md
 - [x]...
+
+---
+type: progress
+timestamp: '2025-12-26T17:17:41.241621+00:00'
+summary: '...JSON Parsing | ✅ Added _safe_float() helper |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...JSON Parsing | ✅ Added _safe_float() helper |
+| PROMPT-M-003 | Token Budget Not Enforced | ✅ IMPLEMENTED (filter_memories enforces) |
+| PROMPT-M-004 | Missing Rate Limit Headers | ✅ IMPLEMENTED (retry-after...
