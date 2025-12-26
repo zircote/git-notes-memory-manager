@@ -213,3 +213,12 @@ summary: '...been created yet in the plugin. The command was defined in the spec
 1. **Update plugin cache** (sync with latest):
    ```bash
    # Reinstall...
+
+---
+type: progress
+timestamp: '2025-12-26T04:31:48.248480+00:00'
+summary: '...completed_spans()` function returns the spans, but there''s no CLI script
+  yet. Let me create a sim'
+---
+
+...completed_spans()` function returns the spans, but there's no CLI script yet. Let me create a simple inline solution to display the traces:
