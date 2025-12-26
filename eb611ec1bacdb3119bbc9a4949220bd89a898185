@@ -239,3 +239,23 @@ tags:
 Subtasks:
 - [x] Test Anthropic provider with mocked SDK
 - [x] Test...
+
+---
+type: progress
+timestamp: '2025-12-26T00:58:54.889388+00:00'
+summary: '...unit tests for LLMClient'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...unit tests for LLMClient
+- **Status**: ✅ Complete
+- **Started**: 2025-12-26T01:45:00Z
+- **Completed**: 2025-12-26T01:50:00Z
+
+Subtasks:
+- [x] Test provider selection
+- [x] Test rate limiting
+-...
