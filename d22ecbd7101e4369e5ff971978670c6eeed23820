@@ -707,3 +707,18 @@ tags:
 
 Search results often reveal connections worth preserving as new memories.
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:41:51.115582+00:00'
+summary: '...Domain markers: [global]/[user] → USER domain, [project]/[local] → PROJECT
+  domain'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Domain markers: [global]/[user] → USER domain, [project]/[local] → PROJECT domain
+- Block pattern extended for domain prefix: `global:decision`, `user:learned`
+- CaptureSignal and SuggestedCapture...
