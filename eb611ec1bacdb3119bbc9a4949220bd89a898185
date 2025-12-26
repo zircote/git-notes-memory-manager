@@ -2881,3 +2881,37 @@ Added tests for capture store cleanup, factory functions, and hook integration s
 ## Related Files
 - tests/subconsciousness/test_capture_store.py:511-662
 - tests/subconsciousness/test_hook_integration.py:362-412
+
+---
+type: progress
+timestamp: '2025-12-26T03:17:09.148760+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Session summary: Tasks 2.8-2.12 of Phase 2 compl...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Session summary: Tasks 2.8-2.12 of Phase 2 complete
+## Summary
+Completed 5 tasks of Phase 2 (Implicit Capture / Dream Harvesting): auto-capture logic, hook integration, /memory:review command, and unit tests.
+
+## Changes Made
+- Task 2.8: Verified CaptureStore already complete from Task 2.2
+- Task 2.9: Implemented three-tier confidence handling (auto-approve >= 0.9, pending >= 0.7, discard < 0.7)
+- Task 2.10: Created hook_integration.py with analyze_session_transcript() entry point
+- Task 2.11: Created /memory:review command for reviewing pending captures
+- Task 2.12: Added 7 new unit tests (238 total subconsciousness tests)
+
+## Quality Status
+- 238 tests passing (subconsciousness module)
+- mypy strict: No issues found in 17 source files
+- ruff: All checks passed
+
+## Related Files
+- src/git_notes_memory/subconsciousness/implicit_capture_service.py
+- src/git_notes_memory/subconsciousness/hook_integration.py
+- commands/review.md
+- tests/subconsciousness/test_capture_store.py
+- tests/subconsciousness/test_hook_integration.py
