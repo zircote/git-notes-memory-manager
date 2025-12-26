@@ -639,3 +639,20 @@ tags:
 #### Task 4.2: Implement Prometheus text format export
 
 - **Description**:...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:08:59.009792+00:00'
+summary: '...local models'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...local models
+
+**Decision**:
+Implement a provider-agnostic LLM client using Python's Protocol pattern:
+- `LLMProvider` protocol defines the interface
+- `AnthropicProvider`, `OpenAIProvider`, `OllamaProvider...
