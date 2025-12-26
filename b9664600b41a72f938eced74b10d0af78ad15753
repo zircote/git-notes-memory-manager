@@ -8525,3 +8525,19 @@ tags:
 - [x] PEN-L-004: API Key Logging Exposure ✅
   - **Status:** ALREADY FIXED - SEC-H-002 implemented `_sanitize_error_message()` in all providers
 - [x] PEN-L-005: JSON Nesting Depth Limit ✅...
+
+---
+type: progress
+timestamp: '2025-12-26T17:20:05.783744+00:00'
+summary: '...```
+
+  [learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/ind...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
