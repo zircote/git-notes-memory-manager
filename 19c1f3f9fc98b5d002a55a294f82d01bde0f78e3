@@ -28,3 +28,15 @@ tags:
 
 <thinking>
 The health.py script is self-contained with good imports. I can replace the PLUGIN_ROOT pattern with a direct inline version that calls this script's logic. Let me create a simpler inline...
+
+---
+type: patterns
+timestamp: '2025-12-26T20:26:48.685883+00:00'
+summary: 'Auto-capture is enabled by default (True). Let me verify the block pattern
+  matches what I''m writing:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Auto-capture is enabled by default (True). Let me verify the block pattern matches what I'm writing:
