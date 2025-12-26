@@ -2657,3 +2657,17 @@ tags:
 - **Completed:** 2025-12-26 - Added `UserCaptureService` subclass and `ServiceRegistry.has()` method
 
 ###...
+
+---
+type: progress
+timestamp: '2025-12-26T15:48:36.489774+00:00'
+summary: '...adversarial_prompt()` into extraction pipeline'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...adversarial_prompt()` into extraction pipeline
+- [x] **Tests:** Add test for adversarial content rejection
+- **Completed:** 2025-12-26 - Added `_screen_memories()` with `AdversarialDetector` integration
