@@ -113,3 +113,15 @@ Use task-specific queries (0.77 relevance) rather than generic project names (0.
 
 ## Gap Identified
 I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T13:31:18.484007+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
