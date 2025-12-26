@@ -1004,3 +1004,22 @@ tags:
 
 # Pattern to match YAML front matter at the start of content
 # Matches: ---\n<yaml>\n--- followed by...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:59:51.067812+00:00'
+summary: '...= re.compile('
+tags:
+- auto-captured
+- post-tool-use
+- file:note_parser.py
+---
+
+...= re.compile(
+    r"^---\s*\n(.*?)^---\s*(?:\n(.*))?$",
+    re.DOTALL | re.MULTILINE,
+)
+
+# Pattern to split multiple notes in a single git note
+# Each note starts with --- on its own line
+_MULTI_NOTE...
