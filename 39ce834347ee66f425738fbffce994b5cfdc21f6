@@ -26,3 +26,18 @@ summary: '...Issue:**'
 
 **Pattern repeated across 12+ commands:**
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:14:54.712290+00:00'
+summary: '...Root Cause Analysis'
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
