@@ -1541,3 +1541,15 @@ tags:
 The test file follows a clear pattern:
 1. Fixtures for mock dependencies (`mock_llm_client`, `agent`)
 2. Helper method for creating...
+
+---
+type: patterns
+timestamp: '2025-12-26T15:29:46.583614+00:00'
+summary: '...Now I understand the full issue. Let me check other commands to see if
+  they use a different pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Now I understand the full issue. Let me check other commands to see if they use a different pattern:
