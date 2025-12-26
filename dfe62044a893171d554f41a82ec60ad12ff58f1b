@@ -1460,3 +1460,16 @@ tags:
 
 ...The multi-layer detection approach (pattern → entropy → contextual) is a well-established pattern used by tools like `detect-secrets`, `gitleaks`, and `truffleHog`.
 `────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:32:13.269203+00:00'
+summary: '...they want ML extension points designed now but implemented later - this
+  is a classic "seam" pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...they want ML extension points designed now but implemented later - this is a classic "seam" pattern where we design for future capabilities without implementing them.
+`────────────────────────────────...
