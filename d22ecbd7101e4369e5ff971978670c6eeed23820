@@ -538,3 +538,15 @@ tags:
 ---
 
 Good. Now let me check if there are existing tests for models.py that I should follow the pattern of:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.521077+00:00'
+summary: '...Migration for Domain Column. First, let me read the current index.py
+  to understand the migrati...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Migration for Domain Column. First, let me read the current index.py to understand the migration pattern:
