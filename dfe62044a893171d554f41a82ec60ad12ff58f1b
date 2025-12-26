@@ -428,3 +428,24 @@ FOLLOWED_BY_EQUAL = r'{keyword}["\']?\s*[:=]\s*["\']?({secret})'
 
 # Examples matched:
 # password...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.272541+00:00'
+summary: '...sk-ant-api03-...'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...sk-ant-api03-...
+# database_pass := 'mypass'
+# secret => "value"
+```
+
+### 6.3 File Context
+
+| File Pattern | Context | Sensitivity Adjustment |
+|--------------|---------|----------------------|
+| `.env*`...
