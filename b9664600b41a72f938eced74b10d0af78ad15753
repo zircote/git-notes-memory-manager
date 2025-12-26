@@ -8374,3 +8374,17 @@ tags:
 
 - [x] RES-M-005: File Loading Can Exhaust Memory (`recall.py:871-903`) ✅
   - **Completed:** 2025-12-26 - Added limits: 50 files max, 512KB per file, 5MB total
+
+---
+type: progress
+timestamp: '2025-12-26T17:14:12.917778+00:00'
+summary: '...logged and session continues'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...logged and session continues
+- [x] QUAL-M-006: Magic Numbers (`capture.py:180-182`) ✅
+  - **Completed:** 2025-12-26 - Extracted to named constants: `LOCK_RETRY_BASE_INTERVAL_S`, `LOCK_RETRY_MAX_INTERVAL...
