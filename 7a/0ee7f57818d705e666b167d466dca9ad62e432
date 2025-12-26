@@ -606,3 +606,21 @@ tags:
 
 ...was implemented for Issue #18 and already handles the fetch→merge→push workflow correctly. The fix is literally a one-line change that replaces a direct push with a proper sync.
 `──────────────────────...
+
+---
+type: progress
+timestamp: '2025-12-26T20:11:08.670443+00:00'
+summary: '...README.md | 1.9K | Overview (status: in-review) |
+
+  | CHANGELOG.md | 614B | Version history |
+
+  *...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...README.md | 1.9K | Overview (status: in-review) |
+| CHANGELOG.md | 614B | Version history |
+
+**The fix is straightforward**: Replace `push_notes_to_remote()` with `sync_notes_with_remote(push=True)`...
