@@ -555,3 +555,39 @@ Phase 3 of the Observability Instrumentation project is now complete. All hook h
 ## Related Files
 - src/git_notes_memory/observability/logging.py:97-148
 - src/git_notes_memory/hooks/*.py (all handler and supporting modules)
+
+---
+type: progress
+timestamp: '2025-12-26T02:48:42.033380+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 4 (CLI & Export) - All 5 tasks f...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 4 (CLI & Export) - All 5 tasks finished
+## Summary
+Phase 4 of the Observability Instrumentation project is now complete. Three new CLI commands and Prometheus export have been implemented.
+
+## Changes Made
+- Task 4.1: Created `/memory:metrics` command with text/json/prometheus output formats
+- Task 4.2: Added `PrometheusExporter` class wrapper to existing prometheus.py
+- Task 4.3: Created `/memory:traces` command for viewing recent trace spans
+- Task 4.4: Created `/memory:health` command with `--timing` flag for latency percentiles
+- Task 4.5: Commands auto-discovered from commands/ directory (no pyproject.toml changes needed)
+
+## New Commands
+| Command | Description |
+|---------|-------------|
+| `/memory:metrics` | View metrics with text/json/prometheus formats |
+| `/memory:traces` | View recent trace spans for debugging |
+| `/memory:health` | Health check with optional timing percentiles |
+
+## Related Files
+- commands/metrics.md
+- commands/traces.md
+- commands/health.md
+- src/git_notes_memory/observability/exporters/prometheus.py:119-185
+- src/git_notes_memory/observability/exporters/__init__.py
