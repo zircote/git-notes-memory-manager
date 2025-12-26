@@ -1173,3 +1173,24 @@ tags:
 **Option 1: Fix path pattern (short-term)**
 ```bash
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/*/memory-capture...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:18:39.070683+00:00'
+summary: '...investigation context including:
+
+  ### What was included:
+
+  1. **Root Cause Analysis**: Hardcode...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...investigation context including:
+
+### What was included:
+
+1. **Root Cause Analysis**: Hardcoded path pattern `git-notes-memory/` doesn't match marketplace install path `zircote-claude-marketplace/`
+
+2....
