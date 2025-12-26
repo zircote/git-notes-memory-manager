@@ -34,7 +34,8 @@ Environment Variables:
     HOOK_POST_TOOL_USE_MAX_RESULTS: Maximum memories to inject
     HOOK_POST_TOOL_USE_TIMEOUT: PostToolUse timeout in seconds
     HOOK_PRE_COMPACT_ENABLED: Enable PreCompact hook
-    HOOK_PRE_COMPACT_AUTO_CAPTURE: Auto-capture without user prompt
+    HOOK_PRE_COMPACT_CONSENT_GIVEN: User has explicitly consented to auto-capture (MED-011)
+    HOOK_PRE_COMPACT_AUTO_CAPTURE: Auto-capture without user prompt (requires consent)
     HOOK_PRE_COMPACT_PROMPT_FIRST: Show suggestions before capturing (suggestion mode)
     HOOK_PRE_COMPACT_MIN_CONFIDENCE: Minimum confidence for auto-capture
     HOOK_PRE_COMPACT_MAX_CAPTURES: Maximum memories to auto-capture
@@ -170,13 +171,24 @@ class HookConfig:
 
     # PreCompact hook settings
     pre_compact_enabled: bool = True
-    pre_compact_auto_capture: bool = True
+    # MED-011: Consent mechanism for GDPR compliance
+    # Auto-capture requires explicit user consent via HOOK_PRE_COMPACT_CONSENT_GIVEN=true
+    # Without consent, only suggestions are shown (prompt_first mode)
+    pre_compact_consent_given: bool = False  # Must be explicitly enabled by user
+    pre_compact_auto_capture: bool = True  # Only active when consent_given=True
     pre_compact_prompt_first: bool = (
         False  # Suggestion mode: show what would be captured
     )
     pre_compact_min_confidence: float = 0.85
     pre_compact_max_captures: int = 50
     pre_compact_timeout: int = 15
+
+    def can_auto_capture_pre_compact(self) -> bool:
+        """Check if auto-capture is both enabled and consented to.
+
+        MED-011: Ensures GDPR compliance by requiring explicit consent.
+        """
+        return self.pre_compact_auto_capture and self.pre_compact_consent_given
 
     # Performance settings
     timeout: int = 30
@@ -456,6 +468,11 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
     # PreCompact hook settings
     if "HOOK_PRE_COMPACT_ENABLED" in env:
         kwargs["pre_compact_enabled"] = _parse_bool(env["HOOK_PRE_COMPACT_ENABLED"])
+    # MED-011: Consent mechanism for auto-capture
+    if "HOOK_PRE_COMPACT_CONSENT_GIVEN" in env:
+        kwargs["pre_compact_consent_given"] = _parse_bool(
+            env["HOOK_PRE_COMPACT_CONSENT_GIVEN"]
+        )
     if "HOOK_PRE_COMPACT_AUTO_CAPTURE" in env:
         kwargs["pre_compact_auto_capture"] = _parse_bool(
             env["HOOK_PRE_COMPACT_AUTO_CAPTURE"]

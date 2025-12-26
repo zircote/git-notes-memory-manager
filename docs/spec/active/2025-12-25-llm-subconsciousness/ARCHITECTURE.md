@@ -18,8 +18,8 @@ The subconsciousness layer implements a cognitive architecture inspired by Dual-
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    CONSCIOUS LAYER (Claude Code Agent)              │
 │                                                                     │
-│  Receives: Synthesized context, confidence scores, proactive hints │
-│  Sends: Capture requests, recall queries, user feedback            │
+│  Receives: Synthesized context, confidence scores, proactive hints  │
+│  Sends: Capture requests, recall queries, user feedback             │
 └─────────────────────────────────────────────────────────────────────┘
                               ▲
                               │ Clean, validated context
@@ -28,39 +28,39 @@ The subconsciousness layer implements a cognitive architecture inspired by Dual-
 │                    SUBCONSCIOUSNESS LAYER                           │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐     │
-│  │ IMPLICIT        │  │ PROACTIVE       │  │ CONSOLIDATION   │     │
-│  │ CAPTURE AGENT   │  │ SURFACING AGENT │  │ AGENT           │     │
-│  ├─────────────────┤  ├─────────────────┤  ├─────────────────┤     │
-│  │ • Transcript    │  │ • Context       │  │ • Clustering    │     │
-│  │   analysis      │  │   analysis      │  │ • Merging       │     │
-│  │ • Confidence    │  │ • Relevance     │  │ • Meta-memory   │     │
-│  │   scoring       │  │   ranking       │  │   synthesis     │     │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘     │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│  │ IMPLICIT        │  │ PROACTIVE       │  │ CONSOLIDATION   │      │
+│  │ CAPTURE AGENT   │  │ SURFACING AGENT │  │ AGENT           │      │
+│  ├─────────────────┤  ├─────────────────┤  ├─────────────────┤      │
+│  │ • Transcript    │  │ • Context       │  │ • Clustering    │      │
+│  │   analysis      │  │   analysis      │  │ • Merging       │      │
+│  │ • Confidence    │  │ • Relevance     │  │ • Meta-memory   │      │
+│  │   scoring       │  │   ranking       │  │   synthesis     │      │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘      │
 │                                                                     │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐     │
-│  │ DECAY/FORGET    │  │ SEMANTIC        │  │ ADVERSARIAL     │     │
-│  │ AGENT           │  │ LINKING AGENT   │  │ DETECTOR        │     │
-│  ├─────────────────┤  ├─────────────────┤  ├─────────────────┤     │
-│  │ • Access track  │  │ • Relationship  │  │ • Injection     │     │
-│  │ • Decay scoring │  │   discovery     │  │   detection     │     │
-│  │ • Archive       │  │ • Bidirectional │  │ • Contradiction │     │
-│  │   workflow      │  │   linking       │  │   flagging      │     │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘     │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│  │ DECAY/FORGET    │  │ SEMANTIC        │  │ ADVERSARIAL     │      │
+│  │ AGENT           │  │ LINKING AGENT   │  │ DETECTOR        │      │
+│  ├─────────────────┤  ├─────────────────┤  ├─────────────────┤      │
+│  │ • Access track  │  │ • Relationship  │  │ • Injection     │      │
+│  │ • Decay scoring │  │   discovery     │  │   detection     │      │
+│  │ • Archive       │  │ • Bidirectional │  │ • Contradiction │      │
+│  │   workflow      │  │   linking       │  │   flagging      │      │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘      │
 │                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │                     LLM CLIENT ABSTRACTION                     │ │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐   │ │
-│  │  │ Anthropic│  │  OpenAI  │  │  Ollama  │  │ Rate Limiter │   │ │
-│  │  │ Provider │  │ Provider │  │ Provider │  │ + Batcher    │   │ │
-│  │  └──────────┘  └──────────┘  └──────────┘  └──────────────┘   │ │
-│  └───────────────────────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                     LLM CLIENT ABSTRACTION                    │  │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐   │  │
+│  │  │ Anthropic│  │  OpenAI  │  │  Ollama  │  │ Rate Limiter │   │  │
+│  │  │ Provider │  │ Provider │  │ Provider │  │ + Batcher    │   │  │
+│  │  └──────────┘  └──────────┘  └──────────┘  └──────────────┘   │  │
+│  └───────────────────────────────────────────────────────────────┘  │
 │                              │                                      │
 │                              ▼                                      │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │              EXTENDED INDEX (sqlite-vec + metadata)            │ │
-│  │  • Embeddings  • Links  • Decay scores  • Access patterns      │ │
-│  └───────────────────────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │              EXTENDED INDEX (sqlite-vec + metadata)           │  │
+│  │  • Embeddings  • Links  • Decay scores  • Access patterns     │  │
+│  └───────────────────────────────────────────────────────────────┘  │
 │                              ▲                                      │
 └──────────────────────────────│──────────────────────────────────────┘
                                │
@@ -73,14 +73,14 @@ The subconsciousness layer implements a cognitive architecture inspired by Dual-
 
 ### Key Design Decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| LLM calls | Async/batched | Don't block agent; minimize API costs |
-| Provider abstraction | Interface-based | Swap providers without code changes |
-| Confidence representation | Float (0.0-1.0) | Enables threshold-based decisions |
-| Memory linking | Bidirectional graph | When A links to B, B knows about A |
-| Forgetting | Archive, not delete | Preserve audit trail |
-| Local fallback | Ollama | Offline capability |
+| Decision                  | Choice              | Rationale                             |
+| ------------------------- | ------------------- | ------------------------------------- |
+| LLM calls                 | Async/batched       | Don't block agent; minimize API costs |
+| Provider abstraction      | Interface-based     | Swap providers without code changes   |
+| Confidence representation | Float (0.0-1.0)     | Enables threshold-based decisions     |
+| Memory linking            | Bidirectional graph | When A links to B, B knows about A    |
+| Forgetting                | Archive, not delete | Preserve audit trail                  |
+| Local fallback            | Ollama              | Offline capability                    |
 
 ## Component Design
 
@@ -153,16 +153,19 @@ class LLMClient:
 ```
 
 **Responsibilities**:
+
 - Provider selection and fallback
 - Rate limiting and retry logic
 - Request batching for cost optimization
 - Timeout handling
 
 **Interfaces**:
+
 - `LLMProvider` protocol for implementations
 - `LLMClient` as the unified entry point
 
 **Dependencies**:
+
 - `anthropic` (optional)
 - `openai` (optional)
 - `ollama` (optional)
@@ -221,12 +224,14 @@ class ImplicitCaptureAgent:
 ```
 
 **Responsibilities**:
+
 - Transcript parsing and chunking
 - LLM-based content analysis
 - Confidence scoring
 - Deduplication against existing memories
 
 **Interfaces**:
+
 - Consumes `LLMClient`
 - Produces `ImplicitMemory` candidates
 - Integrates with `CaptureService`
@@ -286,6 +291,7 @@ class ConsolidationAgent:
 ```
 
 **Responsibilities**:
+
 - Vector-based clustering
 - LLM-powered abstraction synthesis
 - Link creation for merged memories
@@ -364,6 +370,7 @@ class ForgettingAgent:
 ```
 
 **Responsibilities**:
+
 - Access pattern tracking
 - Decay score calculation
 - Archive workflow
@@ -423,6 +430,7 @@ class ProactiveSurfacingAgent:
 ```
 
 **Responsibilities**:
+
 - Context analysis (files, errors, topics)
 - Relevance scoring
 - LLM-powered intuition ranking
@@ -490,6 +498,7 @@ class SemanticLinkingAgent:
 ```
 
 **Responsibilities**:
+
 - Link discovery via LLM
 - Contradiction detection
 - Graph traversal
@@ -546,6 +555,7 @@ class AdversarialDetector:
 ```
 
 **Responsibilities**:
+
 - Pattern-based injection detection
 - Authority claim detection
 - Contradiction flagging
@@ -746,6 +756,7 @@ CREATE INDEX IF NOT EXISTS idx_implicit_source ON implicit_captures(source_hash)
 ## LLM Output Templates
 
 **Critical Requirement**: All LLM-generated memories MUST conform to the existing memory format used by `note_parser.py`. The LLM output templates ensure compatibility with:
+
 - YAML frontmatter parsing via `parse_note()`
 - Progressive hydration levels (SUMMARY, FULL, FILES)
 - Existing capture and recall pipelines
@@ -783,11 +794,11 @@ The LLM MUST output memories in this exact JSON schema, which is then serialized
     },
     "tags": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": { "type": "string" }
     },
     "relates_to": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": { "type": "string" },
       "description": "IDs of related memories"
     }
   }
@@ -833,15 +844,15 @@ and OllamaProvider implementations...
 
 The LLM must understand and support progressive hydration:
 
-| Level | Data Returned | LLM Responsibility |
-|-------|---------------|---------------------|
-| **SUMMARY** | `summary` field only (≤100 chars) | Generate concise, searchable summary |
-| **FULL** | `summary` + full `content` | Generate complete markdown with ## sections |
-| **FILES** | All above + file snapshots | Reference specific file paths with line numbers |
+| Level       | Data Returned                     | LLM Responsibility                              |
+| ----------- | --------------------------------- | ----------------------------------------------- |
+| **SUMMARY** | `summary` field only (≤100 chars) | Generate concise, searchable summary            |
+| **FULL**    | `summary` + full `content`        | Generate complete markdown with ## sections     |
+| **FILES**   | All above + file snapshots        | Reference specific file paths with line numbers |
 
 ### Implicit Capture Prompt Template
 
-```
+````
 You are analyzing a conversation transcript to identify memory-worthy content.
 
 Extract any:
@@ -879,37 +890,44 @@ Output format:
     }
   ]
 }
-```
+````
+
 ```
 
 ### Consolidation Prompt Template
 
 ```
+
 You are synthesizing related memories into a higher-level abstraction.
 
 Given these related memories:
 {cluster_memories}
 
 Create a meta-memory that:
+
 1. Captures the essential pattern or theme
 2. Preserves key details from each source
 3. Uses SUMMARY level for quick recall
 4. Links back to source memories
 
 Output JSON matching the Memory Output Schema with:
+
 - namespace: "patterns" (for meta-memories)
 - relates_to: list of source memory IDs
 - confidence: based on cluster coherence
 
 The synthesized summary should be a generalization, not a concatenation.
+
 ```
 
 ### Surfacing Context Template
 
 ```
+
 You are evaluating memories for proactive surfacing.
 
 Current context:
+
 - Files being accessed: {file_paths}
 - Recent conversation topics: {topics}
 - Current task: {task_description}
@@ -920,6 +938,7 @@ Candidate memories:
 For each candidate, score relevance (0.0-1.0) and provide a brief reason.
 
 Output JSON:
+
 ```json
 {
   "surfaced": [
@@ -931,6 +950,7 @@ Output JSON:
   ]
 }
 ```
+
 ```
 
 ### Template Loading
@@ -938,6 +958,7 @@ Output JSON:
 Templates are loaded from `src/git_notes_memory/subconsciousness/templates/`:
 
 ```
+
 templates/
 ├── implicit_capture.txt
 ├── consolidation.txt
@@ -945,7 +966,8 @@ templates/
 ├── link_discovery.txt
 ├── decay_evaluation.txt
 └── adversarial_check.txt
-```
+
+````
 
 Templates support variable substitution via `{variable_name}` syntax.
 
@@ -1046,7 +1068,7 @@ class SubconsciousnessService:
     ) -> list[ThreatDetection]:
         """Check content for adversarial patterns."""
         ...
-```
+````
 
 ### CLI Commands
 
@@ -1082,6 +1104,7 @@ class SubconsciousnessService:
 ### Hook Integration
 
 **Stop Hook Enhancement** (`stop_handler.py`):
+
 ```python
 # After existing transcript analysis
 if config.subconsciousness_enabled:
@@ -1098,6 +1121,7 @@ if config.subconsciousness_enabled:
 ```
 
 **PostToolUse Hook Enhancement** (`post_tool_use_handler.py`):
+
 ```python
 # When file is read/edited
 if config.subconsciousness_enabled and config.surfacing_enabled:
@@ -1113,6 +1137,7 @@ if config.subconsciousness_enabled and config.surfacing_enabled:
 ```
 
 **SessionStart Hook Enhancement** (`session_start_handler.py`):
+
 ```python
 # Check for pending reviews
 if config.subconsciousness_enabled:
@@ -1125,20 +1150,20 @@ if config.subconsciousness_enabled:
 
 ### Internal Integrations
 
-| Component | Integration Type | Purpose |
-|-----------|-----------------|---------|
-| `CaptureService` | Method extension | Add implicit capture pathway |
-| `RecallService` | Method extension | Track access for decay |
-| `IndexService` | Schema extension | Add links and decay tables |
-| `SessionAnalyzer` | Enhancement | LLM-powered analysis |
+| Component         | Integration Type | Purpose                      |
+| ----------------- | ---------------- | ---------------------------- |
+| `CaptureService`  | Method extension | Add implicit capture pathway |
+| `RecallService`   | Method extension | Track access for decay       |
+| `IndexService`    | Schema extension | Add links and decay tables   |
+| `SessionAnalyzer` | Enhancement      | LLM-powered analysis         |
 
 ### External Integrations
 
-| Service | Type | Purpose |
-|---------|------|---------|
+| Service       | Type     | Purpose            |
+| ------------- | -------- | ------------------ |
 | Anthropic API | HTTP/SDK | Claude completions |
-| OpenAI API | HTTP/SDK | GPT fallback |
-| Ollama | Local | Offline mode |
+| OpenAI API    | HTTP/SDK | GPT fallback       |
+| Ollama        | Local    | Offline mode       |
 
 ## Security Design
 
@@ -1150,12 +1175,12 @@ if config.subconsciousness_enabled:
 
 ### Adversarial Detection
 
-| Pattern | Detection Method | Action |
-|---------|-----------------|--------|
-| Prompt injection | Regex + LLM | Block capture |
-| Authority claims | Regex | Flag, reduce confidence |
-| Temporal anomalies | Timestamp analysis | Flag for review |
-| Contradictions | Vector similarity + LLM | Create CONTRADICTS link |
+| Pattern            | Detection Method        | Action                  |
+| ------------------ | ----------------------- | ----------------------- |
+| Prompt injection   | Regex + LLM             | Block capture           |
+| Authority claims   | Regex                   | Flag, reduce confidence |
+| Temporal anomalies | Timestamp analysis      | Flag for review         |
+| Contradictions     | Vector similarity + LLM | Create CONTRADICTS link |
 
 ### Data Protection
 
@@ -1167,21 +1192,21 @@ if config.subconsciousness_enabled:
 
 ### Expected Load
 
-| Operation | Frequency | Expected Load |
-|-----------|-----------|---------------|
-| Implicit capture | Per session end | 1-5 per session |
+| Operation           | Frequency       | Expected Load     |
+| ------------------- | --------------- | ----------------- |
+| Implicit capture    | Per session end | 1-5 per session   |
 | Proactive surfacing | Per file access | 10-50 per session |
-| Consolidation | Daily/weekly | 1 per cycle |
-| Decay evaluation | Weekly | 1 per cycle |
+| Consolidation       | Daily/weekly    | 1 per cycle       |
+| Decay evaluation    | Weekly          | 1 per cycle       |
 
 ### Performance Targets
 
-| Metric | Target | Rationale |
-|--------|--------|-----------|
-| LLM latency (async) | <5s | User doesn't wait |
-| Surfacing overhead | <50ms | Don't slow hooks |
-| Consolidation batch | <10s/100 memories | Background task |
-| Decay evaluation | <1s/1000 memories | Weekly is fine |
+| Metric              | Target            | Rationale         |
+| ------------------- | ----------------- | ----------------- |
+| LLM latency (async) | <5s               | User doesn't wait |
+| Surfacing overhead  | <50ms             | Don't slow hooks  |
+| Consolidation batch | <10s/100 memories | Background task   |
+| Decay evaluation    | <1s/1000 memories | Weekly is fine    |
 
 ### Optimization Strategies
 

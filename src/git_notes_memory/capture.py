@@ -63,6 +63,10 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 
+# SEC-HIGH-003: Stale lock detection threshold (seconds)
+STALE_LOCK_THRESHOLD_SECONDS = 300  # 5 minutes
+
+
 def _is_process_alive(pid: int) -> bool:
     """Check if a process with the given PID is alive.
 
@@ -144,6 +148,20 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
     """
     # Ensure parent directory exists
     lock_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # MED-008: Check for stale lock file from crashed process
+    if lock_path.exists():
+        try:
+            lock_age = time.time() - lock_path.stat().st_mtime
+            if lock_age > STALE_LOCK_THRESHOLD_SECONDS:
+                logger.warning(
+                    "Stale lock detected (age: %.1fs), removing: %s",
+                    lock_age,
+                    lock_path,
+                )
+                lock_path.unlink(missing_ok=True)
+        except OSError:
+            pass  # Best effort stale detection
 
     fd = None
     stale_warning_logged = False

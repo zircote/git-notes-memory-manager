@@ -106,7 +106,7 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_memories_status ON memories(status)",
     "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
     "CREATE INDEX IF NOT EXISTS idx_memories_domain ON memories(domain)",
-    # PERF-HIGH-004: Composite indexes for common multi-column queries
+    # Composite indexes for common multi-column queries
     # These optimize the most frequent query patterns:
     # - Domain + namespace: multi-domain recall filtering
     # - Spec + namespace: project-scoped namespace queries
@@ -118,8 +118,10 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_memories_namespace_domain ON memories(namespace, domain)",
     # Composite index for efficient range queries within namespace
     "CREATE INDEX IF NOT EXISTS idx_memories_namespace_timestamp ON memories(namespace, timestamp DESC)",
-    # LOW-004: Composite index for status-filtered recency queries
+    # Composite index for status-filtered recency queries
     "CREATE INDEX IF NOT EXISTS idx_memories_status_timestamp ON memories(status, timestamp DESC)",
+    # Composite index for common query pattern (namespace + spec + ORDER BY timestamp)
+    "CREATE INDEX IF NOT EXISTS idx_memories_ns_spec_ts ON memories(namespace, spec, timestamp DESC)",
 ]
 
 # Migration SQL for schema version upgrades
@@ -1002,6 +1004,9 @@ class IndexService:
     ) -> None:
         """Update an embedding in the vector table.
 
+        Note: sqlite-vec virtual tables don't support UPDATE or INSERT OR REPLACE,
+        so we must use DELETE + INSERT pattern.
+
         Args:
             cursor: Active database cursor.
             memory_id: ID of the memory this embedding belongs to.
@@ -1010,7 +1015,8 @@ class IndexService:
         # PERF-007: Use cached struct format for embedding packing
         blob = _get_struct_format(len(embedding)).pack(*embedding)
 
-        # Delete existing and insert new (sqlite-vec doesn't support UPDATE well)
+        # sqlite-vec doesn't support UPDATE or INSERT OR REPLACE on virtual tables
+        # Delete existing and insert new (this is the required pattern)
         cursor.execute("DELETE FROM vec_memories WHERE id = ?", (memory_id,))
         cursor.execute(
             "INSERT INTO vec_memories (id, embedding) VALUES (?, ?)",
@@ -1398,13 +1404,19 @@ class IndexService:
     # =========================================================================
 
     def vacuum(self) -> None:
-        """Optimize the database by vacuuming."""
+        """Optimize the database by vacuuming and updating query planner statistics.
+
+        Performs VACUUM to reclaim space and defragment, then runs ANALYZE
+        to update query planner statistics for optimal index usage.
+        """
         if self._conn is None:
             raise MemoryIndexError(
                 "Database not initialized",
                 "Call initialize() before performing operations",
             )
         self._conn.execute("VACUUM")
+        # MED-004: Update statistics for query planner after schema changes
+        self._conn.execute("ANALYZE")
 
     def has_embedding(self, memory_id: str) -> bool:
         """Check if a memory has an embedding.

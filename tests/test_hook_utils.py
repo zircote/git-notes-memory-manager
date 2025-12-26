@@ -31,6 +31,7 @@ from git_notes_memory.hooks.hook_utils import (
     log_hook_input,
     log_hook_output,
     read_json_input,
+    scrub_pii,
     setup_logging,
     setup_timeout,
     validate_file_path,
@@ -727,3 +728,187 @@ class TestHookUtilsIntegration:
         traversal_path = str(subdir / ".." / ".." / "etc" / "passwd")
         with pytest.raises(ValueError, match="traversal"):
             validate_file_path(traversal_path)
+
+
+# =============================================================================
+# scrub_pii() Tests
+# =============================================================================
+
+
+class TestScrubPii:
+    """Test the scrub_pii function for PII redaction."""
+
+    def test_scrub_email_address(self) -> None:
+        """Test email addresses are scrubbed."""
+        text = "Contact john.doe@example.com for help"
+        result = scrub_pii(text)
+        assert "john.doe@example.com" not in result
+        assert "[REDACTED:email]" in result
+
+    def test_scrub_multiple_emails(self) -> None:
+        """Test multiple email addresses are all scrubbed."""
+        text = "Send to alice@test.org and bob@company.net"
+        result = scrub_pii(text)
+        assert "alice@test.org" not in result
+        assert "bob@company.net" not in result
+        assert result.count("[REDACTED:email]") == 2
+
+    def test_scrub_us_phone_basic(self) -> None:
+        """Test basic US phone number format is scrubbed."""
+        text = "Call me at 555-123-4567"
+        result = scrub_pii(text)
+        assert "555-123-4567" not in result
+        assert "[REDACTED:phone]" in result
+
+    def test_scrub_us_phone_with_area_code(self) -> None:
+        """Test phone with parenthetical area code is scrubbed."""
+        text = "Phone: (555) 123-4567"
+        result = scrub_pii(text)
+        assert "(555) 123-4567" not in result
+        assert "[REDACTED:phone]" in result
+
+    def test_scrub_us_phone_with_country_code(self) -> None:
+        """Test phone with +1 country code is scrubbed."""
+        text = "International: +1-555-123-4567"
+        result = scrub_pii(text)
+        assert "+1-555-123-4567" not in result
+        assert "[REDACTED:phone]" in result
+
+    def test_scrub_ssn_with_dashes(self) -> None:
+        """Test SSN with dashes is scrubbed."""
+        text = "SSN: 123-45-6789"
+        result = scrub_pii(text)
+        assert "123-45-6789" not in result
+        assert "[REDACTED:ssn]" in result
+
+    def test_scrub_ssn_with_spaces(self) -> None:
+        """Test SSN with spaces is scrubbed."""
+        text = "SSN: 123 45 6789"
+        result = scrub_pii(text)
+        assert "123 45 6789" not in result
+        assert "[REDACTED:ssn]" in result
+
+    def test_scrub_credit_card_with_dashes(self) -> None:
+        """Test credit card with dashes is scrubbed."""
+        text = "Card: 4111-1111-1111-1111"
+        result = scrub_pii(text)
+        assert "4111-1111-1111-1111" not in result
+        assert "[REDACTED:card]" in result
+
+    def test_scrub_credit_card_with_spaces(self) -> None:
+        """Test credit card with spaces is scrubbed."""
+        text = "Card: 4111 1111 1111 1111"
+        result = scrub_pii(text)
+        assert "4111 1111 1111 1111" not in result
+        assert "[REDACTED:card]" in result
+
+    def test_scrub_api_key_pattern(self) -> None:
+        """Test API key patterns are scrubbed."""
+        text = "key: sk-abcdefghij1234567890abcd"
+        result = scrub_pii(text)
+        assert "sk-abcdefghij1234567890abcd" not in result
+        assert "[REDACTED:apikey]" in result
+
+    def test_scrub_aws_access_key(self) -> None:
+        """Test AWS access key pattern is scrubbed."""
+        text = "AWS key: AKIAIOSFODNN7EXAMPLE"
+        result = scrub_pii(text)
+        assert "AKIAIOSFODNN7EXAMPLE" not in result
+        assert "[REDACTED:aws_key]" in result
+
+    def test_scrub_password_in_key_value(self) -> None:
+        """Test password=value patterns are scrubbed."""
+        text = "Connection: password=mySecretPass123"
+        result = scrub_pii(text)
+        assert "mySecretPass123" not in result
+        assert "[REDACTED:secret]" in result
+
+    def test_scrub_secret_in_key_value(self) -> None:
+        """Test secret=value patterns are scrubbed."""
+        text = 'Config: secret="abc123xyz789"'
+        result = scrub_pii(text)
+        assert "abc123xyz789" not in result
+        assert "[REDACTED:secret]" in result
+
+    def test_scrub_api_key_in_key_value(self) -> None:
+        """Test api_key=value patterns are scrubbed."""
+        text = "apikey: supersecretapikey123"
+        result = scrub_pii(text)
+        assert "supersecretapikey123" not in result
+        assert "[REDACTED:secret]" in result
+
+    def test_preserves_non_pii_text(self) -> None:
+        """Test non-PII text is preserved unchanged."""
+        text = "This is a normal log message with no PII"
+        result = scrub_pii(text)
+        assert result == text
+
+    def test_mixed_pii_and_non_pii(self) -> None:
+        """Test mixed content is partially scrubbed."""
+        text = "User john@test.com submitted request from 192.168.1.1"
+        result = scrub_pii(text)
+        assert "[REDACTED:email]" in result
+        # IP addresses are NOT scrubbed (not in our pattern list)
+        assert "192.168.1.1" in result
+        assert "submitted request from" in result
+
+    def test_empty_string(self) -> None:
+        """Test empty string returns empty."""
+        assert scrub_pii("") == ""
+
+    def test_multiple_pii_types(self) -> None:
+        """Test multiple types of PII are all scrubbed."""
+        text = "Contact jane@example.com or 555-123-4567, SSN 123-45-6789"
+        result = scrub_pii(text)
+        assert "[REDACTED:email]" in result
+        assert "[REDACTED:phone]" in result
+        assert "[REDACTED:ssn]" in result
+        assert "jane@example.com" not in result
+        assert "555-123-4567" not in result
+        assert "123-45-6789" not in result
+
+    def test_log_hook_input_scrubs_prompt(
+        self, reset_hook_loggers: None, tmp_path: Path
+    ) -> None:
+        """Test log_hook_input scrubs PII from prompts."""
+        with patch("git_notes_memory.hooks.hook_utils.LOG_DIR", tmp_path / "logs"):
+            mock_logger = MagicMock()
+            with patch(
+                "git_notes_memory.hooks.hook_utils.get_hook_logger",
+                return_value=mock_logger,
+            ):
+                log_hook_input(
+                    "TestHook",
+                    {"prompt": "Please email john@example.com for details"},
+                )
+
+        # Check that email was scrubbed in logged output
+        info_calls = " ".join(str(c) for c in mock_logger.info.call_args_list)
+        assert "john@example.com" not in info_calls
+        assert "[REDACTED:email]" in info_calls
+
+    def test_log_hook_input_scrubs_tool_input(
+        self, reset_hook_loggers: None, tmp_path: Path
+    ) -> None:
+        """Test log_hook_input scrubs PII from tool_input."""
+        with patch("git_notes_memory.hooks.hook_utils.LOG_DIR", tmp_path / "logs"):
+            mock_logger = MagicMock()
+            with patch(
+                "git_notes_memory.hooks.hook_utils.get_hook_logger",
+                return_value=mock_logger,
+            ):
+                log_hook_input(
+                    "TestHook",
+                    {
+                        "tool_name": "Bash",
+                        "tool_input": {
+                            "command": "export API_KEY=sk-abc123defghij456789xyz"
+                        },
+                    },
+                )
+
+        # Check that API key was scrubbed in logged output
+        # The key=value pattern matches [REDACTED:secret]
+        info_calls = " ".join(str(c) for c in mock_logger.info.call_args_list)
+        assert "sk-abc123defghij456789xyz" not in info_calls
+        assert "[REDACTED:secret]" in info_calls
