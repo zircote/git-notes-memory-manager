@@ -340,3 +340,23 @@ tags:
 SSN_PATTERN = r'\b(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b'
 
 # Validation...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.165181+00:00'
+summary: '...644-649, 65'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...644-649, 65
+    "discover": r'\b(?:6011|65[0-9]{2}|64[4-9][0-9])[0-9]{12,15}\b',
+}
+
+# Combined pattern with common separators
+CREDIT_CARD_COMBINED = r'\b(?:\d{4}[- ]?){3}\d{4}\b'
+```
+
+**Luhn Algorithm...
