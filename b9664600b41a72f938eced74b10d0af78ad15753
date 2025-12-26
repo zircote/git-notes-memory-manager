@@ -2493,3 +2493,29 @@ Resolved two issues preventing the stack from starting.
 
 ## Related Files
 - docker/otel-collector-config.yaml:66-70 (fixed Loki exporter config)
+
+---
+type: progress
+timestamp: '2025-12-26T15:37:54.688426+00:00'
+summary: Docker observability stack fully operational
+---
+
+Docker observability stack fully operational
+## Summary
+Resolved all issues with the local observability stack.
+
+## Issues Fixed
+1. Port 9090 conflict with `readinesshub-prometheus` → user stopped conflicting container
+2. OTel Collector Loki config using deprecated `labels` schema → updated to `default_labels_enabled`
+
+## Services Running
+- Grafana: http://localhost:3000
+- Prometheus: http://localhost:9090
+- Loki: http://localhost:3100
+- Tempo: http://localhost:3200
+- OTel Collector: localhost:4317 (gRPC), 4318 (HTTP)
+
+## Related Files
+- docker/docker-compose.yml
+- docker/otel-collector-config.yaml:66-70 (fixed)
+- docker/grafana/provisioning/datasources/datasources.yaml (3 datasources auto-provisioned)
