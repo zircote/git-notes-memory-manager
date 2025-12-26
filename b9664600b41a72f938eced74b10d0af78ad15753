@@ -8265,3 +8265,27 @@ Completed ALL HIGH priority findings (27 total)
 ## Remaining
 - 42 MEDIUM priority findings
 - 28 LOW priority findings
+
+---
+type: progress
+timestamp: '2025-12-26T17:05:49.578430+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed Database MEDIUM findings DB-M-001 through ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed Database MEDIUM findings DB-M-001 through DB-M-004 and RES-M-004
+## Changes Made
+- **DB-M-001**: Added `index.vacuum()` after reindex in sync.py to run ANALYZE
+- **DB-M-002**: Added `confidence_overall` column for efficient ORDER BY (no JSON extraction)
+- **DB-M-003**: Added connection cleanup in capture_store.py exception handler
+- **DB-M-004**: Added composite index `(status, expires_at)` for pending query
+- **RES-M-004**: Added `PRAGMA busy_timeout=5000` to both IndexService and CaptureStore
+
+## Related Files
+- src/git_notes_memory/sync.py:427-431
+- src/git_notes_memory/subconsciousness/capture_store.py:80,100-103,184,218-266,304-305,377-398
+- src/git_notes_memory/index/service.py:122-123
