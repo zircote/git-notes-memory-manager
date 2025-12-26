@@ -1,0 +1,18 @@
+---
+type: progress
+timestamp: '2025-12-26T00:50:24.355056+00:00'
+summary: '...assert get_current_trace_id() is None'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_tracing.py
+---
+
+...assert get_current_trace_id() is None
+
+class TestCompletedSpans:
+    """Tests for completed spans buffer."""
+
+    def setup_method(self) -> None:
+        """Clear spans."""
+        clear_completed...
