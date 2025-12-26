@@ -283,7 +283,9 @@ class ImplicitCaptureAgent:
                 end = chunk.line_range[0] + int(source_lines[1])
                 source_range = (start, end)
             except (ValueError, TypeError):
-                pass
+                # Invalid source_lines format - skip source range extraction
+                # This can happen if LLM returns non-integer values
+                source_range = None
 
         # Parse tags
         tags_raw = item.get("tags", [])
