@@ -50,3 +50,19 @@ tags:
 
 #### Task 1.2: Extend Memory Model with Domain Field
 - **Description**:...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:01:27.899157+00:00'
+summary: '...- [ ] Migration runs cleanly on existing databases'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...- [ ] Migration runs cleanly on existing databases
+- **Notes**: Follow existing migration pattern from version 2
+
+#### Task 1.4: Update IndexService for Domain
+- **Description**: Extend IndexService...
