@@ -2216,3 +2216,40 @@ Replaced module-level `_user_capture_service` global with ServiceRegistry-based 
 - src/git_notes_memory/capture.py:1264-1335
 - src/git_notes_memory/registry.py:143-162
 - tests/test_capture.py:1132-1246
+
+---
+type: progress
+timestamp: '2025-12-26T15:29:45.277753+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed all 4 CRITICAL severity findings from ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed all 4 CRITICAL severity findings from code review
+## Summary
+All 4 CRITICAL findings have been remediated:
+- CRIT-001: Circuit breaker added to embedding service (resilience)
+- CRIT-002: Secrets filtering integrated for LLM prompts (GDPR compliance)
+- CRIT-003: User capture service moved to ServiceRegistry (thread safety)
+- CRIT-004: Adversarial screening activated (prompt injection defense)
+
+## Changes Made
+- `src/git_notes_memory/embedding.py`: Added circuit breaker to `embed_batch()`, fixed type handling
+- `src/git_notes_memory/subconsciousness/llm_client.py`: Integrated `SecretsFilteringService` before API calls
+- `src/git_notes_memory/capture.py`: Created `UserCaptureService` wrapper, rewrote `get_user_capture_service()` to use ServiceRegistry
+- `src/git_notes_memory/registry.py`: Added `has()` method for existence checking
+- `src/git_notes_memory/subconsciousness/implicit_capture_agent.py`: Added `_screen_memories()` method and `adversarial_detector` field
+
+## Test Coverage
+- 14 new tests for circuit breaker (`tests/test_embedding.py`)
+- 10 new tests for LLM secrets filtering (`tests/subconsciousness/test_llm_secrets_filtering.py`)
+- 4 updated tests for user capture service (`tests/test_capture.py`)
+- 7 new tests for adversarial screening (`tests/subconsciousness/test_implicit_capture_agent.py`)
+
+## Verification
+- 472 affected tests pass
+- All lint checks pass
+- All type checks pass (mypy strict)
