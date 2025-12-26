@@ -248,3 +248,22 @@ tags:
 **Marketplace Structure Best Practice**:
 - `owner` identifies who maintains the marketplace
 - `metadata` contains marketplace-level...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:50:51.381729+00:00'
+summary: '...state, every `embed()` call waits for the full timeout.'
+tags:
+- auto-captured
+- post-tool-use
+- file:CODE_REVIEW.md
+---
+
+...state, every `embed()` call waits for the full timeout.
+
+**Remediation:** Add circuit breaker pattern similar to `llm_client.py`.
+
+---
+
+### CRIT-002: LLM Prompts Sent Without Secrets Filtering
+**Source:...
