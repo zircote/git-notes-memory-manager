@@ -472,3 +472,22 @@ tags:
 ...2.4.
 
 Let me first read the current state of the index.py and test file to see exactly what was implemented:
+
+---
+type: progress
+timestamp: '2025-12-26T01:43:52.638937+00:00'
+summary: '...**Impact**: Knowledge loss, repetitive context, slower ramp-up, fragmented
+  learning.
+
+  ### Prop...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**Impact**: Knowledge loss, repetitive context, slower ramp-up, fragmented learning.
+
+### Proposed Solution
+
+Implement two-domain memory storage:
+- **User domain**: Global memories at `~/.local/share/memory-plugin...
