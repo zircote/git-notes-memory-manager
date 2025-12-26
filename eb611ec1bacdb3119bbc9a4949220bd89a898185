@@ -679,3 +679,21 @@ tags:
         # Check that API key was scrubbed in logged output
         # The key=value pattern matches [REDACTED:secret]
         info_calls = " ".join(str(c) for c in mock_logger.info.call_args_list...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:25:31.573846+00:00'
+summary: '...============================================================'
+tags:
+- auto-captured
+- post-tool-use
+- file:patterns.py
+---
+
+...============================================================
+
+# Minimum occurrences for a candidate pattern
+MIN_OCCURRENCES_FOR_CANDIDATE = 2
+
+# Minimum confidence for validation
+MIN_CONFIDENCE_FOR_VALIDATION...
