@@ -301,3 +301,14 @@ tags:
 ---
 
 test content
+
+---
+type: learnings
+timestamp: '2025-12-26T02:36:00.189280+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
