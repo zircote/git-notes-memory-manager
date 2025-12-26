@@ -181,3 +181,22 @@ tags:
 Subtasks:
 - [x] Create `LLMClient` class
 - [x] Implement provider...
+
+---
+type: progress
+timestamp: '2025-12-26T00:58:54.819691+00:00'
+summary: '...timeout and cancellation'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...timeout and cancellation
+- **Status**: ✅ Complete
+- **Started**: 2025-12-26T01:35:00Z
+- **Completed**: 2025-12-26T01:37:00Z
+
+Subtasks:
+- [x] Add configurable timeout per request
+- [x] Support...
