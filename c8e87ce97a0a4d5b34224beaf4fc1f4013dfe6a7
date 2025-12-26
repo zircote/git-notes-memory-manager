@@ -368,3 +368,21 @@ tags:
 ...flush_telemetry()` to export on session end
 - **Docker Compose stack**: Originally Phase 6 (optional), implemented per user request
 - **Grafana dashboards**: Pre-built memory-operations.json and hook-performance.json...
+
+---
+type: progress
+timestamp: '2025-12-26T03:47:00.599007+00:00'
+summary: '...Key Learnings'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...Key Learnings
+
+### Technical Learnings
+
+**1. Zero-dependency observability is achievable**
+- Implemented full metrics + tracing without opentelemetry-api or prometheus-client
+- Used stdlib only:...
