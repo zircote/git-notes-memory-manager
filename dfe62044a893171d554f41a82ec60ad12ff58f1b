@@ -1269,3 +1269,26 @@ class SecretPattern:
     regex: str
     confidence: float
     severity: Severity...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:10.678932+00:00'
+summary: '...Considerations'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Considerations
+
+### Expected Load
+
+- Captures per session: 10-50
+- Content size: Up to 100KB
+- Pattern count: ~20 patterns
+
+### Performance Targets
+
+| Metric | Target | Rationale |
+|--------|--------|---...
