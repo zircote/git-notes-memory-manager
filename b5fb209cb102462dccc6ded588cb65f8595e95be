@@ -114,3 +114,18 @@ The implementation provides:
 - src/git_notes_memory/sync.py (user memory sync, remote sync)
 - src/git_notes_memory/hooks/config_loader.py (user remote hooks)
 - commands/status.md, recall.md, search.md (domain filtering)
+
+---
+type: decisions
+timestamp: '2025-12-26T04:09:02.858095+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  **String vs Enum for dataclass fields**: I chos...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+**String vs Enum for dataclass fields**: I chose to store `domain` as a `str` rather than the `Domain` enum because:
+1. **Serialization**: SQLite...
