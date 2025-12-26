@@ -21,6 +21,7 @@ XDG Compliance:
 from __future__ import annotations
 
 import os
+from enum import Enum
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -30,6 +31,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 __all__ = [
+    # Domain Configuration
+    "Domain",
+    "get_user_memories_path",
+    "get_user_index_path",
     # Namespaces
     "NAMESPACES",
     # Git Configuration
@@ -134,6 +139,72 @@ AUTO_CAPTURE_NAMESPACES: frozenset[str] = frozenset(
         "patterns",
     }
 )
+
+
+# =============================================================================
+# Domain Configuration
+# =============================================================================
+
+
+class Domain(Enum):
+    """Memory storage domain.
+
+    Defines where memories are stored:
+    - USER: Global, cross-project memories stored in ~/.local/share/memory-plugin/user-memories/
+    - PROJECT: Repository-scoped memories stored in git notes (existing behavior)
+
+    User memories persist across all projects and capture universal learnings,
+    preferences, and practices. Project memories remain scoped to their repository.
+    """
+
+    USER = "user"
+    PROJECT = "project"
+
+
+# Directory name for user-memories bare repo
+USER_MEMORIES_DIR_NAME = "user-memories"
+# Subdirectory for user-specific data (separate from project data)
+USER_DATA_DIR_NAME = "user"
+
+
+def get_user_memories_path(ensure_exists: bool = False) -> Path:
+    """Get the path to the user-memories bare git repository.
+
+    This is where global, cross-project memories are stored as git notes.
+    The repository is created lazily on first capture to the user domain.
+
+    Environment override: MEMORY_PLUGIN_DATA_DIR (affects base path)
+
+    Args:
+        ensure_exists: If True, create the directory if it doesn't exist.
+
+    Returns:
+        Path to user-memories bare repository (default: ~/.local/share/memory-plugin/user-memories/).
+    """
+    path = get_data_path() / USER_MEMORIES_DIR_NAME
+    if ensure_exists:
+        path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def get_user_index_path(ensure_exists: bool = False) -> Path:
+    """Get the path to the user-domain SQLite index database.
+
+    User memories have their own separate index, distinct from project indexes.
+    This enables fast cross-project recall without affecting project-specific indices.
+
+    Environment override: MEMORY_PLUGIN_DATA_DIR (affects base path)
+
+    Args:
+        ensure_exists: If True, create the parent directory if it doesn't exist.
+
+    Returns:
+        Path to user index.db file (default: ~/.local/share/memory-plugin/user/index.db).
+    """
+    path = get_data_path() / USER_DATA_DIR_NAME
+    if ensure_exists:
+        path.mkdir(parents=True, exist_ok=True)
+    return path / INDEX_DB_NAME
 
 
 # =============================================================================
