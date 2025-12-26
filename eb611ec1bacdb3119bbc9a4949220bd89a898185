@@ -59,3 +59,18 @@ tags:
 
 ...has explicit completion criteria that prevent moving forward with incomplete foundations - a pattern from the CognitiveSubstrate research emphasizing "don't trust, verify."
 3. **85 tasks across...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:13:09.914228+00:00'
+summary: '...Archive workflow (no hard deletes, audit trail preserved)                  |
+
+  |    - Access pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Archive workflow (no hard deletes, audit trail preserved)                  |
+|    - Access pattern tracking                                                    |
+|...
