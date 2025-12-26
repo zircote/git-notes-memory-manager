@@ -2,6 +2,13 @@
 
 All notable changes to this project specification will be documented in this file.
 
+## [2025-12-26]
+
+### Approved
+- Spec approved by Robert Allen <zircote@gmail.com>
+- Ready for implementation via /claude-spec:implement
+- Status changed: in-review → approved
+
 ## [Unreleased]
 
 ### Added

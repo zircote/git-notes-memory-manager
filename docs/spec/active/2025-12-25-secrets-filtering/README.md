@@ -2,10 +2,12 @@
 project_id: SPEC-2025-12-25-001
 project_name: "Secrets Filtering and Sensitive Data Protection"
 slug: secrets-filtering
-status: in-review
+status: approved
 priority: P0
 created: 2025-12-25
 expires: 2026-01-24
+approved: 2025-12-26T00:50:22Z
+approved_by: "Robert Allen <zircote@gmail.com>"
 github_issue: 12
 github_issue_url: https://github.com/zircote/git-notes-memory/issues/12
 author: Claude Code
