@@ -237,3 +237,22 @@ tags:
 - [ ] Rate limiting verified under load
 - [ ] Batching reduces API calls by >50%
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T00:09:32.405446+00:00'
+summary: '...github.com/zircote/git-notes-memory/issues/11'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...github.com/zircote/git-notes-memory/issues/11
+created: 2025-12-25T23:47:00Z
+approved: null
+started: null
+completed: null
+expires: 2026-03-25T23:47:00Z
+superseded_by: null
+tags: [ai, memory-management, llm,...
