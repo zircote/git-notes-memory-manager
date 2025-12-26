@@ -477,3 +477,14 @@ tags:
 ---
 
 Now I understand the model. I need to filter the content of each message before sending it to the LLM. Let...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:23:12.138857+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
