@@ -535,3 +535,23 @@ tags:
 3. **Actual path**: `~/.claude/plugins/cache/zircote-claude-marketplace/memory-capture/`
 4. Pattern doesn't match → `PLUGIN_ROOT=""` (empty string)
 5. `uv run --directory ""` fails with "a value...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:16:47.765472+00:00'
+summary: '...capture
+
+  /Users/AllenR1_1/.claude/plugins/cache/zircote-claude-marketplace/memory-capture
+
+  # Th...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...capture
+/Users/AllenR1_1/.claude/plugins/cache/zircote-claude-marketplace/memory-capture
+
+# The glob pattern expects:
+~/.claude/plugins/cache/git-notes-memory/memory-capture/*/
+#...
