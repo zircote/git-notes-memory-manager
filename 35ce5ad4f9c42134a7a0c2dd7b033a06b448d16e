@@ -1,0 +1,15 @@
+---
+type: patterns
+timestamp: '2025-12-26T17:30:50.641321+00:00'
+summary: '...parameterized query with optional filters'
+tags:
+- auto-captured
+- post-tool-use
+- file:index.py
+---
+
+...parameterized query with optional filters
+                    # Use single JOIN to eliminate N+1 query pattern
+                    params: list[object] = [blob, k * 3]
+
+                    sql = """...
