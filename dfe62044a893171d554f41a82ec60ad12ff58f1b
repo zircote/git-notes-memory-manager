@@ -363,3 +363,24 @@ summary: The task may have completed quickly. Let me directly read the key files
 ---
 
 The task may have completed quickly. Let me directly read the key files in the codebase to understand the patterns:
+
+---
+type: progress
+timestamp: '2025-12-26T00:11:36.425801+00:00'
+summary: '...instrumentation'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...instrumentation
+status: in-review
+github_issue: 10
+created: 2025-12-25T23:50:00Z
+approved: null
+started: null
+completed: null
+expires: 2026-03-25T23:50:00Z
+superseded_by: null
+tags: [observability, metrics, tracing,...
