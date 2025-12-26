@@ -609,3 +609,32 @@ Created Domain enum and user memory path functions in config.py.
 ## Related Files
 - src/git_notes_memory/config.py:149-207
 - tests/test_config.py:56-175
+
+---
+type: progress
+timestamp: '2025-12-26T01:57:47.127022+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 1.2: Extended Memory model with d...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 1.2: Extended Memory model with domain field
+## Summary
+Added domain awareness to the Memory dataclass with backward-compatible defaults and convenience properties.
+
+## Changes Made
+- Added `domain: str = "project"` field to Memory dataclass
+- Added `domain_enum` property returning Domain enum value
+- Added `is_user_domain` and `is_project_domain` boolean properties
+- Extended MemoryResult with same domain properties for uniform access
+- Added 7 comprehensive tests for domain functionality
+
+## Design Decision
+Stored domain as string rather than enum for SQLite/JSON serialization compatibility. The `domain_enum` property provides type-safe access when needed.
+
+## Related Files
+- src/git_notes_memory/models.py:123-152
+- tests/test_models.py:214-342
