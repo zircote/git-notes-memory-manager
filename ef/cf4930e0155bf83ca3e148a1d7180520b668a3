@@ -1,0 +1,1019 @@
+---
+type: progress
+timestamp: '2025-12-26T13:13:35.914228+00:00'
+summary: 'Created GitHub issue #31 for PLUGIN_ROOT path resolution bug'
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:13:35.933593+00:00'
+summary: Skipped committing broken metrics.py script
+---
+
+Skipped committing broken metrics.py script
+## Summary
+Reviewed pending changes and found only one untracked file (`.claude-plugin/scripts/metrics.py`) which uses a non-existent API (`get_metrics_registry`). Per user decision, skipped committing this broken file.
+
+## Context
+- The broken script is related to issue #31 filed earlier
+- Issue #31 recommends using Python module imports instead of scripts
+- The actual API is `get_metrics()` not `get_metrics_registry()`
+
+---
+type: progress
+timestamp: '2025-12-26T13:13:35.956164+00:00'
+summary: Deep-clean code review and remediation complete - all findings resolved
+---
+
+Deep-clean code review and remediation complete - all findings resolved
+## Summary
+Completed comprehensive `/claude-spec:deep-clean --focus MAXALL` with 9 parallel specialist agents (Security, Performance, Test Coverage, Database, Code Quality, Documentation, Architecture, Resilience, Compliance). All critical and high-priority findings remediated, full verification passing.
+
+## Changes Made
+- **CRIT-001**: Fixed SQLite connection leak in `index.py` - added proper cleanup with `contextlib.suppress(Exception)` on initialization failure
+- **MED-001**: Fixed session hook connection cleanup in `session_start_handler.py` - added `try/finally` block
+- **LOW-004**: Added composite index for `status+timestamp` queries in `index.py`
+- **LOW-010**: Added warning logging for batch note fetch fallback in `git_ops.py`
+- **HIGH-006**: Created comprehensive `docs/ENV.md` with all environment variables documented
+- **HIGH-007**: Added CHANGELOG v0.12.0 entry with observability and secrets filtering features
+- **Test Fix**: Fixed `domain=domain.value` parameter in Memory creation in `capture.py`
+- **Lint Fix**: Moved logger initialization after imports in `git_ops.py`
+
+## Verification Results
+- **Tests**: 2,342 passed (100%)
+- **Coverage**: 88.21% (exceeds 80% requirement)
+- **Formatting**: PASS
+- **Linting**: PASS (ruff)
+- **Type checking**: PASS (mypy strict)
+- **Security**: PASS (bandit)
+
+## Related Files
+- src/git_notes_memory/index.py:243-253
+- src/git_notes_memory/git_ops.py:18-43
+- src/git_notes_memory/hooks/session_start_handler.py:85-93
+- src/git_notes_memory/capture.py:727-740
+- docs/ENV.md (created)
+- CHANGELOG.md:9-28
+
+---
+type: progress
+timestamp: '2025-12-26T13:14:54.647772+00:00'
+summary: 'Created GitHub issue #31 for PLUGIN_ROOT path resolution bug'
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:14:54.669861+00:00'
+summary: Skipped committing broken metrics.py script
+---
+
+Skipped committing broken metrics.py script
+## Summary
+Reviewed pending changes and found only one untracked file (`.claude-plugin/scripts/metrics.py`) which uses a non-existent API (`get_metrics_registry`). Per user decision, skipped committing this broken file.
+
+## Context
+- The broken script is related to issue #31 filed earlier
+- Issue #31 recommends using Python module imports instead of scripts
+- The actual API is `get_metrics()` not `get_metrics_registry()`
+
+---
+type: progress
+timestamp: '2025-12-26T13:14:54.690970+00:00'
+summary: Deep-clean code review and remediation complete - all findings resolved
+---
+
+Deep-clean code review and remediation complete - all findings resolved
+## Summary
+Completed comprehensive `/claude-spec:deep-clean --focus MAXALL` with 9 parallel specialist agents (Security, Performance, Test Coverage, Database, Code Quality, Documentation, Architecture, Resilience, Compliance). All critical and high-priority findings remediated, full verification passing.
+
+## Changes Made
+- **CRIT-001**: Fixed SQLite connection leak in `index.py` - added proper cleanup with `contextlib.suppress(Exception)` on initialization failure
+- **MED-001**: Fixed session hook connection cleanup in `session_start_handler.py` - added `try/finally` block
+- **LOW-004**: Added composite index for `status+timestamp` queries in `index.py`
+- **LOW-010**: Added warning logging for batch note fetch fallback in `git_ops.py`
+- **HIGH-006**: Created comprehensive `docs/ENV.md` with all environment variables documented
+- **HIGH-007**: Added CHANGELOG v0.12.0 entry with observability and secrets filtering features
+- **Test Fix**: Fixed `domain=domain.value` parameter in Memory creation in `capture.py`
+- **Lint Fix**: Moved logger initialization after imports in `git_ops.py`
+
+## Verification Results
+- **Tests**: 2,342 passed (100%)
+- **Coverage**: 88.21% (exceeds 80% requirement)
+- **Formatting**: PASS
+- **Linting**: PASS (ruff)
+- **Type checking**: PASS (mypy strict)
+- **Security**: PASS (bandit)
+
+## Related Files
+- src/git_notes_memory/index.py:243-253
+- src/git_notes_memory/git_ops.py:18-43
+- src/git_notes_memory/hooks/session_start_handler.py:85-93
+- src/git_notes_memory/capture.py:727-740
+- docs/ENV.md (created)
+- CHANGELOG.md:9-28
+
+---
+type: progress
+timestamp: '2025-12-26T13:19:02.372172+00:00'
+summary: 'Created GitHub issue #31 for PLUGIN_ROOT path resolution bug'
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:19:02.396043+00:00'
+summary: Skipped committing broken metrics.py script
+---
+
+Skipped committing broken metrics.py script
+## Summary
+Reviewed pending changes and found only one untracked file (`.claude-plugin/scripts/metrics.py`) which uses a non-existent API (`get_metrics_registry`). Per user decision, skipped committing this broken file.
+
+## Context
+- The broken script is related to issue #31 filed earlier
+- Issue #31 recommends using Python module imports instead of scripts
+- The actual API is `get_metrics()` not `get_metrics_registry()`
+
+---
+type: progress
+timestamp: '2025-12-26T13:19:02.418769+00:00'
+summary: Deep-clean code review and remediation complete - all findings resolved
+---
+
+Deep-clean code review and remediation complete - all findings resolved
+## Summary
+Completed comprehensive `/claude-spec:deep-clean --focus MAXALL` with 9 parallel specialist agents (Security, Performance, Test Coverage, Database, Code Quality, Documentation, Architecture, Resilience, Compliance). All critical and high-priority findings remediated, full verification passing.
+
+## Changes Made
+- **CRIT-001**: Fixed SQLite connection leak in `index.py` - added proper cleanup with `contextlib.suppress(Exception)` on initialization failure
+- **MED-001**: Fixed session hook connection cleanup in `session_start_handler.py` - added `try/finally` block
+- **LOW-004**: Added composite index for `status+timestamp` queries in `index.py`
+- **LOW-010**: Added warning logging for batch note fetch fallback in `git_ops.py`
+- **HIGH-006**: Created comprehensive `docs/ENV.md` with all environment variables documented
+- **HIGH-007**: Added CHANGELOG v0.12.0 entry with observability and secrets filtering features
+- **Test Fix**: Fixed `domain=domain.value` parameter in Memory creation in `capture.py`
+- **Lint Fix**: Moved logger initialization after imports in `git_ops.py`
+
+## Verification Results
+- **Tests**: 2,342 passed (100%)
+- **Coverage**: 88.21% (exceeds 80% requirement)
+- **Formatting**: PASS
+- **Linting**: PASS (ruff)
+- **Type checking**: PASS (mypy strict)
+- **Security**: PASS (bandit)
+
+## Related Files
+- src/git_notes_memory/index.py:243-253
+- src/git_notes_memory/git_ops.py:18-43
+- src/git_notes_memory/hooks/session_start_handler.py:85-93
+- src/git_notes_memory/capture.py:727-740
+- docs/ENV.md (created)
+- CHANGELOG.md:9-28
+
+---
+type: progress
+timestamp: '2025-12-26T13:19:50.142872+00:00'
+summary: 'Created GitHub issue #31 for PLUGIN_ROOT path resolution bug'
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:19:50.166847+00:00'
+summary: Skipped committing broken metrics.py script
+---
+
+Skipped committing broken metrics.py script
+## Summary
+Reviewed pending changes and found only one untracked file (`.claude-plugin/scripts/metrics.py`) which uses a non-existent API (`get_metrics_registry`). Per user decision, skipped committing this broken file.
+
+## Context
+- The broken script is related to issue #31 filed earlier
+- Issue #31 recommends using Python module imports instead of scripts
+- The actual API is `get_metrics()` not `get_metrics_registry()`
+
+---
+type: progress
+timestamp: '2025-12-26T13:19:50.190291+00:00'
+summary: Deep-clean code review and remediation complete - all findings resolved
+---
+
+Deep-clean code review and remediation complete - all findings resolved
+## Summary
+Completed comprehensive `/claude-spec:deep-clean --focus MAXALL` with 9 parallel specialist agents (Security, Performance, Test Coverage, Database, Code Quality, Documentation, Architecture, Resilience, Compliance). All critical and high-priority findings remediated, full verification passing.
+
+## Changes Made
+- **CRIT-001**: Fixed SQLite connection leak in `index.py` - added proper cleanup with `contextlib.suppress(Exception)` on initialization failure
+- **MED-001**: Fixed session hook connection cleanup in `session_start_handler.py` - added `try/finally` block
+- **LOW-004**: Added composite index for `status+timestamp` queries in `index.py`
+- **LOW-010**: Added warning logging for batch note fetch fallback in `git_ops.py`
+- **HIGH-006**: Created comprehensive `docs/ENV.md` with all environment variables documented
+- **HIGH-007**: Added CHANGELOG v0.12.0 entry with observability and secrets filtering features
+- **Test Fix**: Fixed `domain=domain.value` parameter in Memory creation in `capture.py`
+- **Lint Fix**: Moved logger initialization after imports in `git_ops.py`
+
+## Verification Results
+- **Tests**: 2,342 passed (100%)
+- **Coverage**: 88.21% (exceeds 80% requirement)
+- **Formatting**: PASS
+- **Linting**: PASS (ruff)
+- **Type checking**: PASS (mypy strict)
+- **Security**: PASS (bandit)
+
+## Related Files
+- src/git_notes_memory/index.py:243-253
+- src/git_notes_memory/git_ops.py:18-43
+- src/git_notes_memory/hooks/session_start_handler.py:85-93
+- src/git_notes_memory/capture.py:727-740
+- docs/ENV.md (created)
+- CHANGELOG.md:9-28
+
+---
+type: progress
+timestamp: '2025-12-26T13:19:50.213187+00:00'
+summary: Updated Claude Code hooks to enforce CI quality checks
+---
+
+Updated Claude Code hooks to enforce CI quality checks
+## Summary
+Fixed hooks.json to match CI workflow and added security scanning.
+
+## Changes Made
+- Fixed paths from git-notes-memory-manager to git-notes-memory
+- Added security-scan-on-edit hook for bandit security checks
+- Updated CLAUDE.md to document all hooks with CI mapping
+
+## Related Files
+- .claude/hooks.json:1-58
+- CLAUDE.md:291-301
+
+---
+type: progress
+timestamp: '2025-12-26T13:21:55.458749+00:00'
+summary: '...```'
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
+
+---
+type: progress
+timestamp: '2025-12-26T13:21:55.482695+00:00'
+summary: '...memory/index.db'
+---
+
+...memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]  2025-12-26T13:19:50 - Deep-clean code review and remediation complete
+```
+
+Let me also verify...
+
+---
+type: progress
+timestamp: '2025-12-26T13:21:55.505480+00:00'
+summary: '...(13:19:50) ==='
+---
+
+...(13:19:50) ===
+[learnings] Memory index location is project-specific at .memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean...
+
+---
+type: progress
+timestamp: '2025-12-26T13:21:55.529192+00:00'
+summary: '....memory/index.db  ✓'
+---
+
+....memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean code review and remediation complete                 ✓
+```
+
+The memory system...
+
+---
+type: progress
+timestamp: '2025-12-26T13:21:55.552384+00:00'
+summary: 'Created GitHub issue #31 for PLUGIN_ROOT path resolution bug'
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:22:43.736497+00:00'
+summary: '...```'
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
+
+---
+type: progress
+timestamp: '2025-12-26T13:22:43.758558+00:00'
+summary: '...memory/index.db'
+---
+
+...memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]  2025-12-26T13:19:50 - Deep-clean code review and remediation complete
+```
+
+Let me also verify...
+
+---
+type: progress
+timestamp: '2025-12-26T13:22:43.784834+00:00'
+summary: '...(13:19:50) ==='
+---
+
+...(13:19:50) ===
+[learnings] Memory index location is project-specific at .memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean...
+
+---
+type: progress
+timestamp: '2025-12-26T13:22:43.808265+00:00'
+summary: '....memory/index.db  ✓'
+---
+
+....memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean code review and remediation complete                 ✓
+```
+
+The memory system...
+
+---
+type: progress
+timestamp: '2025-12-26T13:22:43.831357+00:00'
+summary: 'Created GitHub issue #31 for PLUGIN_ROOT path resolution bug'
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:24:50.426519+00:00'
+summary: '...```'
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
+
+---
+type: progress
+timestamp: '2025-12-26T13:24:50.451048+00:00'
+summary: '...memory/index.db'
+---
+
+...memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]  2025-12-26T13:19:50 - Deep-clean code review and remediation complete
+```
+
+Let me also verify...
+
+---
+type: progress
+timestamp: '2025-12-26T13:24:50.474081+00:00'
+summary: '...(13:19:50) ==='
+---
+
+...(13:19:50) ===
+[learnings] Memory index location is project-specific at .memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean...
+
+---
+type: progress
+timestamp: '2025-12-26T13:24:50.496338+00:00'
+summary: '....memory/index.db  ✓'
+---
+
+....memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean code review and remediation complete                 ✓
+```
+
+The memory system...
+
+---
+type: progress
+timestamp: '2025-12-26T13:24:50.519566+00:00'
+summary: 'Created GitHub issue #31 for PLUGIN_ROOT path resolution bug'
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:27:11.420057+00:00'
+summary: '...```'
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
+
+---
+type: progress
+timestamp: '2025-12-26T13:27:11.441767+00:00'
+summary: '...memory/index.db'
+---
+
+...memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]  2025-12-26T13:19:50 - Deep-clean code review and remediation complete
+```
+
+Let me also verify...
+
+---
+type: progress
+timestamp: '2025-12-26T13:27:11.462812+00:00'
+summary: '...(13:19:50) ==='
+---
+
+...(13:19:50) ===
+[learnings] Memory index location is project-specific at .memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean...
+
+---
+type: progress
+timestamp: '2025-12-26T13:27:11.483528+00:00'
+summary: '....memory/index.db  ✓'
+---
+
+....memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean code review and remediation complete                 ✓
+```
+
+The memory system...
+
+---
+type: progress
+timestamp: '2025-12-26T13:27:11.506874+00:00'
+summary: 'Created GitHub issue #31 for PLUGIN_ROOT path resolution bug'
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:29:38.708535+00:00'
+summary: <self_audit_reminder><![CDATA[
+tags:
+- auto-captured
+- post-tool-use
+- file:guidance_standard.md
+---
+
+<self_audit_reminder><![CDATA[
+## PERIODIC SELF-AUDIT (Check periodically)
+
+Ask yourself:
+- Have I completed significant work without capturing it?
+- Have I made decisions that should be remembered?
+-...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.331978+00:00'
+summary: '...```
+
+  [learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/ind...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.380252+00:00'
+summary: '...memory/index.db
+
+  [progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI qual...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]  2025-12-26T13:19:50 - Deep-clean code review and remediation complete
+```
+
+Let me also verify...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.427166+00:00'
+summary: '...(13:19:50) ===
+
+  [learnings] Memory index location is project-specific at .memory/index.db  ✓
+
+  [p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...(13:19:50) ===
+[learnings] Memory index location is project-specific at .memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.475943+00:00'
+summary: '....memory/index.db  ✓
+
+  [progress]  Updated Claude Code hooks to enforce CI quality checks        ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+....memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean code review and remediation complete                 ✓
+```
+
+The memory system...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.525212+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Created GitHub issue #31 for PLUGIN_ROOT path re...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Created GitHub issue #31 for PLUGIN_ROOT path resolution bug
+## Summary
+Investigated and filed comprehensive bug report for path resolution failures in marketplace-installed plugins. The issue affects 12+ command files and includes three solution options with recommendation.
+
+## Changes Made
+- Investigated 12+ affected command files
+- Traced root cause to hardcoded namespace assumption
+- Discovered secondary issue (missing scripts/ in distribution)
+- Generated detailed issue report with file:line references
+- Filed issue #31 to zircote/git-notes-memory
+
+## Related Files
+- commands/metrics.md:76-77 (primary example)
+- commands/health.md:76-77
+- commands/traces.md:79-80
+- commands/audit-log.md (2 instances)
+- commands/capture.md:90
+- commands/recall.md:81
+- commands/scan-secrets.md (2 instances)
+- commands/search.md (2 instances)
+- commands/secrets-allowlist.md (3 instances)
+- commands/status.md (2 instances)
+- commands/sync.md (7 instances)
+- commands/test-secret.md:87
+- commands/validate.md:69
+- https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.575229+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Skipped committing broken metrics.py script
+
+  ## ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Skipped committing broken metrics.py script
+## Summary
+Reviewed pending changes and found only one untracked file (`.claude-plugin/scripts/metrics.py`) which uses a non-existent API (`get_metrics_registry`). Per user decision, skipped committing this broken file.
+
+## Context
+- The broken script is related to issue #31 filed earlier
+- Issue #31 recommends using Python module imports instead of scripts
+- The actual API is `get_metrics()` not `get_metrics_registry()`
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.624486+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Deep-clean code review and remediation complete ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Deep-clean code review and remediation complete - all findings resolved
+## Summary
+Completed comprehensive `/claude-spec:deep-clean --focus MAXALL` with 9 parallel specialist agents (Security, Performance, Test Coverage, Database, Code Quality, Documentation, Architecture, Resilience, Compliance). All critical and high-priority findings remediated, full verification passing.
+
+## Changes Made
+- **CRIT-001**: Fixed SQLite connection leak in `index.py` - added proper cleanup with `contextlib.suppress(Exception)` on initialization failure
+- **MED-001**: Fixed session hook connection cleanup in `session_start_handler.py` - added `try/finally` block
+- **LOW-004**: Added composite index for `status+timestamp` queries in `index.py`
+- **LOW-010**: Added warning logging for batch note fetch fallback in `git_ops.py`
+- **HIGH-006**: Created comprehensive `docs/ENV.md` with all environment variables documented
+- **HIGH-007**: Added CHANGELOG v0.12.0 entry with observability and secrets filtering features
+- **Test Fix**: Fixed `domain=domain.value` parameter in Memory creation in `capture.py`
+- **Lint Fix**: Moved logger initialization after imports in `git_ops.py`
+
+## Verification Results
+- **Tests**: 2,342 passed (100%)
+- **Coverage**: 88.21% (exceeds 80% requirement)
+- **Formatting**: PASS
+- **Linting**: PASS (ruff)
+- **Type checking**: PASS (mypy strict)
+- **Security**: PASS (bandit)
+
+## Related Files
+- src/git_notes_memory/index.py:243-253
+- src/git_notes_memory/git_ops.py:18-43
+- src/git_notes_memory/hooks/session_start_handler.py:85-93
+- src/git_notes_memory/capture.py:727-740
+- docs/ENV.md (created)
+- CHANGELOG.md:9-28
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.688407+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated Claude Code hooks to enforce CI quality ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated Claude Code hooks to enforce CI quality checks
+## Summary
+Fixed hooks.json to match CI workflow and added security scanning.
+
+## Changes Made
+- Fixed paths from git-notes-memory-manager to git-notes-memory
+- Added security-scan-on-edit hook for bandit security checks
+- Updated CLAUDE.md to document all hooks with CI mapping
+
+## Related Files
+- .claude/hooks.json:1-58
+- CLAUDE.md:291-301
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:17.791775+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Committed and pushed 6 commits to v1.0.0 branch
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Committed and pushed 6 commits to v1.0.0 branch
+## Summary
+Split changes into logical commits following conventional commit format.
+
+## Commits
+- fix: SQLite connection leaks and domain parameter
+- refactor: batch fetch fallback logging
+- docs: environment variables reference
+- feat(hooks): security scanning and path fixes
+- docs: CHANGELOG v0.12.0 entry
+- docs: code review artifacts
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:18.529556+00:00'
+summary: 'Rebase completed successfully. v1.0.0 is now rebased onto origin/v1.0.0.
+
+  ```
+
+  aa35822 fix(plugin)...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Rebase completed successfully. v1.0.0 is now rebased onto origin/v1.0.0.
+
+```
+aa35822 fix(plugin): correct...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:18.717997+00:00'
+summary: '...installation path
+
+  - Doesn''t require scripts/ directory
+
+  - Already proven working (we used this ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...installation path
+- Doesn't require scripts/ directory
+- Already proven working (we used this workaround earlier)
+- More robust across different plugin installations
+
+**Option 3: Hybrid approach**
+```bash...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:18.767574+00:00'
+summary: '...with synthesis, remediation, and observability verification.
+
+  Let me check the status of the c...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...with synthesis, remediation, and observability verification.
+
+Let me check the status of the completed agents:
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:18.817133+00:00'
+summary: "...snippet\n   - Step-by-step failure analysis\n   - Actual vs expected\
+  \ filesystem paths\n\n4. **Thre..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...snippet
+   - Step-by-step failure analysis
+   - Actual vs expected filesystem paths
+
+4. **Three Solution Options**:
+   - **Option 1**: Quick glob pattern fix
+   - **Option 2**: Python module imports...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:18.866819+00:00'
+summary: '...fix. All file paths include line numbers, code snippets show the exact
+  problem, and three solu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...fix. All file paths include line numbers, code snippets show the exact problem, and three solution approaches are documented with pros/cons.
+
+`★ Insight ─────────────────────────────────────`
+-...
+
+---
+type: progress
+timestamp: '2025-12-26T13:31:18.914379+00:00'
+summary: '...elsewhere.
+
+  - **AI-actionable format**: Including exact file:line references, code snippets,
+  an...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...elsewhere.
+- **AI-actionable format**: Including exact file:line references, code snippets, and solution options means Claude or another AI can execute the fix without additional exploration.
+- **Distribution...
