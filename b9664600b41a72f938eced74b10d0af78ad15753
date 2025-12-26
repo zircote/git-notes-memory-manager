@@ -8447,3 +8447,18 @@ tags:
 
 ...PROMPT-M-004: Missing Rate Limit Header Handling (`llm_client.py:406-469`) ✅
   - **Status:** IMPLEMENTED - Providers parse `retry-after` headers from rate limit errors; `_parse_retry_after()` methods...
+
+---
+type: progress
+timestamp: '2025-12-26T17:16:52.150143+00:00'
+summary: '...formats'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...formats
+- [x] DOC-M-005: Security Module Docs Incomplete ✅
+  - **Status:** DOCUMENTED - `docs/spec/completed/2025-12-25-secrets-filtering/` has comprehensive ARCHITECTURE.md and REQUIREMENTS.md
+- [x]...
