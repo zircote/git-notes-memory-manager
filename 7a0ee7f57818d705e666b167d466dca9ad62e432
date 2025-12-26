@@ -1,0 +1,19 @@
+---
+type: patterns
+timestamp: '2025-12-26T19:25:29.333124+00:00'
+summary: '...use existing `sync_notes_with_remote()` method'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...use existing `sync_notes_with_remote()` method
+- Must preserve current exception handling pattern
+- Must work with all configured namespaces
+
+## Dependencies
+
+### Internal Dependencies
+
+- `GitOps.sync...
