@@ -638,3 +638,22 @@ Another project's Prometheus (`readinesshub-prometheus`) is using port 9090, blo
 
 ## Related Files
 - docker/docker-compose.yml:46 (port mapping)
+
+---
+type: learnings
+timestamp: '2025-12-26T15:37:54.639075+00:00'
+summary: Port conflict blocking Docker Compose services
+---
+
+Port conflict blocking Docker Compose services
+## Summary
+Another project's Prometheus (`readinesshub-prometheus`) is using port 9090, blocking this stack's Prometheus from starting.
+
+## Details
+- Containers with `depends_on` won't start if dependencies fail
+- Docker shows "Created" state when networking setup fails
+- OTel Collector → depends on Prometheus, Tempo, Loki
+- Grafana → depends on Prometheus, Tempo, Loki
+
+## Related Files
+- docker/docker-compose.yml:46 (port mapping)
