@@ -1284,3 +1284,25 @@ tags:
 **Category:** Performance
 
 **Issue:**...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:20:43.266323+00:00'
+summary: '...Resilience'
+tags:
+- auto-captured
+- post-tool-use
+- file:CODE_REVIEW.md
+---
+
+...Resilience
+
+**Issue:** Library failures cause entire filtering to fail.
+
+**Remediation:** Add basic pattern matching fallback.
+
+---
+
+### MED-008: Session Start Hook Unbounded Fetch
+
+**File:** `src/git_notes_memory...
