@@ -937,3 +937,27 @@ tags:
 ### Alternatives Considered
 
 1. **Context managers everywhere**:...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.149846+00:00'
+summary: '...calculation**: Rejected - complexity, requires warmup period'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...calculation**: Rejected - complexity, requires warmup period
+
+---
+
+## ADR-008: Graceful Degradation Pattern
+
+**Date**: 2025-12-25
+**Status**: Accepted
+**Deciders**: Claude (technical decision)
+
+### Context
+
+Observability...
