@@ -322,3 +322,35 @@ Thoroughly analyzed the git-notes-memory codebase to understand architecture and
 - src/git_notes_memory/capture.py:1-1007
 - src/git_notes_memory/index.py:1-1248
 - src/git_notes_memory/hooks/stop_handler.py:1-510
+
+---
+type: progress
+timestamp: '2025-12-26T00:10:27.658067+00:00'
+summary: 'Completed specification artifacts for LLM-powered subconsciousness feature
+  (Issue #11)'
+---
+
+Completed specification artifacts for LLM-powered subconsciousness feature (Issue #11)
+## Summary
+Created comprehensive specification documents for implementing an LLM-powered subconsciousness layer that provides autonomous memory management including implicit capture, consolidation, intelligent forgetting, proactive surfacing, and semantic linking.
+
+## Artifacts Created
+1. **REQUIREMENTS.md** - 23 functional requirements (P0/P1/P2), success metrics, user stories
+2. **ARCHITECTURE.md** - 7 component designs, schema extensions, API design, integration points
+3. **IMPLEMENTATION_PLAN.md** - 6 phases with 85 tasks, verification gates, risk register
+4. **DECISIONS.md** - 13 Architecture Decision Records documenting key trade-offs
+
+## Key Design Decisions
+- Provider-agnostic LLM client (Anthropic, OpenAI, Ollama)
+- Confidence-threshold auto-capture (>0.9 auto, 0.7-0.9 review)
+- Bidirectional memory links with 5 relationship types
+- Archive instead of delete for forgetting (audit trail)
+- Async/non-blocking LLM calls in hooks
+
+## Related Files
+- docs/spec/active/2025-12-25-llm-subconsciousness/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-llm-subconsciousness/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-llm-subconsciousness/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-llm-subconsciousness/DECISIONS.md
+- docs/spec/active/2025-12-25-llm-subconsciousness/README.md
+- docs/spec/active/2025-12-25-llm-subconsciousness/CHANGELOG.md
