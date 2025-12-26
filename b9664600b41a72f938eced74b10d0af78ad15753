@@ -2731,3 +2731,19 @@ tags:
   - **Completed:** Already implemented with `limit`/`offset` params and `iter_all_ids()` generator
 
 - [x]...
+
+---
+type: progress
+timestamp: '2025-12-26T15:49:13.944889+00:00'
+summary: '...notes_memory/index.py:787-817`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...notes_memory/index.py:787-817`
+  - Action: Add iterator-based pagination
+  - **Completed:** Already implemented with `limit`/`offset` params and `iter_all_ids()` generator
+
+- [x] **PERF-H-002:** N+1 Query...
