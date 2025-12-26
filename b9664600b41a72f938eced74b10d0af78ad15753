@@ -303,3 +303,23 @@ tags:
 
 ### Security Strengths
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:50:55.521005+00:00'
+summary: '...Root Cause Analysis
+
+  **The issue occurs due to a mismatch between the expected plugin path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
