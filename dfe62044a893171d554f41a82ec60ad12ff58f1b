@@ -449,3 +449,23 @@ tags:
 | File Pattern | Context | Sensitivity Adjustment |
 |--------------|---------|----------------------|
 | `.env*`...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.299964+00:00'
+summary: '...7.1 Detection Pipeline Architecture'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...7.1 Detection Pipeline Architecture
+
+```
+Input Content
+    |
+    v
+[Layer 1: Deterministic Pattern Matching]
+    |-- OpenAI, Anthropic, GitHub, AWS, Slack, etc.
+    |-- Private keys (BEGIN...PRIVATE...
