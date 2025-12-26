@@ -1004,3 +1004,19 @@ except ImportError:
 def export_traces(spans: list[Span]) -> None:
     if not OTEL_AVAILABLE:
         return  #...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.255284+00:00'
+summary: '...Claude'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...Claude
+
+### Context
+
+New CLI commands need consistent naming. Existing commands follow `/memory:*` pattern (e.g., `/memory:capture`, `/memory:recall`). Observability commands could follow the same pattern...
