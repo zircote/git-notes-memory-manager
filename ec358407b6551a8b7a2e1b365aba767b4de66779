@@ -266,3 +266,59 @@ OTLP Push → OTel Collector → prometheusremotewrite exporter → Prometheus /
 ## Related Files
 - docker/otel-collector-config.yaml:47-48 (prometheusremotewrite)
 - docker/prometheus/prometheus.yml (remote_write config)
+
+---
+type: learnings
+timestamp: '2025-12-26T21:08:39.587051+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Process isolation is the root cause of empty metr...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Process isolation is the root cause of empty metrics
+## Summary
+The `/memory:metrics` command shows empty output because each slash command runs in an **isolated Python process**. Metrics collected during one operation die with that process before the next command can see them.
+
+## Architecture Details
+
+### The In-Memory Singleton Problem
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  /memory:capture "test"                                              │
+│  ┌─────────────────┐                                                │
+│  │ Python Process A │                                               │
+│  │  MetricsCollector (empty → collects metrics → pushes to OTLP)   │
+│  └─────────────────┘                                                │
+│           ↓ process exits, metrics die                              │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  /memory:metrics                                                     │
+│  ┌─────────────────┐                                                │
+│  │ Python Process B │  ← COMPLETELY SEPARATE PROCESS                │
+│  │  MetricsCollector() ← FRESH, EMPTY                               │
+│  └─────────────────┘                                                │
+│           ↓ shows nothing because no operations ran in THIS process │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### The Push Model (OTLP)
+
+The code DOES push metrics to OTLP—but only at specific points:
+
+| Location | When | What's Pushed |
+|----------|------|---------------|
+| `capture.py:812` | After each capture | Capture metrics |
+| `stop_handler.py:541` | On session Stop | All session metrics + traces |
+| `hook_utils.py:572` | Helper function | Metrics collected so far |
+
+**BUT** this only works if `MEMORY_PLUGIN_OTLP_ENDPOINT` is set DURING those operations.
+
+## Related Files
+- src/git_notes_memory/observability/metrics.py:485-502 (singleton pattern)
+- src/git_notes_memory/observability/exporters/otlp.py:552-565 (push function)
+- src/git_notes_memory/hooks/stop_handler.py:541 (Stop hook export)
