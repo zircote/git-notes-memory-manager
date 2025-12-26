@@ -206,3 +206,17 @@ Export returned True and Prometheus query shows the data.
 ## Related Files
 - src/git_notes_memory/observability/metrics.py
 - docker/otel-collector-config.yaml
+
+---
+type: progress
+timestamp: '2025-12-26T19:46:34.124058+00:00'
+summary: '...the same attributes that Python was already setting. Removing it from
+  the metrics pipeline fix...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...the same attributes that Python was already setting. Removing it from the metrics pipeline fixed the conflict.
+
+**Next session's telemetry should work.** The Stop hook exports metrics at session...
