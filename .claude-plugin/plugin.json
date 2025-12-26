@@ -15,7 +15,5 @@
     "semantic-search",
     "context",
     "recall"
-  ],
-  "commands": "./commands/",
-  "skills": "./skills/"
+  ]
 }

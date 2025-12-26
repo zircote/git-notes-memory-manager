@@ -7,7 +7,7 @@
       "event": "PostToolUse",
       "matcher": "Write|Edit|str_replace_editor",
       "type": "command",
-      "command": "cd /Users/AllenR1_1/Projects/zircote/git-notes-memory && uv run ruff format $CLAUDE_FILE_PATHS 2>/dev/null || true",
+      "command": "cd \"$CLAUDE_PROJECT_DIR\" && uv run ruff format $CLAUDE_FILE_PATHS 2>/dev/null || true",
       "conditions": {
         "fileExtensions": [".py", ".pyi"]
       }
@@ -18,7 +18,7 @@
       "event": "PostToolUse",
       "matcher": "Write|Edit|str_replace_editor",
       "type": "command",
-      "command": "cd /Users/AllenR1_1/Projects/zircote/git-notes-memory && uv run ruff check $CLAUDE_FILE_PATHS --output-format=concise 2>/dev/null | head -20 || true",
+      "command": "cd \"$CLAUDE_PROJECT_DIR\" && uv run ruff check $CLAUDE_FILE_PATHS --output-format=concise 2>/dev/null | head -20 || true",
       "conditions": {
         "fileExtensions": [".py", ".pyi"]
       }
@@ -29,7 +29,7 @@
       "event": "PostToolUse",
       "matcher": "Write|Edit|str_replace_editor",
       "type": "command",
-      "command": "cd /Users/AllenR1_1/Projects/zircote/git-notes-memory && uv run mypy $CLAUDE_FILE_PATHS 2>&1 | grep -E 'error:' | head -10 || true",
+      "command": "cd \"$CLAUDE_PROJECT_DIR\" && uv run mypy $CLAUDE_FILE_PATHS 2>&1 | grep -E 'error:' | head -10 || true",
       "conditions": {
         "fileExtensions": [".py", ".pyi"]
       }
@@ -40,7 +40,7 @@
       "event": "PostToolUse",
       "matcher": "Write|Edit|str_replace_editor",
       "type": "command",
-      "command": "cd /Users/AllenR1_1/Projects/zircote/git-notes-memory && uv run bandit -ll $CLAUDE_FILE_PATHS 2>/dev/null | grep -E '^>>' | head -10 || true",
+      "command": "cd \"$CLAUDE_PROJECT_DIR\" && uv run bandit -ll $CLAUDE_FILE_PATHS 2>/dev/null | grep -E '^>>' | head -10 || true",
       "conditions": {
         "fileExtensions": [".py"]
       }
@@ -51,7 +51,7 @@
       "event": "PreToolUse",
       "matcher": "Bash",
       "type": "command",
-      "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'git commit'; then cd /Users/AllenR1_1/Projects/zircote/git-notes-memory && make quality; fi",
+      "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'git commit'; then cd \"$CLAUDE_PROJECT_DIR\" && make quality; fi",
       "blocking": true
     }
   ]
