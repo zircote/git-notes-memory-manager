@@ -591,3 +591,14 @@ OTLP Push → OTel Collector → prometheusremotewrite exporter → Prometheus /
 ## Related Files
 - docker/otel-collector-config.yaml:47-48 (prometheusremotewrite)
 - docker/prometheus/prometheus.yml (remote_write config)
+
+---
+type: learnings
+timestamp: '2025-12-26T21:36:27.718778+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
