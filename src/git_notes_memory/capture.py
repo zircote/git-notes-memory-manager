@@ -17,6 +17,7 @@ from __future__ import annotations
 import fcntl
 import logging
 import os
+import random
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
@@ -93,8 +94,11 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
 
         # Acquire exclusive lock with timeout using non-blocking retry loop
         # CRIT-001: Prevents indefinite blocking if lock is held
+        # Uses exponential backoff with jitter to reduce contention under high concurrency
         deadline = time.monotonic() + timeout
-        retry_interval = 0.1  # 100ms between retries
+        base_interval = 0.05  # Start with 50ms
+        max_interval = 2.0  # Cap at 2 seconds
+        attempt = 0
 
         while True:
             try:
@@ -107,7 +111,12 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
                         f"Lock acquisition timed out after {timeout}s",
                         "Another capture may be in progress, wait and retry",
                     ) from None
-                time.sleep(retry_interval)
+                # Exponential backoff: 50ms, 100ms, 200ms, ... up to max_interval
+                # Add jitter (0-10% of interval) to prevent thundering herd
+                interval = min(base_interval * (2**attempt), max_interval)
+                jitter = random.uniform(0, interval * 0.1)  # noqa: S311
+                time.sleep(interval + jitter)
+                attempt += 1
             except OSError as e:
                 raise CaptureError(
                     f"Failed to acquire capture lock: {e}",

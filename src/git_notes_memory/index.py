@@ -103,6 +103,8 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_memories_timestamp ON memories(timestamp)",
     "CREATE INDEX IF NOT EXISTS idx_memories_status ON memories(status)",
     "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
+    # HIGH-004: Composite index for efficient range queries within namespace
+    "CREATE INDEX IF NOT EXISTS idx_memories_namespace_timestamp ON memories(namespace, timestamp DESC)",
 ]
 
 # Migration SQL for schema version upgrades
