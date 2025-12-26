@@ -859,3 +859,18 @@ tags:
 | Category | Examples | Detection Method |
 |----------|----------|------------------|
 |...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:56.535769+00:00'
+summary: '...ADR-008: Decay score formula with weighted factors'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...ADR-008: Decay score formula with weighted factors
+  - ADR-009: Adversarial detection with pattern matching first
+  - ADR-010: Proactive surfacing rate limiting
+  - ADR-011: Meta-memory for...
