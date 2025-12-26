@@ -26,3 +26,22 @@ Processed 24 Copilot review comments on PR #26 for the subconsciousness layer fe
 ## Related Files
 - src/git_notes_memory/subconsciousness/implicit_capture_agent.py:285-290
 - commands/review.md:175-243
+
+---
+type: progress
+timestamp: '2025-12-26T14:37:14.162328+00:00'
+summary: '---'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+---
+document_type: retrospective
+project_id: SPEC-2025-12-25-001
+completed: 2025-12-26T14:35:00Z
+outcome: success
+---
+
+# LLM-Powered Subconsciousness - Project Retrospective...
