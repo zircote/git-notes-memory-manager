@@ -1160,3 +1160,20 @@ tags:
   - ADR-009: Command naming convention
 
 - Codebase analysis and research findings (RESEARCH_NOTES.md...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:10.504237+00:00'
+summary: '...self._compiled = {'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...self._compiled = {
+            name: re.compile(pattern.regex)
+            for name, pattern in self.PATTERNS.items()
+        }
+
+    def detect(self, text: str) -> list[Detection]:...
