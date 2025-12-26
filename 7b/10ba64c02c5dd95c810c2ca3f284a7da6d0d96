@@ -680,3 +680,41 @@ Verified that observability decorator and logging tests already exist and pass.
 ## Related Files
 - tests/test_observability/test_decorators.py:1-246 (14 tests)
 - tests/test_observability/test_logging.py:1-211 (12 tests)
+
+---
+type: progress
+timestamp: '2025-12-26T17:42:44.895155+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  ARCH-H-001 Complete: Refactored IndexService God...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+ARCH-H-001 Complete: Refactored IndexService God Object into composed components
+## Summary
+Successfully extracted SchemaManager and SearchEngine from the 1500-line IndexService monolith, following Single Responsibility Principle through composition.
+
+## Changes Made
+- Created `src/git_notes_memory/index/` package with:
+  - `schema_manager.py`: Schema creation, migrations, sqlite-vec extension loading (68 statements)
+  - `search_engine.py`: Vector similarity search, FTS5 text search (94 statements)
+  - `service.py`: Main IndexService facade (369 statements) using composition
+  - `__init__.py`: Package exports for backward compatibility
+- Removed old `src/git_notes_memory/index.py` (package takes precedence)
+- Updated test mocks to reference new module paths
+
+## Architecture After
+```
+IndexService (facade)
+├── SchemaManager (schema, migrations, sqlite-vec)
+└── SearchEngine (vector + FTS5 search)
+```
+
+## Related Files
+- src/git_notes_memory/index/__init__.py
+- src/git_notes_memory/index/schema_manager.py
+- src/git_notes_memory/index/search_engine.py
+- src/git_notes_memory/index/service.py
+- tests/test_index.py:88,284 (mock paths updated)
