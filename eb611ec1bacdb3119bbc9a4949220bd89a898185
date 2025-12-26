@@ -697,3 +697,20 @@ MIN_OCCURRENCES_FOR_CANDIDATE = 2
 
 # Minimum confidence for validation
 MIN_CONFIDENCE_FOR_VALIDATION...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:25:31.594758+00:00'
+summary: '...5'
+tags:
+- auto-captured
+- post-tool-use
+- file:patterns.py
+---
+
+...5
+
+# MED-007: Extracted magic numbers to named constants for clarity
+# Scoring weights for pattern confidence calculation
+NORMALIZED_SCORE_WEIGHT = 0.6  # Weight for normalized score in confidence
+OCCURRENCE...
