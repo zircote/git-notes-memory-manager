@@ -251,3 +251,21 @@ tags:
 
 ...2025-12-26 | DOMAIN_MARKERS dict, inline [global]/[user]/[project]/[local] |
 | 4.2 | Extend Block Pattern for Domain Prefix | done | 2025-12-26 | 2025-12-26 | BLOCK_PATTERN with optional domain prefix...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:43.791390+00:00'
+summary: '...get_by_namespace.side_effect = mock_get_by_namespace'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_context_builder.py
+---
+
+...get_by_namespace.side_effect = mock_get_by_namespace
+
+    # Configure search to return learning and pattern results
+    def mock_search(
+        query: str,
+        k: int = 10,
+        namespace: str...
