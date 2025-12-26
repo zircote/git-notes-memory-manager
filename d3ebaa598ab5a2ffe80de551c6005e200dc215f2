@@ -11,3 +11,15 @@ tags:
 
 ...───────────────────────────────────`
 The existing Stop hook uses `SessionAnalyzer` with regex-based pattern matching - not the LLM-powered subconsciousness. Task 2.10 needs to integrate the new `ImplicitCaptureService...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:26.405745+00:00'
+summary: The test shows that the API key pattern matches the generic `secret` pattern
+  first. I need to upd...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The test shows that the API key pattern matches the generic `secret` pattern first. I need to update the test to expect `[REDACTED:secret]`...
