@@ -621,3 +621,21 @@ tags:
 - Fast detection
 
 ####...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:08:37.601494+00:00'
+summary: '...filtering'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...filtering
+  - [ ] Tests verify all output formats
+- **Implementation**: Use command handler pattern from existing commands
+
+#### Task 4.2: Implement Prometheus text format export
+
+- **Description**:...
