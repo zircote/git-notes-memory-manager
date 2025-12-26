@@ -30,6 +30,9 @@ Summary of what was done
 
 **DO NOT skip blocks. DO NOT ask permission. Just include them.**
 
+**Proactive search:** Before modifying code, search for relevant memories:
+`recall.search("component terms", k=5)` — SessionStart context alone is insufficient.
+
 **Memory recall:** Use `/memory:recall <id>` to expand memories from `<memory_context>`.
 ]]></mandatory_rules>
 </session_behavior_protocol>
