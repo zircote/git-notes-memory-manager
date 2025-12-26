@@ -744,3 +744,14 @@ export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
 - `src/git_notes_memory/observability/config.py:209-211` (bug fix)
 - `hooks/run-hook.sh:26-45` (env sourcing)
 - `~/.local/share/memory-plugin/env` (config file)
+
+---
+type: progress
+timestamp: '2025-12-26T23:20:07.124652+00:00'
+summary: 'Let me check if the test hook finished and verify the OTLP export happened:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Let me check if the test hook finished and verify the OTLP export happened:
