@@ -1630,3 +1630,22 @@ tags:
 ---
 
 The parallel research agents completed already. Let me proceed by reading the additional key files directly to complete my understanding:
+
+---
+type: progress
+timestamp: '2025-12-26T02:50:40.364707+00:00'
+summary: '...& Polish | ✓ | User memory sync, remote sync, commands, documentation
+  |
+
+  ### Key Features Impl...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...& Polish | ✓ | User memory sync, remote sync, commands, documentation |
+
+### Key Features Implemented
+
+1. **Two-Domain Architecture**:
+   - PROJECT: Repo-scoped memories in `refs/notes/mem/{namespace}`...
