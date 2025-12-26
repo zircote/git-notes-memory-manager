@@ -9386,3 +9386,14 @@ summary: '...memory/index.db'
 ```
 
 Let me also verify...
+
+---
+type: progress
+timestamp: '2025-12-26T17:23:23.231635+00:00'
+summary: '...(13:19:50) ==='
+---
+
+...(13:19:50) ===
+[learnings] Memory index location is project-specific at .memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean...
