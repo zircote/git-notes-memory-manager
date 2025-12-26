@@ -12,3 +12,15 @@ tags:
 ...7 core components (MetricsCollector, SpanContext, StructuredLogger)  |
 | - Optional extras pattern: pip install .[monitoring]                   |
 | - Session identification for multi-tenant...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:48:42.793993+00:00'
+summary: '...reformatted the files and found some issues in `__init__.py`. The issue
+  is the lazy import pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...reformatted the files and found some issues in `__init__.py`. The issue is the lazy import pattern - the imports appear unused because they're returned via `locals()[name]`. Let me fix the `__init__.py...
