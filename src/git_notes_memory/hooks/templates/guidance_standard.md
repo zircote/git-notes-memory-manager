@@ -96,6 +96,46 @@ When you see memories in `<memory_context>`:
 
 ---
 
+## RULE 5: PROACTIVE MEMORY SEARCH — BEFORE YOU ACT
+
+**Before starting work on a component, module, or feature, SEARCH for relevant memories.**
+
+### When to Search
+
+| Trigger | Search Query Example |
+|---------|---------------------|
+| Modifying a file | `"index.py SQLite connection"` |
+| Implementing a feature | `"authentication session handling"` |
+| Fixing a bug | `"error handling retry logic"` |
+| Making architectural decisions | `"service pattern dependency injection"` |
+
+### How to Search
+
+```python
+# Use the recall service directly
+from git_notes_memory import get_recall_service
+recall = get_recall_service()
+results = recall.search("specific task terms here", k=5)
+```
+
+Or use `/memory:recall <query>` if available.
+
+### Why This Matters
+
+- **SessionStart injects ~5 memories** using generic project name (low relevance ~0.53)
+- **Task-specific queries** find highly relevant memories (relevance ~0.77+)
+- **Prior decisions/patterns** prevent repeating mistakes or contradicting past choices
+
+### Self-Check Before Major Changes
+
+- [ ] Have I searched for memories related to this component?
+- [ ] Are there past decisions that should guide this work?
+- [ ] Did we learn something relevant from a previous session?
+
+**SEARCH FIRST, THEN ACT.** Don't rely solely on SessionStart context.
+
+---
+
 ## FAILURE MODES TO AVOID
 
 ❌ **Forgetting to write blocks** — Use the self-check above
@@ -103,6 +143,7 @@ When you see memories in `<memory_context>`:
 ❌ **Waiting until the end** — Write blocks AS you complete work, not after
 ❌ **Rationalizing "too minor"** — If it's worth mentioning, it's worth capturing
 ❌ **Inline when block is appropriate** — Default to blocks
+❌ **Skipping proactive search** — Search for relevant memories BEFORE modifying code
 
 ---
 
@@ -145,7 +186,10 @@ Ask yourself:
 - Have I completed significant work without capturing it?
 - Have I made decisions that should be remembered?
 - Have I learned something valuable this session?
+- **Did I search for relevant memories before starting this task?**
 
-**If yes to any, produce the appropriate block. Don't let meaningful work go uncaptured.**
+**If yes to any of the first three, produce the appropriate block. Don't let meaningful work go uncaptured.**
+
+**If no to the last one, search now:** `recall.search("component/feature terms", k=5)`
 ]]></self_audit_reminder>
 </session_behavior_protocol>

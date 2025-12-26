@@ -210,21 +210,21 @@ class TestGuidanceBuilderTokenEstimation:
         # Minimal template is concise but includes key rules
         assert tokens < 500, f"Minimal guidance is ~{tokens} tokens, expected <500"
 
-    def test_standard_under_1500_tokens(
+    def test_standard_under_1700_tokens(
         self, guidance_builder: GuidanceBuilder
     ) -> None:
-        """Test that standard guidance is under ~1500 tokens."""
+        """Test that standard guidance is under ~1700 tokens."""
         xml = guidance_builder.build_guidance("standard")
         tokens = self.estimate_tokens(xml)
-        assert tokens < 1500, f"Standard guidance is ~{tokens} tokens, expected <1500"
+        assert tokens < 1700, f"Standard guidance is ~{tokens} tokens, expected <1700"
 
-    def test_detailed_under_2500_tokens(
+    def test_detailed_under_2800_tokens(
         self, guidance_builder: GuidanceBuilder
     ) -> None:
-        """Test that detailed guidance is under ~2500 tokens."""
+        """Test that detailed guidance is under ~2800 tokens."""
         xml = guidance_builder.build_guidance("detailed")
         tokens = self.estimate_tokens(xml)
-        assert tokens < 2500, f"Detailed guidance is ~{tokens} tokens, expected <2500"
+        assert tokens < 2800, f"Detailed guidance is ~{tokens} tokens, expected <2800"
 
 
 # =============================================================================
