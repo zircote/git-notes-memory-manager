@@ -110,3 +110,21 @@ The existing architecture provides strong extension points for multi-domain supp
 - src/git_notes_memory/recall.py:72-131 (service initialization)
 - src/git_notes_memory/hooks/signal_detector.py:40-155 (patterns + block markers)
 - src/git_notes_memory/hooks/context_builder.py:340-390 (working memory building)
+
+---
+type: learnings
+timestamp: '2025-12-26T01:43:52.507814+00:00'
+summary: '...pattern used for `repo_path` in version 2.
+
+  `─────────────────────────────────────────────────`...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...pattern used for `repo_path` in version 2.
+`─────────────────────────────────────────────────`
+
+Now I understand the pattern. I need to:
+1. Update `SCHEMA_VERSION` to 3
+2. Add the domain column to `_CREATE_MEMORIES...
