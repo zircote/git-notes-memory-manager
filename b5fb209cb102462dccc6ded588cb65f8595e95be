@@ -128,3 +128,21 @@ tags:
 ---
 
 ...ignore` isn't sufficient for Pyright. Let me use a better approach - using a sentinel value pattern or `field(default_factory=...)`. Actually, looking at this more carefully, I should use a cleaner...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:02.899992+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  **Schema Migration Pattern in index.py**:
+
+  1. `S...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+**Schema Migration Pattern in index.py**:
+1. `SCHEMA_VERSION` constant defines target version
+2. `_MIGRATIONS` dict maps...
