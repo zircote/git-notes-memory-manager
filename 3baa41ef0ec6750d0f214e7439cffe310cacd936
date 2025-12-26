@@ -37,3 +37,22 @@ Codebase exploration and security research completed. Research notes have been a
 - src/git_notes_memory/capture.py:281-300 (validation integration point)
 - src/git_notes_memory/capture.py:530-532 (embedding integration point)
 - docs/spec/active/2025-12-25-secrets-filtering/RESEARCH_NOTES.md
+
+---
+type: progress
+timestamp: '2025-12-26T03:14:02.082367+00:00'
+summary: Completed ARCHITECTURE.md technical design
+---
+
+Completed ARCHITECTURE.md technical design
+## Summary
+Wrote comprehensive technical architecture covering all components, integration points, and extension mechanisms.
+
+## Changes Made
+- Defined 7 core components: SecretsFilteringService, PatternDetector, EntropyAnalyzer, PIIDetector, AllowlistManager, Redactor, AuditLogger
+- Documented data models (Detection, Severity, FilteringResult)
+- Specified integration points in capture.py (lines 281-300 and 530-532)
+- Included ML and contextual analysis extension points for future
+
+## Related Files
+- docs/spec/active/2025-12-25-secrets-filtering/ARCHITECTURE.md
