@@ -83,3 +83,12 @@ The `/memory:traces` command failed because the plugin cache contains v0.3.1 whi
 
 ## Related Files
 - src/git_notes_memory/observability/tracing.py:129-158
+
+---
+type: learnings
+timestamp: '2025-12-26T04:31:48.268585+00:00'
+summary: Now I understand the tracing system. The `get_completed_spans()` function
+  returns the spans, but the
+---
+
+Now I understand the tracing system. The `get_completed_spans()` function returns the spans, but there's no...
