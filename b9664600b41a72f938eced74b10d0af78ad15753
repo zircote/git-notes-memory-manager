@@ -1327,3 +1327,19 @@ tags:
 ...elsewhere.
 - **AI-actionable format**: Including exact file:line references, code snippets, and solution options means Claude or another AI can execute the fix without additional exploration.
 - **Distribution...
+
+---
+type: progress
+timestamp: '2025-12-26T15:09:25.763276+00:00'
+summary: '...```
+
+  [learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/ind...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
