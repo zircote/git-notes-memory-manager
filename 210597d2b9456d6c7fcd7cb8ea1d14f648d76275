@@ -136,3 +136,21 @@ tags:
 ## Critical (10 tasks)
 
 - [x] **CRIT-001**: Add double-checked locking to security module...
+
+---
+type: progress
+timestamp: '2025-12-26T02:42:58.084526+00:00'
+summary: '...service singletons'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...service singletons
+  - Files: `__init__.py`, `capture.py`, `recall.py`
+  - Status: **Already Implemented** - Core services use ServiceRegistry which has thread-safe double-checked locking
+
+---
+
+##...
