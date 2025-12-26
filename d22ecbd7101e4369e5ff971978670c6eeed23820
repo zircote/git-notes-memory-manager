@@ -318,3 +318,19 @@ tags:
 
 I see the issue - the block pattern matching code needs to be updated because the group indices changed. With the new pattern:
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:47.622195+00:00'
+summary: '...pattern matching code needs to be updated because the group indices changed.
+  With the new patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...pattern matching code needs to be updated because the group indices changed. With the new pattern:
+- Group 1: domain prefix (optional)
+- Group 2: namespace keyword
+- Group 3: title
+- Group...
