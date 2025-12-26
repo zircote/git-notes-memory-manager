@@ -27,6 +27,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "sentence-transformers>=3.0.0",
     "sqlite-vec>=0.1.6",
+    "detect-secrets>=1.4.0",
 ]
 
 [project.optional-dependencies]
@@ -139,6 +140,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "sqlite_vec.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "detect_secrets.*"
 ignore_missing_imports = true
 
 # pytest - Testing

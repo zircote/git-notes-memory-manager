@@ -4,7 +4,7 @@ format_version: "1.0.0"
 project_id: SPEC-2025-12-25-001
 project_name: "Secrets Filtering and Sensitive Data Protection"
 project_status: in-progress
-current_phase: 1
+current_phase: 3
 implementation_started: 2025-12-26T00:55:00Z
 last_session: 2025-12-26T00:55:00Z
 last_updated: 2025-12-26T00:55:00Z
@@ -31,11 +31,11 @@ This document tracks implementation progress against the spec plan.
 | 1.3 | Define Configuration | done | 2025-12-26 | 2025-12-26 | SecretsConfig with env/YAML loading |
 | 1.4 | Define Exceptions | done | 2025-12-26 | 2025-12-26 | SecretsFilteringError, BlockedContentError, etc. |
 | 1.5 | Create Factory Function | done | 2025-12-26 | 2025-12-26 | get_secrets_filtering_service() in main __init__.py |
-| 2.1 | Add detect-secrets Dependency | pending | | | |
-| 2.2 | Implement DetectSecretsAdapter | pending | | | |
-| 2.3 | Write DetectSecretsAdapter Tests | pending | | | |
-| 2.4 | Implement PIIDetector | pending | | | |
-| 2.5 | Write PIIDetector Tests | pending | | | |
+| 2.1 | Add detect-secrets Dependency | done | 2025-12-26 | 2025-12-26 | detect-secrets>=1.4.0, mypy override |
+| 2.2 | Implement DetectSecretsAdapter | done | 2025-12-26 | 2025-12-26 | Wraps detect-secrets with type mapping |
+| 2.3 | Write DetectSecretsAdapter Tests | done | 2025-12-26 | 2025-12-26 | 11 tests covering major patterns |
+| 2.4 | Implement PIIDetector | done | 2025-12-26 | 2025-12-26 | SSN, credit card (Luhn), phone patterns |
+| 2.5 | Write PIIDetector Tests | done | 2025-12-26 | 2025-12-26 | 24 tests including Luhn validation |
 | 3.1 | Implement Redactor | pending | | | |
 | 3.2 | Write Redactor Tests | pending | | | |
 | 3.3 | Implement AllowlistManager | pending | | | |
@@ -64,7 +64,7 @@ This document tracks implementation progress against the spec plan.
 | Phase | Name | Progress | Status |
 |-------|------|----------|--------|
 | 1 | Foundation | 100% | done |
-| 2 | Detection Layer | 0% | pending |
+| 2 | Detection Layer | 100% | done |
 | 3 | Integration | 0% | pending |
 | 4 | Commands & Audit | 0% | pending |
 | 5 | Testing & Docs | 0% | pending |
@@ -94,3 +94,15 @@ This document tracks implementation progress against the spec plan.
 - Added get_secrets_filtering_service() factory to main package
 - Created stub SecretsFilteringService for Phase 3 implementation
 - All quality checks passing (mypy, ruff)
+
+### 2025-12-26 - Phase 2 Complete
+- Added detect-secrets>=1.4.0 dependency
+- Implemented DetectSecretsAdapter wrapping Yelp's detect-secrets library
+  - Maps 27+ detector types to SecretType enum
+  - Deduplicates overlapping detections (prefers specific over entropy)
+  - SHA-256 hashing for allowlist matching
+- Implemented PIIDetector for SSN, credit cards, phone numbers
+  - Luhn algorithm validation for credit cards (reduces false positives)
+  - Lenient phone pattern for US formats
+  - Position-based deduplication
+- 35 tests in tests/security/ (11 detector + 24 PII)
