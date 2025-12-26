@@ -522,3 +522,15 @@ tags:
 2. `uv run --directory "$PLUGIN_ROOT" python3 ...`
 
 The fix is to remove the PLUGIN_ROOT variable and the `--directory` flag since we're using Python module...
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:49.358316+00:00'
+summary: The fix is likely to add `resource_to_telemetry_conversion` setting. Let
+  me update the collector ...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The fix is likely to add `resource_to_telemetry_conversion` setting. Let me update the collector config:
