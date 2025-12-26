@@ -846,3 +846,20 @@ tags:
    - `commands/metrics.md:76-77`
    - `commands/health.md:76-77`
    - `commands/traces.md:79-80`...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:57:12.286064+00:00'
+summary: "...vs expected filesystem paths\n\n4. **Three Solution Options**:\n   -\
+  \ **Option 1**: Quick glob pat..."
+tags:
+- auto-captured
+- pre-compact
+---
+
+...vs expected filesystem paths
+
+4. **Three Solution Options**:
+   - **Option 1**: Quick glob pattern fix
+   - **Option 2**: Python module imports (recommended)
+   - **Option 3**: Robust hybrid...
