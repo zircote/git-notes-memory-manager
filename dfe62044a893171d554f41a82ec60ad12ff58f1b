@@ -1473,3 +1473,18 @@ tags:
 
 ...they want ML extension points designed now but implemented later - this is a classic "seam" pattern where we design for future capabilities without implementing them.
 `────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:32:13.318610+00:00'
+summary: '...secrets from becoming searchable via vector similarity
+
+  The design follows the existing servic...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...secrets from becoming searchable via vector similarity
+
+The design follows the existing service pattern with `SecretsFilteringService` as a singleton, injected via `set_secrets_service()` method...
