@@ -71,3 +71,19 @@ tags:
 
 **Pattern repeated across 12+ commands:**
 - `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets.md`,...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:45:48.146165+00:00'
+summary: '...capture/*/`
+
+  3. **Actual path**: `~/.claude/plugins/cache/zircote-claude-marketplace/memory-cap...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...capture/*/`
+3. **Actual path**: `~/.claude/plugins/cache/zircote-claude-marketplace/memory-capture/`
+4. Pattern doesn't match → `PLUGIN_ROOT=""` (empty string)
+5. `uv run --directory ""` fails with "a value...
