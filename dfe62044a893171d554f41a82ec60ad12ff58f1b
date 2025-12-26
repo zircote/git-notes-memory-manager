@@ -775,3 +775,20 @@ tags:
 - **Memory overhead**: <50MB for pattern compilation
 - **Startup time**: Lazy initialization, no impact on import time
 - **Batch scanning**:...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:15.780561+00:00'
+summary: '...degradation**: Capture succeeds with warning if filtering fails'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...degradation**: Capture succeeds with warning if filtering fails
+
+### Maintainability
+
+- **Pattern updates**: Patterns in separate module for easy updates
+- **Test coverage**: >90% coverage...
