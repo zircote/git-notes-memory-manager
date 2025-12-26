@@ -32,3 +32,19 @@ tags:
             },
             "histograms": {
                 k: v for k, v in snapshot.get...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:33:52.317670+00:00'
+summary: '..."histograms": {'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.py
+---
+
+..."histograms": {
+                k: v for k, v in snapshot.get("histograms", {}).items() if pattern in k.lower()
+            },
+            "gauges": {
+                k: v for k, v in snapshot.get("gauges...
