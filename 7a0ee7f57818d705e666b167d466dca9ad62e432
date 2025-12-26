@@ -1,0 +1,27 @@
+---
+type: blockers
+timestamp: '2025-12-26T19:46:33.961244+00:00'
+summary: '▶ blocker ─────────────────────────────────────
+
+  OTEL collector rejecting metrics due to duplicate...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+OTEL collector rejecting metrics due to duplicate labels
+## Summary
+Found the issue: Prometheus exporter rejects metrics with duplicate label names. The error "duplicate label names in constant and variable labels for metric 'memory_memories_captured_total'" is logged at 17:51:02.
+
+## Root Cause
+The Python metrics are sending label attributes that duplicate built-in Prometheus labels. This causes the exporter to fail silently - metrics are received but not forwarded to Prometheus.
+
+## Error Log Evidence
+```
+failed to convert metric memories_captured_total: duplicate label names in constant and variable labels for metric "memory_memories_captured_total"
+failed to convert metric hook_executions_total: duplicate label names in constant and variable labels for metric "memory_hook_executions_total"
+```
+
+## Related Files
+- src/git_notes_memory/observability/metrics.py (label definitions)
+- docker/otel-collector-config.yaml (processor config)
