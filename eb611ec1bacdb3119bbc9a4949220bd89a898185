@@ -82,3 +82,22 @@ Approved the specification for implementation with formal approval recorded in R
 ## Related Files
 - docs/spec/active/2025-12-25-llm-subconsciousness/README.md:9-10
 - docs/spec/active/2025-12-25-llm-subconsciousness/CHANGELOG.md:7-9
+
+---
+type: decisions
+timestamp: '2025-12-26T02:45:41.885594+00:00'
+summary: '...persistence'
+tags:
+- auto-captured
+- post-tool-use
+- file:SUBCONSCIOUSNESS.md
+---
+
+...persistence
+
+- **Namespace**: decisions
+- **Confidence**: 85%
+- **Expires in**: 5 days
+
+> We decided to use PostgreSQL instead of SQLite for the production
+> database because we need concurrent...
