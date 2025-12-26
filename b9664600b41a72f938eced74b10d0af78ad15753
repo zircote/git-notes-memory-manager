@@ -1573,3 +1573,18 @@ tags:
 **Marketplace Structure Best Practice**:
 - `owner` identifies who maintains the marketplace
 - `metadata` contains marketplace-level...
+
+---
+type: patterns
+timestamp: '2025-12-26T15:48:36.394107+00:00'
+summary: '...(30s per memory) if embedding repeatedly fails'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...(30s per memory) if embedding repeatedly fails
+- [x] **Action:** Implement circuit breaker pattern similar to `llm_client.py`
+- [x] **Tests:** Add test for circuit breaker state transitions
+-...
