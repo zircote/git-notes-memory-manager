@@ -173,3 +173,18 @@ summary: '...(`▶ learned ───`) → just formatted text, not processed'
 **What WOULD work:**
 - If YOU write `[decision] Use sync_notes_with_remote` in your message, the hook captures it
 - My blocks are just visual...
+
+---
+type: decisions
+timestamp: '2025-12-26T19:54:38.520746+00:00'
+summary: '...input.'
+---
+
+...input.
+
+**Current design:**
+- UserPromptSubmit hook → processes **your** messages for markers like `[decision]`
+- My memory blocks (`▶ learned ───`) → just formatted text, not processed
+
+**What WOULD work:**
+-...
