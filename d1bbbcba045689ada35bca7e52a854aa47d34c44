@@ -263,3 +263,31 @@ Added comprehensive observability to embedding model loading and generation.
 - src/git_notes_memory/embedding.py:114-197 (load instrumentation)
 - src/git_notes_memory/embedding.py:199-244 (embed instrumentation)
 - src/git_notes_memory/embedding.py:246-322 (embed_batch instrumentation)
+
+---
+type: progress
+timestamp: '2025-12-26T03:23:15.318008+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.4: Instrumented IndexService wi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.4: Instrumented IndexService with observability
+## Summary
+Added observability to SQLite index operations (insert, vector search).
+
+## Changes Made
+- Added `@measure_duration("index_insert")` decorator to `insert()` method
+- Added `trace_operation("index.insert")` with namespace label
+- Added `index_inserts_total` counter with namespace label
+- Added `@measure_duration("index_search_vector")` decorator to `search_vector()`
+- Added `trace_operation("index.search_vector")` with k label
+- Added `index_searches_total` counter with search_type label
+- All 72 existing tests pass
+
+## Related Files
+- src/git_notes_memory/index.py:369-453 (insert instrumentation)
+- src/git_notes_memory/index.py:1005-1077 (search_vector instrumentation)
