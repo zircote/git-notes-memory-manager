@@ -4404,3 +4404,27 @@ Completed comprehensive `/claude-spec:deep-clean --focus MAXALL` with 9 parallel
 - src/git_notes_memory/capture.py:727-740
 - docs/ENV.md (created)
 - CHANGELOG.md:9-28
+
+---
+type: progress
+timestamp: '2025-12-26T16:20:38.540994+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated Claude Code hooks to enforce CI quality ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated Claude Code hooks to enforce CI quality checks
+## Summary
+Fixed hooks.json to match CI workflow and added security scanning.
+
+## Changes Made
+- Fixed paths from git-notes-memory-manager to git-notes-memory
+- Added security-scan-on-edit hook for bandit security checks
+- Updated CLAUDE.md to document all hooks with CI mapping
+
+## Related Files
+- .claude/hooks.json:1-58
+- CLAUDE.md:291-301
