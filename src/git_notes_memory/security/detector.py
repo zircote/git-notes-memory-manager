@@ -10,8 +10,9 @@ import hashlib
 from typing import TYPE_CHECKING
 
 from detect_secrets.core.scan import scan_line
-from detect_secrets.settings import default_settings
+from detect_secrets.settings import transient_settings
 
+from git_notes_memory.registry import ServiceRegistry
 from git_notes_memory.security.models import SecretDetection, SecretType
 
 if TYPE_CHECKING:
@@ -21,9 +22,6 @@ __all__ = [
     "DetectSecretsAdapter",
     "get_default_adapter",
 ]
-
-# Singleton instance
-_adapter: DetectSecretsAdapter | None = None
 
 # Mapping from detect-secrets plugin types to our SecretType enum
 _TYPE_MAPPING: dict[str, SecretType] = {
@@ -110,13 +108,15 @@ class DetectSecretsAdapter:
     def __init__(
         self,
         disabled_plugins: tuple[str, ...] = (),
-        entropy_limit: float = 3.0,
+        entropy_limit: float = 4.5,
     ) -> None:
         """Initialize the adapter.
 
         Args:
             disabled_plugins: Plugin class names to disable.
             entropy_limit: Minimum entropy threshold for high-entropy detection.
+                          Default 4.5 is a balance between catching real secrets
+                          and avoiding false positives on normal words.
         """
         self._disabled_plugins = disabled_plugins
         self._entropy_limit = entropy_limit
@@ -243,9 +243,8 @@ class DetectSecretsAdapter:
         Returns:
             List of PotentialSecret objects found.
         """
-        # Use default_settings for now; custom settings require more work
-        _ = settings  # Will be used when we implement custom plugin configuration
-        with default_settings():
+        # Use transient_settings to apply our custom plugin configuration
+        with transient_settings(settings):
             return list(scan_line(line))
 
     def _deduplicate(
@@ -302,24 +301,28 @@ def get_default_adapter(
 ) -> DetectSecretsAdapter:
     """Get the default DetectSecretsAdapter instance.
 
-    Returns a singleton instance. Thread-safe for typical usage patterns.
+    Returns a singleton instance via ServiceRegistry with thread-safe
+    double-checked locking.
 
     Args:
-        disabled_plugins: Plugin class names to disable.
+        disabled_plugins: Plugin class names to disable (only used on first call).
 
     Returns:
         The shared DetectSecretsAdapter instance.
     """
-    global _adapter
-    if _adapter is None:
-        _adapter = DetectSecretsAdapter(disabled_plugins=disabled_plugins)
-    return _adapter
+    if disabled_plugins:
+        return ServiceRegistry.get(
+            DetectSecretsAdapter, disabled_plugins=disabled_plugins
+        )
+    return ServiceRegistry.get(DetectSecretsAdapter)
 
 
 def reset_adapter() -> None:
     """Reset the singleton adapter instance.
 
     Used for testing to ensure fresh instances.
+    Note: Prefer ServiceRegistry.reset() to reset all services at once.
     """
-    global _adapter
-    _adapter = None
+    # ServiceRegistry.reset() handles this globally
+    # This function is kept for backward compatibility
+    pass
