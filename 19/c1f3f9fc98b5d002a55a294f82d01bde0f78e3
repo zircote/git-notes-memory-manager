@@ -427,3 +427,15 @@ tags:
 ---
 
 To be clear about my earlier error: **I was wrong when I said Phase 5 wasn't implemented.** The OTLP exporter code exists and works (582 lines in `otlp.py`). The PROGRESS.md falsely...
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:49.111789+00:00'
+summary: You're absolutely right - that was a mistake. The observability spec should
+  have been fully imple...
+tags:
+- auto-captured
+- pre-compact
+---
+
+You're absolutely right - that was a mistake. The observability spec should have been fully implemented, not partially. Let me check what was skipped and fix it:
