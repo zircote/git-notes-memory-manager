@@ -726,3 +726,20 @@ tags:
 | 009 | 2025-12-26 | Accepted | Adversarial detection with pattern matching first |
 | 010 | 2025-12-26 | Accepted | Proactive surfacing rate limiting |
 | 011...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:15.695241+00:00'
+summary: '...Metrics'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...Metrics
+
+| Metric | Target | Measurement Method |
+|--------|--------|-------------------|
+| Pattern detection coverage | >95% of common secret formats | Test against known secret formats |
+|...
