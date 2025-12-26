@@ -3538,3 +3538,18 @@ tags:
 ...different abstraction layers; duplication is intentional defense-in-depth
 - [x] QUAL-M-002: Pattern Scoring Complexity (`patterns.py:777-842`) ✅
   - **Status:** ACCEPTABLE - Method is well-documented,...
+
+---
+type: patterns
+timestamp: '2025-12-26T17:17:41.218971+00:00'
+summary: '...QUAL-M-001 | Validation Logic Duplicated | ✅ BY DESIGN (defense-in-depth)
+  |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...QUAL-M-001 | Validation Logic Duplicated | ✅ BY DESIGN (defense-in-depth) |
+| QUAL-M-002 | Pattern Scoring Complexity | ✅ ACCEPTABLE (TF-IDF, documented) |
+| QUAL-M-003 | 11-Parameter Method...
