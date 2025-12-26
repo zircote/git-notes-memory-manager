@@ -436,3 +436,15 @@ tags:
 ...the same attributes that Python was already setting. Removing it from the metrics pipeline fixed the conflict.
 
 **Next session's telemetry should work.** The Stop hook exports metrics at session...
+
+---
+type: progress
+timestamp: '2025-12-26T20:11:08.022678+00:00'
+summary: '...the telemetry issue you mentioned - are you still not seeing data in
+  Grafana even after we fix...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...the telemetry issue you mentioned - are you still not seeing data in Grafana even after we fixed the duplicate label issue? Let me check what might be happening:
