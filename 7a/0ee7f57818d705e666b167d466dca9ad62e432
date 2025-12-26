@@ -78,3 +78,23 @@ Investigated and filed comprehensive bug report for path resolution failures in 
 - commands/test-secret.md:87
 - commands/validate.md:69
 - https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T19:23:50.301053+00:00'
+summary: '...multi-worktree-sync-fix'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...multi-worktree-sync-fix
+status: draft
+created: 2025-12-26T14:23:00Z
+approved: null
+started: null
+completed: null
+expires: 2026-03-26T14:23:00Z
+superseded_by: null
+tags: [bug-fix, git-notes, hooks,...
