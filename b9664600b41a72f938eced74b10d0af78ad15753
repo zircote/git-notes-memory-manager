@@ -2480,3 +2480,19 @@ tags:
 
 ...tests to use `ServiceRegistry.unregister(UserCaptureService)` instead. The ServiceRegistry pattern provides `unregister()` for exactly this purpose—test isolation.
 `──────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T16:20:40.817606+00:00'
+summary: '...from missing arguments, but the registry logic is designed to create
+  instances directly.
+
+  The ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...from missing arguments, but the registry logic is designed to create instances directly.
+
+The pattern I'm using is wrong. I should check if it exists, and if not, create and register. The proper...
