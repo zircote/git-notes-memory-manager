@@ -411,3 +411,28 @@ Added observability to SQLite index operations (insert, vector search).
 ## Related Files
 - src/git_notes_memory/index.py:369-453 (insert instrumentation)
 - src/git_notes_memory/index.py:1005-1077 (search_vector instrumentation)
+
+---
+type: progress
+timestamp: '2025-12-26T02:48:41.781238+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.5: Instrumented GitOps with obs...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.5: Instrumented GitOps with observability
+## Summary
+Added observability to all git subprocess calls via the central `_run_git` wrapper.
+
+## Changes Made
+- Added `trace_operation("git.subprocess")` with command label
+- Added `git_command_duration_ms` histogram for timing
+- Added `git_commands_total` counter with command and status labels
+- Status labels: success, error, timeout
+- All 88 existing tests pass
+
+## Related Files
+- src/git_notes_memory/git_ops.py:201-317 (_run_git instrumentation)
