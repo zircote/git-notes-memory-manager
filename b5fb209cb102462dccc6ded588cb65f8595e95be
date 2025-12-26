@@ -62,3 +62,15 @@ tags:
 - Group 2: namespace keyword
 - Group 3: title
 - Group...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:02.554118+00:00'
+summary: '...verbose status section to include user memory statistics, following the
+  same domain-separated ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...verbose status section to include user memory statistics, following the same domain-separated pattern as the basic status. The verbose status needs to show both project and user memory breakdowns.
