@@ -25,3 +25,22 @@ summary: Now I understand the tracing system. The `get_completed_spans()` functi
 ---
 
 Now I understand the tracing system. The `get_completed_spans()` function returns the spans, but there's no...
+
+---
+type: learnings
+timestamp: '2025-12-26T04:26:10.501670+00:00'
+summary: Plugin cache version mismatch causes command failures
+---
+
+Plugin cache version mismatch causes command failures
+## Summary
+The `/memory:traces` command failed because the plugin cache contains v0.3.1 while the repo is at v0.12.0. The command template references `scripts/traces.py` which doesn't exist.
+
+## Technical Details
+- Plugin cache: `~/.claude/plugins/cache/git-notes-memory/memory-capture/0.3.1/`
+- Repo version: v0.12.0
+- Missing file: `scripts/traces.py`
+- Traces are in-memory only (rolling buffer in `_completed_spans`)
+
+## Related Files
+- src/git_notes_memory/observability/tracing.py:129-158
