@@ -7472,3 +7472,17 @@ tags:
 - [x] DB-M-001: Missing ANALYZE After Bulk Ops (`sync.py:272-372`) ✅
   - **Completed:** 2025-12-26 - Added `index.vacuum()` call after reindex (includes ANALYZE)
 - [x] DB-M-002:...
+
+---
+type: progress
+timestamp: '2025-12-26T17:02:58.032521+00:00'
+summary: '...ANALYZE)'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...ANALYZE)
+- [x] DB-M-002: JSON Extraction in ORDER BY (`capture_store.py:369-373`) ✅
+  - **Completed:** 2025-12-26 - Added `confidence_overall` column, denormalized from JSON; added index for...
