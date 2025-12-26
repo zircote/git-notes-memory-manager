@@ -761,3 +761,32 @@ Added `scrub_pii()` function to remove personally identifiable information from 
 ## Related Files
 - src/git_notes_memory/hooks/hook_utils.py:401-470
 - tests/test_hook_utils.py:738-912
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:26.240738+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Medium priority fixes (MED-004, MED-00...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Medium priority fixes (MED-004, MED-005, MED-007, MED-008, MED-011)
+## Summary
+Addressed key medium-priority issues from the code review for database optimization, resource management, code clarity, resilience, and compliance.
+
+## Changes Made
+- MED-004: Added ANALYZE statement in vacuum() method for query planner statistics
+- MED-005: Used context manager for SQLite connection to prevent leaks
+- MED-007: Extracted magic numbers to named constants in patterns.py
+- MED-008: Added stale lock detection (5-minute threshold) in capture.py
+- MED-011: Added consent mechanism for PreCompact auto-capture (GDPR compliance)
+
+## Related Files
+- src/git_notes_memory/index.py:1206-1219
+- src/git_notes_memory/hooks/session_start_handler.py:80-91
+- src/git_notes_memory/patterns.py:71-82, 349-352, 815-817, 1103-1106
+- src/git_notes_memory/capture.py:58-99
+- src/git_notes_memory/hooks/config_loader.py:171, 180-185, 459-463
