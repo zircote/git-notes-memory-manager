@@ -1921,3 +1921,15 @@ tags:
 `★ Insight ─────────────────────────────────────`
 The `CaptureStore` is well-implemented with all CRUD operations needed for Task 2.8:
 - `save()`, `get()`, `get_pending()` for queue_for_review...
+
+---
+type: progress
+timestamp: '2025-12-26T02:39:37.805320+00:00'
+summary: The background tasks may have completed quickly or failed. I have enough
+  context from the Cogniti...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The background tasks may have completed quickly or failed. I have enough context from the CognitiveSubstrate research documents and...
