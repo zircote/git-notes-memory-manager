@@ -13,3 +13,23 @@ tags:
 | Thread safety | Full thread-safe metrics | Concurrent hook invocations |
 
 ## Technical...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:00:15.721501+00:00'
+summary: '...timeout mechanism |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...timeout mechanism |
+| Service singletons | Inject metrics collector | Use existing factory pattern |
+
+## Dependencies
+
+### Internal Dependencies
+
+| Dependency | Type | Notes |
+|------------|------|--...
