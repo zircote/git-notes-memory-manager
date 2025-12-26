@@ -109,3 +109,19 @@ tags:
 ...Archive workflow (no hard deletes, audit trail preserved)                  |
 |    - Access pattern tracking                                                    |
 |...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:27.026558+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The codebase uses a versioned schema migration ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The codebase uses a versioned schema migration pattern:
+1. **SCHEMA_VERSION** constant tracks the current version
+2. **_MIGRATIONS** dict maps version...
