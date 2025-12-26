@@ -66,3 +66,20 @@ tags:
 
 #### Task 1.4: Update IndexService for Domain
 - **Description**: Extend IndexService...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:01:27.926768+00:00'
+summary: '...repo (existing behavior)'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...repo (existing behavior)
+  - [ ] Instance cached per domain
+- **Notes**: Consider singleton pattern per domain
+
+#### Task 2.2: Initialize User-Memories Bare Repo
+- **Description**: Create and...
