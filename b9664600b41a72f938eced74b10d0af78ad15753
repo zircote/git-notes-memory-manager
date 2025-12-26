@@ -9267,3 +9267,27 @@ Fixed Database MEDIUM findings DB-M-001 through DB-M-004 and RES-M-004
 - src/git_notes_memory/sync.py:427-431
 - src/git_notes_memory/subconsciousness/capture_store.py:80,100-103,184,218-266,304-305,377-398
 - src/git_notes_memory/index/service.py:122-123
+
+---
+type: progress
+timestamp: '2025-12-26T17:20:07.463677+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed RES-M-001 (User Index Race) and RES-M-005 ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed RES-M-001 (User Index Race) and RES-M-005 (File Memory Exhaustion)
+## Summary
+Fixed two resilience issues in RecallService to prevent thread-safety bugs and memory exhaustion.
+
+## Changes Made
+- Added `threading.Lock` with double-checked locking for `_get_user_index()`
+- Added memory limits: 50 files max, 512KB per file, 5MB total content
+
+## Related Files
+- src/git_notes_memory/recall.py:103-105 (lock initialization)
+- src/git_notes_memory/recall.py:370-392 (_get_user_index with lock)
+- src/git_notes_memory/recall.py:883-960 (_load_files_with_git_ops with limits)
