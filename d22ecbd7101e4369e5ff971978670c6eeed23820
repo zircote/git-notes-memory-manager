@@ -156,3 +156,19 @@ tags:
 
 `★ Insight ─────────────────────────────────────`
 The CaptureService follows the singleton pattern via `ServiceRegistry.get()`. It already accepts a `git_ops` parameter and lazily creates one...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.144850+00:00'
+summary: '...────────────────────────`
+
+  The multi-domain search architecture follows a **parallel query + me...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...────────────────────────`
+The multi-domain search architecture follows a **parallel query + merge** pattern:
+1. When `domain=None`, we query both project and user indexes in parallel
+2. Results are merged...
