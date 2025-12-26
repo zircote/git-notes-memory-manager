@@ -501,3 +501,15 @@ tags:
 ...exists but the Python code doesn't export to OTLP yet.
 
 From the retrospective notes, Phase 4 completed metrics collection and CLI, but Phase 5 (OTLP export) was explicitly skipped. So when you're...
+
+---
+type: progress
+timestamp: '2025-12-26T20:11:08.323728+00:00'
+summary: '...elegant because it leverages existing infrastructure. The `sync_notes_with_remote()`
+  method wa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...elegant because it leverages existing infrastructure. The `sync_notes_with_remote()` method was implemented for Issue #18 and already handles the fetch→merge→push workflow correctly. The fix is literally...
