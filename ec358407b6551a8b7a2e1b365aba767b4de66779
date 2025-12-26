@@ -490,3 +490,28 @@ The code DOES push metrics to OTLP—but only at specific points:
 - src/git_notes_memory/observability/metrics.py:485-502 (singleton pattern)
 - src/git_notes_memory/observability/exporters/otlp.py:552-565 (push function)
 - src/git_notes_memory/hooks/stop_handler.py:541 (Stop hook export)
+
+---
+type: learnings
+timestamp: '2025-12-26T21:16:11.212273+00:00'
+summary: OTel Collector's prometheus exporter doesn't accumulate OTLP pushed metrics
+---
+
+OTel Collector's prometheus exporter doesn't accumulate OTLP pushed metrics
+## Summary
+The `prometheus` exporter in OTel Collector exposes metrics for scraping but **doesn't retain** metrics pushed via OTLP. They flow through and are gone.
+
+## Architecture Issue
+```
+OTLP Push → OTel Collector → prometheusremotewrite exporter → Prometheus /api/v1/write
+                           ↘ prometheus exporter (port 8889) → EMPTY (no accumulation)
+```
+
+## Root Cause
+1. Prometheus config has `remote_write: []` (empty)
+2. Prometheus needs `--web.enable-remote-write-receiver` flag
+3. The `prometheus` exporter on 8889 is empty because it doesn't accumulate pushed data
+
+## Related Files
+- docker/otel-collector-config.yaml:47-48 (prometheusremotewrite)
+- docker/prometheus/prometheus.yml (remote_write config)
