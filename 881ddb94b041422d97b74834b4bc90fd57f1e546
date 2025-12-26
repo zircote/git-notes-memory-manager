@@ -182,3 +182,22 @@ tags:
 ---
 
 The parallel research agents completed already. Let me proceed by reading the additional key files directly to complete my understanding:
+
+---
+type: progress
+timestamp: '2025-12-26T00:56:02.798928+00:00'
+summary: '...**Impact**: Knowledge loss, repetitive context, slower ramp-up, fragmented
+  learning.
+
+  ### Prop...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**Impact**: Knowledge loss, repetitive context, slower ramp-up, fragmented learning.
+
+### Proposed Solution
+
+Implement two-domain memory storage:
+- **User domain**: Global memories at `~/.local/share/memory-plugin...
