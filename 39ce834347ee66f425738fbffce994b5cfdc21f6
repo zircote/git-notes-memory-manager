@@ -271,3 +271,21 @@ tags:
 1. **Root Cause Analysis**: Hardcoded path pattern `git-notes-memory/` doesn't match marketplace install path `zircote-claude-marketplace/`
 
 2....
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:18.381400+00:00'
+summary: '...`zircote-claude-marketplace/`
+
+  2. **Affected Files**: All 12+ command files with the same brok...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`zircote-claude-marketplace/`
+
+2. **Affected Files**: All 12+ command files with the same broken pattern:
+   - `commands/metrics.md:76-77`
+   - `commands/health.md:76-77`
+   - `commands/traces.md:79-80`...
