@@ -196,3 +196,29 @@ The observability pipeline IS functioning correctly. Metrics pushed via OTLP rea
 ## Related Files
 - docker/otel-collector-config.yaml:53-55 (prometheus exporter with `namespace: memory`)
 - src/git_notes_memory/observability/exporters/otlp.py:552 (export function)
+
+---
+type: progress
+timestamp: '2025-12-26T21:08:39.544445+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed CLAUDE_PLUGIN_ROOT fallback for all slash ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed CLAUDE_PLUGIN_ROOT fallback for all slash commands
+## Summary
+Added bash parameter expansion fallback (`${CLAUDE_PLUGIN_ROOT:-.}`) to all 14 command files. When `CLAUDE_PLUGIN_ROOT` is not set (e.g., when developing from source repo), commands now fall back to current directory instead of passing empty string to `--directory` flag.
+
+## Changes Made
+- Updated 14 command files with `${CLAUDE_PLUGIN_ROOT:-.}` pattern
+- Fixes `uv run --directory` error when running from source checkout
+- Maintains compatibility with installed plugin (where CLAUDE_PLUGIN_ROOT is set)
+
+## Related Files
+- commands/metrics.md:77
+- commands/audit-log.md, capture.md, health.md, recall.md, review.md
+- commands/scan-secrets.md, search.md, secrets-allowlist.md
+- commands/status.md, sync.md, test-secret.md, traces.md, validate.md
