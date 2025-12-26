@@ -874,3 +874,23 @@ tags:
   - ADR-009: Adversarial detection with pattern matching first
   - ADR-010: Proactive surfacing rate limiting
   - ADR-011: Meta-memory for...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.067800+00:00'
+summary: '...Claude Code hooks with strict timeout constraints.'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...Claude Code hooks with strict timeout constraints.
+
+### Decision
+
+Use Python's `extras_require` pattern to make observability dependencies optional:
+
+```toml
+[project.optional-dependencies]
+monitoring...
