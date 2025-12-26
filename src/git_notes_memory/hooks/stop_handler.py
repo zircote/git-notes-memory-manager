@@ -470,8 +470,9 @@ def main() -> None:
             elif not sync_result.get("success"):
                 logger.warning("Index sync failed: %s", sync_result.get("error"))
 
-        # Push notes to remote if enabled (opt-in via env var)
-        # This ensures local memories are shared with collaborators
+        # Sync notes with remote if enabled (opt-in via env var)
+        # Uses fetch→merge→push to avoid race conditions in multi-worktree
+        # environments (Issue #28: prevents non-fast-forward push failures)
         if config.stop_push_remote:
             cwd = input_data.get("cwd")
             if cwd:
@@ -479,12 +480,15 @@ def main() -> None:
                     from git_notes_memory.git_ops import GitOps
 
                     git_ops = GitOps(repo_path=cwd)
-                    if git_ops.push_notes_to_remote():
-                        logger.debug("Pushed notes to remote on session stop")
+                    sync_result = git_ops.sync_notes_with_remote(push=True)
+                    if any(sync_result.values()):
+                        logger.debug(
+                            "Synced notes with remote on session stop: %s", sync_result
+                        )
                     else:
-                        logger.debug("Push to remote failed (will retry next session)")
+                        logger.debug("Sync with remote had no changes")
                 except Exception as e:
-                    logger.debug("Remote push on stop skipped: %s", e)
+                    logger.debug("Remote sync on stop skipped: %s", e)
 
         # Push user memories to remote if enabled (opt-in via env var)
         if config.stop_push_user_remote:
@@ -550,7 +554,9 @@ def main() -> None:
                             "event": "session_end",
                             "memories_captured": len(captured),
                             "namespaces": ", ".join(
-                                sorted({m.get("namespace", "unknown") for m in captured})
+                                sorted(
+                                    {m.get("namespace", "unknown") for m in captured}
+                                )
                             ),
                         },
                     )
