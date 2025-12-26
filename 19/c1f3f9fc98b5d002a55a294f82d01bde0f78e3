@@ -24,3 +24,33 @@ The test metric `memory_test_counter_total` successfully reached Prometheus with
 
 ## Related Files
 - docker/otel-collector-config.yaml:88,93,98
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:47.895122+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Telemetry pipeline verified working end-to-end
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Telemetry pipeline verified working end-to-end
+## Summary
+Simulated capture metrics are now visible in Prometheus. The OTEL duplicate label fix is confirmed working.
+
+## Metrics Now Available
+- `memory_memories_captured_total{namespace="decisions", status="success"}`: 1
+- `memory_memories_captured_total{namespace="learnings", status="success"}`: 1
+- `memory_hook_executions_total{hook="SessionStart", status="success"}`: 1
+- `memory_capture_duration_ms{namespace="decisions"}`: 45.2ms
+
+## Verification
+Export returned True and Prometheus query shows the data.
+
+## Related Files
+- src/git_notes_memory/observability/metrics.py
+- docker/otel-collector-config.yaml
