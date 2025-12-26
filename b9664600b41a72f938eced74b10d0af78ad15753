@@ -1192,3 +1192,14 @@ tags:
 **Marketplace Structure Best Practice**:
 - `owner` identifies who maintains the marketplace
 - `metadata` contains marketplace-level...
+
+---
+type: patterns
+timestamp: '2025-12-26T15:09:27.820484+00:00'
+summary: 'Let me check the circuit_breaker test file to understand the testing pattern:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Let me check the circuit_breaker test file to understand the testing pattern:
