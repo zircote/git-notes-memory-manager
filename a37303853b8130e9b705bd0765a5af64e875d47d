@@ -1,0 +1,12 @@
+---
+type: patterns
+timestamp: '2025-12-26T14:39:06.499017+00:00'
+summary: '...legitimate CRITICAL catch - shell string interpolation (`''$VAR''`) enables
+  escape attacks'
+---
+
+...legitimate CRITICAL catch - shell string interpolation (`'$VAR'`) enables escape attacks
+
+**Pattern for Lazy Imports:**
+The `__getattr__` pattern for deferred imports is common in Python to:
+-...
