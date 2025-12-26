@@ -89,3 +89,22 @@ tags:
 EXAMPLES
     /memory:metrics
     /memory:metrics --format=json...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:38:37.306629+00:00'
+summary: '...text|json|prometheus` - Output format (default: text)'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.md
+---
+
+...text|json|prometheus` - Output format (default: text)
+- `--filter=<pattern>` - Filter metrics by name pattern
+
+</step>
+
+<step number="2" name="Collect and Display Metrics">
+
+**Execute the metrics collection**:...
