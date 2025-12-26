@@ -2234,3 +2234,23 @@ tags:
 ---
 
 ...I'm using is wrong. I should check if it exists, and if not, create and register. The proper pattern should use the `try...KeyError` approach or a different mechanism. Let me look at how other...
+
+---
+type: patterns
+timestamp: '2025-12-26T16:20:39.883709+00:00'
+summary: '...Root Cause Analysis
+
+  **The issue occurs due to a mismatch between the expected plugin path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
