@@ -2609,3 +2609,19 @@ Cleaned up and organized observability environment variables.
 
 ## Related Files
 - ~/.bash_profile:163-182
+
+---
+type: progress
+timestamp: '2025-12-26T15:48:36.418211+00:00'
+summary: '...similar to `llm_client.py`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...similar to `llm_client.py`
+- [x] **Tests:** Add test for circuit breaker state transitions
+- **Completed:** 2025-12-26 - Added `EmbeddingCircuitBreaker` class with CLOSED/OPEN/HALF_OPEN states
+
+###...
