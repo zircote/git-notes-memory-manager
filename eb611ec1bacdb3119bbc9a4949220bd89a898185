@@ -663,3 +663,19 @@ tags:
         # IP addresses are NOT scrubbed (not in our pattern list)
         assert "192.168.1.1" in result
         assert "submitted request from" in result...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:20:37.018796+00:00'
+summary: '...)'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_hook_utils.py
+---
+
+...)
+
+        # Check that API key was scrubbed in logged output
+        # The key=value pattern matches [REDACTED:secret]
+        info_calls = " ".join(str(c) for c in mock_logger.info.call_args_list...
