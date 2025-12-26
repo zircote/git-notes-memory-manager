@@ -318,3 +318,33 @@ Created complete specification for multi-worktree sync fix bug (GitHub Issue #28
 - docs/spec/active/2025-12-26-multi-worktree-sync-fix/IMPLEMENTATION_PLAN.md
 - docs/spec/active/2025-12-26-multi-worktree-sync-fix/DECISIONS.md
 - docs/spec/active/2025-12-26-multi-worktree-sync-fix/README.md
+
+---
+type: progress
+timestamp: '2025-12-26T20:11:07.808975+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Verified OTLP telemetry pipeline is fully functi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Verified OTLP telemetry pipeline is fully functional
+## Summary
+The telemetry export pipeline works end-to-end. Test metrics successfully exported to Prometheus via OTEL Collector.
+
+## Findings
+- **Test metrics in Prometheus**:
+  - `verify_pipeline_counter_total` = 1
+  - `verify_pipeline_gauge` = 99
+  - `verify_pipeline_histogram_sum` = 42.5
+- **Pipeline flow confirmed**: Python → OTLP HTTP → Collector → Prometheus
+- **Real metrics empty** because Stop hook hasn't run yet (exports at session end)
+
+## Root Cause
+Metrics are only exported when a session ends (Stop hook). Since this session is still active, real capture/hook metrics haven't been pushed to Prometheus yet.
+
+## Related Files
+- src/git_notes_memory/observability/exporters/otlp.py:422-479 (export_metrics)
+- src/git_notes_memory/hooks/stop_handler.py:505-538 (OTLP export trigger)
