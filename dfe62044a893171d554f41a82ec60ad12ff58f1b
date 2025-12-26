@@ -1143,3 +1143,20 @@ tags:
   - ADR-006: Decorator pattern for timing
   - ADR-007: Prometheus histogram bucket configuration
   - ADR-008: Graceful degradation...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:08.549354+00:00'
+summary: '...timing'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...timing
+  - ADR-007: Prometheus histogram bucket configuration
+  - ADR-008: Graceful degradation pattern
+  - ADR-009: Command naming convention
+
+- Codebase analysis and research findings (RESEARCH_NOTES.md...
