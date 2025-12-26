@@ -20,3 +20,23 @@ tags:
 ### Available Metrics
 
 | Metric | Type | Description...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:37:10.600797+00:00'
+summary: '...methods use try/except with explicit `rollback()` on failure.'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_REPORT.md
+---
+
+...methods use try/except with explicit `rollback()` on failure.
+
+**Status**: No fix needed - pattern is correct.
+
+---
+
+### CRIT-004: SIGALRM Thread Safety (Acceptable)
+
+**Finding**: "Using signal.SIGALRM...
