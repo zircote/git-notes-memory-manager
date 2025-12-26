@@ -2701,3 +2701,17 @@ tags:
   - **Completed:** 2025-12-26 - Added `_sanitize_error_message()` helper to both Anthropic and OpenAI providers
 
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T15:48:54.145178+00:00'
+summary: '...`src/git_notes_memory/capture.py:152-163`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...`src/git_notes_memory/capture.py:152-163`
+  - Action: Use atomic lock acquisition pattern
+  - **Completed:** 2025-12-26 - Removed unsafe mtime-based file deletion; rely on flock auto-release and PID...
