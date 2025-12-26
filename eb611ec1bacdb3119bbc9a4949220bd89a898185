@@ -1906,3 +1906,18 @@ tags:
 ---
 
 The task may have completed quickly. Let me directly read the key files in the codebase to understand the patterns:
+
+---
+type: progress
+timestamp: '2025-12-26T02:39:37.755105+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The `CaptureStore` is well-implemented with all...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The `CaptureStore` is well-implemented with all CRUD operations needed for Task 2.8:
+- `save()`, `get()`, `get_pending()` for queue_for_review...
