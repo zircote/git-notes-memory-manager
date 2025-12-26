@@ -187,3 +187,19 @@ tags:
 
 - [x] **HIGH-017**: Standardize docstrings to Google style
   - Files:...
+
+---
+type: progress
+timestamp: '2025-12-26T02:42:58.143331+00:00'
+summary: '...context manager for lock file'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...context manager for lock file
+  - File: `src/git_notes_memory/capture.py`
+  - Status: **Already Implemented** - `_acquire_lock` is a context manager
+
+- [x] **HIGH-020**: Add path validation in config...
