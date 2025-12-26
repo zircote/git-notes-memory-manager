@@ -8,3 +8,14 @@ tags:
 ---
 
 test content
+
+---
+type: learnings
+timestamp: '2025-12-26T00:59:41.064057+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
