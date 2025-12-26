@@ -20,7 +20,7 @@ import os
 import subprocess
 import time
 from collections.abc import Iterator
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -43,6 +43,7 @@ from git_notes_memory.note_parser import serialize_note
 if TYPE_CHECKING:
     from git_notes_memory.embedding import EmbeddingService
     from git_notes_memory.index import IndexService
+    from git_notes_memory.security.service import SecretsFilteringService
 
 __all__ = [
     "CaptureService",
@@ -201,8 +202,9 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
                 fcntl.flock(fd, fcntl.LOCK_UN)
                 os.close(fd)
                 logger.debug("Released capture lock: %s", lock_path)
-            except OSError:
-                pass  # Best effort cleanup
+            except OSError as e:
+                # Log warning rather than silently ignoring - helps debug lock issues
+                logger.warning("Failed to release capture lock %s: %s", lock_path, e)
 
 
 # =============================================================================
@@ -305,6 +307,7 @@ class CaptureService:
         git_ops: GitOps | None = None,
         index_service: IndexService | None = None,
         embedding_service: EmbeddingService | None = None,
+        secrets_service: SecretsFilteringService | None = None,
         repo_path: Path | None = None,
     ) -> None:
         """Initialize the capture service.
@@ -316,12 +319,15 @@ class CaptureService:
                 are captured but not indexed.
             embedding_service: EmbeddingService for embeddings. If None,
                 memories are indexed without embeddings.
+            secrets_service: SecretsFilteringService for filtering sensitive
+                data. If None, content is captured without filtering.
             repo_path: Path to the git repository. Only used if git_ops
                 is None.
         """
         self._git_ops = git_ops
         self._index_service = index_service
         self._embedding_service = embedding_service
+        self._secrets_service: SecretsFilteringService | None = secrets_service
         self._repo_path = repo_path
         self._lock_path = get_lock_path()
 
@@ -356,6 +362,18 @@ class CaptureService:
         """
         self._embedding_service = service
 
+    @property
+    def secrets_service(self) -> SecretsFilteringService | None:
+        """Get the SecretsFilteringService instance."""
+        return self._secrets_service
+
+    def set_secrets_service(self, service: SecretsFilteringService) -> None:
+        """Set the secrets filtering service after initialization.
+
+        Useful for lazy initialization or dependency injection.
+        """
+        self._secrets_service = service
+
     # =========================================================================
     # Input Validation (extracted for ARCH-007)
     # =========================================================================
@@ -379,6 +397,63 @@ class CaptureService:
         _validate_namespace(namespace)
         _validate_summary(summary)
         _validate_content(content)
+
+    def _filter_content(
+        self,
+        summary: str,
+        content: str,
+        namespace: str,
+    ) -> tuple[str, str, list[str]]:
+        """Filter secrets from summary and content.
+
+        Applies secrets filtering if a SecretsFilteringService is configured.
+        Raises BlockedContentError if content contains blocked secrets.
+
+        Args:
+            summary: The one-line summary to filter.
+            content: The full content to filter.
+            namespace: Memory namespace for allowlist scoping.
+
+        Returns:
+            Tuple of (filtered_summary, filtered_content, warnings).
+
+        Raises:
+            BlockedContentError: If BLOCK strategy is configured and secrets found.
+        """
+        if self._secrets_service is None or not self._secrets_service.enabled:
+            return summary, content, []
+
+        warnings: list[str] = []
+
+        # Filter summary
+        summary_result = self._secrets_service.filter(
+            summary,
+            source="capture_summary",
+            namespace=namespace,
+        )
+        filtered_summary = summary_result.content
+        if summary_result.warnings:
+            warnings.extend(summary_result.warnings)
+        if summary_result.had_secrets:
+            warnings.append(
+                f"Summary contained {summary_result.detection_count} secret(s), redacted"
+            )
+
+        # Filter content
+        content_result = self._secrets_service.filter(
+            content,
+            source="capture_content",
+            namespace=namespace,
+        )
+        filtered_content = content_result.content
+        if content_result.warnings:
+            warnings.extend(content_result.warnings)
+        if content_result.had_secrets:
+            warnings.append(
+                f"Content contained {content_result.detection_count} secret(s), redacted"
+            )
+
+        return filtered_summary, filtered_content, warnings
 
     def _build_front_matter(
         self,
@@ -485,6 +560,12 @@ class CaptureService:
         # Validate input (extracted method for ARCH-007)
         self._validate_capture_input(namespace, summary, content)
 
+        # Filter secrets from summary and content
+        # This may raise BlockedContentError if BLOCK strategy is configured
+        filtered_summary, filtered_content, filter_warnings = self._filter_content(
+            summary, content, namespace
+        )
+
         # Normalize tags
         tags_tuple = tuple(tags) if tags else ()
         relates_tuple = tuple(relates_to) if relates_to else ()
@@ -493,9 +574,10 @@ class CaptureService:
         timestamp = datetime.now(UTC)
 
         # Build front matter (extracted method for ARCH-007)
+        # Use filtered_summary in front matter
         front_matter = self._build_front_matter(
             namespace=namespace,
-            summary=summary,
+            summary=filtered_summary,
             timestamp=timestamp,
             spec=spec,
             phase=phase,
@@ -505,14 +587,15 @@ class CaptureService:
         )
 
         # Serialize to YAML front matter format
-        note_content = serialize_note(front_matter, content)
+        # Use filtered_content in note body
+        note_content = serialize_note(front_matter, filtered_content)
 
         # Capture with or without locking
         if skip_lock:
             return self._do_capture(
                 namespace=namespace,
-                summary=summary,
-                content=content,
+                summary=filtered_summary,
+                content=filtered_content,
                 note_content=note_content,
                 timestamp=timestamp,
                 domain=domain,
@@ -522,13 +605,14 @@ class CaptureService:
                 status=status,
                 relates_to=relates_tuple,
                 commit=commit,
+                filter_warnings=filter_warnings,
             )
 
         with _acquire_lock(self._lock_path):
             return self._do_capture(
                 namespace=namespace,
-                summary=summary,
-                content=content,
+                summary=filtered_summary,
+                content=filtered_content,
                 note_content=note_content,
                 timestamp=timestamp,
                 domain=domain,
@@ -538,6 +622,7 @@ class CaptureService:
                 status=status,
                 relates_to=relates_tuple,
                 commit=commit,
+                filter_warnings=filter_warnings,
             )
 
     def _do_capture(
@@ -555,10 +640,14 @@ class CaptureService:
         status: str,
         relates_to: tuple[str, ...],
         commit: str,
+        filter_warnings: list[str] | None = None,
     ) -> CaptureResult:
         """Execute the capture operation (called within lock).
 
         Internal method that performs the actual capture work.
+
+        Args:
+            filter_warnings: Optional list of warnings from secrets filtering.
         """
         # Get the appropriate GitOps instance for this domain
         if domain == Domain.USER:
@@ -618,7 +707,7 @@ class CaptureService:
 
         # Try to index (graceful degradation)
         indexed = False
-        warning: str | None = None
+        warnings: list[str] = list(filter_warnings) if filter_warnings else []
 
         if self._index_service is not None:
             try:
@@ -630,7 +719,7 @@ class CaptureService:
                         embed_text = f"{summary}\n\n{content}"
                         embedding = self._embedding_service.embed(embed_text)
                     except Exception as e:
-                        warning = f"Embedding failed: {e}"
+                        warnings.append(f"Embedding failed: {e}")
                         logger.warning("Embedding generation failed: %s", e)
 
                 # Insert into index
@@ -639,17 +728,17 @@ class CaptureService:
                 logger.debug("Indexed memory: %s", memory_id)
 
             except Exception as e:
-                if warning:
-                    warning = f"{warning}; Indexing failed: {e}"
-                else:
-                    warning = f"Indexing failed: {e}"
+                warnings.append(f"Indexing failed: {e}")
                 logger.warning("Indexing failed for %s: %s", memory_id, e)
+
+        # Combine all warnings into a single string (or None if no warnings)
+        combined_warning = "; ".join(warnings) if warnings else None
 
         return CaptureResult(
             success=True,
             memory=memory,
             indexed=indexed,
-            warning=warning,
+            warning=combined_warning,
         )
 
     # =========================================================================
@@ -1099,8 +1188,10 @@ def get_default_service() -> CaptureService:
     service = ServiceRegistry.get(CaptureService)
 
     # Ensure git notes sync is configured on first use (best effort)
-    with suppress(Exception):
+    try:
         service.git_ops.ensure_sync_configured()
+    except Exception as e:
+        logger.debug("Git notes sync auto-configuration skipped: %s", e)
 
     return service
 

@@ -15,6 +15,8 @@ __all__ = [
     # Error Categories
     "ErrorCategory",
     # Exception Classes
+    "MemoryPluginError",
+    # Backward compatibility alias (deprecated - avoid using in new code)
     "MemoryError",
     "StorageError",
     "MemoryIndexError",
@@ -65,11 +67,15 @@ class ErrorCategory(Enum):
 # =============================================================================
 
 
-class MemoryError(Exception):
-    """Base exception for memory system errors.
+class MemoryPluginError(Exception):
+    """Base exception for memory plugin errors.
 
     All exceptions include a category, message, and recovery action
     to help users understand and resolve issues.
+
+    Note:
+        Renamed from 'MemoryError' to avoid confusion with Python's builtin
+        MemoryError (raised on OOM). The old name is kept as a deprecated alias.
 
     Attributes:
         category: Error category for grouping related errors.
@@ -83,7 +89,7 @@ class MemoryError(Exception):
         message: str,
         recovery_action: str,
     ) -> None:
-        """Initialize a MemoryError.
+        """Initialize a MemoryPluginError.
 
         Args:
             category: The error category.
@@ -100,12 +106,16 @@ class MemoryError(Exception):
         return f"[{self.category.value}] {self.message}\n-> {self.recovery_action}"
 
 
+# Backward compatibility alias (deprecated - use MemoryPluginError in new code)
+MemoryError = MemoryPluginError
+
+
 # =============================================================================
 # Specific Exception Classes
 # =============================================================================
 
 
-class StorageError(MemoryError):
+class StorageError(MemoryPluginError):
     """Git notes operation failed.
 
     Common causes:
@@ -125,7 +135,7 @@ class StorageError(MemoryError):
         super().__init__(ErrorCategory.STORAGE, message, recovery_action)
 
 
-class MemoryIndexError(MemoryError):
+class MemoryIndexError(MemoryPluginError):
     """SQLite or sqlite-vec operation failed.
 
     Common causes:
@@ -147,7 +157,7 @@ class MemoryIndexError(MemoryError):
         super().__init__(ErrorCategory.INDEX, message, recovery_action)
 
 
-class EmbeddingError(MemoryError):
+class EmbeddingError(MemoryPluginError):
     """Embedding generation failed.
 
     Common causes:
@@ -167,7 +177,7 @@ class EmbeddingError(MemoryError):
         super().__init__(ErrorCategory.EMBEDDING, message, recovery_action)
 
 
-class ParseError(MemoryError):
+class ParseError(MemoryPluginError):
     """Note content parsing failed.
 
     Common causes:
@@ -187,7 +197,7 @@ class ParseError(MemoryError):
         super().__init__(ErrorCategory.PARSE, message, recovery_action)
 
 
-class CaptureError(MemoryError):
+class CaptureError(MemoryPluginError):
     """Memory capture operation failed.
 
     Common causes:
@@ -206,7 +216,7 @@ class CaptureError(MemoryError):
         super().__init__(ErrorCategory.CAPTURE, message, recovery_action)
 
 
-class RecallError(MemoryError):
+class RecallError(MemoryPluginError):
     """Memory recall/retrieval operation failed.
 
     Common causes:
@@ -226,7 +236,7 @@ class RecallError(MemoryError):
         super().__init__(ErrorCategory.RECALL, message, recovery_action)
 
 
-class ValidationError(MemoryError):
+class ValidationError(MemoryPluginError):
     """Input validation failed.
 
     Common causes:
