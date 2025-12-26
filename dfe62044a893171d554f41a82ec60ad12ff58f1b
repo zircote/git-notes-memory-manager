@@ -256,3 +256,23 @@ tags:
     # WHERE
     source_location: str      # File path or capture source
     memory_namespace...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.049566+00:00'
+summary: '....memory-secrets-allowlist.yaml'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+....memory-secrets-allowlist.yaml
+version: 1
+
+# Global allowlist patterns
+global:
+  patterns:
+    - pattern: "AKIA.*EXAMPLE"
+      reason: "Documentation example"
+      added_by: "user@example.com"...
