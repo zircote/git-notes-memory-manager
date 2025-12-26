@@ -8403,3 +8403,18 @@ tags:
 - [x] QUAL-M-007: Type Annotation Mismatches (`patterns.py:525-526`) ✅
   - **Completed:** 2025-12-26 - Fixed `dict` to `defaultdict` type annotation
 - [x] QUAL-M-008: Config Loader...
+
+---
+type: progress
+timestamp: '2025-12-26T17:15:27.003574+00:00'
+summary: '...behavior compliance'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...behavior compliance
+- [x] PROMPT-M-002: Unsafe JSON Parsing (`implicit_capture_agent.py`) ✅
+  - **Completed:** 2025-12-26 - Added `_safe_float()` helper for parsing confidence data; wrapped in try-except
+-...
