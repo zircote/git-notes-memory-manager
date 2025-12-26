@@ -253,6 +253,33 @@ def capture_service(tmp_path, monkeypatch):
 | `SECRETS_FILTER_AUDIT_ENABLED` | Enable audit logging | `true` |
 | `SECRETS_FILTER_AUDIT_DIR` | Audit log directory | `~/.local/share/memory-plugin/audit/` |
 
+### Observability Configuration (OTLP)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MEMORY_PLUGIN_OTLP_ENDPOINT` | OTLP HTTP endpoint (e.g., `http://localhost:4318`) | (none) |
+| `MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL` | Allow internal/localhost endpoints (SEC-H-001 SSRF override) | `false` |
+
+To enable observability with the local Docker stack:
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc for persistence
+export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
+```
+
+**Note**: The `ALLOW_INTERNAL` flag is required because the OTLP exporter has SSRF protection (SEC-H-001) that blocks localhost/private IPs by default. This is a security feature for production environments.
+
+Start the observability stack with:
+```bash
+cd docker && docker compose up -d
+```
+
+Access dashboards:
+- **Grafana**: http://localhost:3000 (admin/admin) - Memory Operations and Hook Performance dashboards
+- **Prometheus**: http://localhost:9090 - Direct metrics queries
+- **Tempo traces**: Access via Grafana → Explore → Tempo datasource (no direct web UI)
+
 ### Remote Sync (Team Collaboration)
 
 For team environments where multiple developers share memories:

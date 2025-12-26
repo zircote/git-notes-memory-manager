@@ -32,6 +32,11 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Filter metrics by name pattern",
     )
+    parser.add_argument(
+        "--export",
+        action="store_true",
+        help="Export metrics to OTLP endpoint (requires MEMORY_PLUGIN_OTLP_ENDPOINT)",
+    )
     return parser.parse_args()
 
 
@@ -40,11 +45,41 @@ def main() -> int:
     args = parse_args()
     format_type = args.format
     filter_pattern = args.filter
+    do_export = args.export
 
     # Import after parsing to avoid slow imports if --help is used
     from git_notes_memory.observability.metrics import get_metrics
 
     metrics = get_metrics()
+
+    # Handle OTLP export if requested
+    if do_export:
+        from git_notes_memory.observability.exporters.otlp import (
+            export_metrics_if_configured,
+            export_traces_if_configured,
+            get_otlp_exporter,
+        )
+        from git_notes_memory.observability.tracing import get_completed_spans
+
+        exporter = get_otlp_exporter()
+        if not exporter.enabled:
+            print(
+                "OTLP export not configured. Set environment variables:\n"
+                "  export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318\n"
+                "  export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true",
+                file=sys.stderr,
+            )
+            return 1
+
+        # Export metrics
+        metrics_ok = export_metrics_if_configured()
+
+        # Export any pending traces
+        spans = get_completed_spans()
+        traces_ok = export_traces_if_configured(spans) if spans else True
+
+        print(f"OTLP export: metrics={'OK' if metrics_ok else 'FAILED'}, traces={'OK' if traces_ok else 'FAILED'} ({len(spans)} spans)")
+        return 0 if (metrics_ok and traces_ok) else 1
 
     if format_type == "json":
         output = metrics.export_json()

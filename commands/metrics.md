@@ -1,6 +1,6 @@
 ---
 description: Display observability metrics for the memory system
-argument-hint: "[--format=text|json|prometheus] [--filter=<pattern>]"
+argument-hint: "[--format=text|json|prometheus] [--filter=<pattern>] [--export]"
 allowed-tools: ["Bash", "Read"]
 ---
 
@@ -19,7 +19,7 @@ NAME
     metrics - Display observability metrics for the memory system
 
 SYNOPSIS
-    /memory:metrics [--format=text|json|prometheus] [--filter=<pattern>]
+    /memory:metrics [--format=text|json|prometheus] [--filter=<pattern>] [--export]
 
 DESCRIPTION
     Display collected observability metrics including counters, histograms, and gauges.
@@ -29,6 +29,7 @@ OPTIONS
     --help, -h            Show this help message
     --format=FORMAT       Output format: text (default), json, prometheus
     --filter=PATTERN      Filter metrics by name pattern (e.g., "capture", "hook")
+    --export              Export metrics/traces to OTLP endpoint (for Grafana)
 
 EXAMPLES
     /memory:metrics
