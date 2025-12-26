@@ -2860,3 +2860,20 @@ tags:
 | CRIT-002 | Secrets Filtering for LLM Prompts | ✅ Completed |
 | CRIT-003 | User Capture Service to ServiceRegistry | ✅ Completed |
 | CRIT-004 | Adversarial...
+
+---
+type: progress
+timestamp: '2025-12-26T15:50:48.704421+00:00'
+summary: '...Filtering for LLM Prompts | ✅ Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...Filtering for LLM Prompts | ✅ Completed |
+| CRIT-003 | User Capture Service to ServiceRegistry | ✅ Completed |
+| CRIT-004 | Adversarial Screening Activation | ✅ Completed |
+
+### Security HIGH (3/3 Complete)
+|...
