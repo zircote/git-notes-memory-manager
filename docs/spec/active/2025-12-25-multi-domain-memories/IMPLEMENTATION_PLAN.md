@@ -53,19 +53,19 @@ This plan implements multi-domain memory storage in 5 phases, building from foun
 #### Task 1.3: Create Schema Migration for Domain Column
 - **Description**: Add migration to SCHEMA_VERSION 3 in `index.py`
 - **Acceptance Criteria**:
-  - [ ] `_MIGRATIONS[3]` adds `domain TEXT DEFAULT 'project'`
-  - [ ] Index `idx_memories_domain` created
-  - [ ] `SCHEMA_VERSION` updated to 3
-  - [ ] Migration runs cleanly on existing databases
-- **Notes**: Follow existing migration pattern from version 2
+  - [x] `_MIGRATIONS[3]` adds `domain TEXT DEFAULT 'project'`
+  - [x] Index `idx_memories_domain` created
+  - [x] `SCHEMA_VERSION` updated to 3
+  - [x] Migration runs cleanly on existing databases
+- **Notes**: Follow existing migration pattern from version 2. Added 2 tests for migration.
 
 #### Task 1.4: Update IndexService for Domain
 - **Description**: Extend IndexService CRUD operations to include domain
 - **Acceptance Criteria**:
-  - [ ] `insert()` accepts optional `domain` parameter
-  - [ ] `_row_to_memory()` populates `Memory.domain` from row
-  - [ ] Serialization handles domain field
-- **Notes**: Default domain is PROJECT for backward compatibility
+  - [x] `insert()` accepts optional `domain` parameter
+  - [x] `_row_to_memory()` populates `Memory.domain` from row
+  - [x] Serialization handles domain field
+- **Notes**: Default domain is PROJECT for backward compatibility. Added 2 domain-specific tests.
 
 ### Phase 1 Deliverables
 - [ ] Domain enum in config

@@ -74,7 +74,7 @@ __all__ = [
 # =============================================================================
 
 # Schema version for migrations
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 # SQL statements for schema creation
 _CREATE_MEMORIES_TABLE = """
@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS memories (
     summary TEXT NOT NULL,
     content TEXT NOT NULL,
     timestamp TEXT NOT NULL,
+    domain TEXT DEFAULT 'project',
     repo_path TEXT,
     spec TEXT,
     phase TEXT,
@@ -103,6 +104,7 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_memories_timestamp ON memories(timestamp)",
     "CREATE INDEX IF NOT EXISTS idx_memories_status ON memories(status)",
     "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
+    "CREATE INDEX IF NOT EXISTS idx_memories_domain ON memories(domain)",
     # HIGH-004: Composite index for efficient range queries within namespace
     "CREATE INDEX IF NOT EXISTS idx_memories_namespace_timestamp ON memories(namespace, timestamp DESC)",
 ]
@@ -113,6 +115,11 @@ _MIGRATIONS = {
         # Add repo_path column for per-repository memory isolation
         "ALTER TABLE memories ADD COLUMN repo_path TEXT",
         "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
+    ],
+    3: [
+        # Add domain column for multi-domain memory storage (user vs project)
+        "ALTER TABLE memories ADD COLUMN domain TEXT DEFAULT 'project'",
+        "CREATE INDEX IF NOT EXISTS idx_memories_domain ON memories(domain)",
     ],
 }
 
@@ -417,9 +424,15 @@ class IndexService:
                     """
                     INSERT INTO memories (
                         id, commit_sha, namespace, summary, content,
+<<<<<<< HEAD
                         timestamp, repo_path, spec, phase, tags, status,
                         relates_to, created_at, updated_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+=======
+                        timestamp, domain, repo_path, spec, phase, tags, status,
+                        relates_to, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+>>>>>>> c2a1898 (feat(index): add schema migration v3 and domain support (Tasks 1.3, 1.4))
                     """,
                     (
                         memory.id,
@@ -428,6 +441,7 @@ class IndexService:
                         memory.summary,
                         memory.content,
                         memory.timestamp.isoformat(),
+                        memory.domain,
                         memory.repo_path,
                         memory.spec,
                         memory.phase,
@@ -506,9 +520,9 @@ class IndexService:
                             """
                             INSERT INTO memories (
                                 id, commit_sha, namespace, summary, content,
-                                timestamp, repo_path, spec, phase, tags, status,
+                                timestamp, domain, repo_path, spec, phase, tags, status,
                                 relates_to, created_at, updated_at
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             """,
                             (
                                 memory.id,
@@ -517,6 +531,7 @@ class IndexService:
                                 memory.summary,
                                 memory.content,
                                 memory.timestamp.isoformat(),
+                                memory.domain,
                                 memory.repo_path,
                                 memory.spec,
                                 memory.phase,
@@ -798,6 +813,9 @@ class IndexService:
         # Parse timestamp
         timestamp = datetime.fromisoformat(row["timestamp"])
 
+        # Parse domain with backward-compatible default
+        domain = row["domain"] if row["domain"] else "project"
+
         return Memory(
             id=row["id"],
             commit_sha=row["commit_sha"],
@@ -805,6 +823,7 @@ class IndexService:
             summary=row["summary"],
             content=row["content"],
             timestamp=timestamp,
+            domain=domain,
             spec=row["spec"],
             phase=row["phase"],
             tags=tags,
@@ -845,6 +864,7 @@ class IndexService:
                         summary = ?,
                         content = ?,
                         timestamp = ?,
+                        domain = ?,
                         spec = ?,
                         phase = ?,
                         tags = ?,
@@ -859,6 +879,7 @@ class IndexService:
                         memory.summary,
                         memory.content,
                         memory.timestamp.isoformat(),
+                        memory.domain,
                         memory.spec,
                         memory.phase,
                         ",".join(memory.tags) if memory.tags else None,
