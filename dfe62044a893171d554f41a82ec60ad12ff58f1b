@@ -122,3 +122,23 @@ tags:
 - Reviewed hooks subsystem (SignalDetector, ContextBuilder)
 - Examined completed refspec fix spec for sync patterns
 - Identified 6 key integration points for multi-domain...
+
+---
+type: progress
+timestamp: '2025-12-26T00:06:34.040838+00:00'
+summary: '...multi-domain-memories'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...multi-domain-memories
+status: in-review
+created: 2025-12-25T23:47:00Z
+approved: null
+started: null
+completed: null
+expires: 2026-03-25T23:47:00Z
+superseded_by: null
+github_issue: https://github.com/zircote/git...
