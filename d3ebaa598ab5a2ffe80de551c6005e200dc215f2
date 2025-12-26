@@ -709,3 +709,30 @@ Added circuit breaker implementation to prevent cascading failures when LLM prov
 ## Related Files
 - src/git_notes_memory/subconsciousness/llm_client.py:189-335
 - tests/subconsciousness/test_circuit_breaker.py:1-395
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:26.156761+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Integrated ServiceRegistry for subconsciousness ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Integrated ServiceRegistry for subconsciousness singletons
+## Summary
+Updated the subconsciousness module to use ServiceRegistry for thread-safe singleton management. Added reset functions to all service modules for testing.
+
+## Changes Made
+- Modified `__init__.py` to use ServiceRegistry for `get_llm_client()` and `get_capture_store()`
+- Added `reset_subconsciousness_services()` function for test cleanup
+- Added `reset_default_detector()` to adversarial_detector.py
+- Added `reset_default_agent()` to implicit_capture_agent.py
+- All 2171 tests pass
+
+## Related Files
+- src/git_notes_memory/subconsciousness/__init__.py:83-154
+- src/git_notes_memory/subconsciousness/adversarial_detector.py:241-247
+- src/git_notes_memory/subconsciousness/implicit_capture_agent.py:345-351
