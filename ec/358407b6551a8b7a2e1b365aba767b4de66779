@@ -137,3 +137,12 @@ The observability pipeline IS functioning correctly. Metrics pushed via OTLP rea
 ## Related Files
 - docker/otel-collector-config.yaml:53-55 (prometheus exporter with `namespace: memory`)
 - src/git_notes_memory/observability/exporters/otlp.py:552 (export function)
+
+---
+type: progress
+timestamp: '2025-12-26T20:56:47.403214+00:00'
+summary: The variable isn't set when developing from source. The fix is to add a fallback
+  to the current dire
+---
+
+The variable isn't set when developing from source. The fix is to add a fallback to the current directory. Let me update the command:
