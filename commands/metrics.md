@@ -74,53 +74,7 @@ Parse the following options:
 **Execute the metrics collection**:
 ```bash
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
-import sys
-import json
-
-# Parse arguments
-args = '$ARGUMENTS'.split()
-format_type = 'text'
-filter_pattern = None
-
-for arg in args:
-    if arg.startswith('--format='):
-        format_type = arg.split('=', 1)[1]
-    elif arg.startswith('--filter='):
-        filter_pattern = arg.split('=', 1)[1]
-
-from git_notes_memory.observability.metrics import get_metrics
-
-metrics = get_metrics()
-
-if format_type == 'json':
-    output = metrics.export_json()
-    if filter_pattern:
-        data = json.loads(output)
-        data['counters'] = {k: v for k, v in data.get('counters', {}).items() if filter_pattern in k}
-        data['histograms'] = {k: v for k, v in data.get('histograms', {}).items() if filter_pattern in k}
-        data['gauges'] = {k: v for k, v in data.get('gauges', {}).items() if filter_pattern in k}
-        output = json.dumps(data, indent=2)
-    print(output)
-elif format_type == 'prometheus':
-    from git_notes_memory.observability.exporters.prometheus import PrometheusExporter
-    exporter = PrometheusExporter()
-    output = exporter.export(metrics)
-    if filter_pattern:
-        lines = output.split('\n')
-        filtered = [l for l in lines if not l.strip() or l.startswith('#') or filter_pattern in l]
-        output = '\n'.join(filtered)
-    print(output)
-else:
-    # Text format (default)
-    output = metrics.export_text()
-    if filter_pattern:
-        lines = output.split('\n')
-        filtered = [l for l in lines if not l.strip() or filter_pattern.lower() in l.lower()]
-        output = '\n'.join(filtered)
-    print('## Observability Metrics\n')
-    print(output if output.strip() else '(No metrics collected yet)')
-"
+uv run --directory "$PLUGIN_ROOT" python3 "$PLUGIN_ROOT/scripts/metrics.py" $ARGUMENTS
 ```
 
 </step>
