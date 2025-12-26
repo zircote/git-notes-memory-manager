@@ -116,3 +116,16 @@ Successfully archived the secrets filtering project to completed/ with full retr
 ## Related Files
 - docs/spec/completed/2025-12-25-secrets-filtering/
 - CLAUDE.md:289-295
+
+---
+type: progress
+timestamp: '2025-12-26T03:58:12.287337+00:00'
+summary: '...───────────────────────────────────'
+---
+
+...───────────────────────────────────
+
+**Project closed:** SPEC-2025-12-25-001 archived to `docs/spec/completed/2025-12-25-secrets-filtering/`
+
+**Key learnings captured:**
+- Code review (`/cr` + `/cr-fx`)...
