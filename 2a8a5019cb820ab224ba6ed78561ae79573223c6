@@ -322,3 +322,21 @@ tags:
 
         Returns:
             True if export succeeded, False otherwise....
+
+---
+type: progress
+timestamp: '2025-12-26T03:09:51.855302+00:00'
+summary: '...function that checks configuration before attempting export.'
+tags:
+- auto-captured
+- post-tool-use
+- file:otlp.py
+---
+
+...function that checks configuration before attempting export.
+
+    Args:
+        spans: List of completed spans.
+
+    Returns:
+        True if export succeeded or no endpoint configured, False on...
