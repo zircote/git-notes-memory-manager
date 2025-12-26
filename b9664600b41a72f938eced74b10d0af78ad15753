@@ -2160,3 +2160,33 @@ Implemented circuit breaker pattern in EmbeddingService to prevent repeated call
 - src/git_notes_memory/embedding.py:417-426 (embed() integration)
 - src/git_notes_memory/embedding.py:513-522 (embed_batch() integration)
 - tests/test_embedding.py:420-597 (new tests)
+
+---
+type: progress
+timestamp: '2025-12-26T15:29:45.178845+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed CRIT-002: Integrated secrets filtering...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed CRIT-002: Integrated secrets filtering for LLM prompts
+## Summary
+Added secrets filtering to LLMClient to prevent PII from being sent to external LLM providers, addressing GDPR Art. 44-49 compliance.
+
+## Changes Made
+- Added `filter_secrets` parameter to LLMClient (default: True)
+- Added `_secrets_service` field initialized in `__post_init__`
+- Added `_filter_request_secrets()` method to filter all messages
+- Integrated filtering in `complete_request()` before sending to provider
+- Created 10 new tests for secrets filtering functionality
+
+## Related Files
+- src/git_notes_memory/subconsciousness/llm_client.py:45-49 (imports)
+- src/git_notes_memory/subconsciousness/llm_client.py:385,393 (new fields)
+- src/git_notes_memory/subconsciousness/llm_client.py:416-418 (init)
+- src/git_notes_memory/subconsciousness/llm_client.py:466-468 (integration)
+- src/git_notes_memory/subconsciousness/llm_client.py:492-542 (filter method)
+- tests/subconsciousness/test_llm_secrets_filtering.py (new tests)
