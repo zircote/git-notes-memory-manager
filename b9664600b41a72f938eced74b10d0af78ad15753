@@ -1603,3 +1603,28 @@ Successfully installed memory-capture plugin from local git-notes-memory marketp
 ## Related Files
 - .claude-plugin/marketplace.json:15
 - .claude-plugin/plugin.json
+
+---
+type: progress
+timestamp: '2025-12-26T15:09:26.567383+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed .claude/hooks.json to use portable $CLAUDE...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed .claude/hooks.json to use portable $CLAUDE_PROJECT_DIR
+## Summary
+Replaced all hardcoded absolute paths with the `$CLAUDE_PROJECT_DIR` environment variable so the hooks work for anyone who clones the repository.
+
+## Changes Made
+- format-on-edit: use `$CLAUDE_PROJECT_DIR`
+- lint-check-on-edit: use `$CLAUDE_PROJECT_DIR`
+- typecheck-on-edit: use `$CLAUDE_PROJECT_DIR`
+- security-scan-on-edit: use `$CLAUDE_PROJECT_DIR`
+- pre-commit-quality-gate: use `$CLAUDE_PROJECT_DIR`
+
+## Related Files
+- .claude/hooks.json:10,21,32,43,54
