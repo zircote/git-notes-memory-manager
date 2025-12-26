@@ -74,3 +74,19 @@ tags:
 
         for pattern in self._patterns:
             for match in pattern.regex.finditer(content):...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:42:58.065972+00:00'
+summary: '...`detector.py`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...`detector.py`
+  - Status: **Fixed** - Added `threading.Lock()` and double-checked locking pattern to all 5 security singletons
+
+- [x] **CRIT-002**: Add test for lock acquisition timeout
+  -...
