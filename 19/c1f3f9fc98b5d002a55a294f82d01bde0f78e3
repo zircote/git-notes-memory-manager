@@ -239,3 +239,17 @@ tags:
 ---
 
 The OTLP exporter is actually fully implemented (582 lines)! The issue must be that **it's not being called** anywhere. Let me check the Stop...
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.306661+00:00'
+summary: '...the same attributes that Python was already setting. Removing it from
+  the metrics pipeline fix...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...the same attributes that Python was already setting. Removing it from the metrics pipeline fixed the conflict.
+
+**Next session's telemetry should work.** The Stop hook exports metrics at session...
