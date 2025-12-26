@@ -475,3 +475,45 @@ Added `timed_hook_execution` context manager to hook_utils.py and wrapped all ho
 - src/git_notes_memory/hooks/user_prompt_handler.py:248-349
 - src/git_notes_memory/hooks/post_tool_use_handler.py:383-463
 - src/git_notes_memory/hooks/pre_compact_handler.py:245-355
+
+---
+type: progress
+timestamp: '2025-12-26T02:48:41.915913+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 2 (Instrumentation) - All 7 task...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 2 (Instrumentation) - All 7 tasks finished
+## Summary
+Phase 2 of the Observability Instrumentation project is now complete. All core services and hook handlers have been instrumented with metrics and tracing, and all 5 silent failure points have been converted to logged + tracked failures.
+
+## Changes Made
+- Task 2.6: Added `timed_hook_execution` context manager to all 5 hook handlers
+- Task 2.7: Fixed 5 silent failure points across 4 files:
+  - `capture.py:126` - Lock release OSError
+  - `capture.py:503` - Note parsing exception
+  - `git_ops.py:1011` - Fetch failure
+  - `sync.py:444` - Hash verification exception
+  - `index.py:307` - Index creation OperationalError (converted from `contextlib.suppress`)
+
+## Metrics Added
+- `hook_execution_duration_ms` histogram with hook label
+- `hook_executions_total` counter with hook and status labels
+- `hook_timeouts_total` counter with hook label
+- `silent_failures_total` counter with location labels
+
+## Related Files
+- src/git_notes_memory/hooks/hook_utils.py:291-356
+- src/git_notes_memory/hooks/session_start_handler.py
+- src/git_notes_memory/hooks/stop_handler.py
+- src/git_notes_memory/hooks/user_prompt_handler.py
+- src/git_notes_memory/hooks/post_tool_use_handler.py
+- src/git_notes_memory/hooks/pre_compact_handler.py
+- src/git_notes_memory/capture.py:126,503
+- src/git_notes_memory/git_ops.py:1011
+- src/git_notes_memory/sync.py:444
+- src/git_notes_memory/index.py:306-316
