@@ -373,3 +373,22 @@ summary: '...namespace ───`) get 0.99 confidence - explicit structured cap
 2. **Inline patterns** (`[decision]`, natural language) get 0.70-0.98 confidence
 
 The `CaptureSignal` model needs a `domain` field...
+
+---
+type: decisions
+timestamp: '2025-12-26T03:12:08.775081+00:00'
+summary: Confirmed key architectural decisions for multi-domain memories
+---
+
+Confirmed key architectural decisions for multi-domain memories
+## Summary
+User validated 4 critical design decisions from the open questions in GitHub Issue #13.
+
+## Rationale
+- **Storage**: Separate bare git repo at `~/.local/share/memory-plugin/user-memories/` - maintains git notes semantics for both domains
+- **Conflicts**: Project memories override user memories - local context is more specific
+- **Team domain**: Deferred to v2 - keep initial scope focused
+- **Sync**: Optional remote auto-sync - configure remote and sync on session events
+
+## Related Files
+- GitHub Issue #13: https://github.com/zircote/git-notes-memory/issues/13
