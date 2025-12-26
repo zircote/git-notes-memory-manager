@@ -677,3 +677,20 @@ tags:
 
 **Context**:
 Memory poisoning is a security concern (per...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:08:59.065403+00:00'
+summary: '...capture.'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...capture.
+
+**Decision**:
+Implement two-tier adversarial detection:
+1. **Fast path (regex)**: Pattern match for known injection patterns
+2. **Slow path (LLM)**: Deep analysis for contradictions,...
