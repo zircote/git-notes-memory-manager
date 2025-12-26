@@ -2519,3 +2519,22 @@ Resolved all issues with the local observability stack.
 - docker/docker-compose.yml
 - docker/otel-collector-config.yaml:66-70 (fixed)
 - docker/grafana/provisioning/datasources/datasources.yaml (3 datasources auto-provisioned)
+
+---
+type: progress
+timestamp: '2025-12-26T15:37:54.714978+00:00'
+summary: Updated ~/.bash_profile with observability config
+---
+
+Updated ~/.bash_profile with observability config
+## Summary
+Cleaned up and organized observability environment variables.
+
+## Changes Made
+- Commented out duplicate HOOK_DEBUG (superseded by MEMORY_PLUGIN_LOG_LEVEL)
+- Added clear section header for observability config
+- Added MEMORY_PLUGIN_METRICS_RETENTION=3600
+- Removed duplicate entries at end of file
+
+## Related Files
+- ~/.bash_profile:163-182
