@@ -10,3 +10,14 @@ summary: '...legitimate CRITICAL catch - shell string interpolation (`''$VAR''`)
 **Pattern for Lazy Imports:**
 The `__getattr__` pattern for deferred imports is common in Python to:
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:39:06.517889+00:00'
+summary: '...POSITIVES**. The `__getattr__` function provides lazy imports for these
+  names - a standard Python'
+---
+
+...POSITIVES**. The `__getattr__` function provides lazy imports for these names - a standard Python pattern for avoiding import-time overhead.
+
+3. **Exception pass block (1 finding)**: **VALID - ACCEPT**....
