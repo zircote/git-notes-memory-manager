@@ -21,7 +21,13 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from git_notes_memory.embedding import EmbeddingService, get_default_service
+from git_notes_memory.embedding import (
+    CircuitOpenError,
+    CircuitState,
+    EmbeddingCircuitBreaker,
+    EmbeddingService,
+    get_default_service,
+)
 from git_notes_memory.exceptions import EmbeddingError
 
 # =============================================================================
@@ -220,6 +226,52 @@ class TestModelLoading:
             assert "Failed to load" in exc_info.value.message
 
 
+class TestWarmup:
+    """Test model warmup for PERF-H-004."""
+
+    def test_warmup_loads_model(self, cache_dir: Path, mock_model: MagicMock) -> None:
+        """Test warmup loads the model if not loaded."""
+        service = EmbeddingService(cache_dir=cache_dir)
+
+        with patch(
+            "sentence_transformers.SentenceTransformer", return_value=mock_model
+        ):
+            warmup_time = service.warmup()
+
+        assert service.is_loaded is True
+        assert warmup_time >= 0.0
+
+    def test_warmup_runs_test_embedding(
+        self, cache_dir: Path, mock_model: MagicMock
+    ) -> None:
+        """Test warmup runs a test embedding to warm up JIT."""
+        service = EmbeddingService(cache_dir=cache_dir)
+
+        with patch(
+            "sentence_transformers.SentenceTransformer", return_value=mock_model
+        ):
+            service.warmup()
+
+        # Verify encode was called with warmup text
+        mock_model.encode.assert_called_once()
+        call_args = mock_model.encode.call_args
+        assert call_args[0][0] == "warmup"
+
+    def test_warmup_returns_elapsed_time(
+        self, cache_dir: Path, mock_model: MagicMock
+    ) -> None:
+        """Test warmup returns the time taken."""
+        service = EmbeddingService(cache_dir=cache_dir)
+
+        with patch(
+            "sentence_transformers.SentenceTransformer", return_value=mock_model
+        ):
+            warmup_time = service.warmup()
+
+        assert isinstance(warmup_time, float)
+        assert warmup_time >= 0.0
+
+
 # =============================================================================
 # Test: Single Text Embedding
 # =============================================================================
@@ -404,6 +456,191 @@ class TestBatchEmbedding:
             embedding_service.embed_batch(["Hello", "World"])
 
         assert "Failed to generate batch embeddings" in exc_info.value.message
+
+
+# =============================================================================
+# Test: Circuit Breaker (CRIT-001)
+# =============================================================================
+
+
+class TestCircuitBreaker:
+    """Test circuit breaker functionality."""
+
+    def test_initial_state_is_closed(self) -> None:
+        """Test circuit breaker starts in closed state."""
+        cb = EmbeddingCircuitBreaker()
+        assert cb.state == CircuitState.CLOSED
+
+    def test_allow_request_when_closed(self) -> None:
+        """Test requests are allowed in closed state."""
+        cb = EmbeddingCircuitBreaker()
+        assert cb.allow_request() is True
+
+    def test_state_opens_after_threshold_failures(self) -> None:
+        """Test circuit opens after failure threshold is reached."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=3)
+
+        cb.record_failure()
+        cb.record_failure()
+        assert cb.state == CircuitState.CLOSED
+
+        cb.record_failure()  # Third failure opens circuit
+        assert cb.state == CircuitState.OPEN
+
+    def test_requests_blocked_when_open(self) -> None:
+        """Test requests are blocked when circuit is open."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=1)
+        cb.record_failure()
+
+        assert cb.state == CircuitState.OPEN
+        assert cb.allow_request() is False
+
+    def test_success_resets_failure_count(self) -> None:
+        """Test success resets failure count in closed state."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=3)
+
+        cb.record_failure()
+        cb.record_failure()
+        cb.record_success()
+
+        # After success, should need 3 more failures to open
+        cb.record_failure()
+        cb.record_failure()
+        assert cb.state == CircuitState.CLOSED
+
+    def test_status_returns_correct_info(self) -> None:
+        """Test status returns correct state information."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=3)
+        cb.record_failure()
+
+        status = cb.status()
+        assert status["state"] == "closed"
+        assert status["failure_count"] == 1
+        assert status["failure_threshold"] == 3
+
+    def test_reset_clears_all_state(self) -> None:
+        """Test reset clears circuit breaker state."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=1)
+        cb.record_failure()
+        assert cb.state == CircuitState.OPEN
+
+        cb.reset()
+        assert cb.state == CircuitState.CLOSED
+        assert cb.allow_request() is True
+
+    def test_circuit_open_error_attributes(self) -> None:
+        """Test CircuitOpenError has correct attributes."""
+        error = CircuitOpenError(
+            state=CircuitState.OPEN,
+            failures=3,
+            threshold=3,
+        )
+
+        assert error.circuit_state == CircuitState.OPEN
+        assert error.failures == 3
+        assert error.threshold == 3
+        assert "circuit breaker is open" in str(error)
+
+
+class TestCircuitBreakerIntegration:
+    """Test circuit breaker integration with EmbeddingService."""
+
+    def test_embed_raises_circuit_open_error(
+        self,
+        cache_dir: Path,
+        mock_model: MagicMock,
+    ) -> None:
+        """Test embed raises CircuitOpenError when circuit is open."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=1)
+        cb.record_failure()  # Open the circuit
+
+        service = EmbeddingService(cache_dir=cache_dir, circuit_breaker=cb)
+
+        with pytest.raises(CircuitOpenError) as exc_info:
+            service.embed("Hello")
+
+        assert exc_info.value.circuit_state == CircuitState.OPEN
+
+    def test_embed_batch_raises_circuit_open_error(
+        self,
+        cache_dir: Path,
+        mock_model: MagicMock,
+    ) -> None:
+        """Test embed_batch raises CircuitOpenError when circuit is open."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=1)
+        cb.record_failure()  # Open the circuit
+
+        service = EmbeddingService(cache_dir=cache_dir, circuit_breaker=cb)
+
+        with pytest.raises(CircuitOpenError) as exc_info:
+            service.embed_batch(["Hello", "World"])
+
+        assert exc_info.value.circuit_state == CircuitState.OPEN
+
+    def test_embed_records_failure_on_error(
+        self,
+        cache_dir: Path,
+        mock_model: MagicMock,
+    ) -> None:
+        """Test embed records failure to circuit breaker on error."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=3)
+        service = EmbeddingService(cache_dir=cache_dir, circuit_breaker=cb)
+
+        # Patch to make encode fail
+        with patch(
+            "sentence_transformers.SentenceTransformer", return_value=mock_model
+        ):
+            service.load()
+
+        mock_model.encode.side_effect = RuntimeError("Model error")
+
+        # Should not raise CircuitOpenError yet
+        with pytest.raises(EmbeddingError):
+            service.embed("Hello")
+
+        status = cb.status()
+        assert status["failure_count"] == 1
+
+    def test_embed_records_success(
+        self,
+        cache_dir: Path,
+        mock_model: MagicMock,
+    ) -> None:
+        """Test embed records success to circuit breaker."""
+        cb = EmbeddingCircuitBreaker(failure_threshold=3)
+        cb.record_failure()  # Add a failure
+
+        service = EmbeddingService(cache_dir=cache_dir, circuit_breaker=cb)
+
+        with patch(
+            "sentence_transformers.SentenceTransformer", return_value=mock_model
+        ):
+            service.load()
+
+        service.embed("Hello")
+
+        # Success should reset failure count
+        status = cb.status()
+        assert status["failure_count"] == 0
+
+    def test_circuit_breaker_property(
+        self,
+        cache_dir: Path,
+    ) -> None:
+        """Test circuit_breaker property returns the instance."""
+        cb = EmbeddingCircuitBreaker()
+        service = EmbeddingService(cache_dir=cache_dir, circuit_breaker=cb)
+
+        assert service.circuit_breaker is cb
+
+    def test_default_circuit_breaker_created(
+        self,
+        cache_dir: Path,
+    ) -> None:
+        """Test default circuit breaker is created if not provided."""
+        service = EmbeddingService(cache_dir=cache_dir)
+        assert service.circuit_breaker is not None
+        assert isinstance(service.circuit_breaker, EmbeddingCircuitBreaker)
 
 
 # =============================================================================

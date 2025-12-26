@@ -85,7 +85,7 @@ class TestInitialization:
 
     def test_init_with_default_path(self) -> None:
         """Test initialization uses default path when none provided."""
-        with patch("git_notes_memory.index.get_index_path") as mock_path:
+        with patch("git_notes_memory.index.service.get_index_path") as mock_path:
             mock_path.return_value = Path("/tmp/default.db")
             service = IndexService()
             assert service.db_path == Path("/tmp/default.db")
@@ -153,7 +153,7 @@ class TestInitialization:
         cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
         row = cursor.fetchone()
         assert row is not None
-        assert row[0] == "3"  # Schema v3 adds domain column
+        assert row[0] == "4"  # Schema v4 adds FTS5 full-text search
 
         service.close()
 
@@ -248,10 +248,10 @@ class TestSchemaMigration:
         columns = {row["name"] for row in cursor.fetchall()}
         assert "domain" in columns
 
-        # Check schema version updated to 3
+        # Check schema version updated to 4 (latest)
         cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
         row = cursor.fetchone()
-        assert row[0] == "3"
+        assert row[0] == "4"
 
         # Check index exists
         cursor.execute(
@@ -281,7 +281,9 @@ class TestInitializationErrors:
         """Test error when sqlite-vec fails to load."""
         service = IndexService(db_path)
 
-        with patch("git_notes_memory.index.sqlite_vec.load") as mock_load:
+        with patch(
+            "git_notes_memory.index.schema_manager.sqlite_vec.load"
+        ) as mock_load:
             mock_load.side_effect = Exception("Extension not found")
             with pytest.raises(MemoryIndexError) as exc_info:
                 service.initialize()
@@ -638,6 +640,38 @@ class TestReadOperations:
     ) -> None:
         """Test exists returns False for nonexistent memory."""
         assert index_service.exists("nonexistent:id:0") is False
+
+    def test_get_existing_ids_batch(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test batch existence check for PERF-H-002."""
+        memories = [
+            Memory(
+                id=f"test:{i}:0",
+                commit_sha=f"sha{i}",
+                namespace="learnings",
+                summary=f"Memory {i}",
+                content=f"Content {i}",
+                timestamp=datetime.now(UTC),
+            )
+            for i in range(5)
+        ]
+        index_service.insert_batch(memories)
+
+        # Check mix of existing and non-existing IDs
+        check_ids = ["test:0:0", "test:2:0", "nonexistent:1:0", "test:4:0"]
+        existing = index_service.get_existing_ids(check_ids)
+
+        assert existing == {"test:0:0", "test:2:0", "test:4:0"}
+        assert "nonexistent:1:0" not in existing
+
+    def test_get_existing_ids_empty_input(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test batch existence check with empty input."""
+        assert index_service.get_existing_ids([]) == set()
 
     def test_get_all_ids(
         self,

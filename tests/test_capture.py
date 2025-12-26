@@ -1136,13 +1136,11 @@ class TestGetUserCaptureService:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test get_user_capture_service returns a CaptureService."""
-        import git_notes_memory.capture as capture_module
         import git_notes_memory.config as config_module
         from git_notes_memory.capture import get_user_capture_service
         from git_notes_memory.git_ops import GitOps
 
-        # Reset singleton for test
-        capture_module._user_capture_service = None
+        # Note: ServiceRegistry is reset by conftest fixture (reset_services)
 
         # Mock GitOps.for_domain to return a mock GitOps
         mock_git_ops = MagicMock()
@@ -1163,13 +1161,11 @@ class TestGetUserCaptureService:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test get_user_capture_service returns the same instance."""
-        import git_notes_memory.capture as capture_module
         import git_notes_memory.config as config_module
         from git_notes_memory.capture import get_user_capture_service
         from git_notes_memory.git_ops import GitOps
 
-        # Reset singleton for test
-        capture_module._user_capture_service = None
+        # Note: ServiceRegistry is reset by conftest fixture (reset_services)
 
         # Mock GitOps.for_domain to return a mock GitOps
         mock_git_ops = MagicMock()
@@ -1190,14 +1186,12 @@ class TestGetUserCaptureService:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test get_user_capture_service uses GitOps.for_domain(USER)."""
-        import git_notes_memory.capture as capture_module
         import git_notes_memory.config as config_module
         from git_notes_memory.capture import get_user_capture_service
         from git_notes_memory.config import Domain
         from git_notes_memory.git_ops import GitOps
 
-        # Reset singleton for test
-        capture_module._user_capture_service = None
+        # Note: ServiceRegistry is reset by conftest fixture (reset_services)
 
         # Track GitOps.for_domain calls
         mock_git_ops = MagicMock()
@@ -1226,14 +1220,12 @@ class TestGetUserCaptureService:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test get_user_capture_service returns service with IndexService."""
-        import git_notes_memory.capture as capture_module
         import git_notes_memory.config as config_module
         from git_notes_memory.capture import get_user_capture_service
         from git_notes_memory.git_ops import GitOps
         from git_notes_memory.index import IndexService
 
-        # Reset singleton for test
-        capture_module._user_capture_service = None
+        # Note: ServiceRegistry is reset by conftest fixture (reset_services)
 
         # Mock GitOps.for_domain
         mock_git_ops = MagicMock()

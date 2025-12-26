@@ -535,3 +535,221 @@ class TestParseResponse:
         assert len(memories) == 1
         # Source lines adjusted: 100 + 5 = 105, 100 + 10 = 110
         assert memories[0].source_range == (105, 110)
+
+
+class TestAdversarialScreening:
+    """Tests for CRIT-004: Adversarial screening integration."""
+
+    @pytest.fixture
+    def mock_llm_client(self) -> MagicMock:
+        """Create a mock LLM client."""
+        client = MagicMock()
+        client.complete = AsyncMock()
+        return client
+
+    @pytest.fixture
+    def mock_adversarial_detector(self) -> MagicMock:
+        """Create a mock adversarial detector."""
+        detector = MagicMock()
+        detector.analyze = AsyncMock()
+        return detector
+
+    @pytest.fixture
+    def sample_memory(self) -> Any:
+        """Create a sample memory for testing."""
+        from git_notes_memory.subconsciousness.models import (
+            CaptureConfidence,
+            ImplicitMemory,
+        )
+
+        return ImplicitMemory(
+            namespace="decisions",
+            summary="Use PostgreSQL for persistence",
+            content="We decided to use PostgreSQL for data storage.",
+            confidence=CaptureConfidence.from_factors(
+                relevance=0.9,
+                actionability=0.8,
+                novelty=0.7,
+                specificity=0.9,
+                coherence=0.8,
+            ),
+            source_hash="abc123",
+            source_range=(10, 20),
+            rationale="Database decision",
+            tags=("database", "architecture"),
+        )
+
+    def make_safe_detection(self) -> Any:
+        """Create a safe (non-blocking) detection result."""
+        from git_notes_memory.subconsciousness.adversarial_detector import (
+            DetectionResult,
+        )
+        from git_notes_memory.subconsciousness.models import ThreatDetection
+
+        return DetectionResult(
+            detection=ThreatDetection.safe(),
+            analyzed_length=100,
+        )
+
+    def make_blocking_detection(self) -> Any:
+        """Create a blocking (adversarial) detection result."""
+        from git_notes_memory.subconsciousness.adversarial_detector import (
+            DetectionResult,
+        )
+        from git_notes_memory.subconsciousness.models import (
+            ThreatDetection,
+            ThreatLevel,
+        )
+
+        return DetectionResult(
+            detection=ThreatDetection.blocked(
+                level=ThreatLevel.HIGH,
+                patterns=["prompt_injection"],
+                explanation="Detected 'ignore previous instructions'",
+            ),
+            analyzed_length=100,
+        )
+
+    @pytest.mark.asyncio
+    async def test_screening_allows_safe_memories(
+        self,
+        mock_llm_client: MagicMock,
+        mock_adversarial_detector: MagicMock,
+        sample_memory: Any,
+    ) -> None:
+        """Test that safe memories pass through screening."""
+        mock_adversarial_detector.analyze.return_value = self.make_safe_detection()
+
+        agent = ImplicitCaptureAgent(
+            llm_client=mock_llm_client,
+            adversarial_detector=mock_adversarial_detector,
+        )
+
+        result = await agent._screen_memories([sample_memory])
+
+        assert len(result) == 1
+        assert result[0] == sample_memory
+        mock_adversarial_detector.analyze.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_screening_blocks_adversarial_memories(
+        self,
+        mock_llm_client: MagicMock,
+        mock_adversarial_detector: MagicMock,
+        sample_memory: Any,
+    ) -> None:
+        """Test that adversarial memories are blocked."""
+        mock_adversarial_detector.analyze.return_value = self.make_blocking_detection()
+
+        agent = ImplicitCaptureAgent(
+            llm_client=mock_llm_client,
+            adversarial_detector=mock_adversarial_detector,
+            block_on_adversarial=True,
+        )
+
+        result = await agent._screen_memories([sample_memory])
+
+        assert len(result) == 0
+        mock_adversarial_detector.analyze.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_screening_disabled_allows_all(
+        self,
+        mock_llm_client: MagicMock,
+        mock_adversarial_detector: MagicMock,
+        sample_memory: Any,
+    ) -> None:
+        """Test that disabling blocking allows adversarial memories."""
+        mock_adversarial_detector.analyze.return_value = self.make_blocking_detection()
+
+        agent = ImplicitCaptureAgent(
+            llm_client=mock_llm_client,
+            adversarial_detector=mock_adversarial_detector,
+            block_on_adversarial=False,  # Disable blocking
+        )
+
+        result = await agent._screen_memories([sample_memory])
+
+        # Memory passes through even though it was flagged
+        assert len(result) == 1
+
+    @pytest.mark.asyncio
+    async def test_screening_fail_closed_on_error(
+        self,
+        mock_llm_client: MagicMock,
+        mock_adversarial_detector: MagicMock,
+        sample_memory: Any,
+    ) -> None:
+        """Test fail-closed behavior when detector raises error."""
+        mock_adversarial_detector.analyze.side_effect = Exception("Detector failure")
+
+        agent = ImplicitCaptureAgent(
+            llm_client=mock_llm_client,
+            adversarial_detector=mock_adversarial_detector,
+            block_on_adversarial=True,  # Fail closed
+        )
+
+        result = await agent._screen_memories([sample_memory])
+
+        # Memory blocked due to error (fail closed)
+        assert len(result) == 0
+
+    @pytest.mark.asyncio
+    async def test_screening_fail_open_on_error(
+        self,
+        mock_llm_client: MagicMock,
+        mock_adversarial_detector: MagicMock,
+        sample_memory: Any,
+    ) -> None:
+        """Test fail-open behavior when detector raises error."""
+        mock_adversarial_detector.analyze.side_effect = Exception("Detector failure")
+
+        agent = ImplicitCaptureAgent(
+            llm_client=mock_llm_client,
+            adversarial_detector=mock_adversarial_detector,
+            block_on_adversarial=False,  # Fail open
+        )
+
+        result = await agent._screen_memories([sample_memory])
+
+        # Memory allowed through despite error (fail open)
+        assert len(result) == 1
+
+    @pytest.mark.asyncio
+    async def test_no_detector_skips_screening(
+        self,
+        mock_llm_client: MagicMock,
+        sample_memory: Any,
+    ) -> None:
+        """Test that screening is skipped when no detector configured."""
+        agent = ImplicitCaptureAgent(
+            llm_client=mock_llm_client,
+            adversarial_detector=None,  # No detector
+        )
+
+        result = await agent._screen_memories([sample_memory])
+
+        assert len(result) == 1
+        assert result[0] == sample_memory
+
+    @pytest.mark.asyncio
+    async def test_screening_analyzes_combined_content(
+        self,
+        mock_llm_client: MagicMock,
+        mock_adversarial_detector: MagicMock,
+        sample_memory: Any,
+    ) -> None:
+        """Test that screening analyzes both summary and content."""
+        mock_adversarial_detector.analyze.return_value = self.make_safe_detection()
+
+        agent = ImplicitCaptureAgent(
+            llm_client=mock_llm_client,
+            adversarial_detector=mock_adversarial_detector,
+        )
+
+        await agent._screen_memories([sample_memory])
+
+        # Verify the combined content was analyzed
+        call_args = mock_adversarial_detector.analyze.call_args[0][0]
+        assert sample_memory.summary in call_args
+        assert sample_memory.content in call_args
