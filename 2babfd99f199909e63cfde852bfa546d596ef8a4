@@ -66,3 +66,18 @@ tags:
 
     if args.format == "json":
         print(json.dumps(snapshot...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:58:26.445819+00:00'
+summary: '...Root Cause Analysis'
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
