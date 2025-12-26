@@ -1,0 +1,19 @@
+---
+type: decisions
+timestamp: '2025-12-26T04:30:49.262596+00:00'
+summary: '...**SessionStart** | Injects memory context at session start |'
+---
+
+...**SessionStart** | Injects memory context at session start |
+| **UserPromptSubmit** | Detects `[decision]`, `[learned]` markers |
+| **PostToolUse** | Surfaces related memories after file operations...
+
+---
+type: decisions
+timestamp: '2025-12-26T04:33:30.151199+00:00'
+summary: '...begins | Injects relevant memory context |'
+---
+
+...begins | Injects relevant memory context |
+| UserPromptSubmit | User sends message | Detects `[decision]`, `[learned]` markers |
+| PostToolUse | After Read/Write/Edit | Surfaces related memories...
