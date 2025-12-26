@@ -1,0 +1,15 @@
+---
+type: patterns
+timestamp: '2025-12-26T03:47:00.620005+00:00'
+summary: '...Automatically inherits parent context in async tasks'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...Automatically inherits parent context in async tasks
+- Thread-local would fail in async contexts
+- Pattern: `token = context_var.set(value)` → `context_var.reset(token)`
+
+**3. Hook performance is critical**...
