@@ -6692,3 +6692,19 @@ tags:
 | TEST-H-005 | Batcher Tests | ✅ Completed (26 tests) |
 | TEST-H-006 | Decorator Tests | ✅ Already exists (14 tests) |
 | TEST-H-007 |...
+
+---
+type: progress
+timestamp: '2025-12-26T16:56:09.558076+00:00'
+summary: '...```
+
+  [learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/ind...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
