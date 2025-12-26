@@ -1212,3 +1212,21 @@ tags:
             pattern = self.PATTERNS[name]
             for match in compiled.finditer(text):
                 detections.append...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:10.592214+00:00'
+summary: '...pattern.finditer(text):'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...pattern.finditer(text):
+            token = match.group()
+
+            # Check if already covered by pattern detector
+            # (entropy is fallback for unknown formats)
+
+            # Try base64...
