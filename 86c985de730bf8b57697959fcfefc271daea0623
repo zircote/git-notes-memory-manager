@@ -1,0 +1,22 @@
+---
+type: patterns
+timestamp: '2025-12-26T02:35:12.789531+00:00'
+summary: '...--format json'
+tags:
+- auto-captured
+- post-tool-use
+- file:observability.md
+---
+
+...--format json
+
+# Prometheus exposition format
+/memory:metrics --format prometheus
+
+# Filter by pattern
+/memory:metrics --filter "capture"
+```
+
+### Available Metrics
+
+| Metric | Type | Description...
