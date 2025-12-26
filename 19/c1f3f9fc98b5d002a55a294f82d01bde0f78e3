@@ -415,3 +415,15 @@ tags:
 ---
 
 The spec is still in `active/`, not `completed/`. Let me check what's missing:
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.987440+00:00'
+summary: 'To be clear about my earlier error: **I was wrong when I said Phase 5 wasn''t
+  implemented.** The O...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+To be clear about my earlier error: **I was wrong when I said Phase 5 wasn't implemented.** The OTLP exporter code exists and works (582 lines in `otlp.py`). The PROGRESS.md falsely...
