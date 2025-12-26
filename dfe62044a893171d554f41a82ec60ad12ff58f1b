@@ -894,3 +894,26 @@ Use Python's `extras_require` pattern to make observability dependencies optiona
 ```toml
 [project.optional-dependencies]
 monitoring...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.094786+00:00'
+summary: '...throughout codebase'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...throughout codebase
+3. **Global state**: Rejected - not thread-safe
+
+---
+
+## ADR-006: Decorator Pattern for Timing
+
+**Date**: 2025-12-25
+**Status**: Accepted
+**Deciders**: Claude (technical decision)
+
+###...
