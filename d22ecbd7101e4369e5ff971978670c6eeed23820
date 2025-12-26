@@ -1023,3 +1023,18 @@ tags:
 # Pattern to split multiple notes in a single git note
 # Each note starts with --- on its own line
 _MULTI_NOTE...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:08:10.544314+00:00'
+summary: '..."--get-all" in args_str and "remote.origin.fetch" in args_str:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_git_ops.py
+---
+
+..."--get-all" in args_str and "remote.origin.fetch" in args_str:
+                # Return old pattern
+                result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
+            elif "--unset"...
