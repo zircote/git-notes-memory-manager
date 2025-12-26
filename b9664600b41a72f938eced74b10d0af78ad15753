@@ -2277,3 +2277,18 @@ Added error message sanitization to prevent API keys from leaking into logs/exce
 ## Related Files
 - src/git_notes_memory/subconsciousness/providers/anthropic.py:66-81, 426-457
 - src/git_notes_memory/subconsciousness/providers/openai.py:61-76, 351-378
+
+---
+type: progress
+timestamp: '2025-12-26T15:29:45.436495+00:00'
+summary: '...────────────────────────────────────────────`
+
+  The `embed()` method already has the circuit br...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...────────────────────────────────────────────`
+
+The `embed()` method already has the circuit breaker implemented correctly. Now I need to add the same circuit breaker logic to `embed_batch()`. Let me update it:
