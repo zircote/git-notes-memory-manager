@@ -415,3 +415,19 @@ tags:
 
 - **Completed all Phase 3 tasks (3.1-3.4) - Structured Logging**
   - StructuredLogger already existed from...
+
+---
+type: progress
+timestamp: '2025-12-26T01:50:50.541620+00:00'
+summary: '...(guidance_builder, session_analyzer, etc.)'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...(guidance_builder, session_analyzer, etc.)
+  - Updated hook_utils.py with cleaned imports
+
+- **Completed all Phase 4 tasks (4.1-4.5) - CLI & Export**
+  - Created `/memory:metrics` command with `--format=text...
