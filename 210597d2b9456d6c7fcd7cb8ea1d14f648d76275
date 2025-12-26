@@ -255,3 +255,19 @@ tags:
 ## Executive Summary
 
 The `/claude-spec:deep-clean --focus=MAXALL` command completed successfully. 12 specialist agents reviewed the codebase, identifying 120 unique findings....
+
+---
+type: progress
+timestamp: '2025-12-26T02:43:56.201770+00:00'
+summary: '...Agent | Role | Status |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_REPORT.md
+---
+
+...Agent | Role | Status |
+|-------|------|--------|
+| Security Review | OWASP, secrets, auth | Completed |
+| Code Quality | Style, patterns, DRY | Completed |
+| Architecture | SOLID, modularity |...
