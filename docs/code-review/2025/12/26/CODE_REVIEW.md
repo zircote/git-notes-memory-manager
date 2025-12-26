@@ -1,481 +1,323 @@
 # Comprehensive Code Review Report
 
-**Project:** git-notes-memory
-**Date:** 2025-12-26
-**Branch:** v1.0.0 (rebased onto origin/v1.0.0)
-**Mode:** MAXALL (12+ agents, all severities, full verification)
+**Project:** git-notes-memory v1.0.0
+**Review Date:** 2025-12-26
+**Review Mode:** MAXALL (11 Parallel Specialist Agents)
+**Commit:** v1.0.0 (9204bc3)
 
 ---
 
 ## Executive Summary
 
-The git-notes-memory codebase demonstrates **mature engineering practices** with strong security controls, comprehensive documentation, and well-architected service layers. The codebase has explicit security annotations (SEC-XXX, CRIT-XXX, PERF-XXX) indicating security-conscious development.
+This comprehensive code review analyzed 75+ Python files across the git-notes-memory codebase using 11 parallel specialist agents. The codebase demonstrates **strong security practices** and **good architectural foundations**, but has notable technical debt in several areas requiring attention.
 
 ### Overall Health Scores
 
-| Dimension | Score | Assessment |
-|-----------|-------|------------|
-| Security | 9/10 | Excellent - defense-in-depth, no critical vulnerabilities |
-| Performance | 8/10 | Good - existing optimizations, minor improvements identified |
-| Architecture | 8.5/10 | Strong - clean layering, singleton patterns, dependency injection |
-| Code Quality | 8/10 | Good - consistent patterns, full type hints, minor complexity |
-| Test Coverage | 7.5/10 | Adequate - 80%+ coverage, some edge cases missing |
-| Documentation | 7/10 | Good - docstrings present, some gaps in external docs |
-| Database | 8/10 | Strong - proper indexes, WAL mode, parameterized queries |
-| Resilience | 7/10 | Adequate - timeouts present, circuit breakers missing |
-| Compliance | 8.5/10 | Strong - secrets filtering, audit logging, PII detection |
+| Dimension | Score | Status |
+|-----------|-------|--------|
+| Security | 8/10 | Good - Some SSRF/secrets exposure concerns |
+| Performance | 7/10 | Good - Missing FTS5, some N+1 patterns |
+| Architecture | 6/10 | Fair - God objects, inconsistent DI |
+| Code Quality | 7/10 | Good - DRY violations, complexity |
+| Test Coverage | 6/10 | Fair - Critical gaps in hooks/LLM providers |
+| Documentation | 7/10 | Good - Module docstrings gaps |
+| Resilience | 7/10 | Good - Missing embedding circuit breaker |
+| Compliance | 7/10 | Good - LLM data flow gaps |
+
+### Findings Summary
+
+| Severity | Count | Key Areas |
+|----------|-------|-----------|
+| CRITICAL | 4 | Embedding circuit breaker, LLM data filtering, user service global, hook handler coupling |
+| HIGH | 23 | Architecture debt, test gaps, security hardening, prompt injection |
+| MEDIUM | 42 | Performance optimization, documentation, compliance |
+| LOW | 28 | Code smells, edge cases, minor improvements |
 
 ---
 
-## Critical Findings (Immediate Action Required)
+## Critical Findings
 
-### CRIT-001: SQLite Connection Leak on Initialization Failure
+### CRIT-001: No Circuit Breaker for Embedding Service
+**Source:** Chaos Engineer
+**File:** `src/git_notes_memory/embedding.py:196-249`
+**Impact:** Session capture becomes extremely slow (30s per memory) if embedding repeatedly fails
 
-**File:** `src/git_notes_memory/index.py:217-250`
-**Severity:** CRITICAL
-**Category:** Resource Management
+The embedding service has timeout protection but no circuit breaker to prevent repeated calls to a failing model. If the sentence-transformer model enters a bad state, every `embed()` call waits for the full timeout.
 
-**Issue:** If `_create_schema()` fails after connection is established, connection is set to `None` without calling `close()`, potentially leaking file handles.
+**Remediation:** Add circuit breaker pattern similar to `llm_client.py`.
 
-**Current Code:**
-```python
-except Exception as e:
-    self._conn = None  # Connection not closed!
-    self._initialized = False
-```
+---
 
-**Remediation:**
-```python
-except Exception as e:
-    if self._conn is not None:
-        try:
-            self._conn.close()
-        except Exception:
-            pass
-    self._conn = None
-    self._initialized = False
-```
+### CRIT-002: LLM Prompts Sent Without Secrets Filtering
+**Source:** Compliance Auditor
+**File:** `src/git_notes_memory/subconsciousness/llm_client.py:456`
+**Impact:** PII in user transcripts may be sent to external LLM providers (GDPR Art. 44-49 violation)
+
+The `LLMRequest.messages` are sent directly to Anthropic/OpenAI without passing through `SecretsFilteringService.filter()`. User transcripts may contain PII.
+
+**Remediation:** Integrate secrets filtering before LLM API calls.
+
+---
+
+### CRIT-003: User Domain Service Uses Module Global State
+**Source:** Architecture Reviewer
+**File:** `src/git_notes_memory/capture.py:1264-1303`
+**Impact:** Not thread-safe, breaks ServiceRegistry abstraction, tests cannot reset
+
+The `get_user_capture_service()` uses module-level global `_user_capture_service` instead of `ServiceRegistry`, creating dual singleton patterns.
+
+**Remediation:** Register user capture service in ServiceRegistry.
+
+---
+
+### CRIT-004: Adversarial Screening Defined But Never Used
+**Source:** Prompt Engineer
+**File:** `src/git_notes_memory/subconsciousness/prompts.py:204-246`
+**Impact:** Prompt injection via memory capture possible; malicious content could be stored and re-injected
+
+The `ADVERSARIAL_SCREENING_PROMPT` and `get_adversarial_prompt()` function are defined but never called in the extraction pipeline.
+
+**Remediation:** Integrate adversarial screening into `implicit_capture_agent.py`.
 
 ---
 
 ## High Severity Findings
 
-### HIGH-001: No Retry Logic for Transient Git Failures
+### Security (3 findings)
 
-**File:** `src/git_notes_memory/git_ops.py:286-350`
-**Category:** Resilience
+| ID | Finding | File | Line |
+|----|---------|------|------|
+| SEC-H-001 | SSRF via OTLP Endpoint | `observability/exporters/otlp.py` | 61 |
+| SEC-H-002 | API Key Exposure in Error Messages | `subconsciousness/llm_client.py` | 688-700 |
+| SEC-H-003 | Stale Lock TOCTOU Race Condition | `capture.py` | 152-163 |
 
-**Issue:** Git commands fail immediately without retry on transient failures (index.lock contention, network issues).
+### Performance (5 findings)
 
-**Remediation:** Add retry decorator with exponential backoff for transient errors.
+| ID | Finding | File | Line |
+|----|---------|------|------|
+| PERF-H-001 | `get_all_ids()` Unbounded Memory | `index.py` | 787-817 |
+| PERF-H-002 | N+1 Query in Reindex | `sync.py` | 329 |
+| PERF-H-003 | Unbounded `collect_notes()` | `sync.py` | 235-261 |
+| PERF-H-004 | Cold Start on First Embedding | `embedding.py` | 125-173 |
+| PERF-H-005 | Missing FTS5 for Text Search | `index.py` | 1237-1286 |
 
----
+### Architecture (8 findings)
 
-### HIGH-002: Silent Failure in Audit Log Write
+| ID | Finding | File | Line |
+|----|---------|------|------|
+| ARCH-H-001 | IndexService God Object (37 methods) | `index.py` | 161-1459 |
+| ARCH-H-002 | GitOps Dual Responsibility | `git_ops.py` | 183-263 |
+| ARCH-H-003 | Observability Lazy `__getattr__` | `observability/__init__.py` | 61-147 |
+| ARCH-H-004 | Security Service Init Order | `security/service.py` | 60-88 |
+| ARCH-H-005 | Hooks Module 27 Classes | `hooks/` | - |
+| ARCH-H-006 | Subconsciousness Provider Inconsistency | `subconsciousness/providers/` | - |
+| ARCH-H-007 | Config Circular Import Risk | `config.py` | 1-32 |
+| ARCH-H-008 | 5 Different DI Patterns in Capture | `capture.py` | - |
 
-**File:** `src/git_notes_memory/security/audit.py:304-317`
-**Category:** Compliance
+### Test Coverage (7 findings)
 
-**Issue:** Audit log write failures are logged but don't block operations. For SOC2 compliance, this may need stricter handling.
-
-**Remediation:** Add `SECRETS_FILTER_AUDIT_STRICT=true` option to raise on audit failures.
-
----
-
-### HIGH-003: Thread Pool Not Properly Cleaned Up on Timeout
-
-**File:** `src/git_notes_memory/embedding.py:235-238`
-**Category:** Resource Management
-
-**Issue:** When embed operation times out, background thread continues running.
-
-**Remediation:** Document behavior; consider multiprocessing for true cancellation.
-
----
-
-### HIGH-004: Missing Circuit Breaker for External Service Calls
-
-**File:** `src/git_notes_memory/sync.py:686-731`
-**Category:** Resilience
-
-**Issue:** `sync_user_memories_with_remote()` lacks circuit breaker protection against repeated failures.
-
-**Remediation:** Implement circuit breaker pattern for remote operations.
-
----
-
-### HIGH-005: Missing Quick Start Section in README
-
-**File:** `README.md`
-**Category:** Documentation
-
-**Issue:** No minimal working example for new users.
-
-**Remediation:** Add Quick Start section with capture/recall example.
-
----
-
-### HIGH-006: Missing API.md and ENV.md Documentation
-
-**Files:** `docs/API.md`, `docs/ENV.md`
-**Category:** Documentation
-
-**Issue:** Referenced in CLAUDE.md but files don't exist.
-
-**Remediation:** Create consolidated environment variable reference.
-
----
-
-### HIGH-007: CHANGELOG Missing v0.12.0 Entry
-
-**File:** `CHANGELOG.md`
-**Category:** Documentation
-
-**Issue:** Current version 0.12.0 not documented.
-
-**Remediation:** Add changelog entry for 0.12.0 release.
+| ID | Finding | Files Missing Tests |
+|----|---------|---------------------|
+| TEST-H-001 | No handler tests | `session_start_handler.py`, `stop_handler.py`, `user_prompt_handler.py` |
+| TEST-H-002 | No provider tests | `anthropic.py`, `openai.py`, `ollama.py` |
+| TEST-H-003 | No novelty_checker tests | `novelty_checker.py` |
+| TEST-H-004 | No xml_formatter tests | `xml_formatter.py` |
+| TEST-H-005 | No batcher tests | `batcher.py` |
+| TEST-H-006 | Missing decorator tests | `observability/decorators.py` |
+| TEST-H-007 | Missing logging tests | `observability/logging.py` |
 
 ---
 
 ## Medium Severity Findings
 
-### MED-001: Unclosed SQLite Connection in Session Hook
-
-**File:** `src/git_notes_memory/hooks/session_start_handler.py:86-90`
-**Category:** Resource Management
-
-**Issue:** `_get_memory_count()` doesn't use try/finally for connection cleanup.
-
-**Remediation:** Wrap in try/finally block.
-
----
-
-### MED-002: Text Search Uses Inefficient LIKE Pattern
-
-**File:** `src/git_notes_memory/index.py:1247-1273`
-**Category:** Performance
-
-**Issue:** `LIKE '%term%'` requires full table scan - O(n) performance.
-
-**Remediation:** Consider FTS5 virtual table for text search.
-
----
-
-### MED-003: Missing Connection Pooling for Multi-threaded Access
-
-**File:** `src/git_notes_memory/index.py:180-198`
-**Category:** Performance
-
-**Issue:** Single shared connection with `check_same_thread=False`.
-
-**Remediation:** Consider thread-local connections for high concurrency.
-
----
-
-### MED-004: Batch Insert Doesn't Use executemany()
-
-**File:** `src/git_notes_memory/index.py:493-578`
-**Category:** Performance
-
-**Issue:** Individual execute() calls in loop slower than executemany().
-
-**Remediation:** Use INSERT OR IGNORE with executemany().
-
----
-
-### MED-005: Secrets Filtering Not Wired by Default in Capture
-
-**File:** `src/git_notes_memory/capture.py:326,346`
-**Category:** Compliance
-
-**Issue:** `get_default_service()` doesn't enable secrets filtering by default.
-
-**Remediation:** Enable by default or document explicit opt-in requirement.
-
----
-
-### MED-006: Database Migration Without Transaction Safety
-
-**File:** `src/git_notes_memory/index.py:291-311`
-**Category:** Data Integrity
-
-**Issue:** Partial migration failures could leave database inconsistent.
-
-**Remediation:** Per-migration-version transaction handling.
-
----
-
-### MED-007: No Fallback for Detect-Secrets Library Failure
-
-**File:** `src/git_notes_memory/security/detector.py:124-176`
-**Category:** Resilience
-
-**Issue:** Library failures cause entire filtering to fail.
-
-**Remediation:** Add basic pattern matching fallback.
-
----
-
-### MED-008: Session Start Hook Unbounded Fetch
-
-**File:** `src/git_notes_memory/hooks/session_start_handler.py:196-215`
-**Category:** Resilience
-
-**Issue:** Remote fetch can take arbitrarily long inside hook timeout.
-
-**Remediation:** Add explicit timeout to fetch operations.
-
----
-
-### MED-009: Capture Service Doesn't Verify Git State After Write
-
-**File:** `src/git_notes_memory/capture.py:716-724`
-**Category:** Data Integrity
-
-**Issue:** No verification that git note was actually written.
-
-**Remediation:** Read back and verify after write.
-
----
-
-### MED-010: RecallService No Query Complexity Limit
-
-**File:** `src/git_notes_memory/recall.py:200-206`
-**Category:** Resource Protection
-
-**Issue:** Very long queries could exhaust embedding model resources.
-
-**Remediation:** Add MAX_QUERY_LENGTH truncation.
-
----
-
-### MED-011: SyncService Reindex Can Exhaust Memory
-
-**File:** `src/git_notes_memory/sync.py:313-334`
-**Category:** Resource Protection
-
-**Issue:** Loads all memories into memory for batch embedding.
-
-**Remediation:** Process in memory-bounded chunks.
-
----
-
-### MED-012: User Prompt Handler Missing Rate Limiting
-
-**File:** `src/git_notes_memory/hooks/user_prompt_handler.py:131-178`
-**Category:** Resource Protection
-
-**Issue:** Rapid repeated calls could overload capture service.
-
-**Remediation:** Add simple rate limiter.
-
----
-
-### MED-013: DEVELOPER_GUIDE.md Deprecated Exception Reference
-
-**File:** `docs/DEVELOPER_GUIDE.md:511-523`
-**Category:** Documentation
-
-**Issue:** References `MemoryError` instead of `MemoryPluginError`.
-
-**Remediation:** Update exception examples.
-
----
-
-### MED-014: DEVELOPER_GUIDE.md Outdated Package Structure
-
-**File:** `docs/DEVELOPER_GUIDE.md:41-50`
-**Category:** Documentation
-
-**Issue:** Directory tree doesn't match actual hooks layout.
-
-**Remediation:** Update to show actual handler locations.
+### Database (4 findings)
+
+| ID | Finding | File | Line |
+|----|---------|------|------|
+| DB-M-001 | Missing ANALYZE After Bulk Ops | `sync.py` | 272-372 |
+| DB-M-002 | JSON Extraction in ORDER BY | `subconsciousness/capture_store.py` | 369-373 |
+| DB-M-003 | Connection Not Closed on Init Failure | `subconsciousness/capture_store.py` | 184-192 |
+| DB-M-004 | Missing Composite Index for Pending Query | `subconsciousness/capture_store.py` | 375-384 |
+
+### Compliance (6 findings)
+
+| ID | Finding | Regulation |
+|----|---------|------------|
+| COMP-M-001 | Limited PII Coverage | GDPR Art. 4(1), CCPA |
+| COMP-M-002 | API Keys From Env Without Audit | SOC2 CC6.1 |
+| COMP-M-003 | MASK Strategy Reveals Partial Secrets | SOC2 CC6.1 |
+| COMP-M-004 | Implicit Captures Stored Unencrypted | GDPR Art. 32, HIPAA |
+| COMP-M-005 | Structured Logs May Contain PII | GDPR Art. 32 |
+| COMP-M-006 | Raw API Responses Stored | SOC2 CC7.2 |
+
+### Code Quality (8 findings)
+
+| ID | Finding | File |
+|----|---------|------|
+| QUAL-M-001 | Validation Logic Duplicated (3 places) | `capture.py`, `hooks/` |
+| QUAL-M-002 | Pattern Scoring Complexity | `patterns.py:777-842` |
+| QUAL-M-003 | 11-Parameter Method | `capture.py:663-679` |
+| QUAL-M-004 | Deep Nesting in Signal Detector | `hooks/signal_detector.py:411-456` |
+| QUAL-M-005 | Silent Exception Handlers | `hooks/session_start_handler.py:196-215` |
+| QUAL-M-006 | Magic Numbers | `capture.py:180-182` |
+| QUAL-M-007 | Type Annotation Mismatches | `patterns.py:525-526` |
+| QUAL-M-008 | Config Loader Complexity | `hooks/config_loader.py` |
+
+### Prompt Engineering (4 findings)
+
+| ID | Finding | File |
+|----|---------|------|
+| PROMPT-M-001 | Coercive Guidance Language | `hooks/templates/guidance_standard.md` |
+| PROMPT-M-002 | Unsafe JSON Parsing | `subconsciousness/implicit_capture_agent.py` |
+| PROMPT-M-003 | Token Budget Not Enforced | `hooks/context_builder.py:187-222` |
+| PROMPT-M-004 | Missing Rate Limit Header Handling | `subconsciousness/llm_client.py:406-469` |
+
+### Resilience (5 findings)
+
+| ID | Finding | File |
+|----|---------|------|
+| RES-M-001 | User Index Race Condition | `recall.py:366-380` |
+| RES-M-002 | Unbounded Memory in Batch Operations | `sync.py:312-333` |
+| RES-M-003 | Rate Limiter Token Refund Race | `rate_limiter.py:243-250` |
+| RES-M-004 | No SQLite busy_timeout Set | `recall.py:326-337` |
+| RES-M-005 | File Loading Can Exhaust Memory | `recall.py:871-903` |
+
+### Documentation (6 findings)
+
+| ID | Finding | Files |
+|----|---------|-------|
+| DOC-M-001 | Missing Module Docstrings | 10+ files in hooks/, subconsciousness/ |
+| DOC-M-002 | Hook Handler Response Format Missing | stop_handler.py, pre_compact_handler.py |
+| DOC-M-003 | LLM Provider Docs Missing | providers/*.py |
+| DOC-M-004 | Observability Export Formats Missing | exporters/*.py |
+| DOC-M-005 | Security Module Docs Incomplete | security/*.py |
+| DOC-M-006 | Environment Variables Not Documented | .env.example incomplete |
 
 ---
 
 ## Low Severity Findings
 
-### LOW-001: ThreadPoolExecutor Overhead per Embedding Call
+### Security (3 findings)
+- SEC-L-001: Environment Variable Range Validation (`config.py`)
+- SEC-L-002: Debug Logging May Leak Details (`HOOK_DEBUG`)
+- SEC-L-003: .env Injection Risk (`config.py:32`)
 
-**File:** `src/git_notes_memory/embedding.py:235-238`
-**Category:** Performance
+### Performance (4 findings)
+- PERF-L-001: Redundant Domain Index (`index.py:107-108`)
+- PERF-L-002: k*3 Over-fetch in Vector Search (`index.py:1193`)
+- PERF-L-003: Thread Lock Inconsistency (`capture_store.py` vs `index.py`)
+- PERF-L-004: Unbounded Metrics Buffer (`metrics.py:129-131`)
 
-**Issue:** New executor per call incurs ~0.1-1ms overhead.
+### Architecture (7 findings)
+- ARCH-L-001: RecallService Duplicates Lazy Init (`recall.py`)
+- ARCH-L-002: SyncService Duplicates Lazy Init (`sync.py`)
+- ARCH-L-003: ContextBuilder Mutable State (`context_builder.py:88-92`)
+- ARCH-L-004: Search Optimizer Not Used (`search.py`)
+- ARCH-L-005: Metrics Collection No Export (`metrics.py`)
+- ARCH-L-006: Verify Consistency Not Called (`index.py`)
+- ARCH-L-007: Utils Module Lacks Public Interface (`utils.py`)
 
-**Remediation:** Acceptable tradeoff for timeout safety.
+### Code Quality (4 findings)
+- QUAL-L-001: Warning Duplication (`security/redactor.py`)
+- QUAL-L-002: Documentation Gaps (`various`)
+- QUAL-L-003: Module Organization (`hooks/`)
+- QUAL-L-004: Long Functions (`index.py`)
 
----
+### Resilience (4 findings)
+- RES-L-001: No Corrupted DB Detection (`index.py`)
+- RES-L-002: Domain Cache Never Auto-Clears (`git_ops.py`)
+- RES-L-003: Batcher No Executor Timeout (`batcher.py`)
+- RES-L-004: Git Version Detection Caches Failure (`git_ops.py`)
 
-### LOW-002: Repeated Config Lookup in Metrics Decorators
-
-**File:** `src/git_notes_memory/observability/decorators.py:91`
-**Category:** Performance
-
-**Issue:** `get_config()` called per decorated function invocation.
-
-**Remediation:** Minor issue - @lru_cache already mitigates.
-
----
-
-### LOW-003: Histogram Percentile Calculation Overhead
-
-**File:** `src/git_notes_memory/observability/metrics.py:328-336`
-**Category:** Performance
-
-**Issue:** Sorts all samples on each export (O(n log n)).
-
-**Remediation:** Bounded by max_samples=3600 - acceptable.
-
----
-
-### LOW-004: Missing status+timestamp Index
-
-**File:** `src/git_notes_memory/index.py:100-121`
-**Category:** Database
-
-**Issue:** No composite index for status-filtered recency queries.
-
-**Remediation:** Add `idx_memories_status_timestamp`.
+### Penetration Testing (6 findings)
+- PEN-L-001: Unicode Normalization Bypass Potential (`git_ops.py:165`)
+- PEN-L-002: Git Ref DoS Potential (`git_ops.py:404`)
+- PEN-L-003: Allowlist Corruption DoS (`allowlist.py:123`)
+- PEN-L-004: API Key Logging Exposure (`subconsciousness/config.py`)
+- PEN-L-005: JSON Nesting Depth Limit (`hook_utils.py:386`)
+- PEN-L-006: PII Pattern Bypass Potential (`hook_utils.py:487`)
 
 ---
 
-### LOW-005: Database File Permissions Not Explicit
+## Positive Observations
 
-**File:** `src/git_notes_memory/index.py:218-225`
-**Category:** Security
+### Security Strengths
+- Parameterized SQL queries throughout (no SQL injection)
+- `yaml.safe_load()` with 64KB size limit (billion laughs prevention)
+- Path traversal prevention with comprehensive validation
+- Symlink attack detection (SEC-HIGH-001 mitigation)
+- Hash-based secret storage (SHA-256)
+- Comprehensive secrets filtering with PII detection
+- Luhn validation for credit cards (reduces false positives)
 
-**Issue:** SQLite uses default umask instead of explicit 0o600.
+### Performance Strengths
+- WAL mode enabled for SQLite concurrency
+- Batch operations throughout (insert_batch, embed_batch, etc.)
+- Iterator-based pagination available
+- Struct caching for embedding serialization
+- Lazy model loading
 
-**Remediation:** Add `self.db_path.chmod(0o600)` after creation.
-
----
-
-### LOW-006: Path Sanitization Could Be More Comprehensive
-
-**File:** `src/git_notes_memory/git_ops.py:314-342`
-**Category:** Security
-
-**Issue:** `_looks_like_path()` may miss some relative paths.
-
-**Remediation:** Extend regex for broader coverage.
-
----
-
-### LOW-007: Float Config Parsing Lacks Bounds Checking
-
-**File:** `src/git_notes_memory/security/config.py:139-140`
-**Category:** Input Validation
-
-**Issue:** Confidence threshold parsed without 0.0-1.0 validation.
-
-**Remediation:** Add bounds checking.
-
----
-
-### LOW-008: Metrics Collector Unbounded Labels
-
-**File:** `src/git_notes_memory/observability/metrics.py:152-178`
-**Category:** Resource Protection
-
-**Issue:** Dynamic labels could cause unbounded memory growth.
-
-**Remediation:** Add MAX_LABEL_CARDINALITY limit.
-
----
-
-### LOW-009: Stop Handler No Graceful Shutdown on SIGTERM
-
-**File:** `src/git_notes_memory/hooks/stop_handler.py:355-522`
-**Category:** Resilience
-
-**Issue:** In-flight operations may be interrupted without cleanup.
-
-**Remediation:** Add signal handlers for graceful shutdown.
-
----
-
-### LOW-010: show_notes_batch Fallback Swallows Errors
-
-**File:** `src/git_notes_memory/git_ops.py:552-554`
-**Category:** Debugging
-
-**Issue:** Batch fetch failures silently fall back without logging cause.
-
-**Remediation:** Add warning log with exception details.
-
----
-
-### LOW-011: Missing Security README
-
-**File:** `src/git_notes_memory/security/`
-**Category:** Documentation
-
-**Issue:** Security subsystem lacks dedicated README.
-
-**Remediation:** Add security/README.md with overview.
-
----
-
-### LOW-012: Missing Observability Env Vars in CLAUDE.md
-
-**File:** `CLAUDE.md`
-**Category:** Documentation
-
-**Issue:** New observability variables not documented.
-
-**Remediation:** Add observability configuration table.
-
----
-
-## Positive Findings (No Action Required)
-
-1. **Security:** No command injection, SQL injection, or path traversal vulnerabilities found
-2. **Security:** SHA-256 used for allowlist hashing
-3. **Security:** YAML safe_load() used exclusively
-4. **Security:** Symlink attack prevention (O_NOFOLLOW)
-5. **Performance:** Excellent batch operations (git cat-file --batch)
-6. **Performance:** Cached struct format for embeddings
-7. **Performance:** WAL mode enabled for SQLite
-8. **Performance:** Proper pagination support (PERF-HIGH-001)
-9. **Architecture:** Clean service layer pattern
-10. **Architecture:** Thread-safe registry with double-checked locking
-11. **Compliance:** Comprehensive secrets detection (detect-secrets + custom PII)
-12. **Compliance:** SOC2/GDPR audit logging with rotation
-13. **Type Safety:** Full type annotations throughout
+### Resilience Strengths
+- Circuit breaker in LLM client with half-open recovery
+- Timeout protection on critical operations
+- Graceful degradation (embedding failures don't block capture)
+- Stale lock detection and cleanup
+- Proper transaction rollback
+- Retry with exponential backoff for API calls
+- Structured exceptions with recovery hints
 
 ---
 
 ## Remediation Priority
 
-### Immediate (< 1 day)
-1. CRIT-001: SQLite connection leak fix
-2. MED-001: Session hook connection cleanup
+### Immediate Actions (Critical - Day 1)
+1. **CRIT-001:** Add circuit breaker to embedding service
+2. **CRIT-002:** Integrate secrets filtering for LLM prompts
+3. **CRIT-003:** Move user capture service to ServiceRegistry
+4. **CRIT-004:** Activate adversarial screening
 
-### Short-term (1-3 days)
-3. HIGH-002: Audit log strict mode option
-4. HIGH-005-007: Documentation gaps (README, API.md, CHANGELOG)
-5. MED-002: Consider FTS5 for text search
-6. MED-004: Batch insert optimization
+### Short-term Actions (High - Week 1)
+5. **ARCH-H-001:** Split IndexService into SchemaManager, MemoryRepository, SearchEngine
+6. **ARCH-H-002:** Create GitOpsFactory separate from GitOps
+7. **TEST-H-001:** Add tests for hook handlers (session_start, stop, user_prompt)
+8. **TEST-H-002:** Add tests for LLM providers (anthropic, openai, ollama)
+9. **PERF-H-005:** Add FTS5 virtual table for text search
+10. **SEC-H-001:** Validate OTLP endpoint URLs (SSRF prevention)
 
-### Medium-term (1 week)
-7. HIGH-001: Git retry logic
-8. HIGH-004: Circuit breaker implementation
-9. MED-005: Secrets filtering default-enabled
-10. MED-006: Migration transaction safety
+### Medium-term Actions (Week 2-3)
+11. Consolidate lazy initialization patterns
+12. Add encryption at rest for implicit captures
+13. Extend PII patterns (email, IP, passport)
+14. Add module docstrings to undocumented files
+15. Implement proper token counting with Anthropic's tokenizer
 
-### Long-term (backlog)
-11. All LOW severity items
-12. Performance optimizations (connection pooling, etc.)
+### Long-term Actions (Backlog)
+16. All LOW severity findings
+17. Performance optimizations (FTS5, connection pooling)
+18. Complete test coverage for edge cases
 
 ---
 
-## Appendix: Agent Reports
+## Methodology
 
-Full reports from each specialist agent are available:
-- Security Analyst: Strong security posture (A-)
-- Performance Engineer: Well-optimized with minor improvements
-- Database Expert: Good schema design, consider FTS5
-- Resilience Engineer: 16 issues identified, mostly MEDIUM
-- Compliance Auditor: 8.5/10 compliance score
-- Documentation Reviewer: Good coverage, gaps in external docs
-- Test Coverage: 80%+ minimum enforced, some edge cases missing
+This review used 11 parallel specialist agents:
+
+| Agent | Focus Area | Finding Count |
+|-------|------------|---------------|
+| Security Analyst | OWASP Top 10, secrets, input validation | 6 |
+| Performance Engineer | Query optimization, memory, concurrency | 20 |
+| Architecture Reviewer | SOLID principles, patterns, coupling | 22 |
+| Code Quality Analyst | DRY, complexity, naming | 15 |
+| Test Coverage Analyst | Missing tests, edge cases | 30 |
+| Documentation Reviewer | Docstrings, README, guides | 6 |
+| Database Expert | SQLite optimization, indexing | 10 |
+| Penetration Tester | Attack vectors, bypass scenarios | 10 |
+| Compliance Auditor | GDPR, SOC2, HIPAA patterns | 20 |
+| Chaos Engineer | Failure scenarios, resilience | 13 |
+| Prompt Engineer | LLM usage, context management | 10 |
+
+Each agent performed thorough file-by-file analysis using the codebase exploration pattern.
+
+---
+
+*Report generated by MAXALL deep-clean code review - 2025-12-26*
