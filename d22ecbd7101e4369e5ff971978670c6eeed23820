@@ -111,3 +111,15 @@ tags:
 
 `★ Insight ─────────────────────────────────────`
 The query methods follow a consistent pattern: build SQL with optional filters, use parameterized queries. Adding domain filtering will follow...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.874937+00:00'
+summary: '...optional filters, use parameterized queries. Adding domain filtering
+  will follow the same patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...optional filters, use parameterized queries. Adding domain filtering will follow the same pattern - an optional `domain: str | None = None` parameter and adding `AND domain = ?` when it's set....
