@@ -7357,3 +7357,31 @@ Extracted factory methods from GitOps into dedicated GitOpsFactory class followi
 ## Related Files
 - src/git_notes_memory/git_ops.py:184-267 (new GitOpsFactory class)
 - src/git_notes_memory/git_ops.py:290-327 (updated GitOps with delegation)
+
+---
+type: progress
+timestamp: '2025-12-26T16:56:11.094906+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed ARCH-H-006: Subconsciousness Provider ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed ARCH-H-006: Subconsciousness Provider Inconsistency
+## Summary
+Standardized LLM provider implementations across Anthropic, OpenAI, and Ollama.
+
+## Changes Made
+- Refactored `providers/__init__.py` to use dict-based lazy imports (consistent with ARCH-H-003)
+- Added jitter to OpenAI retry logic (was missing vs Anthropic)
+- Added jitter to Ollama retry logic
+- Added `_sanitize_error_message` to Ollama (was missing vs Anthropic/OpenAI)
+- Added test for Ollama error sanitization
+
+## Related Files
+- src/git_notes_memory/subconsciousness/providers/__init__.py:152-200
+- src/git_notes_memory/subconsciousness/providers/openai.py:337-377
+- src/git_notes_memory/subconsciousness/providers/ollama.py:48-79, 400-439
+- tests/subconsciousness/test_providers.py:696-712
