@@ -101,3 +101,37 @@ tags:
 
 > We decided to use PostgreSQL instead of SQLite for the production
 > database because we need concurrent...
+
+---
+type: decisions
+timestamp: '2025-12-26T03:17:08.395549+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Approved SPEC-2025-12-25-001 (LLM-Powered Subcon...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Approved SPEC-2025-12-25-001 (LLM-Powered Subconsciousness)
+## Context
+The specification defines a comprehensive LLM-powered subconsciousness layer for autonomous memory management. After reviewing the 3,216 lines of specification across 6 documents, the spec demonstrates:
+- Clear problem definition with 5 identified pain points
+- Well-structured architecture with 7 components and 13 ADRs
+- Detailed implementation plan with 85 tasks across 6 phases
+- Grounded research foundation (CognitiveSubstrate, MemGPT, A-MEM)
+
+## Decision
+Approved the specification for implementation with formal approval recorded in README.md frontmatter and CHANGELOG.md.
+
+## Rationale
+- All required documents complete and comprehensive
+- Clear success metrics with measurable targets (>70% acceptance, >30% redundancy reduction, etc.)
+- Risk mitigation strategies documented for top 3 risks
+- Architecture follows existing codebase patterns (frozen dataclasses, Protocol-based abstractions)
+- LLM output templates ensure compatibility with existing note_parser.py format
+- Phased implementation with verification gates enables incremental delivery
+
+## Related Files
+- docs/spec/active/2025-12-25-llm-subconsciousness/README.md:9-10
+- docs/spec/active/2025-12-25-llm-subconsciousness/CHANGELOG.md:7-9
