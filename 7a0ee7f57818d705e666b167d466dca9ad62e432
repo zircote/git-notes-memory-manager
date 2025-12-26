@@ -702,3 +702,31 @@ The signal detector runs on UserPromptSubmit hook which only sees user input. Me
 ## Related Files
 - src/git_notes_memory/hooks/user_prompt_handler.py
 - src/git_notes_memory/hooks/signal_detector.py:183-190
+
+---
+type: learnings
+timestamp: '2025-12-26T20:11:07.599456+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Duplicate labels caused by double resource attrib...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Duplicate labels caused by double resource attribute injection
+## Root Cause Analysis
+The `service.name` attribute is being added twice:
+1. Python's `OTLPExporter._make_resource()` adds it in the OTLP payload
+2. Collector's `resource` processor (lines 36-40) adds it again via upsert
+
+When Prometheus exporter converts resource→labels, duplicates occur.
+
+## Fix Options
+1. Remove resource processor from metrics pipeline in collector config
+2. Add `resource_to_telemetry_conversion: disabled` to prometheus exporter
+3. Ensure Python and collector don't both add same attributes
+
+## Related Files
+- docker/otel-collector-config.yaml:35-43 (resource processor)
+- src/git_notes_memory/observability/exporters/otlp.py:193-206 (_make_resource)
