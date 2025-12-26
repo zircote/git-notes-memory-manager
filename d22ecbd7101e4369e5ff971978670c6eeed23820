@@ -514,3 +514,15 @@ tags:
 
 `★ Insight ─────────────────────────────────────`
 The...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.436303+00:00'
+summary: '...I''ve completed Task 4.1 (Add Domain Markers to SignalDetector) and Task
+  4.2 (Extend Block Patt...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...I've completed Task 4.1 (Add Domain Markers to SignalDetector) and Task 4.2 (Extend Block Pattern for Domain Prefix) since they were both implemented together. Let me update the PROGRESS.md...
