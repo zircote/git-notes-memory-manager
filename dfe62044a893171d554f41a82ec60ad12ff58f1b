@@ -559,3 +559,23 @@ tags:
 | **Entropy Threshold** | 3.0 hex / 4.5 base64 | Industry standard, balanced FP/FN |
 | **Pattern Priority** | Deterministic first | Highest confidence, fastest |
 | **Keyword Context** | Required...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:07:20.092457+00:00'
+summary: '...handling'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...handling
+
+**Acceptance Criteria**:
+- Protocol is runtime-checkable
+- Supports async/await pattern
+- Clear interface documentation
+
+#### 1.4 Implement Anthropic provider
+- [ ] Create `src/git_notes_memory...
