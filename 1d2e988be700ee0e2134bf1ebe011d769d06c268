@@ -26,3 +26,19 @@ tags:
 
 - `docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability Instrumentation
   - Completed:...
+
+---
+type: progress
+timestamp: '2025-12-26T03:56:12.708343+00:00'
+summary: '...`docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability
+  Instrumentation'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...`docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability Instrumentation
+  - Completed: 2025-12-26
+  - Outcome: success
+  - GitHub Issue: [#10](https://github.com/zircote/git-notes-memory...
