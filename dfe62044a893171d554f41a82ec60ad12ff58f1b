@@ -1,0 +1,15 @@
+---
+type: patterns
+timestamp: '2025-12-26T00:00:15.697553+00:00'
+summary: '...functionality |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...functionality |
+| Graceful degradation | Silent fallback if monitoring unavailable | Optional extras pattern |
+| Thread safety | Full thread-safe metrics | Concurrent hook invocations |
+
+## Technical...
