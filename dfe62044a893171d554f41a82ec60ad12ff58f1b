@@ -522,3 +522,20 @@ tags:
 ### Summary
 
 I've completed the specification for **Observability Instrumentation and Distributed Tracing** (SPEC-2025-12-25-001...
+
+---
+type: progress
+timestamp: '2025-12-26T00:16:48.904240+00:00'
+summary: '...ADRs'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...ADRs
+  - Key docs: REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md
+
+## Completed Spec Projects
+
+- `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes...
