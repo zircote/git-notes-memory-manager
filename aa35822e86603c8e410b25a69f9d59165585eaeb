@@ -246,3 +246,23 @@ summary: '...resolution logic'
 
 **Pattern repeated across 12+ commands:**
 - `audit-log.md`, `capture.md`, `recall.md`, `scan-secrets...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:16:36.284748+00:00'
+summary: '...Root Cause Analysis
+
+  **The issue occurs due to a mismatch between the expected plugin path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
