@@ -205,3 +205,20 @@ tags:
 **Example Output (text)**:
 ```
 Memory...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:52.966236+00:00'
+summary: '...**deterministic prefixes** and are highly reliable with minimal false
+  positives:'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...**deterministic prefixes** and are highly reliable with minimal false positives:
+
+| Provider | Pattern | Regex | Notes |
+|----------|---------|-------|-------|
+| **OpenAI** | `sk-` prefix (legacy)...
