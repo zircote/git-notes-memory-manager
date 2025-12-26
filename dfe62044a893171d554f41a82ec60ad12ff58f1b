@@ -168,3 +168,22 @@ tags:
 - **Acceptance Criteria**:
   - [ ] Block pattern regex updated for optional domain prefix
   - [ ] `global:`, `user:` prefix sets USER domain...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:01:28.096724+00:00'
+summary: '...XMLBuilder.add_memory_element()`'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...XMLBuilder.add_memory_element()`
+
+### Phase 4 Deliverables
+- [ ] Domain marker detection
+- [ ] Block pattern with domain prefix
+- [ ] Handler integration
+- [ ] Multi-domain context building
+- [ ] Tests...
