@@ -307,3 +307,43 @@ Comprehensive specification for GitHub Issue #13 completed planning phase with f
 - docs/spec/active/2025-12-25-multi-domain-memories/README.md:5-8
 - docs/spec/active/2025-12-25-multi-domain-memories/README.md:63
 - docs/spec/active/2025-12-25-multi-domain-memories/CHANGELOG.md:5-10
+
+---
+type: decisions
+timestamp: '2025-12-26T02:50:39.796330+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Multi-Domain Memories implementation complete
+
+  #...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Multi-Domain Memories implementation complete
+## Summary
+All 24 tasks across 5 phases of the Multi-Domain Memories specification (SPEC-2025-12-25-001) are now complete.
+
+## Rationale
+The implementation provides:
+- Two-domain architecture: PROJECT (repo-scoped) vs USER (global, cross-project)
+- User memories stored in bare repo at ~/.local/share/memory-plugin/user-memories/
+- Domain markers in signal detection: [global], [user] → USER; [project], [local] → PROJECT
+- Block pattern domain prefix: `global:decision`, `user:learned`
+- Optional remote sync for user memories via USER_MEMORIES_REMOTE
+- Auto-sync hooks: HOOK_SESSION_START_FETCH_USER_REMOTE, HOOK_STOP_PUSH_USER_REMOTE
+- Domain filtering in /memory:recall and /memory:search commands
+
+## Implementation Stats
+- 24 tasks completed
+- 5 phases (Foundation, Storage, Service, Hooks, Sync & Polish)
+- 1955 tests passing
+- Commands updated: /memory:status, /memory:recall, /memory:search
+
+## Related Files
+- src/git_notes_memory/config.py (Domain enum, user paths)
+- src/git_notes_memory/git_ops.py (for_domain factory, user repo init)
+- src/git_notes_memory/sync.py (user memory sync, remote sync)
+- src/git_notes_memory/hooks/config_loader.py (user remote hooks)
+- commands/status.md, recall.md, search.md (domain filtering)
