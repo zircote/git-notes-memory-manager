@@ -172,3 +172,15 @@ tags:
 The multi-domain search architecture follows a **parallel query + merge** pattern:
 1. When `domain=None`, we query both project and user indexes in parallel
 2. Results are merged...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:52.189511+00:00'
+summary: Good. Now let me check if there are existing tests for models.py that I should
+  follow the pattern...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Good. Now let me check if there are existing tests for models.py that I should follow the pattern of:
