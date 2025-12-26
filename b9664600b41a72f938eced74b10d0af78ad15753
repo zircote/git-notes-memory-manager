@@ -3581,3 +3581,15 @@ tags:
 ...module has default recursion limit; memory protection via content limits
 - [x] PEN-L-006: PII Pattern Bypass Potential ✅
   - **Status:** DOCUMENTED LIMITATION - Pattern-based detection has known...
+
+---
+type: patterns
+timestamp: '2025-12-26T17:20:07.576054+00:00'
+summary: '...I''m using is wrong. I should check if it exists, and if not, create
+  and register. The proper p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...I'm using is wrong. I should check if it exists, and if not, create and register. The proper pattern should use the `try...KeyError` approach or a different mechanism. Let me look at how other...
