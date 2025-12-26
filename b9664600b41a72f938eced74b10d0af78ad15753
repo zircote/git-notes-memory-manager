@@ -6449,3 +6449,18 @@ tags:
 | CRIT-001 | Circuit Breaker for Embedding Service | ✅ Completed |
 | CRIT-002 | Secrets Filtering for LLM Prompts | ✅ Completed |
 | CRIT-003 | User Capture...
+
+---
+type: progress
+timestamp: '2025-12-26T16:55:27.077737+00:00'
+summary: '...Breaker for Embedding Service | ✅ Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...Breaker for Embedding Service | ✅ Completed |
+| CRIT-002 | Secrets Filtering for LLM Prompts | ✅ Completed |
+| CRIT-003 | User Capture Service to ServiceRegistry | ✅ Completed |
+| CRIT-004 | Adversarial...
