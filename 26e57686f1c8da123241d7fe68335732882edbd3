@@ -250,3 +250,19 @@ tags:
 ---
 
 ...`CounterValue` because the first loop uses that variable name for counters, and then it's reused. The fix is to use different variable names or to add explicit type annotations. Let me add explicit type...
+
+---
+type: progress
+timestamp: '2025-12-26T01:40:37.421009+00:00'
+summary: '.../memory:traces [--operation=<name>] [--status=ok|error] [--limit=<n>]'
+tags:
+- auto-captured
+- post-tool-use
+- file:traces.md
+---
+
+.../memory:traces [--operation=<name>] [--status=ok|error] [--limit=<n>]
+
+DESCRIPTION
+    Display completed trace spans from memory operations. Useful for debugging
+    performance issues and understanding...
