@@ -1258,9 +1258,7 @@ class TestBlockPatternDomainPrefix:
         assert signals[0].type == SignalType.LEARNING
         assert signals[0].domain == Domain.USER
 
-    def test_project_prefix_sets_project_domain(
-        self, detector: SignalDetector
-    ) -> None:
+    def test_project_prefix_sets_project_domain(self, detector: SignalDetector) -> None:
         """Test project: prefix explicitly sets PROJECT domain."""
         text = (
             "▶ project:blocker ─────────────────────────────────────\n"
@@ -1284,9 +1282,7 @@ class TestBlockPatternDomainPrefix:
         assert signals[0].type == SignalType.PROGRESS
         assert signals[0].domain == Domain.PROJECT
 
-    def test_all_block_types_with_domain_prefix(
-        self, detector: SignalDetector
-    ) -> None:
+    def test_all_block_types_with_domain_prefix(self, detector: SignalDetector) -> None:
         """Test all block types work with domain prefix."""
         block_types = [
             ("decision", SignalType.DECISION),
@@ -1306,9 +1302,9 @@ class TestBlockPatternDomainPrefix:
             )
             signals = detector.detect(text)
             assert len(signals) == 1, f"No signal for {block_type}"
-            assert (
-                signals[0].type == expected_signal_type
-            ), f"Wrong type for {block_type}"
+            assert signals[0].type == expected_signal_type, (
+                f"Wrong type for {block_type}"
+            )
             assert signals[0].domain == Domain.USER, f"Wrong domain for {block_type}"
 
     def test_block_domain_prefix_case_insensitive(

@@ -7,6 +7,7 @@ memory capture and recall throughout a development session.
 """
 
 from datetime import datetime
+
 from git_notes_memory import get_capture_service, get_recall_service, get_sync_service
 
 
@@ -239,7 +240,7 @@ def session_end():
     if result.is_consistent:
         print("Index is consistent with git notes.")
     else:
-        print(f"Found inconsistencies:")
+        print("Found inconsistencies:")
         print(f"  - Missing in index: {len(result.missing_in_index)}")
         print(f"  - Orphaned in index: {len(result.orphaned_in_index)}")
 

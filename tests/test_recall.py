@@ -1334,7 +1334,9 @@ class TestDomainAwareSearch:
 
         # Patch _get_user_index to raise an exception
         # QUAL-HIGH-001: Use specific exception type that we catch
-        with patch.object(service, "_get_user_index", side_effect=OSError("No user index")):
+        with patch.object(
+            service, "_get_user_index", side_effect=OSError("No user index")
+        ):
             results = service.search("database", k=10, domain=None)
 
         # Should still return project results
@@ -1512,7 +1514,6 @@ class TestDomainConvenienceMethods:
         user_memory: Memory,
     ) -> None:
         """Test search_user delegates to search with USER domain."""
-        from git_notes_memory.config import Domain
 
         mock_user_index = MagicMock()
         mock_user_index.search_vector.return_value = [(user_memory, 0.3)]
