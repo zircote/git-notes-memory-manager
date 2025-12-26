@@ -1230,3 +1230,23 @@ tags:
             # (entropy is fallback for unknown formats)
 
             # Try base64...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:10.624552+00:00'
+summary: '...Dependencies**: None'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Dependencies**: None
+- **Technology**: Regex + Luhn algorithm
+
+```python
+class PIIDetector:
+    """PII pattern detection."""
+
+    def __init__(self) -> None:
+        self._ssn_pattern = re.compile(r"\b\d{3}-\d{2...
