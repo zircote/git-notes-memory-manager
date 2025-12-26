@@ -8361,3 +8361,16 @@ tags:
 
 - [x] RES-M-001: User Index Race Condition (`recall.py:366-380`) ✅
   - **Completed:** 2025-12-26 - Added `threading.Lock` with double-checked locking pattern
+
+---
+type: progress
+timestamp: '2025-12-26T17:10:20.241547+00:00'
+summary: '- [x] RES-M-005: File Loading Can Exhaust Memory (`recall.py:871-903`) ✅'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+- [x] RES-M-005: File Loading Can Exhaust Memory (`recall.py:871-903`) ✅
+  - **Completed:** 2025-12-26 - Added limits: 50 files max, 512KB per file, 5MB total
