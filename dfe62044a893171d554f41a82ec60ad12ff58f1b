@@ -1059,3 +1059,20 @@ Use `/memory:*` pattern for observability commands:
 - `/memory:metrics` - View metrics
 - `/memory:traces` - View traces
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:11:10.347774+00:00'
+summary: '...only depend on `opentelemetry-api`'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...only depend on `opentelemetry-api`
+   - SDK is application's choice
+   - Follows our extras pattern perfectly
+
+2. **Version Compatibility**:
+   - Use `~= 1.32.0` style for tight compatibility...
