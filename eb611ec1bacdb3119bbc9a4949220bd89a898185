@@ -118,3 +118,22 @@ tags:
 ---
 
 Those unreachable warnings are for the final `return None` statements which are correct pattern for exhaustive enum handling. Now let me create the models.py file:
+
+---
+type: patterns
+timestamp: '2025-12-26T02:34:46.739417+00:00'
+summary: '...ThreatLevel.CRITICAL)'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_adversarial.py
+---
+
+...ThreatLevel.CRITICAL)
+        assert result.detection.should_block
+        assert any(
+            pattern in result.detection.patterns_found
+            for pattern in expected_patterns
+        )
+
+#...
