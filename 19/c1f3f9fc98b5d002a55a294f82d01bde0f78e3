@@ -200,3 +200,29 @@ tags:
 **What WOULD work:**
 - If YOU write `[decision] Use sync_notes_with_remote` in your message, the hook captures it
 - My blocks are just visual...
+
+---
+type: decisions
+timestamp: '2025-12-26T20:26:47.977545+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  Approved spec SPEC-2025-12-26-001 for implementa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Approved spec SPEC-2025-12-26-001 for implementation
+## Context
+After reviewing the complete specification for the multi-worktree sync fix (Issue #28), the spec was approved with all required documents validated.
+
+## Rationale
+- All 5 required documents present (README, REQUIREMENTS, ARCHITECTURE, IMPLEMENTATION_PLAN, DECISIONS)
+- Clear problem statement with race condition diagrams
+- Minimal risk - using existing proven sync method from Issue #18
+- Well-scoped: single-line code change with comprehensive testing plan
+- 5 ADRs documenting key architectural decisions
+
+## Related Files
+- docs/spec/active/2025-12-26-multi-worktree-sync-fix/README.md (status: approved)
+- docs/spec/active/2025-12-26-multi-worktree-sync-fix/CHANGELOG.md (approval recorded)
