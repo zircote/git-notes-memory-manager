@@ -792,3 +792,18 @@ tags:
 
 - **Pattern updates**: Patterns in separate module for easy updates
 - **Test coverage**: >90% coverage...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:15.809078+00:00'
+summary: '...|'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...|
+| Performance regression | Low | Medium | Lazy compilation, benchmark tests |
+| Incomplete pattern coverage | Medium | High | Extensible pattern system, updates |
+| Allowlist bypass | Low |...
