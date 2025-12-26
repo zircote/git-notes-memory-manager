@@ -211,3 +211,14 @@ tags:
 ---
 
 test content
+
+---
+type: learnings
+timestamp: '2025-12-26T13:09:08.167898+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
