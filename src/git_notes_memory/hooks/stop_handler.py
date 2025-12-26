@@ -502,25 +502,98 @@ def main() -> None:
                 # Don't block session - just log and continue
                 logger.debug("User memory remote push skipped: %s", e)
 
-        # Export metrics and traces to OTLP collector before session ends
+        # Export metrics, traces, and logs to OTLP collector before session ends
         try:
             from git_notes_memory.observability.exporters import (
+                LogRecord,
+                export_logs_if_configured,
                 export_metrics_if_configured,
                 export_traces_if_configured,
             )
+            from git_notes_memory.observability.exporters.otlp import get_otlp_exporter
             from git_notes_memory.observability.tracing import get_completed_spans
+
+            exporter = get_otlp_exporter()
+            hook_logger.info(
+                "OTLP export: enabled=%s, endpoint=%s",
+                exporter.enabled,
+                exporter.endpoint,
+            )
 
             # Export any collected traces
             completed_spans = get_completed_spans()
+            traces_ok = False
             if completed_spans:
-                export_traces_if_configured(completed_spans)
-                logger.debug("Exported %d traces to OTLP", len(completed_spans))
+                traces_ok = export_traces_if_configured(completed_spans)
+                hook_logger.info(
+                    "OTLP traces export: success=%s, count=%d",
+                    traces_ok,
+                    len(completed_spans),
+                )
+            else:
+                hook_logger.info("OTLP traces export: no spans to export")
 
             # Export metrics
-            if export_metrics_if_configured():
-                logger.debug("Exported metrics to OTLP")
+            metrics_ok = export_metrics_if_configured()
+            hook_logger.info("OTLP metrics export: success=%s", metrics_ok)
+
+            # Export session summary logs
+            logs: list[LogRecord] = []
+
+            # Log session end with capture stats
+            if captured:
+                logs.append(
+                    LogRecord(
+                        body=f"Session ended with {len(captured)} memories captured",
+                        severity="INFO",
+                        attributes={
+                            "event": "session_end",
+                            "memories_captured": len(captured),
+                            "namespaces": ", ".join(
+                                sorted({m.get("namespace", "unknown") for m in captured})
+                            ),
+                        },
+                    )
+                )
+
+            # Log each captured memory
+            for memory in captured:
+                logs.append(
+                    LogRecord(
+                        body=f"Memory captured: {memory.get('summary', 'No summary')[:100]}",
+                        severity="INFO",
+                        attributes={
+                            "event": "memory_captured",
+                            "namespace": memory.get("namespace", "unknown"),
+                            "memory_id": memory.get("id", "unknown"),
+                        },
+                    )
+                )
+
+            # Log uncaptured content warnings
+            if uncaptured:
+                logs.append(
+                    LogRecord(
+                        body=f"Session ended with {len(uncaptured)} uncaptured items",
+                        severity="WARN",
+                        attributes={
+                            "event": "uncaptured_content",
+                            "count": len(uncaptured),
+                        },
+                    )
+                )
+
+            if logs:
+                logs_ok = export_logs_if_configured(logs)
+                hook_logger.info(
+                    "OTLP logs export: success=%s, count=%d", logs_ok, len(logs)
+                )
+            else:
+                hook_logger.info("OTLP logs export: no logs to export")
+
         except Exception as e:
             # Don't block session - telemetry export is best-effort
+            hook_logger.info("OTLP export error: %s", e)
             logger.debug("OTLP export skipped: %s", e)
 
         # Output result

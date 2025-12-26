@@ -1,4 +1,4 @@
-"""OTLP HTTP exporter for metrics and traces.
+"""OTLP HTTP exporter for metrics, traces, and logs.
 
 Exports telemetry to OpenTelemetry Collector via OTLP/HTTP protocol.
 Uses stdlib only - no external dependencies required.
@@ -6,6 +6,7 @@ Uses stdlib only - no external dependencies required.
 The exporter pushes to:
 - {endpoint}/v1/traces for spans
 - {endpoint}/v1/metrics for metrics
+- {endpoint}/v1/logs for log records
 
 Usage:
     from git_notes_memory.observability.exporters.otlp import OTLPExporter
@@ -13,6 +14,7 @@ Usage:
     exporter = OTLPExporter("http://localhost:4318")
     exporter.export_traces(spans)
     exporter.export_metrics(metrics)
+    exporter.export_logs([LogRecord(body="test", severity="INFO")])
 
 Environment:
     MEMORY_PLUGIN_OTLP_ENDPOINT: OTLP HTTP endpoint (e.g., http://localhost:4318)
@@ -27,6 +29,7 @@ import os
 import time
 import urllib.error
 import urllib.request
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 
@@ -35,6 +38,40 @@ from git_notes_memory.observability.config import get_config
 if TYPE_CHECKING:
     from git_notes_memory.observability.metrics import MetricsCollector
     from git_notes_memory.observability.tracing import Span
+
+
+# OTLP severity numbers (SeverityNumber)
+SEVERITY_MAP: dict[str, int] = {
+    "TRACE": 1,
+    "DEBUG": 5,
+    "INFO": 9,
+    "WARN": 13,
+    "WARNING": 13,
+    "ERROR": 17,
+    "FATAL": 21,
+    "CRITICAL": 21,
+}
+
+
+@dataclass
+class LogRecord:
+    """A log record for OTLP export.
+
+    Attributes:
+        body: The log message body.
+        severity: Log level (DEBUG, INFO, WARN, ERROR, etc.).
+        timestamp: Unix timestamp in seconds (defaults to now).
+        attributes: Additional key-value attributes.
+        trace_id: Optional trace ID for correlation.
+        span_id: Optional span ID for correlation.
+    """
+
+    body: str
+    severity: str = "INFO"
+    timestamp: float = field(default_factory=time.time)
+    attributes: dict[str, str | int | float | bool] = field(default_factory=dict)
+    trace_id: str | None = None
+    span_id: str | None = None
 
 logger = logging.getLogger(__name__)
 
@@ -234,6 +271,67 @@ class OTLPExporter:
         }
 
         return self._post(f"{self.endpoint}/v1/traces", payload)
+
+    def _log_to_otlp(self, record: LogRecord) -> dict[str, Any]:
+        """Convert LogRecord to OTLP log format."""
+        time_ns = int(record.timestamp * 1e9)
+        severity_number = SEVERITY_MAP.get(record.severity.upper(), 9)  # Default INFO
+
+        # Build attributes
+        attributes: list[dict[str, Any]] = []
+        for key, value in record.attributes.items():
+            if isinstance(value, bool):
+                attributes.append({"key": key, "value": {"boolValue": value}})
+            elif isinstance(value, int):
+                attributes.append({"key": key, "value": {"intValue": str(value)}})
+            elif isinstance(value, float):
+                attributes.append({"key": key, "value": {"doubleValue": value}})
+            else:
+                attributes.append({"key": key, "value": {"stringValue": str(value)}})
+
+        otlp_log: dict[str, Any] = {
+            "timeUnixNano": str(time_ns),
+            "severityNumber": severity_number,
+            "severityText": record.severity.upper(),
+            "body": {"stringValue": record.body},
+            "attributes": attributes,
+        }
+
+        if record.trace_id:
+            otlp_log["traceId"] = record.trace_id
+        if record.span_id:
+            otlp_log["spanId"] = record.span_id
+
+        return otlp_log
+
+    def export_logs(self, logs: list[LogRecord]) -> bool:
+        """Export log records to OTLP endpoint.
+
+        Args:
+            logs: List of LogRecord objects.
+
+        Returns:
+            True if export succeeded, False otherwise.
+        """
+        if not self._enabled or not logs:
+            return False
+
+        # Build OTLP logs payload
+        payload = {
+            "resourceLogs": [
+                {
+                    "resource": self._make_resource(),
+                    "scopeLogs": [
+                        {
+                            "scope": {"name": "git-notes-memory"},
+                            "logRecords": [self._log_to_otlp(log) for log in logs],
+                        }
+                    ],
+                }
+            ]
+        }
+
+        return self._post(f"{self.endpoint}/v1/logs", payload)
 
     def _counter_to_otlp(
         self,
@@ -464,3 +562,20 @@ def export_metrics_if_configured() -> bool:
     if not exporter.enabled:
         return True  # No endpoint = success (nothing to do)
     return exporter.export_metrics(get_metrics())
+
+
+def export_logs_if_configured(logs: list[LogRecord]) -> bool:
+    """Export logs if OTLP endpoint is configured.
+
+    Convenience function that checks configuration before attempting export.
+
+    Args:
+        logs: List of LogRecord objects.
+
+    Returns:
+        True if export succeeded or no endpoint configured, False on failure.
+    """
+    exporter = get_otlp_exporter()
+    if not exporter.enabled:
+        return True  # No endpoint = success (nothing to do)
+    return exporter.export_logs(logs)

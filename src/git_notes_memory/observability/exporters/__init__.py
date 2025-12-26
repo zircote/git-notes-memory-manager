@@ -15,7 +15,9 @@ from typing import TYPE_CHECKING, Any
 # Explicit imports for static analysis and runtime use
 from git_notes_memory.observability.exporters.json_exporter import export_json
 from git_notes_memory.observability.exporters.otlp import (
+    LogRecord,
     OTLPExporter,
+    export_logs_if_configured,
     export_metrics_if_configured,
     export_traces_if_configured,
     get_otlp_exporter,
@@ -30,9 +32,11 @@ __all__ = [
     "export_json",
     "PrometheusExporter",
     "OTLPExporter",
+    "LogRecord",
     "get_otlp_exporter",
     "export_traces_if_configured",
     "export_metrics_if_configured",
+    "export_logs_if_configured",
 ]
 
 
