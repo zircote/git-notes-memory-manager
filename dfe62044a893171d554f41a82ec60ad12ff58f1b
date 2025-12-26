@@ -239,3 +239,20 @@ tags:
 
 1. **Pattern-first**: If a deterministic pattern matches, skip entropy check (already high confidence)
 2. **Entropy as secondary**: Use entropy...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.022767+00:00'
+summary: '...detection_method: str     # "pattern" | "entropy" | "contextual"'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...detection_method: str     # "pattern" | "entropy" | "contextual"
+    pattern_id: str | None    # Which pattern matched
+
+    # WHERE
+    source_location: str      # File path or capture source
+    memory_namespace...
