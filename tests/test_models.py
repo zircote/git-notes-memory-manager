@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from git_notes_memory.config import Domain
 from git_notes_memory.models import (
     # Result Models
     CaptureAccumulator,
@@ -210,6 +211,73 @@ class TestMemory:
         )
         assert memory1 == memory2
 
+    def test_domain_default_is_project(self, sample_timestamp: datetime) -> None:
+        """Test that domain defaults to 'project' for backward compatibility."""
+        memory = Memory(
+            id="test:sha:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="Test summary",
+            content="Test content",
+            timestamp=sample_timestamp,
+        )
+        assert memory.domain == "project"
+        assert memory.is_project_domain is True
+        assert memory.is_user_domain is False
+
+    def test_domain_explicit_project(self, sample_timestamp: datetime) -> None:
+        """Test creating Memory with explicit project domain."""
+        memory = Memory(
+            id="decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="Test summary",
+            content="Test content",
+            timestamp=sample_timestamp,
+            domain="project",
+        )
+        assert memory.domain == "project"
+        assert memory.is_project_domain is True
+        assert memory.is_user_domain is False
+
+    def test_domain_explicit_user(self, sample_timestamp: datetime) -> None:
+        """Test creating Memory with user domain."""
+        memory = Memory(
+            id="user:decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="Test summary",
+            content="Test content",
+            timestamp=sample_timestamp,
+            domain="user",
+        )
+        assert memory.domain == "user"
+        assert memory.is_user_domain is True
+        assert memory.is_project_domain is False
+
+    def test_domain_enum_property(self, sample_timestamp: datetime) -> None:
+        """Test domain_enum property returns Domain enum."""
+        project_memory = Memory(
+            id="test:sha:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="Test",
+            content="Content",
+            timestamp=sample_timestamp,
+            domain="project",
+        )
+        user_memory = Memory(
+            id="user:test:sha:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="Test",
+            content="Content",
+            timestamp=sample_timestamp,
+            domain="user",
+        )
+        assert project_memory.domain_enum == Domain.PROJECT
+        assert user_memory.domain_enum == Domain.USER
+
 
 class TestMemoryResult:
     """Tests for MemoryResult dataclass."""
@@ -245,6 +313,33 @@ class TestMemoryResult:
         result = MemoryResult(memory=sample_memory, distance=0.25)
         with pytest.raises(FrozenInstanceError):
             result.distance = 0.5  # type: ignore[misc]
+
+    def test_domain_property(self, sample_memory: Memory) -> None:
+        """Test domain property delegates to memory."""
+        result = MemoryResult(memory=sample_memory, distance=0.25)
+        assert result.domain == sample_memory.domain
+        assert result.domain == "project"
+
+    def test_is_user_domain_property(self, sample_timestamp: datetime) -> None:
+        """Test is_user_domain property for user memory."""
+        user_memory = Memory(
+            id="user:decisions:abc:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="Test",
+            content="Content",
+            timestamp=sample_timestamp,
+            domain="user",
+        )
+        result = MemoryResult(memory=user_memory, distance=0.25)
+        assert result.is_user_domain is True
+        assert result.is_project_domain is False
+
+    def test_is_project_domain_property(self, sample_memory: Memory) -> None:
+        """Test is_project_domain property for project memory."""
+        result = MemoryResult(memory=sample_memory, distance=0.25)
+        assert result.is_project_domain is True
+        assert result.is_user_domain is False
 
 
 class TestHydratedMemory:

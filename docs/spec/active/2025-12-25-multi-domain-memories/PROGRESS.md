@@ -6,8 +6,8 @@ project_name: "Multi-Domain Memories (User-Level vs Project-Level Storage)"
 project_status: in-progress
 current_phase: 1
 implementation_started: 2025-12-26T00:35:00Z
-last_session: 2025-12-26T00:35:00Z
-last_updated: 2025-12-26T00:35:00Z
+last_session: 2025-12-26T00:50:00Z
+last_updated: 2025-12-26T00:50:00Z
 ---
 
 # Multi-Domain Memories - Implementation Progress
@@ -27,8 +27,8 @@ This document tracks implementation progress against the spec plan.
 | ID | Description | Status | Started | Completed | Notes |
 |----|-------------|--------|---------|-----------|-------|
 | 1.1 | Add Domain Enum to Config | done | 2025-12-26 | 2025-12-26 | |
-| 1.2 | Extend Memory Model with Domain Field | pending | | | |
-| 1.3 | Create Schema Migration for Domain Column | pending | | | |
+| 1.2 | Extend Memory Model with Domain Field | done | 2025-12-26 | 2025-12-26 | Used string field with enum property for serialization |
+| 1.3 | Create Schema Migration for Domain Column | in-progress | 2025-12-26 | | |
 | 1.4 | Update IndexService for Domain | pending | | | |
 | 2.1 | Create GitOps Factory for Domain | pending | | | |
 | 2.2 | Initialize User-Memories Bare Repo | pending | | | |
@@ -57,7 +57,7 @@ This document tracks implementation progress against the spec plan.
 
 | Phase | Name | Progress | Status |
 |-------|------|----------|--------|
-| 1 | Foundation | 25% | in-progress |
+| 1 | Foundation | 50% | in-progress |
 | 2 | Storage Layer | 0% | pending |
 | 3 | Service Layer | 0% | pending |
 | 4 | Hooks Integration | 0% | pending |
