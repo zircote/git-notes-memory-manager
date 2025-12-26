@@ -51,3 +51,19 @@ tags:
 - GitOps factory with domain-specific caching implemented
 - User-memories bare repo initialization with git identity config
 - Domain filtering added...
+
+---
+type: progress
+timestamp: '2025-12-26T01:14:11.998367+00:00'
+summary: '...domain uses current repo (existing behavior)'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...domain uses current repo (existing behavior)
+  - [x] Instance cached per domain
+- **Notes**: Implemented with clear_domain_cache() for testing. Added 8 tests.
+
+#### Task 2.2: Initialize User-Memories...
