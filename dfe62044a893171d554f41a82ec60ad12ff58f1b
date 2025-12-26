@@ -136,3 +136,20 @@ tags:
 - **Description**: Extend pattern matching to recognize domain markers
 - **Acceptance Criteria**:
   - [ ] `[global]` and `[user]`...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:01:28.040054+00:00'
+summary: '...appropriate for markers'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...appropriate for markers
+- **Notes**: Add to `SIGNAL_PATTERNS` dict
+
+#### Task 4.2: Extend Block Pattern for Domain Prefix
+- **Description**: Support `▶ global:decision ───` format
+- **Acceptance...
