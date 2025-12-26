@@ -220,3 +220,15 @@ tags:
 ...the same attributes that Python was already setting. Removing it from the metrics pipeline fixed the conflict.
 
 **Next session's telemetry should work.** The Stop hook exports metrics at session...
+
+---
+type: progress
+timestamp: '2025-12-26T19:46:34.246881+00:00'
+summary: The fix is likely to add `resource_to_telemetry_conversion` setting. Let
+  me update the collector ...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The fix is likely to add `resource_to_telemetry_conversion` setting. Let me update the collector config:
