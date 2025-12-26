@@ -123,3 +123,21 @@ Synced main branch after PR #30 merge. Plugin.json now correctly shows v0.12.0 a
 
 ## Related Files
 - .claude-plugin/plugin.json:3,9-10
+
+---
+type: progress
+timestamp: '2025-12-26T04:23:35.309597+00:00'
+summary: Replaced v0.12.0 tag to include plugin.json fixes
+---
+
+Replaced v0.12.0 tag to include plugin.json fixes
+## Summary
+Moved git tag v0.12.0 from old commit (566b7a5) to current HEAD (2babfd9) which includes the corrected repository URLs in plugin.json.
+
+## Changes Made
+- Deleted old v0.12.0 tag (761ec73 → 566b7a5)
+- Created new v0.12.0 tag at HEAD (2babfd9)
+- Force pushed tag to origin
+
+## Related Files
+- .claude-plugin/plugin.json
