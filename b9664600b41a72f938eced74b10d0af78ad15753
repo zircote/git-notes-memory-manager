@@ -2340,3 +2340,24 @@ tags:
 3. Register explicitly with full control
 
 The best solution is to create and register the service ourselves since we need to set up the custom git_ops...
+
+---
+type: progress
+timestamp: '2025-12-26T15:29:46.632711+00:00'
+summary: '...installation path
+
+  - Doesn''t require scripts/ directory
+
+  - Already proven working (we used this ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...installation path
+- Doesn't require scripts/ directory
+- Already proven working (we used this workaround earlier)
+- More robust across different plugin installations
+
+**Option 3: Hybrid approach**
+```bash...
