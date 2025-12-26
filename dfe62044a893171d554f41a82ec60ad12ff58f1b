@@ -1375,3 +1375,21 @@ tags:
 │   ├── patterns.py              # PatternDetector + pattern definitions
 │   ├── entropy.py               # EntropyAnalyzer
 │   ├── pii.py...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:15:12.990229+00:00'
+summary: '...Accepted'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...Accepted
+**Deciders**: User (via elicitation)
+
+### Context
+
+The secrets filtering feature requires pattern matching, entropy analysis, and PII detection. Several mature libraries exist for this purpose:
+-...
