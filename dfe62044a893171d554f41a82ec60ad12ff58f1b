@@ -187,3 +187,21 @@ tags:
 - [ ] Handler integration
 - [ ] Multi-domain context building
 - [ ] Tests...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:36.570787+00:00'
+summary: '...Output format: `text`, `json`, `prometheus` | `text` |'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Output format: `text`, `json`, `prometheus` | `text` |
+| `--filter` | Filter by metric name pattern | None |
+| `--since` | Show metrics since timestamp | None |
+
+**Example Output (text)**:
+```
+Memory...
