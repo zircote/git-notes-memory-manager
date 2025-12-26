@@ -1,0 +1,13 @@
+---
+type: patterns
+timestamp: '2025-12-26T14:12:02.328819+00:00'
+summary: '...memories_status_timestamp ON memories(status, timestamp DESC)",'
+tags:
+- auto-captured
+- post-tool-use
+- file:index.py
+---
+
+...memories_status_timestamp ON memories(status, timestamp DESC)",
+    # Composite index for common query pattern (namespace + spec + ORDER BY timestamp)
+    "CREATE INDEX IF NOT EXISTS idx_memories_ns_spec_ts...
