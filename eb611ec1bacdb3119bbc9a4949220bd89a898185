@@ -40,3 +40,20 @@ tags:
 | `progress` | "Completed...", "Implemented...", milestones |
 | `blockers` | "Blocked by...", "Issue with...", problems |
 | `patterns` | "Pattern for...", "Best practice...", reusable...
+
+---
+type: blockers
+timestamp: '2025-12-26T02:45:41.863797+00:00'
+summary: '...`approved` | Approved and stored as memory |'
+tags:
+- auto-captured
+- post-tool-use
+- file:SUBCONSCIOUSNESS.md
+---
+
+...`approved` | Approved and stored as memory |
+| `rejected` | Rejected by user |
+| `blocked` | Blocked by adversarial detection |
+| `expired` | Exceeded pending expiry time |
+
+### Understanding Pending...
