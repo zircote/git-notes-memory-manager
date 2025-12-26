@@ -48,3 +48,21 @@ tags:
             },
             "gauges": {
                 k: v for k, v in snapshot.get("gauges...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:33:52.339955+00:00'
+summary: '..."gauges": {'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.py
+---
+
+..."gauges": {
+                k: v for k, v in snapshot.get("gauges", {}).items() if pattern in k.lower()
+            },
+        }
+
+    if args.format == "json":
+        print(json.dumps(snapshot...
