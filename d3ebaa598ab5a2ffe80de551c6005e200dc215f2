@@ -414,3 +414,31 @@ Created the `ImplicitCaptureService` that provides a unified API for implicit me
 ## Related Files
 - src/git_notes_memory/subconsciousness/implicit_capture_service.py:1-315
 - tests/subconsciousness/test_implicit_capture_service.py:1-390
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:25.720154+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.9: Auto-capture logic with thre...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.9: Auto-capture logic with three-tier confidence handling
+## Summary
+Enhanced ImplicitCaptureService with configurable threshold-based auto-capture/queue/discard logic.
+
+## Changes Made
+- Added `auto_capture_threshold` and `review_threshold` fields to service
+- High confidence (>= auto_capture_threshold): Auto-approved with APPROVED status
+- Medium confidence (>= review_threshold): Queued as PENDING for review
+- Low confidence (< review_threshold): Discarded without storing
+- Added `expire_pending_captures()`, `cleanup_old_captures()`, `get_capture_stats()` methods
+- Added 4 new tests covering all confidence tiers and expiration
+- Updated factory function to use config thresholds
+
+## Related Files
+- src/git_notes_memory/subconsciousness/implicit_capture_service.py:1-432
+- tests/subconsciousness/test_implicit_capture_service.py:455-692
