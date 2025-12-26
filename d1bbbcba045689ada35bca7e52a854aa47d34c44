@@ -1,0 +1,24 @@
+---
+type: decisions
+timestamp: '2025-12-26T03:23:14.897337+00:00'
+summary: '▶ decision ─────────────────────────────────────
+
+  User confirmed full 3-tier implementation with o...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+User confirmed full 3-tier implementation with optional extras pattern
+## Summary
+All three observability tiers will be implemented, with OpenTelemetry as an optional `[monitoring]` extra.
+
+## Rationale
+- Full implementation provides complete observability stack
+- Optional extras pattern (`pip install .[monitoring]`) keeps core lightweight
+- Structured JSON logging becomes new default
+- Unified debug levels replace fragmented HOOK_DEBUG
+
+## Related Files
+- pyproject.toml (extras configuration)
+- docs/spec/active/2025-12-25-observability-instrumentation/
