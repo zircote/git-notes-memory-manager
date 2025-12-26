@@ -579,3 +579,15 @@ tags:
 `─────────────────────────────────────────────────`
 
 Let me look at the existing service registry pattern to understand how to implement Task 3.2:
+
+---
+type: patterns
+timestamp: '2025-12-26T01:57:48.733327+00:00'
+summary: 'Now I''ll add the `get_user_capture_service()` function following the existing
+  pattern:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I'll add the `get_user_capture_service()` function following the existing pattern:
