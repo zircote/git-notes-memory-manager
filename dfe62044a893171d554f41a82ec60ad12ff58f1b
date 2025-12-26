@@ -297,3 +297,21 @@ namespaces:
         reason: "Learning about API key formats"
 
 # Temporary suppressions...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.105961+00:00'
+summary: '..."Learning about API key formats"'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+..."Learning about API key formats"
+
+# Temporary suppressions (require expiry)
+temporary:
+  - pattern: "ghp_[a-zA-Z0-9]{36}"
+    reason: "Documenting GitHub token format change"
+    expires: "2024-02-01...
