@@ -39,3 +39,19 @@ tags:
 `─────────────────────────────────────────────────`
 
 Now...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:13:52.593688+00:00'
+summary: '...git notes sync: %s", e)'
+tags:
+- auto-captured
+- post-tool-use
+- file:session_start_handler.py
+---
+
+...git notes sync: %s", e)
+
+            # Migrate from old fetch refspec to new tracking refs pattern
+            # This is idempotent and safe to call every session
+            if git_ops is not...
