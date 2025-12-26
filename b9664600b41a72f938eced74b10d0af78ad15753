@@ -2376,3 +2376,16 @@ tags:
 ...with synthesis, remediation, and observability verification.
 
 Let me check the status of the completed agents:
+
+---
+type: progress
+timestamp: '2025-12-26T15:29:46.787551+00:00'
+summary: '...circuit breaker to prevent repeated calls to a failing model. The `llm_client.py`
+  has a well-i...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...circuit breaker to prevent repeated calls to a failing model. The `llm_client.py` has a well-implemented `CircuitBreaker` class (lines 193-320) that we can use as a reference.
+2. **CRIT-002** (LLM...
