@@ -153,7 +153,7 @@ class TestInitialization:
         cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
         row = cursor.fetchone()
         assert row is not None
-        assert row[0] == "2"  # Schema v2 adds repo_path column
+        assert row[0] == "3"  # Schema v3 adds domain column
 
         service.close()
 
@@ -185,6 +185,93 @@ class TestInitialization:
         service.initialize()
         service.close()
         service.close()  # Should not raise
+
+
+class TestSchemaMigration:
+    """Test schema migration behavior."""
+
+    def test_migration_from_v2_to_v3_adds_domain_column(self, db_path: Path) -> None:
+        """Test migration from v2 to v3 adds domain column."""
+        # Create a v2 database manually
+        import sqlite3
+
+        import sqlite_vec
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        conn.enable_load_extension(True)
+        sqlite_vec.load(conn)
+        conn.enable_load_extension(False)
+
+        # Create v2 schema (without domain column)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS memories (
+                id TEXT PRIMARY KEY,
+                commit_sha TEXT NOT NULL,
+                namespace TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                content TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                repo_path TEXT,
+                spec TEXT,
+                phase TEXT,
+                tags TEXT,
+                status TEXT DEFAULT 'active',
+                relates_to TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        """)
+        conn.execute("INSERT INTO metadata (key, value) VALUES ('schema_version', '2')")
+        conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_memories USING vec0(
+                id TEXT PRIMARY KEY,
+                embedding FLOAT[384]
+            )
+        """)
+        conn.commit()
+        conn.close()
+
+        # Now initialize IndexService - it should run migration
+        service = IndexService(db_path)
+        service.initialize()
+
+        # Check that domain column exists
+        cursor = service._conn.cursor()
+        cursor.execute("PRAGMA table_info(memories)")
+        columns = {row["name"] for row in cursor.fetchall()}
+        assert "domain" in columns
+
+        # Check schema version updated to 3
+        cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
+        row = cursor.fetchone()
+        assert row[0] == "3"
+
+        # Check index exists
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_memories_domain'"
+        )
+        assert cursor.fetchone() is not None
+
+        service.close()
+
+    def test_new_database_has_domain_column(self, db_path: Path) -> None:
+        """Test a fresh database has domain column from start."""
+        service = IndexService(db_path)
+        service.initialize()
+
+        cursor = service._conn.cursor()
+        cursor.execute("PRAGMA table_info(memories)")
+        columns = {row["name"] for row in cursor.fetchall()}
+        assert "domain" in columns
+
+        service.close()
 
 
 class TestInitializationErrors:
@@ -281,6 +368,52 @@ class TestInsertOperations:
         assert retrieved.tags == sample_memory.tags
         assert retrieved.status == sample_memory.status
         assert retrieved.relates_to == sample_memory.relates_to
+        assert retrieved.domain == sample_memory.domain
+
+    def test_insert_memory_with_user_domain(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test inserting memory with user domain."""
+        memory = Memory(
+            id="user:decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="A user-level decision",
+            content="This applies across all projects",
+            timestamp=datetime.now(UTC),
+            domain="user",
+        )
+        result = index_service.insert(memory)
+        assert result is True
+
+        retrieved = index_service.get(memory.id)
+        assert retrieved is not None
+        assert retrieved.domain == "user"
+        assert retrieved.is_user_domain is True
+        assert retrieved.is_project_domain is False
+
+    def test_insert_memory_default_domain_is_project(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test inserting memory without explicit domain defaults to project."""
+        memory = Memory(
+            id="decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="A project decision",
+            content="This applies to this project only",
+            timestamp=datetime.now(UTC),
+        )
+        result = index_service.insert(memory)
+        assert result is True
+
+        retrieved = index_service.get(memory.id)
+        assert retrieved is not None
+        assert retrieved.domain == "project"
+        assert retrieved.is_project_domain is True
+        assert retrieved.is_user_domain is False
 
     def test_insert_memory_with_none_optional_fields(
         self,
