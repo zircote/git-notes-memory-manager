@@ -961,3 +961,26 @@ tags:
 ### Context
 
 Observability...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.178157+00:00'
+summary: '...operating.'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...operating.
+
+### Decision
+
+Implement graceful degradation at all integration points:
+
+```python
+# Import pattern
+try:
+    from opentelemetry.sdk.trace import TracerProvider
+    OTEL_AVAILABLE = True
+except...
