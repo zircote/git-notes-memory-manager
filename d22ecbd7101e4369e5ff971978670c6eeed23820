@@ -846,3 +846,15 @@ tags:
 ---
 
 ...(Tasks 3.1-3.5) which extends CaptureService and RecallService for domain awareness, but I've completed all work that was in the previous session's scope.
+
+---
+type: progress
+timestamp: '2025-12-26T01:57:48.393043+00:00'
+summary: All 1933 tests pass. I've completed Task 4.1 (Add Domain Markers to SignalDetector)
+  and Task 4.2 ...
+tags:
+- auto-captured
+- pre-compact
+---
+
+All 1933 tests pass. I've completed Task 4.1 (Add Domain Markers to SignalDetector) and Task 4.2 (Extend Block Pattern for Domain...
