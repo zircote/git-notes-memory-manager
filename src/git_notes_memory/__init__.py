@@ -31,6 +31,7 @@ __all__ = [
     "get_capture_service",
     "get_recall_service",
     "get_sync_service",
+    "get_secrets_filtering_service",
     "is_auto_capture_enabled",
     # Models (always available)
     "Memory",
@@ -82,6 +83,12 @@ def __getattr__(name: str) -> object:
         from git_notes_memory.config import is_auto_capture_enabled
 
         return is_auto_capture_enabled
+    if name == "get_secrets_filtering_service":
+        from git_notes_memory.security.service import (
+            get_default_service as get_secrets_filtering_service,
+        )
+
+        return get_secrets_filtering_service
 
     # Models - these are lightweight, import directly
     if name in {

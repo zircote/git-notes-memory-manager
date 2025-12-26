@@ -27,6 +27,7 @@ Git-native, semantically-searchable memory storage for Claude Code.
 - **10 memory namespaces**: inception, elicitation, research, decisions, progress, blockers, reviews, learnings, retrospective, patterns
 - **Progressive hydration**: Load memory content incrementally (SUMMARY -> FULL -> FILES)
 - **Concurrent-safe**: File locking prevents corruption from parallel captures
+- **Secrets filtering**: Automatic detection and redaction of PII, API keys, and credentials
 - **XDG-compliant**: Standard paths on all platforms
 
 ## Installation
@@ -140,6 +141,39 @@ The plugin includes hooks that integrate with Claude Code's hook system for auto
 
 See [User Guide](docs/USER_GUIDE.md#hooks-integration) for configuration options.
 
+### Secrets Filtering
+
+The plugin automatically detects and redacts sensitive information before storing memories:
+
+```python
+from git_notes_memory import get_secrets_filtering_service
+
+# Scan content for secrets (dry-run)
+service = get_secrets_filtering_service()
+result = service.scan("API key: AKIAIOSFODNN7EXAMPLE")
+if result.had_secrets:
+    print(f"Found {result.detection_count} secret(s)")
+
+# Filter (redact) content
+filtered = service.filter("User SSN: 123-45-6789")
+print(filtered.content)  # "User SSN: [REDACTED:pii_ssn]"
+```
+
+Secrets filtering commands:
+
+| Command | Description |
+|---------|-------------|
+| `/memory:scan-secrets` | Scan memories for secrets (dry-run) |
+| `/memory:test-secret <content>` | Test if content contains secrets |
+| `/memory:secrets-allowlist [add\|remove\|list]` | Manage known-safe hashes |
+| `/memory:audit-log [--since]` | View secrets filtering audit log |
+
+Supported secret types:
+- **PII**: SSN, credit cards, phone numbers, email addresses
+- **Credentials**: AWS keys, GitHub tokens, API keys, JWT tokens
+- **Cloud**: Azure, GCP, Stripe, Slack, Discord credentials
+- **Entropy-based**: High-entropy base64/hex strings
+
 ## Development
 
 ```bash
@@ -190,6 +224,17 @@ make quality
 | `HOOK_STOP_SYNC_INDEX` | Sync index on session end | `true` |
 | `HOOK_STOP_PROMPT_UNCAPTURED` | Prompt for uncaptured content | `true` |
 | `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
+
+### Secrets Filtering Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SECRETS_FILTER_ENABLED` | Enable secrets filtering | `true` |
+| `SECRETS_FILTER_PII_ENABLED` | Enable PII detection (SSN, credit cards) | `true` |
+| `SECRETS_FILTER_ENTROPY_ENABLED` | Enable entropy-based detection | `false` |
+| `SECRETS_FILTER_DEFAULT_STRATEGY` | Default action: `redact`, `mask`, `block`, `warn` | `redact` |
+| `SECRETS_FILTER_AUDIT_ENABLED` | Enable audit logging | `true` |
+| `SECRETS_FILTER_AUDIT_DIR` | Audit log directory | `$MEMORY_PLUGIN_DATA_DIR/audit` |
 
 ### Performance Tuning
 
