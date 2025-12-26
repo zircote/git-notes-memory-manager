@@ -5617,3 +5617,19 @@ tags:
 ...notes_memory/index/` (package)
   - Action: Extract SchemaManager, MemoryRepository, SearchEngine
   - **Completed:** 2025-12-26 - Created `index/` package with `SchemaManager` (schema, migrations), `SearchEngine`...
+
+---
+type: progress
+timestamp: '2025-12-26T16:45:14.853662+00:00'
+summary: '...src/git_notes_memory/git_ops.py:184-267`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...src/git_notes_memory/git_ops.py:184-267`
+  - Action: Create GitOpsFactory separate from GitOps
+  - **Completed:** 2025-12-26 - Created `GitOpsFactory` class; `GitOps.for_domain` now delegates to factory
+
+-...
