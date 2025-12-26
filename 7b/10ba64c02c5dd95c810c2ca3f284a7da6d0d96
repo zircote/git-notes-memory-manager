@@ -1847,3 +1847,28 @@ IndexService (facade)
 - src/git_notes_memory/index/search_engine.py
 - src/git_notes_memory/index/service.py
 - tests/test_index.py:88,284 (mock paths updated)
+
+---
+type: progress
+timestamp: '2025-12-26T19:10:58.634416+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed ARCH-H-002: GitOps Dual Responsibility...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed ARCH-H-002: GitOps Dual Responsibility
+## Summary
+Extracted factory methods from GitOps into dedicated GitOpsFactory class following SRP.
+
+## Changes Made
+- Created `GitOpsFactory` class with `for_domain()`, `clear_cache()`, `_ensure_user_repo_initialized()`
+- Factory owns instance caching (`_instances` dict)
+- `GitOps.for_domain` and `clear_domain_cache` now delegate to factory (backward compatible)
+- `GitOps._domain_instances` references factory's cache for legacy compatibility
+
+## Related Files
+- src/git_notes_memory/git_ops.py:184-267 (new GitOpsFactory class)
+- src/git_notes_memory/git_ops.py:290-327 (updated GitOps with delegation)
