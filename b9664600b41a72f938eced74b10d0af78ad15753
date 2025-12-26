@@ -3292,3 +3292,20 @@ tags:
 
     SESSION GUIDANCE: Aim for 1 block per 3-5 substantive messages.
   </mandatory_rules...
+
+---
+type: patterns
+timestamp: '2025-12-26T17:02:58.098830+00:00'
+summary: '...CC7.2)'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...CC7.2)
+
+### Code Quality
+- [ ] QUAL-M-001: Validation Logic Duplicated (3 places)
+- [ ] QUAL-M-002: Pattern Scoring Complexity (`patterns.py:777-842`)
+- [ ] QUAL-M-003: 11-Parameter Method (`capture.py:663-679...
