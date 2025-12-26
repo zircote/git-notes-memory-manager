@@ -932,3 +932,17 @@ tags:
 **Summary of what was implemented:**
 - `GitOps.for_domain(domain)` - Factory pattern with per-domain caching
 - `GitOps.ensure_user_repo_initialized()` - Creates bare git repo for...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:50:41.006596+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The CaptureService follows the singleton patter...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The CaptureService follows the singleton pattern via `ServiceRegistry.get()`. It already accepts a `git_ops` parameter and lazily creates one...
