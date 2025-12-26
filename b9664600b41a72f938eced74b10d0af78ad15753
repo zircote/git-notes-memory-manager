@@ -1165,3 +1165,14 @@ tags:
 ---
 
 ...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:27:53.883608+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
