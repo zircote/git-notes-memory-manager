@@ -1,0 +1,13 @@
+---
+type: patterns
+timestamp: '2025-12-26T01:13:50.546522+00:00'
+summary: '...actually passes Luhn (0 mod 10 = 0)'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_pii.py
+---
+
+...actually passes Luhn (0 mod 10 = 0)
+        # but won't be detected as a credit card due to pattern constraints
+        assert luhn_check("1111111111111111") is False
