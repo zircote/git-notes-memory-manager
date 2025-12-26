@@ -153,3 +153,18 @@ tags:
 #### Task 4.2: Extend Block Pattern for Domain Prefix
 - **Description**: Support `▶ global:decision ───` format
 - **Acceptance...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:01:28.067083+00:00'
+summary: '...**Description**: Support `▶ global:decision ───` format'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...**Description**: Support `▶ global:decision ───` format
+- **Acceptance Criteria**:
+  - [ ] Block pattern regex updated for optional domain prefix
+  - [ ] `global:`, `user:` prefix sets USER domain...
