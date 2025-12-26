@@ -2832,3 +2832,24 @@ tags:
 
 **Primary Issue:**
 - `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T16:45:19.825284+00:00'
+summary: '...Issue:**
+
+  - `commands/metrics.md:76-77` - Path resolution logic
+
+  - `commands/health.md:76-77` - ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
