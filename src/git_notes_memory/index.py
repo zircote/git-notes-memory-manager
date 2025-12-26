@@ -24,7 +24,7 @@ from __future__ import annotations
 import contextlib
 import sqlite3
 import struct
-import threading
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS memories (
 """
 
 _CREATE_INDICES = [
+    # Single-column indexes for simple lookups
     "CREATE INDEX IF NOT EXISTS idx_memories_namespace ON memories(namespace)",
     "CREATE INDEX IF NOT EXISTS idx_memories_spec ON memories(spec)",
     "CREATE INDEX IF NOT EXISTS idx_memories_commit ON memories(commit_sha)",
@@ -100,6 +101,16 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_memories_status ON memories(status)",
     "CREATE INDEX IF NOT EXISTS idx_memories_repo_path ON memories(repo_path)",
     "CREATE INDEX IF NOT EXISTS idx_memories_domain ON memories(domain)",
+    # PERF-HIGH-004: Composite indexes for common multi-column queries
+    # These optimize the most frequent query patterns:
+    # - Domain + namespace: multi-domain recall filtering
+    # - Spec + namespace: project-scoped namespace queries
+    # - Spec + domain: project-scoped domain queries
+    # - Namespace + domain: namespace listing with domain filter
+    "CREATE INDEX IF NOT EXISTS idx_memories_domain_namespace ON memories(domain, namespace)",
+    "CREATE INDEX IF NOT EXISTS idx_memories_spec_namespace ON memories(spec, namespace)",
+    "CREATE INDEX IF NOT EXISTS idx_memories_spec_domain ON memories(spec, domain)",
+    "CREATE INDEX IF NOT EXISTS idx_memories_namespace_domain ON memories(namespace, domain)",
 ]
 
 # Migration SQL for schema version upgrades
@@ -169,8 +180,14 @@ class IndexService:
         self.db_path = db_path or get_index_path()
         self._conn: sqlite3.Connection | None = None
         self._initialized = False
-        # HIGH-011: Thread lock for concurrent access safety
-        self._lock = threading.Lock()
+        # CRIT-003: Thread lock removed. SQLite with WAL mode (set in initialize())
+        # handles concurrency at the database level:
+        # - Concurrent reads are allowed
+        # - Writes are serialized by SQLite
+        # - check_same_thread=False allows multi-threaded access
+        # Adding Python-level locking would duplicate SQLite's own locking and
+        # could introduce deadlocks. If true multi-threaded writes are needed,
+        # use separate IndexService instances per thread.
 
     @property
     def is_initialized(self) -> bool:
@@ -732,15 +749,63 @@ class IndexService:
             cursor.execute(query, params)
             return [self._row_to_memory(row) for row in cursor.fetchall()]
 
-    def get_all_ids(self) -> list[str]:
-        """Get all memory IDs in the index.
+    def get_all_ids(
+        self,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[str]:
+        """Get memory IDs in the index with optional pagination.
+
+        PERF-HIGH-001: Supports pagination to prevent memory exhaustion
+        with large indices. Use limit/offset for batched processing.
+
+        Args:
+            limit: Maximum number of IDs to return. None for all (use with caution).
+            offset: Number of IDs to skip (for pagination).
 
         Returns:
-            List of all memory IDs.
+            List of memory IDs.
+
+        Examples:
+            >>> index.get_all_ids(limit=100)  # First 100 IDs
+            >>> index.get_all_ids(limit=100, offset=100)  # Next 100 IDs
         """
+        if limit is not None:
+            query = "SELECT id FROM memories LIMIT ? OFFSET ?"
+            params: tuple[int, ...] = (limit, offset)
+        else:
+            query = "SELECT id FROM memories"
+            params = ()
+
         with self._cursor() as cursor:
-            cursor.execute("SELECT id FROM memories")
+            cursor.execute(query, params)
             return [row[0] for row in cursor.fetchall()]
+
+    def iter_all_ids(self, batch_size: int = 1000) -> Iterator[str]:
+        """Iterate over all memory IDs in batches.
+
+        PERF-HIGH-001: Generator-based iteration to prevent memory exhaustion.
+        Yields IDs one at a time, fetching in batches internally.
+
+        Args:
+            batch_size: Number of IDs to fetch per database query.
+
+        Yields:
+            Memory IDs one at a time.
+
+        Examples:
+            >>> for memory_id in index.iter_all_ids():
+            ...     process(memory_id)
+        """
+        offset = 0
+        while True:
+            batch = self.get_all_ids(limit=batch_size, offset=offset)
+            if not batch:
+                break
+            yield from batch
+            offset += len(batch)
+            if len(batch) < batch_size:
+                break
 
     def exists(self, memory_id: str) -> bool:
         """Check if a memory exists in the index.

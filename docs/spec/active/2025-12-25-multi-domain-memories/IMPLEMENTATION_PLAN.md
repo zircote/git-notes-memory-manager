@@ -148,11 +148,11 @@ This plan implements multi-domain memory storage in 5 phases, building from foun
 #### Task 3.1: Extend CaptureService for Domain
 - **Description**: Add domain parameter to `capture()` method
 - **Acceptance Criteria**:
-  - [ ] `capture(..., domain: Domain = Domain.PROJECT)`
-  - [ ] Uses `GitOps.for_domain(domain)` for storage
-  - [ ] Stores in correct index with domain field
-  - [ ] Generates appropriate memory ID format
-- **Notes**: Memory ID for user: `user:{namespace}:{sha}:{idx}`
+  - [x] `capture(..., domain: Domain = Domain.PROJECT)`
+  - [x] Uses `GitOps.for_domain(domain)` for storage
+  - [x] Stores in correct index with domain field
+  - [x] Generates appropriate memory ID format
+- **Notes**: Memory ID for user: `user:{namespace}:{sha}:{idx}`. Added 5 domain-aware tests.
 
 #### Task 3.2: Create User CaptureService Singleton
 - **Description**: Add factory function for user-domain capture service

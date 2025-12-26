@@ -67,6 +67,11 @@ _FRONT_MATTER_PATTERN = re.compile(
 # Each note starts with --- on its own line
 _MULTI_NOTE_SPLIT = re.compile(r"(?:^|\n)(?=---\s*\n)")
 
+# SEC-HIGH-002: Maximum YAML front matter size (64KB)
+# Prevents YAML "billion laughs" attacks where recursive anchors/aliases
+# cause exponential memory expansion during parsing
+_MAX_YAML_SIZE = 65536  # 64KB
+
 
 # =============================================================================
 # Data Classes
@@ -205,6 +210,13 @@ def parse_note(content: str) -> ParsedNote:
 
     yaml_content = match.group(1)
     body = match.group(2) or ""
+
+    # SEC-HIGH-002: Reject oversized YAML to prevent billion laughs attacks
+    if len(yaml_content) > _MAX_YAML_SIZE:
+        raise ParseError(
+            f"YAML front matter exceeds maximum size ({len(yaml_content)} > {_MAX_YAML_SIZE} bytes)",
+            "Reduce front matter size or split into multiple notes",
+        )
 
     try:
         front_matter = yaml.safe_load(yaml_content)

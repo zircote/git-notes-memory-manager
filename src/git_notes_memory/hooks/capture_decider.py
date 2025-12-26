@@ -278,6 +278,7 @@ class CaptureDecider:
             content=signal.context or signal.match,
             tags=tags,
             confidence=round(confidence, 3),
+            domain=signal.domain,
         )
 
     def _extract_summary(self, signal: CaptureSignal) -> str:

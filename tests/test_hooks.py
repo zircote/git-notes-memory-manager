@@ -135,6 +135,85 @@ class TestXMLBuilder:
         assert "&lt;script&gt;" in xml
         assert "<script>" not in xml.replace("&lt;script&gt;", "")
 
+    def test_add_memory_element_includes_domain_attribute(
+        self, xml_builder: XMLBuilder
+    ) -> None:
+        """Test that memory element includes domain attribute when set."""
+        from datetime import UTC, datetime
+
+        from git_notes_memory.models import Memory
+
+        # Create memory with user domain
+        user_memory = Memory(
+            id="user:learnings:abc123:0",
+            commit_sha="abc123",
+            namespace="learnings",
+            summary="Global learning across projects",
+            content="This applies everywhere",
+            timestamp=datetime.now(UTC),
+            status="active",
+            domain="user",  # USER domain
+        )
+
+        xml_builder.add_memory_element("root", user_memory, hydration="summary")
+        xml = xml_builder.to_string()
+
+        # Verify domain attribute is present
+        assert 'domain="user"' in xml
+
+    def test_add_memory_element_includes_project_domain(
+        self, xml_builder: XMLBuilder
+    ) -> None:
+        """Test that memory element includes project domain by default."""
+        from datetime import UTC, datetime
+
+        from git_notes_memory.models import Memory
+
+        # Create memory with project domain (default)
+        project_memory = Memory(
+            id="decisions:xyz789:0",
+            commit_sha="xyz789",
+            namespace="decisions",
+            summary="Project-specific decision",
+            content="This applies to current repo",
+            timestamp=datetime.now(UTC),
+            status="active",
+            domain="project",  # PROJECT domain (default)
+        )
+
+        xml_builder.add_memory_element("root", project_memory, hydration="summary")
+        xml = xml_builder.to_string()
+
+        # Verify domain attribute is present
+        assert 'domain="project"' in xml
+
+    def test_add_memory_element_omits_empty_domain(
+        self, xml_builder: XMLBuilder
+    ) -> None:
+        """Test that domain attribute is omitted when empty."""
+        from datetime import UTC, datetime
+
+        from git_notes_memory.models import Memory
+
+        # Create memory with empty domain (shouldn't happen in practice)
+        memory = Memory(
+            id="blockers:def456:0",
+            commit_sha="def456",
+            namespace="blockers",
+            summary="Test blocker",
+            content="Test content",
+            timestamp=datetime.now(UTC),
+            status="active",
+            domain="",  # Empty domain
+        )
+
+        xml_builder.add_memory_element("root", memory, hydration="summary")
+        xml = xml_builder.to_string()
+
+        # Verify domain attribute is NOT present when empty
+        assert 'domain=""' not in xml
+        assert 'domain=' not in xml.split('namespace="blockers"')[0].split(">")[0]
+
 
 # =============================================================================
 # HookConfig Tests

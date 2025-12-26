@@ -35,7 +35,7 @@ import logging
 import sys
 from typing import Any
 
-from git_notes_memory.config import HOOK_USER_PROMPT_TIMEOUT
+from git_notes_memory.config import HOOK_USER_PROMPT_TIMEOUT, Domain
 from git_notes_memory.hooks.capture_decider import CaptureDecider
 from git_notes_memory.hooks.config_loader import load_hook_config
 from git_notes_memory.hooks.hook_utils import (
@@ -87,6 +87,7 @@ def _suggestion_to_dict(suggestion: SuggestedCapture) -> dict[str, Any]:
         "content": suggestion.content,
         "tags": list(suggestion.tags),
         "confidence": suggestion.confidence,
+        "domain": suggestion.domain.value,
     }
 
 
@@ -127,11 +128,15 @@ def _format_suggestions_xml(suggestions: list[SuggestedCapture]) -> str:
     return builder.to_string()
 
 
-def _capture_memory(suggestion: SuggestedCapture) -> dict[str, Any]:
+def _capture_memory(
+    suggestion: SuggestedCapture,
+    domain: Domain = Domain.PROJECT,
+) -> dict[str, Any]:
     """Capture content as a memory (for AUTO action).
 
     Args:
         suggestion: The capture suggestion with pre-filled metadata.
+        domain: Target storage domain (USER for global, PROJECT for repo-local).
 
     Returns:
         Dict with capture result.
@@ -145,6 +150,7 @@ def _capture_memory(suggestion: SuggestedCapture) -> dict[str, Any]:
             content=suggestion.content,
             namespace=suggestion.namespace,
             tags=list(suggestion.tags),
+            domain=domain,
         )
 
         if result.success and result.memory:
@@ -152,6 +158,7 @@ def _capture_memory(suggestion: SuggestedCapture) -> dict[str, Any]:
                 "success": True,
                 "memory_id": result.memory.id,
                 "summary": result.memory.summary,
+                "domain": domain.value,
             }
         return {
             "success": False,
@@ -278,6 +285,10 @@ def main() -> None:
                 resolved_namespace,
             )
 
+            # Determine domain from parsed marker (default to PROJECT)
+            # NamespaceParser doesn't currently detect domain, so default
+            signal_domain = Domain.PROJECT
+
             # Create an explicit capture signal
             signals = [
                 CaptureSignal(
@@ -287,6 +298,7 @@ def main() -> None:
                     context=parsed_marker.content,
                     suggested_namespace=resolved_namespace,
                     position=0,
+                    domain=signal_domain,
                 )
             ]
         else:
@@ -315,13 +327,14 @@ def main() -> None:
         if decision.action == CaptureAction.AUTO:
             # Capture automatically
             for suggestion in decision.suggested_captures:
-                result = _capture_memory(suggestion)
+                result = _capture_memory(suggestion, domain=suggestion.domain)
                 captured.append(result)
                 if result.get("success"):
                     logger.info(
-                        "Auto-captured memory: %s (%s)",
+                        "Auto-captured memory: %s (%s, domain=%s)",
                         result.get("memory_id", "")[:8],
                         suggestion.namespace,
+                        suggestion.domain.value,
                     )
 
         # Output result

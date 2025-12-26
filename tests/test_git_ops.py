@@ -927,7 +927,10 @@ class TestGitOpsMigrationMocked:
             args_str = " ".join(str(a) for a in args)
             result = MagicMock(returncode=0)
 
-            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+            if "--version" in args_str:
+                # Return git version for git_supports_fixed_value()
+                result.stdout = "git version 2.45.0"
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
                 # Return old pattern
                 result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
             elif "--unset" in args_str or "--add" in args_str:
@@ -949,7 +952,9 @@ class TestGitOpsMigrationMocked:
             args_str = " ".join(str(a) for a in args)
             result = MagicMock(returncode=0)
 
-            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+            if "--version" in args_str:
+                result.stdout = "git version 2.45.0"
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
                 # Return new pattern (no old pattern)
                 result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"
             return result
@@ -968,7 +973,9 @@ class TestGitOpsMigrationMocked:
             args_str = " ".join(str(a) for a in args)
             result = MagicMock(returncode=0)
 
-            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+            if "--version" in args_str:
+                result.stdout = "git version 2.45.0"
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
                 # Return both patterns
                 result.stdout = (
                     "refs/notes/mem/*:refs/notes/mem/*\n"
@@ -1128,6 +1135,104 @@ class TestGitOpsRemoteSyncMocked:
 
             # Push should not have been called
             assert len(push_called) == 0
+
+
+# =============================================================================
+# GitOps Remote Configuration Tests
+# =============================================================================
+
+
+class TestGitOpsRemoteConfiguration:
+    """Tests for get_remote_url and set_remote_url methods."""
+
+    def test_get_remote_url_returns_url_when_exists(self, tmp_path: Path) -> None:
+        """Test get_remote_url returns the configured URL."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args: list[str], **kwargs):
+            result = MagicMock(returncode=0)
+            result.stdout = "git@github.com:user/repo.git\n"
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            url = git.get_remote_url("origin")
+
+            assert url == "git@github.com:user/repo.git"
+
+    def test_get_remote_url_returns_none_when_not_exists(self, tmp_path: Path) -> None:
+        """Test get_remote_url returns None when remote doesn't exist."""
+        git = GitOps(tmp_path)
+        mock_result = MagicMock(returncode=128)  # git error code for missing remote
+
+        with patch("subprocess.run", return_value=mock_result):
+            url = git.get_remote_url("origin")
+
+            assert url is None
+
+    def test_set_remote_url_adds_new_remote(self, tmp_path: Path) -> None:
+        """Test set_remote_url adds a new remote."""
+        git = GitOps(tmp_path)
+        calls = []
+
+        def mock_run(args: list[str], **kwargs):
+            calls.append(args)
+            result = MagicMock()
+            if "get-url" in args:
+                result.returncode = 128  # Remote doesn't exist
+            else:
+                result.returncode = 0  # Add succeeds
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            success = git.set_remote_url("origin", "git@github.com:user/repo.git")
+
+            assert success is True
+            # Verify 'remote add' was called
+            add_call = [c for c in calls if "add" in c]
+            assert len(add_call) == 1
+            assert "origin" in add_call[0]
+            assert "git@github.com:user/repo.git" in add_call[0]
+
+    def test_set_remote_url_updates_existing(self, tmp_path: Path) -> None:
+        """Test set_remote_url updates an existing remote."""
+        git = GitOps(tmp_path)
+        calls = []
+
+        def mock_run(args: list[str], **kwargs):
+            calls.append(args)
+            result = MagicMock(returncode=0)
+            if "get-url" in args:
+                result.stdout = "old-url.git\n"  # Existing different URL
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            success = git.set_remote_url("origin", "new-url.git")
+
+            assert success is True
+            # Verify 'remote set-url' was called
+            set_url_call = [c for c in calls if "set-url" in c]
+            assert len(set_url_call) == 1
+            assert "new-url.git" in set_url_call[0]
+
+    def test_set_remote_url_skips_if_same(self, tmp_path: Path) -> None:
+        """Test set_remote_url does nothing if URL already matches."""
+        git = GitOps(tmp_path)
+        calls = []
+
+        def mock_run(args: list[str], **kwargs):
+            calls.append(args)
+            result = MagicMock(returncode=0)
+            if "get-url" in args:
+                result.stdout = "same-url.git\n"
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            success = git.set_remote_url("origin", "same-url.git")
+
+            assert success is True
+            # Only get-url should be called, not set-url or add
+            assert len(calls) == 1
+            assert "get-url" in calls[0]
 
 
 # =============================================================================

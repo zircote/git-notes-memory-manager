@@ -99,7 +99,8 @@ def get_git_version() -> tuple[int, int, int]:
                 stacklevel=2,
             )
             _git_version = (0, 0, 0)
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
+        # QUAL-HIGH-001: Specific exceptions for subprocess operations
         warnings.warn(
             "Git version detection failed; using regex fallback for config operations",
             UserWarning,
@@ -548,8 +549,8 @@ class GitOps:
                 text=True,
                 check=False,
             )
-        except Exception:
-            # Fallback to sequential if batch fails
+        except (OSError, subprocess.SubprocessError):
+            # QUAL-HIGH-001: Fallback to sequential if batch fails
             return {sha: self.show_note(namespace, sha) for sha in commit_shas}
 
         # Parse batch output
@@ -1008,6 +1009,60 @@ class GitOps:
         return True
 
     # =========================================================================
+    # Remote Configuration
+    # =========================================================================
+
+    def get_remote_url(self, remote_name: str = "origin") -> str | None:
+        """Get the URL of a configured remote.
+
+        Args:
+            remote_name: Name of the remote (default: origin).
+
+        Returns:
+            Remote URL if configured, None otherwise.
+        """
+        result = self._run_git(
+            ["remote", "get-url", remote_name],
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return None
+
+    def set_remote_url(self, remote_name: str, url: str) -> bool:
+        """Set or update the URL of a remote.
+
+        If the remote doesn't exist, it will be added.
+        If it exists with a different URL, it will be updated.
+
+        Args:
+            remote_name: Name of the remote.
+            url: URL to set.
+
+        Returns:
+            True if successful, False otherwise.
+        """
+        current_url = self.get_remote_url(remote_name)
+        if current_url == url:
+            # Already configured correctly
+            return True
+
+        if current_url is not None:
+            # Update existing remote
+            result = self._run_git(
+                ["remote", "set-url", remote_name, url],
+                check=False,
+            )
+        else:
+            # Add new remote
+            result = self._run_git(
+                ["remote", "add", remote_name, url],
+                check=False,
+            )
+
+        return result.returncode == 0
+
+    # =========================================================================
     # Remote Sync Operations
     # =========================================================================
 
@@ -1039,7 +1094,8 @@ class GitOps:
                     check=False,
                 )
                 results[ns] = result.returncode == 0
-            except Exception:
+            except (OSError, subprocess.SubprocessError):
+                # QUAL-HIGH-001: Specific exceptions for subprocess operations
                 results[ns] = False
 
         return results
@@ -1274,6 +1330,22 @@ class GitOps:
             # Verify it's actually a git repo
             if instance.is_git_repository():
                 return instance
+
+        # SEC-HIGH-001: Verify path is not a symlink to prevent symlink attacks
+        # An attacker could create a symlink at user_path pointing to a sensitive
+        # location, causing git init to modify unintended directories
+        if user_path.is_symlink():
+            raise StorageError(
+                "User memories path is a symlink",
+                f"Remove symlink at {user_path} and retry",
+            )
+
+        # Also verify parent directory is not a symlink
+        if user_path.parent.is_symlink():
+            raise StorageError(
+                "User memories parent directory is a symlink",
+                f"Remove symlink at {user_path.parent} and retry",
+            )
 
         # Initialize bare repository
         cmd = ["git", "init", "--bare", str(user_path)]
