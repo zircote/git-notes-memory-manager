@@ -823,3 +823,21 @@ tags:
 | Allowlist bypass | Low | High | Hash-based storage, no plaintext |
 
 ##...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:15.859511+00:00'
+summary: '...Hash-based storage, no plaintext |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...Hash-based storage, no plaintext |
+
+## Open Questions
+
+- [x] Which detection layers in v1? → Pattern + Entropy (confirmed)
+- [x] Include PII? → Yes (confirmed)
+- [x] Default strategy? → REDACT...
