@@ -1039,3 +1039,23 @@ tags:
 Use `/memory:*` pattern for observability commands:
 
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.308133+00:00'
+summary: '...commands could follow the same pattern or use a sub-namespace.'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...commands could follow the same pattern or use a sub-namespace.
+
+### Decision
+
+Use `/memory:*` pattern for observability commands:
+
+- `/memory:metrics` - View metrics
+- `/memory:traces` - View traces
+-...
