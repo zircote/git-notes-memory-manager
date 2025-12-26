@@ -7532,3 +7532,18 @@ tags:
 - [x] PROMPT-M-002: Unsafe JSON Parsing (`implicit_capture_agent.py`) ✅
   - **Completed:** 2025-12-26 - Added `_safe_float()` helper for parsing confidence data; wrapped in try-except
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T17:02:58.141307+00:00'
+summary: '...rate_limiter.py:243-250`)'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...rate_limiter.py:243-250`)
+- [x] RES-M-004: No SQLite busy_timeout Set (`recall.py:326-337`) ✅
+  - **Completed:** 2025-12-26 - Added `PRAGMA busy_timeout=5000` to IndexService and CaptureStore
+- [ ] RES-M-005:...
