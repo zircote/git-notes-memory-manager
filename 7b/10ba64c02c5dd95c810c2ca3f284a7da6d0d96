@@ -949,3 +949,18 @@ tags:
 ---
 
 I see RES-M-003 is marked incomplete but I fixed it in the previous session. Let me verify and update the tracker, then continue with remaining...
+
+---
+type: progress
+timestamp: '2025-12-26T17:42:45.371707+00:00'
+summary: '...────────────────────────────────────────────`
+
+  The `embed()` method already has the circuit br...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...────────────────────────────────────────────`
+
+The `embed()` method already has the circuit breaker implemented correctly. Now I need to add the same circuit breaker logic to `embed_batch()`. Let me update it:
