@@ -25,3 +25,18 @@ tags:
 ...test_private_ip_blocked_by_default(self) -> None:
         """Private IP addresses should be blocked by default."""
         exporter = OTLPExporter(endpoint="http://192.168.1.100:4318")...
+
+---
+type: blockers
+timestamp: '2025-12-26T15:34:25.109364+00:00'
+summary: '...test_loopback_ip_blocked_by_default(self) -> None:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_otlp_exporter.py
+---
+
+...test_loopback_ip_blocked_by_default(self) -> None:
+        """Loopback IP addresses should be blocked by default."""
+        exporter = OTLPExporter(endpoint="http://127.0.0.1:4318")
+        assert...
