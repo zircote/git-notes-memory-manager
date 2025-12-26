@@ -1127,3 +1127,19 @@ Create a meta-memory that:
 2. Preserves key details from each source
 3. Uses SUMMARY level for quick recall
 4....
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:08.520007+00:00'
+summary: '...metrics with rolling window'
+tags:
+- auto-captured
+- post-tool-use
+- file:CHANGELOG.md
+---
+
+...metrics with rolling window
+  - ADR-005: Contextvars for span propagation
+  - ADR-006: Decorator pattern for timing
+  - ADR-007: Prometheus histogram bucket configuration
+  - ADR-008: Graceful degradation...
