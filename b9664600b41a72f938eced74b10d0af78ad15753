@@ -8720,3 +8720,28 @@ Fixed hooks.json to match CI workflow and added security scanning.
 ## Related Files
 - .claude/hooks.json:1-58
 - CLAUDE.md:291-301
+
+---
+type: progress
+timestamp: '2025-12-26T17:20:06.247544+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Committed and pushed 6 commits to v1.0.0 branch
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Committed and pushed 6 commits to v1.0.0 branch
+## Summary
+Split changes into logical commits following conventional commit format.
+
+## Commits
+- fix: SQLite connection leaks and domain parameter
+- refactor: batch fetch fallback logging
+- docs: environment variables reference
+- feat(hooks): security scanning and path fixes
+- docs: CHANGELOG v0.12.0 entry
+- docs: code review artifacts
