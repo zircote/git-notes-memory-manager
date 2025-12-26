@@ -278,3 +278,23 @@ tags:
 Subtasks:
 - [x] Test with real Anthropic API (optional, CI-skip)
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T00:58:54.937398+00:00'
+summary: '...Documentation and examples'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Documentation and examples
+- **Status**: ✅ Complete
+- **Started**: 2025-12-26T01:50:00Z
+- **Completed**: 2025-12-26T01:15:00Z
+
+Subtasks:
+- [x] Document environment variables
+- [x] Add usage examples
+-...
