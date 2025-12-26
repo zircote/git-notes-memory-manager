@@ -743,3 +743,18 @@ tags:
 |--------|--------|-------------------|
 | Pattern detection coverage | >95% of common secret formats | Test against known secret formats |
 |...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:15.726186+00:00'
+summary: '...analysis | Understand JSON/YAML structure | Parse structured formats
+  for keys |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...analysis | Understand JSON/YAML structure | Parse structured formats for keys |
+| FR-203 | Custom pattern file | Organization-specific patterns | Load patterns from external YAML |
+| FR-204 | Metrics/telemetry...
