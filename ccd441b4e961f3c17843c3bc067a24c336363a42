@@ -1,0 +1,10 @@
+---
+type: decisions
+timestamp: '2025-12-26T00:48:05.843051+00:00'
+summary: '...(new directory with full spec)'
+---
+
+...(new directory with full spec)
+- `CLAUDE.md` (modified with Active Spec Projects section)
+
+[decision] Switched to existing v1.0.0 branch which contains merged subconsciousness and multi-domain...
