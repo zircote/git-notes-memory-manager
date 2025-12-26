@@ -631,3 +631,20 @@ tags:
     # API keys and tokens (generic pattern for hex/base64 strings)
     (
         re.compile(r"\b(?:sk[-_]|api[-_]?key[-_]?|token[-_]?)[A-Za-z0-9...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:20:14.124526+00:00'
+summary: '...in result'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_hook_utils.py
+---
+
+...in result
+
+    def test_scrub_aws_access_key(self) -> None:
+        """Test AWS access key pattern is scrubbed."""
+        text = "AWS key: AKIAIOSFODNN7EXAMPLE"
+        result = scrub_pii(text)...
