@@ -1241,3 +1241,23 @@ tags:
 ---
 
 ...Now I understand the full issue. Let me check other commands to see if they use a different pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T05:20:43.214718+00:00'
+summary: '...breaker protection against repeated failures.'
+tags:
+- auto-captured
+- post-tool-use
+- file:CODE_REVIEW.md
+---
+
+...breaker protection against repeated failures.
+
+**Remediation:** Implement circuit breaker pattern for remote operations.
+
+---
+
+### HIGH-005: Missing Quick Start Section in README
+
+**File:**...
