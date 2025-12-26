@@ -57,3 +57,20 @@ class TestPatternDetectionPerformance:
 
     def test_pii_detection_under_1ms(self):
         """Test that...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:39:55.427069+00:00'
+summary: '...bisect.bisect_right(line_starts, position)'
+tags:
+- auto-captured
+- post-tool-use
+- file:pii.py
+---
+
+...bisect.bisect_right(line_starts, position)
+
+        detections: list[SecretDetection] = []
+
+        for pattern in self._patterns:
+            for match in pattern.regex.finditer(content):...
