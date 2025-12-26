@@ -445,3 +445,23 @@ tags:
 ---
 
 ...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:27.920064+00:00'
+summary: '...before messages are sent to the provider.
+
+  `─────────────────────────────────────────────────`
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...before messages are sent to the provider.
+`─────────────────────────────────────────────────`
+
+Now I understand the system. I need to:
+1. Import the secrets filtering service in llm_client.py
+2. Add secrets...
