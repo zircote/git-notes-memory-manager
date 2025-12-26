@@ -2538,3 +2538,29 @@ Cleaned up and organized observability environment variables.
 
 ## Related Files
 - ~/.bash_profile:163-182
+
+---
+type: progress
+timestamp: '2025-12-26T15:42:11.241359+00:00'
+summary: Fixed Docker Compose observability stack - all services running
+---
+
+Fixed Docker Compose observability stack - all services running
+## Summary
+Resolved two issues preventing the stack from starting.
+
+## Issues Found & Fixed
+1. **Port conflict (9090)**: `readinesshub-prometheus` was using port 9090 → user stopped it
+2. **OTel config error**: Loki exporter used deprecated `labels` schema → updated to `default_labels_enabled`
+
+## Final Status
+| Service | Port | Status |
+|---------|------|--------|
+| Grafana | 3000 | ✅ 200 |
+| Prometheus | 9090 | ✅ 200 |
+| Loki | 3100 | ✅ 200 |
+| Tempo | 3200 | ✅ 200 |
+| OTel Collector | 4317/4318 | ✅ Running |
+
+## Related Files
+- docker/otel-collector-config.yaml:66-70 (fixed Loki exporter config)
