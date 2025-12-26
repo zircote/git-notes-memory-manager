@@ -571,3 +571,47 @@ summary: '...that doesn''t inherit your shell''s environment variables like `MEM
 ...that doesn't inherit your shell's environment variables like `MEMORY_PLUGIN_OTLP_ENDPOINT`.
 
 The fix is to source your shell profile in `run-hook.sh` or read config from a file. Let me add support...
+
+---
+type: progress
+timestamp: '2025-12-26T23:14:48.051576+00:00'
+summary: Telemetry pipeline verified end-to-end, env config parser bug fixed
+---
+
+Telemetry pipeline verified end-to-end, env config parser bug fixed
+## Summary
+The OTLP telemetry pipeline is now fully functional. Hook metrics flow correctly from hooks → OTLP collector → Prometheus → Grafana. Also fixed a critical bug in the env file parser that was breaking secrets detection.
+
+## Changes Made
+- Fixed env config parser (`observability/config.py:209-211`) to strip inline comments
+  - Previously: `SECRETS_FILTER_ENTROPY_ENABLED=true  # comment` was being parsed as `true  # comment`
+  - This caused boolean parsing to fail, disabling secrets detection in tests
+- All 2860 tests now pass with 85% coverage
+
+## Verification Results
+1. **Hook → OTLP**: Metrics exported successfully (SEC-H-001 SSRF override working)
+2. **OTLP → Prometheus**: `memory_hook_executions_total{hook="SessionStart"}` visible
+3. **Prometheus → Grafana**: 5 dashboards available:
+   - Git Notes Memory - Hook Performance
+   - Git Notes Memory - Operations
+   - Git Notes Memory - Traces
+   - Git Notes Memory - Logs
+   - Git Notes Memory (overview)
+
+## Configuration
+Config file: `~/.local/share/memory-plugin/env`
+```bash
+# Key telemetry settings:
+export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
+```
+
+## Access Points
+- **Grafana**: http://localhost:3000 (admin/admin)
+- **Prometheus**: http://localhost:9090
+- **OTel Collector metrics**: http://localhost:8889/metrics
+
+## Related Files
+- `src/git_notes_memory/observability/config.py:209-211` (bug fix)
+- `hooks/run-hook.sh:26-45` (env sourcing)
+- `~/.local/share/memory-plugin/env` (config file)
