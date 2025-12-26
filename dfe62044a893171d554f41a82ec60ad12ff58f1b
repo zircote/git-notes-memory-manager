@@ -544,3 +544,18 @@ tags:
 ### 8.3 Pattern Sources
 
 1. **gitleaks.toml** (v8.25.0): https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.442942+00:00'
+summary: '...---------|'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...---------|
+| **Entropy Threshold** | 3.0 hex / 4.5 base64 | Industry standard, balanced FP/FN |
+| **Pattern Priority** | Deterministic first | Highest confidence, fastest |
+| **Keyword Context** | Required...
