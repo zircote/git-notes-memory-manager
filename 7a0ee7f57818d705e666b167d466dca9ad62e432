@@ -17,3 +17,15 @@ tags:
 ### Internal Dependencies
 
 - `GitOps.sync...
+
+---
+type: patterns
+timestamp: '2025-12-26T19:46:34.164822+00:00'
+summary: 'Auto-capture is enabled by default (True). Let me verify the block pattern
+  matches what I''m writing:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Auto-capture is enabled by default (True). Let me verify the block pattern matches what I'm writing:
