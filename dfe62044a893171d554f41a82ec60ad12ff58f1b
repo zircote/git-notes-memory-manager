@@ -405,3 +405,26 @@ tags:
 ```python
 # Value follows keyword pattern
 FOLLOWED_BY_EQUAL = r'{keyword}["\']?\s*[:=]\s*...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.244552+00:00'
+summary: '...''contrasena'','
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...'contrasena',
+)
+```
+
+### 6.2 Assignment Pattern Detection
+
+```python
+# Value follows keyword pattern
+FOLLOWED_BY_EQUAL = r'{keyword}["\']?\s*[:=]\s*["\']?({secret})'
+
+# Examples matched:
+# password...
