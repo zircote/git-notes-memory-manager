@@ -21,3 +21,15 @@ Research on Python observability best practices reveals clear patterns for optio
 ## Related Files
 - pyproject.toml (extras configuration)
 - src/git_notes_memory/observability.py (planned)
+
+---
+type: learnings
+timestamp: '2025-12-26T03:23:16.090301+00:00'
+summary: There are several hook modules that still use the old logging pattern. Note
+  that `get_hook_logger...
+tags:
+- auto-captured
+- pre-compact
+---
+
+There are several hook modules that still use the old logging pattern. Note that `get_hook_logger` in hook_utils.py (line 107) creates file-based loggers for dedicated debug...
