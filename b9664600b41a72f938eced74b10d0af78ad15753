@@ -2204,3 +2204,21 @@ tags:
 
 `★ Insight ─────────────────────────────────────`
 The `ServiceRegistry.get()` pattern assumes services can be default-constructed. Since `CaptureService` accepts all optional args,...
+
+---
+type: patterns
+timestamp: '2025-12-26T16:06:40.615935+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The test file follows a clear pattern:
+
+  1. Fixtu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The test file follows a clear pattern:
+1. Fixtures for mock dependencies (`mock_llm_client`, `agent`)
+2. Helper method for creating...
