@@ -276,3 +276,24 @@ global:
     - pattern: "AKIA.*EXAMPLE"
       reason: "Documentation example"
       added_by: "user@example.com"...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.077725+00:00'
+summary: '...expires: "2024-06-01"'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...expires: "2024-06-01"
+
+# Per-namespace allowlists
+namespaces:
+  learnings:
+    patterns:
+      - pattern: "sk-ant-api.*for-testing"
+        reason: "Learning about API key formats"
+
+# Temporary suppressions...
