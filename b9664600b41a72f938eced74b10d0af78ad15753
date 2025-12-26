@@ -891,3 +891,20 @@ tags:
     def test_uses_suggested_namespace(
         self,
         checker:...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:03:23.356524+00:00'
+summary: '...context."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_novelty_checker.py
+---
+
+...context."""
+        signal = CaptureSignal(
+            type=SignalType.LEARNING,
+            match="I learned that SQLite is fast",
+            context="",
+            suggested_namespace="learnings",...
