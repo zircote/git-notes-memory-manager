@@ -119,3 +119,23 @@ tags:
 - [ ] Is there a pattern I should follow or avoid?
 
 **SEARCH FIRST, THEN ACT.** Prior context prevents contradicting...
+
+---
+type: patterns
+timestamp: '2025-12-26T13:31:17.985938+00:00'
+summary: '...Root Cause Analysis
+
+  **The issue occurs due to a mismatch between the expected plugin path pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Root Cause Analysis
+
+**The issue occurs due to a mismatch between the expected plugin path pattern and the actual installed plugin structure.**
+
+### Affected Files
+
+**Primary Issue:**
+- `commands/metrics...
