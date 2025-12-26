@@ -527,3 +527,15 @@ tags:
 ---
 
 ...This pattern creates thread-safety issues and makes testing difficult. The ServiceRegistry pattern provides thread-safe singleton management with a clean reset mechanism for tests. However,...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:10.232549+00:00'
+summary: I can see the pattern matching logic at lines 700-743. The issue is that
+  `_find_co_occurrence_clu...
+tags:
+- auto-captured
+- pre-compact
+---
+
+I can see the pattern matching logic at lines 700-743. The issue is that `_find_co_occurrence_clusters` iterates...
