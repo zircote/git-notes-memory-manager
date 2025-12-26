@@ -6352,3 +6352,18 @@ tags:
 ---
 
 Resuming the code review remediation. I've completed all Critical findings and 3 Security HIGH findings. Let me check the code review document...
+
+---
+type: progress
+timestamp: '2025-12-26T16:45:19.729920+00:00'
+summary: '...────────────────────────────────────────────`
+
+  The `embed()` method already has the circuit br...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...────────────────────────────────────────────`
+
+The `embed()` method already has the circuit breaker implemented correctly. Now I need to add the same circuit breaker logic to `embed_batch()`. Let me update it:
