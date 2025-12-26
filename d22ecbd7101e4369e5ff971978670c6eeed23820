@@ -1430,3 +1430,30 @@ Extended XMLBuilder.add_memory_element() to include a `domain` attribute on memo
 ## Related Files
 - src/git_notes_memory/hooks/xml_formatter.py:131-133
 - tests/test_hooks.py:138-216
+
+---
+type: progress
+timestamp: '2025-12-26T02:50:39.468552+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 5.1: Implement User Memory Sync
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 5.1: Implement User Memory Sync
+## Summary
+Added `sync_user_memories()` method to SyncService for syncing user-level memories from the bare repo at `~/.local/share/memory-plugin/user-memories/`. Fixed 4 failing tests that used incorrect NoteRecord constructor arguments.
+
+## Changes Made
+- Fixed `test_record_to_user_memory_creates_user_domain_id`: Use `make_note_record()` helper instead of invalid NoteRecord constructor args
+- Fixed `test_record_to_user_memory_handles_empty_fields`: Construct NoteRecord with proper `front_matter`, `body`, `raw` fields
+- Fixed `test_syncs_user_memories_from_bare_repo`: Correct mock patch paths to `git_notes_memory.git_ops.GitOps.for_domain`
+- Fixed `test_full_sync_clears_index_first`: Same patch path correction
+
+## Related Files
+- tests/test_sync.py:1295-1449
+- src/git_notes_memory/sync.py:522-638
