@@ -308,3 +308,15 @@ tags:
 The command follows the existing pattern in this codebase:
 1. **YAML frontmatter** with `description`, `argument-hint`, and `allowed-tools`
 2...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:39:38.176386+00:00'
+summary: Those unreachable warnings are for the final `return None` statements which
+  are correct pattern f...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Those unreachable warnings are for the final `return None` statements which are correct pattern for exhaustive enum handling. Now let me create the models.py file:
