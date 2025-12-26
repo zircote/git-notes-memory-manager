@@ -436,3 +436,42 @@ Added observability to all git subprocess calls via the central `_run_git` wrapp
 
 ## Related Files
 - src/git_notes_memory/git_ops.py:201-317 (_run_git instrumentation)
+
+---
+type: progress
+timestamp: '2025-12-26T02:48:41.853740+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.6: Instrumented all 5 hook hand...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.6: Instrumented all 5 hook handlers with observability
+## Summary
+Added `timed_hook_execution` context manager to hook_utils.py and wrapped all hook handlers' main functions with execution timing and status tracking.
+
+## Changes Made
+- Added `timed_hook_execution` class to `hook_utils.py` - context manager that tracks hook execution duration and status
+- Added `hook_timeouts_total` counter to `setup_timeout()` for tracking timeout events
+- Wrapped `session_start_handler.py` main() with `timed_hook_execution("SessionStart")`
+- Wrapped `stop_handler.py` main() with `timed_hook_execution("Stop")`
+- Wrapped `user_prompt_handler.py` main() with `timed_hook_execution("UserPromptSubmit")`
+- Wrapped `post_tool_use_handler.py` main() with `timed_hook_execution("PostToolUse")`
+- Wrapped `pre_compact_handler.py` main() with `timed_hook_execution("PreCompact")`
+- All handlers now track success/error/skipped status
+
+## Metrics Emitted
+- `hook_execution_duration_ms` histogram (labels: hook)
+- `hook_executions_total` counter (labels: hook, status)
+- `hook_timeouts_total` counter (labels: hook)
+
+## Related Files
+- src/git_notes_memory/hooks/hook_utils.py:291-356 (new timed_hook_execution class)
+- src/git_notes_memory/hooks/hook_utils.py:257-262 (timeout metrics)
+- src/git_notes_memory/hooks/session_start_handler.py:147-264
+- src/git_notes_memory/hooks/stop_handler.py:391-509
+- src/git_notes_memory/hooks/user_prompt_handler.py:248-349
+- src/git_notes_memory/hooks/post_tool_use_handler.py:383-463
+- src/git_notes_memory/hooks/pre_compact_handler.py:245-355
