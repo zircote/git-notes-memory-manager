@@ -1517,3 +1517,32 @@ Added opt-in auto-sync hooks for user memories via `HOOK_SESSION_START_FETCH_USE
 - src/git_notes_memory/hooks/config_loader.py:19,31,136-138,155-156,372-375,425-426
 - src/git_notes_memory/hooks/session_start_handler.py:27,215-228
 - src/git_notes_memory/hooks/stop_handler.py:32,488-502
+
+---
+type: progress
+timestamp: '2025-12-26T02:50:39.634309+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated /memory:status command to show domain-se...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated /memory:status command to show domain-separated statistics
+## Summary
+Task 5.4 complete. The `/memory:status` command now displays both project memories (repo-scoped) and user memories (global, cross-project) with detailed breakdowns.
+
+## Changes Made
+- Updated basic status section to show two tables: Project Memories and User Memories
+- Updated verbose status to include domain-specific namespace breakdowns
+- Added user memory storage info: bare repo status, remote sync configuration
+- Extended health metrics: project index consistency, user repo accessibility
+- Updated recommendations with domain-aware suggestions
+- Updated memory capture reminder with domain markers ([global], [user])
+
+## Related Files
+- commands/status.md:65-148 (basic status)
+- commands/status.md:150-288 (verbose status)
+- commands/status.md:293-305 (recommendations)
+- commands/status.md:328-345 (capture reminder)
