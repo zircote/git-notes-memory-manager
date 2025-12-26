@@ -832,3 +832,32 @@ All 15 tasks from Phase 1 of the LLM-powered subconsciousness feature have been 
 - `tests/subconsciousness/test_models.py`
 - `tests/subconsciousness/test_rate_limiter.py`
 - `docs/spec/active/2025-12-25-llm-subconsciousness/PROGRESS.md`
+
+---
+type: progress
+timestamp: '2025-12-26T02:13:09.016896+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.1: Define implicit capture mode...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.1: Define implicit capture models
+## Summary
+Added 6 new model classes for Phase 2 (Implicit Capture) to support LLM-powered transcript analysis and memory review workflow.
+
+## Changes Made
+- Added `ReviewStatus` enum (pending/approved/rejected/expired) for review state machine
+- Added `ThreatLevel` enum (none/low/medium/high/critical) for adversarial detection
+- Added `CaptureConfidence` frozen dataclass with weighted factor breakdown (relevance, actionability, novelty, specificity, coherence)
+- Added `ImplicitMemory` frozen dataclass for extracted memory content with source tracking
+- Added `ThreatDetection` frozen dataclass with factory methods for safe/blocked states
+- Added `ImplicitCapture` frozen dataclass wrapping memory with review status and expiration
+- Added 22 new tests covering all new models (43 total model tests)
+
+## Related Files
+- src/git_notes_memory/subconsciousness/models.py:61-562
+- tests/subconsciousness/test_models.py:245-580
+- docs/spec/active/2025-12-25-llm-subconsciousness/PROGRESS.md:211-240
