@@ -360,3 +360,25 @@ CREDIT_CARD_COMBINED = r'\b(?:\d{4}[- ]?){3}\d{4}\b'
 ```
 
 **Luhn Algorithm...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.192405+00:00'
+summary: '...\s]?|0)(?:\d[-.\s]?){9,10}\b'','
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...\s]?|0)(?:\d[-.\s]?){9,10}\b',
+}
+```
+
+### 5.4 Email Addresses
+
+```python
+# RFC 5322 compliant email pattern (simplified)
+EMAIL_PATTERN = r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b'
+
+# More...
