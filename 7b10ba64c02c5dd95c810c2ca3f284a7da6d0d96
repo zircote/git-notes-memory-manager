@@ -179,3 +179,18 @@ tags:
    - `commands/metrics.md:76-77`
    - `commands/health.md:76-77`
    - `commands/traces.md:79-80`...
+
+---
+type: patterns
+timestamp: '2025-12-26T19:04:57.685453+00:00'
+summary: '...message'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.md
+---
+
+...message
+    --format=FORMAT       Output format: text (default), json, prometheus
+    --filter=PATTERN      Filter metrics by name pattern (e.g., "capture", "hook")
+    --export              Export...
