@@ -587,3 +587,18 @@ tags:
 ---
 
 ...`eval()` as an example of malicious code injection. Let me rewrite this without that specific pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:10.525247+00:00'
+summary: '...Memory Decay - Forgetting curves and relevance decay
+
+  - **Phase 5**: Memory Consolidation - Pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Memory Decay - Forgetting curves and relevance decay
+- **Phase 5**: Memory Consolidation - Pattern recognition and memory merging
+- **Phase 6**: Proactive Surfacing - Context-aware memory suggestions
