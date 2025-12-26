@@ -242,3 +242,17 @@ tags:
   - Completed: 2025-12-26
   - Outcome: success
   - GitHub Issue: [#11](https://github.com/zircote/git-notes-memory...
+
+---
+type: progress
+timestamp: '2025-12-26T14:38:27.167267+00:00'
+summary: '...capture with confidence scoring, approval queue, hook integration'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...capture with confidence scoring, approval queue, hook integration
+  - Deliverables: Phases 1-2 completed (30/85 tasks), 134 tests with 87%+ coverage, 13 ADRs, security fix (command injection)
+  -...
