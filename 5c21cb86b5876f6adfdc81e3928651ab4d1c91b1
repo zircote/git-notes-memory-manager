@@ -49,3 +49,17 @@ tags:
 
 ### Removed
 - **Phases 3-6 deferred**:...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:37:14.230640+00:00'
+summary: '...review)'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...review)
+- **Provider abstraction**: Enhanced to support JSON mode natively (OpenAI) vs tool_use pattern (Anthropic) vs regex extraction (Ollama)
+- **Configuration approach**: Switched from config...
