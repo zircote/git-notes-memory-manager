@@ -563,3 +563,15 @@ tags:
 ---
 
 Now let me fix the N+1 pattern in `update_embedding`. The comment says "sqlite-vec doesn't support UPDATE well" so I'll use...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:17:10.388037+00:00'
+summary: Those unreachable warnings are for the final `return None` statements which
+  are correct pattern f...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Those unreachable warnings are for the final `return None` statements which are correct pattern for exhaustive enum handling. Now let me create the models.py file:
