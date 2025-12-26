@@ -1408,3 +1408,16 @@ tags:
 - [ ] Multi-layer secret detection (pattern + entropy; contextual deferred to v2)
 - [ ] PII detection (SSN, credit cards, phone numbers)
 -...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:16:48.880073+00:00'
+summary: '...(https://github.com/zircote/git-notes-memory/issues/12)'
+tags:
+- auto-captured
+- post-tool-use
+- file:CLAUDE.md
+---
+
+...(https://github.com/zircote/git-notes-memory/issues/12)
+  - Features: Multi-layer secret detection (pattern + entropy), PII detection, configurable filtering strategies, allowlist management, SOC2 audit...
