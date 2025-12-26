@@ -78,3 +78,19 @@ Investigated and filed comprehensive bug report for path resolution failures in 
 - commands/test-secret.md:87
 - commands/validate.md:69
 - https://github.com/zircote/git-notes-memory/issues/31
+
+---
+type: progress
+timestamp: '2025-12-26T17:42:43.631429+00:00'
+summary: '...```
+
+  [learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/ind...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
