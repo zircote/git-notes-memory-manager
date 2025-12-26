@@ -7547,3 +7547,19 @@ tags:
 - [x] RES-M-004: No SQLite busy_timeout Set (`recall.py:326-337`) ✅
   - **Completed:** 2025-12-26 - Added `PRAGMA busy_timeout=5000` to IndexService and CaptureStore
 - [ ] RES-M-005:...
+
+---
+type: progress
+timestamp: '2025-12-26T17:05:48.045445+00:00'
+summary: '...```
+
+  [learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/ind...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...```
+[learnings] 2025-12-26T13:19:50 - Memory index location is project-specific at .memory/index.db
+[progress]  2025-12-26T13:19:50 - Updated Claude Code hooks to enforce CI quality checks
+[progress]...
