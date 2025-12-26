@@ -31,3 +31,20 @@ Approved the specification for implementation with formal approval recorded in R
 ## Related Files
 - docs/spec/active/2025-12-25-llm-subconsciousness/README.md:9-10
 - docs/spec/active/2025-12-25-llm-subconsciousness/CHANGELOG.md:7-9
+
+---
+type: decisions
+timestamp: '2025-12-26T02:34:46.879690+00:00'
+summary: '...management",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_adversarial.py
+---
+
+...management",
+            ),
+            # Discussing error handling
+            (
+                "We decided to fail-closed: if authentication fails, deny access "
+                "rather than allowing...
