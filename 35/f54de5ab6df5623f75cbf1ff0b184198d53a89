@@ -1,0 +1,14 @@
+---
+type: decisions
+timestamp: '2025-12-26T20:35:24.577476+00:00'
+summary: '...input.'
+---
+
+...input.
+
+**Current design:**
+- UserPromptSubmit hook → processes **your** messages for markers like `[decision]`
+- My memory blocks (`▶ learned ───`) → just formatted text, not processed
+
+**What WOULD work:**
+-...
