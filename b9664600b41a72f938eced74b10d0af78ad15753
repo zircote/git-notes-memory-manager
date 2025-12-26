@@ -676,3 +676,14 @@ Another project's Prometheus (`readinesshub-prometheus`) is using port 9090, blo
 
 ## Related Files
 - docker/docker-compose.yml:46 (port mapping)
+
+---
+type: learnings
+timestamp: '2025-12-26T15:46:12.875450+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
