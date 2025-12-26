@@ -6550,3 +6550,19 @@ tags:
 | ID | Finding | Status |
 |----|---------|--------|
 |...
+
+---
+type: progress
+timestamp: '2025-12-26T16:55:27.218631+00:00'
+summary: '...Finding | Status |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...Finding | Status |
+|----|---------|--------|
+| PERF-H-001 | Paginated get_all_ids | ✅ Already implemented |
+| PERF-H-002 | N+1 Query in Reindex | ✅ Completed |
+| PERF-H-003 | Unbounded collect_notes...
