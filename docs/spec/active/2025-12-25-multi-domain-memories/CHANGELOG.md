@@ -2,6 +2,13 @@
 
 All notable changes to this specification will be documented in this file.
 
+## [1.0.0] - 2025-12-26
+
+### Approved
+- Spec approved by Robert Allen <zircote@gmail.com> on 2025-12-26T00:32:52Z
+- Ready for implementation via /claude-spec:implement multi-domain-memories
+- Status changed: in-review → approved
+
 ## [1.0.0] - 2025-12-25
 
 ### Added

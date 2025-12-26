@@ -16,14 +16,14 @@ This architecture extends the existing git-notes-memory system to support two me
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                            CAPTURE FLOW                                      │
+│                            CAPTURE FLOW                                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  User Input: "[global] I prefer tabs over spaces"                           │
 │       │                                                                     │
 │       ▼                                                                     │
 │  ┌──────────────────┐                                                       │
-│  │  SignalDetector  │──────────────────────────────────────────────┐       │
+│  │  SignalDetector  │───────────────────────────────────────────────┐       │
 │  │  (domain marker) │                                               │       │
 │  └────────┬─────────┘                                               │       │
 │           │ domain = "user"                                         │       │
@@ -49,18 +49,18 @@ This architecture extends the existing git-notes-memory system to support two me
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                            RECALL FLOW                                       │
+│                            RECALL FLOW                                      │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  Search Query: "coding preferences"                                         │
 │       │                                                                     │
 │       ▼                                                                     │
-│  ┌──────────────────────────────────────────────────────────────────┐      │
+│  ┌───────────────────────────────────────────────────────────────────┐      │
 │  │                      RecallService                                │      │
-│  │  ┌────────────────┐              ┌─────────────────────┐         │      │
-│  │  │ UserIndex      │              │ ProjectIndex        │         │      │
-│  │  │ search()       │              │ search()            │         │      │
-│  │  └───────┬────────┘              └──────────┬──────────┘         │      │
+│  │  ┌────────────────┐              ┌─────────────────────┐          │      │
+│  │  │ UserIndex      │              │ ProjectIndex        │          │      │
+│  │  │ search()       │              │ search()            │          │      │
+│  │  └───────┬────────┘              └──────────┬──────────┘          │      │
 │  │          │                                  │                     │      │
 │  │          │    ┌─────────────────────┐       │                     │      │
 │  │          └───►│   Merge & Rank      │◄──────┘                     │      │
@@ -282,6 +282,7 @@ RECALL (Both Domains):
 ### Storage Strategy
 
 **User Memories Location**:
+
 ```
 ~/.local/share/memory-plugin/
 ├── user-memories/           # Bare git repo for user notes
@@ -303,6 +304,7 @@ RECALL (Both Domains):
 ```
 
 **Memory ID Format**:
+
 - Project: `{namespace}:{commit_sha}:{index}` (existing)
 - User: `user:{namespace}:{commit_sha}:{index}` (new prefix)
 
@@ -378,22 +380,22 @@ BLOCK_PATTERN_WITH_DOMAIN = re.compile(
 
 ### Internal Integrations
 
-| System | Integration Type | Purpose |
-|--------|-----------------|---------|
-| CaptureService | Method extension | Add `domain` parameter to `capture()` |
-| RecallService | Method extension | Add `domain` parameter to `search()`, merge results |
-| IndexService | Schema migration | Add `domain` column, extend search filters |
-| GitOps | Factory method | `for_domain()` creates appropriate instance |
-| SignalDetector | Pattern addition | Recognize `[global]`, `[user]` markers |
-| ContextBuilder | Query extension | Fetch from both indices, merge context |
-| SyncService | New method | `sync_user_memories()` for user repo |
+| System         | Integration Type | Purpose                                             |
+| -------------- | ---------------- | --------------------------------------------------- |
+| CaptureService | Method extension | Add `domain` parameter to `capture()`               |
+| RecallService  | Method extension | Add `domain` parameter to `search()`, merge results |
+| IndexService   | Schema migration | Add `domain` column, extend search filters          |
+| GitOps         | Factory method   | `for_domain()` creates appropriate instance         |
+| SignalDetector | Pattern addition | Recognize `[global]`, `[user]` markers              |
+| ContextBuilder | Query extension  | Fetch from both indices, merge context              |
+| SyncService    | New method       | `sync_user_memories()` for user repo                |
 
 ### External Integrations
 
-| Service | Integration Type | Purpose |
-|---------|-----------------|---------|
-| Git CLI | subprocess | User-memories bare repo operations |
-| Remote Git | git push/pull | Optional sync for user memories |
+| Service    | Integration Type | Purpose                            |
+| ---------- | ---------------- | ---------------------------------- |
+| Git CLI    | subprocess       | User-memories bare repo operations |
+| Remote Git | git push/pull    | Optional sync for user memories    |
 
 ## Security Design
 
@@ -439,12 +441,12 @@ subprocess.run(f"git notes add -m '{message}' {commit}", shell=True, ...)
 
 ### Performance Targets
 
-| Metric | Target | Rationale |
-|--------|--------|-----------|
-| User index initialization | <100ms | One-time lazy load per session |
-| Dual-domain search | <200ms | Parallel queries, merge overhead |
-| SessionStart context build | <500ms | Already budgeted in existing code |
-| User memory sync | <5s for 1000 | Background, not blocking |
+| Metric                     | Target       | Rationale                         |
+| -------------------------- | ------------ | --------------------------------- |
+| User index initialization  | <100ms       | One-time lazy load per session    |
+| Dual-domain search         | <200ms       | Parallel queries, merge overhead  |
+| SessionStart context build | <500ms       | Already budgeted in existing code |
+| User memory sync           | <5s for 1000 | Background, not blocking          |
 
 ### Optimization Strategies
 
@@ -457,12 +459,12 @@ subprocess.run(f"git notes add -m '{message}' {commit}", shell=True, ...)
 
 ### Failure Modes
 
-| Failure | Impact | Recovery |
-|---------|--------|----------|
-| User-memories repo missing | Cannot access user memories | Auto-create on first capture |
-| User index corruption | Search fails | Rebuild from git notes via sync |
-| Remote sync fails | User memories not synced | Retry on next session, log warning |
-| Schema migration fails | Index unusable | Delete and rebuild from git notes |
+| Failure                    | Impact                      | Recovery                           |
+| -------------------------- | --------------------------- | ---------------------------------- |
+| User-memories repo missing | Cannot access user memories | Auto-create on first capture       |
+| User index corruption      | Search fails                | Rebuild from git notes via sync    |
+| Remote sync fails          | User memories not synced    | Retry on next session, log warning |
+| Schema migration fails     | Index unusable              | Delete and rebuild from git notes  |
 
 ### Graceful Degradation
 
@@ -527,11 +529,11 @@ def search(self, query: str, domain: Domain | None = None) -> list[MemoryResult]
 
 New environment variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable                               | Description                              | Default |
+| -------------------------------------- | ---------------------------------------- | ------- |
 | `HOOK_SESSION_START_FETCH_USER_REMOTE` | Fetch user memories from remote on start | `false` |
-| `HOOK_STOP_PUSH_USER_REMOTE` | Push user memories to remote on stop | `false` |
-| `USER_MEMORIES_REMOTE` | Git remote URL for user memories | (none) |
+| `HOOK_STOP_PUSH_USER_REMOTE`           | Push user memories to remote on stop     | `false` |
+| `USER_MEMORIES_REMOTE`                 | Git remote URL for user memories         | (none)  |
 
 ### Rollback Plan
 
