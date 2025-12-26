@@ -398,3 +398,17 @@ prompt = get_adversarial_prompt(content="...")
 Key elements:
 - **Threat pattern catalog**: Examples of each attack type
 - **Context awareness**: Distinguishes discussion from...
+
+---
+type: patterns
+timestamp: '2025-12-26T03:13:56.100950+00:00'
+summary: '...idx_memories_repo_path ON memories(repo_path)",'
+tags:
+- auto-captured
+- post-tool-use
+- file:index.py
+---
+
+...idx_memories_repo_path ON memories(repo_path)",
+    # HIGH-003: Composite index for common query pattern (namespace + spec + ORDER BY timestamp)
+    "CREATE INDEX IF NOT EXISTS idx_memories_ns_spec_ts...
