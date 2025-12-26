@@ -321,3 +321,15 @@ tags:
 ...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
 
 The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:57:12.334410+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
