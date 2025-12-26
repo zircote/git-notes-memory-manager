@@ -35,3 +35,21 @@ tags:
 ---
 
 The test shows that the API key pattern matches the generic `secret` pattern first. I need to update the test to expect `[REDACTED:secret]` since `API_KEY=value` is matching...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:26.534878+00:00'
+summary: '...Remediation Summary
+
+  ### Critical Priority (2/2)
+
+  - **CRIT-001**: Implemented circuit breaker p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Remediation Summary
+
+### Critical Priority (2/2)
+- **CRIT-001**: Implemented circuit breaker pattern for LLM provider calls with 3 states (CLOSED, OPEN, HALF_OPEN), configurable thresholds, and...
