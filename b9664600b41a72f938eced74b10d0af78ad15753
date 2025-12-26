@@ -9027,3 +9027,30 @@ Fixed N+1 query issue in sync reindex by adding batch existence checking.
 - src/git_notes_memory/index.py:883-910
 - src/git_notes_memory/sync.py:312-352
 - tests/test_index.py:642-672
+
+---
+type: progress
+timestamp: '2025-12-26T17:20:06.975911+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Performance HIGH findings PERF-H-002, ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Performance HIGH findings PERF-H-002, PERF-H-003, PERF-H-004
+## Summary
+Fixed multiple performance issues in the codebase.
+
+## Changes Made
+- **PERF-H-002**: Added `IndexService.get_existing_ids()` batch method, restructured sync reindex
+- **PERF-H-003**: Added `SyncService.iter_notes()` generator for memory-bounded iteration
+- **PERF-H-004**: Added `EmbeddingService.warmup()` to pre-load model and avoid cold start
+
+## Related Files
+- src/git_notes_memory/index.py:883-910
+- src/git_notes_memory/sync.py:272-314
+- src/git_notes_memory/embedding.py:391-426
+- tests/test_index.py:642-672
+- tests/test_embedding.py:229-272
