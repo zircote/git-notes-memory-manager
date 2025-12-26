@@ -1,0 +1,650 @@
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.297524+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Initialized planning workspace for multi-domain ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Initialized planning workspace for multi-domain memories feature
+## Summary
+Created project scaffold at `docs/spec/active/2025-12-25-multi-domain-memories/` with README.md and CHANGELOG.md. Fetched GitHub Issue #13 which contains comprehensive requirements.
+
+## Changes Made
+- Created project directory structure
+- Initialized README.md with project metadata and frontmatter
+- Initialized CHANGELOG.md with creation entry
+- Linked to GitHub Issue #13
+
+## Related Files
+- docs/spec/active/2025-12-25-multi-domain-memories/README.md
+- docs/spec/active/2025-12-25-multi-domain-memories/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.417031+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed specification for Multi-Domain Memorie...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed specification for Multi-Domain Memories (SPEC-2025-12-25-001)
+## Summary
+Created comprehensive specification documents for GitHub Issue #13. All artifacts ready for stakeholder review.
+
+## Changes Made
+- Created REQUIREMENTS.md with 13 functional requirements (6 P0, 4 P1, 3 P2)
+- Created ARCHITECTURE.md with 9 component designs and data flow diagrams
+- Created IMPLEMENTATION_PLAN.md with 5 phases and 24 tasks
+- Created DECISIONS.md with 7 Architecture Decision Records
+- Updated CHANGELOG.md with v1.0.0 release notes
+- Updated README.md with status `in-review`
+
+## Related Files
+- docs/spec/active/2025-12-25-multi-domain-memories/README.md
+- docs/spec/active/2025-12-25-multi-domain-memories/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-multi-domain-memories/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-multi-domain-memories/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-multi-domain-memories/DECISIONS.md
+- docs/spec/active/2025-12-25-multi-domain-memories/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.461517+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Multi-domain memories specification pushed to or...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Multi-domain memories specification pushed to origin
+## Summary
+Successfully pushed the complete specification for Issue #13 (multi-domain memories) to the remote repository.
+
+## Branch State
+- **Branch**: `issue-13-multi-domain` → `origin/issue-13-multi-domain`
+- **Commit**: `0b10234` - "docs: add multi-domain memories specification (SPEC-2025-12-25-001)"
+- **PR Ready**: https://github.com/zircote/git-notes-memory/pull/new/issue-13-multi-domain
+
+## Specification Contents
+- REQUIREMENTS.md - 13 functional requirements (6 P0, 4 P1, 3 P2)
+- ARCHITECTURE.md - 9 component designs with interfaces
+- IMPLEMENTATION_PLAN.md - 5 phases, 24 tasks
+- DECISIONS.md - 7 ADRs documenting key decisions
+
+## Related Files
+- docs/spec/active/2025-12-25-multi-domain-memories/README.md
+- docs/spec/active/2025-12-25-multi-domain-memories/REQUIREMENTS.md
+- docs/spec/active/2025-12-25-multi-domain-memories/ARCHITECTURE.md
+- docs/spec/active/2025-12-25-multi-domain-memories/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-25-multi-domain-memories/DECISIONS.md
+- docs/spec/active/2025-12-25-multi-domain-memories/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.546316+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Task 1.1 complete: Add Domain Enum to Config
+
+  ##...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Task 1.1 complete: Add Domain Enum to Config
+## Summary
+Created Domain enum and user memory path functions in config.py.
+
+## Changes Made
+- Added `Domain` enum with `USER` and `PROJECT` values
+- Added `get_user_memories_path(ensure_exists=False)` for bare repo location
+- Added `get_user_index_path(ensure_exists=False)` for user index DB
+- Added 17 new tests for domain configuration
+- Updated IMPLEMENTATION_PLAN.md checkboxes
+
+## Related Files
+- src/git_notes_memory/config.py:149-207
+- tests/test_config.py:56-175
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.588386+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 1.2: Extended Memory model with d...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 1.2: Extended Memory model with domain field
+## Summary
+Added domain awareness to the Memory dataclass with backward-compatible defaults and convenience properties.
+
+## Changes Made
+- Added `domain: str = "project"` field to Memory dataclass
+- Added `domain_enum` property returning Domain enum value
+- Added `is_user_domain` and `is_project_domain` boolean properties
+- Extended MemoryResult with same domain properties for uniform access
+- Added 7 comprehensive tests for domain functionality
+
+## Design Decision
+Stored domain as string rather than enum for SQLite/JSON serialization compatibility. The `domain_enum` property provides type-safe access when needed.
+
+## Related Files
+- src/git_notes_memory/models.py:123-152
+- tests/test_models.py:214-342
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.630716+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 1.3: Created schema migration for...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 1.3: Created schema migration for domain column
+## Summary
+Added database schema migration from v2 to v3 with domain column support.
+
+## Changes Made
+- Updated SCHEMA_VERSION from 2 to 3
+- Added `domain TEXT DEFAULT 'project'` column to _CREATE_MEMORIES_TABLE
+- Added `idx_memories_domain` index to _CREATE_INDICES
+- Added migration 3 to _MIGRATIONS dict
+- Added 2 migration tests for v2→v3 and fresh database
+
+## Related Files
+- src/git_notes_memory/index.py:72,83,102,112-116
+- tests/test_index.py:190-278
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.672238+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Phase 1 Foundation complete - all 4 tasks done, ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Phase 1 Foundation complete - all 4 tasks done, committed and pushed
+## Summary
+Completed Phase 1 of multi-domain memories implementation with schema migration to v3 and domain support in IndexService.
+
+## Changes Made
+- Tasks 1.1-1.4 all complete (Domain enum, Memory model, schema migration, IndexService)
+- Schema version bumped to 3 with domain column and index
+- All 1862 tests pass with 89% coverage
+- Committed and pushed to issue-13-multi-domain branch
+
+## Related Files
+- src/git_notes_memory/config.py:155-190
+- src/git_notes_memory/models.py:90-110
+- src/git_notes_memory/index.py:80-120
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.714895+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 2: Storage Layer (Tasks 2.1-2.4)...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 2: Storage Layer (Tasks 2.1-2.4) for multi-domain memories
+## Summary
+Implemented the complete storage layer for multi-domain memory support, enabling separation of user-level (global) and project-level memories.
+
+## Changes Made
+- **Task 2.1**: Added `GitOps.for_domain()` factory method with domain-specific caching
+- **Task 2.2**: Implemented `ensure_user_repo_initialized()` for bare git repo at `~/.local/share/memory-plugin/user-memories/`
+- **Task 2.3**: Added domain filter to `search_vector()` and `search_text()`
+- **Task 2.4**: Added domain filter to `get_by_spec()`, `get_by_namespace()`, `list_recent()`, `count()`, and `get_stats()`
+- Extended `IndexStats` model with `by_domain` field and `by_domain_dict` property
+- Added 27 new tests (14 GitOps, 13 domain filter)
+
+## Related Files
+- src/git_notes_memory/git_ops.py:85-250 (factory, cache, bare repo init)
+- src/git_notes_memory/index.py:598-730, 1154-1216 (domain filtering)
+- src/git_notes_memory/models.py:392-427 (IndexStats by_domain)
+- tests/test_git_ops.py:850-960 (14 new tests)
+- tests/test_index.py:832-1808 (13 new domain tests)
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.756798+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 3.1: Extend CaptureService for Do...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 3.1: Extend CaptureService for Domain
+## Summary
+Added domain parameter to CaptureService.capture() method enabling multi-domain memory storage.
+
+## Changes Made
+- Added `domain: Domain = Domain.PROJECT` parameter to `capture()` method
+- Updated `_do_capture()` to use `GitOps.for_domain(domain)` for USER domain
+- Implemented correct memory ID format: `user:{namespace}:{sha}:{idx}` for USER domain
+- Memory object now includes domain value for proper storage
+
+## Related Files
+- src/git_notes_memory/capture.py:350-540
+- tests/test_capture.py:934-1061 (5 new tests)
+- docs/spec/active/2025-12-25-multi-domain-memories/PROGRESS.md
+- docs/spec/active/2025-12-25-multi-domain-memories/IMPLEMENTATION_PLAN.md
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.800531+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 3.3: RecallService multi-domain s...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 3.3: RecallService multi-domain search
+## Summary
+Extended RecallService to support searching across both USER and PROJECT domains with merged results, deduplication, and proper ordering.
+
+## Changes Made
+- Added `domain: Domain | None = None` parameter to `search()` method
+- Added `domain: Domain | None = None` parameter to `search_text()` method
+- Implemented `_search_single_domain()` for single-domain queries
+- Implemented `_search_both_domains()` for parallel query + merge
+- Added `_get_user_index()` for lazy user index initialization
+- Project results win at equal distance (tie-breaker)
+- Deduplication by summary to avoid duplicates across domains
+- Added 10 new domain-aware search tests (6 vector + 4 text)
+- All 1904 tests pass
+
+## Related Files
+- src/git_notes_memory/recall.py:141-360
+- tests/test_recall.py:1111-1478
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.842563+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 4.4: Extend ContextBuilder for Us...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 4.4: Extend ContextBuilder for User Memories
+## Summary
+Extended the ContextBuilder to support multi-domain memory queries by adding `include_user_memories` parameter to internal build methods. Fixed mock signatures across test files.
+
+## Changes Made
+- Updated `_build_working_memory()` to accept `include_user_memories` param and pass `domain=None` (both domains) or `Domain.PROJECT` (project-only)
+- Updated `_build_semantic_context()` with same pattern for semantic search
+- Added `domain` param to `RecallService.get_by_namespace()` with multi-domain merge logic
+- Fixed all test mocks in `test_context_builder.py` and `test_e2e_hooks.py` to accept `domain` parameter
+- Added 4 new tests for domain filtering in ContextBuilder
+
+## Related Files
+- src/git_notes_memory/hooks/context_builder.py:371-433
+- src/git_notes_memory/recall.py:189-214
+- tests/test_context_builder.py:760-914
+- tests/test_e2e_hooks.py:558,603
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.883966+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 4.5: Add Domain Labels to XML Out...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 4.5: Add Domain Labels to XML Output
+## Summary
+Extended XMLBuilder.add_memory_element() to include a `domain` attribute on memory elements in the XML output. This enables Claude to distinguish between user-level (global) and project-level (repo-scoped) memories.
+
+## Changes Made
+- Updated `add_memory_element()` to add `domain` attribute when `memory.domain` is non-empty
+- Added 3 new tests for domain attribute in XML output:
+  - test_add_memory_element_includes_domain_attribute (user domain)
+  - test_add_memory_element_includes_project_domain (project domain)
+  - test_add_memory_element_omits_empty_domain (empty domain omitted)
+
+## Related Files
+- src/git_notes_memory/hooks/xml_formatter.py:131-133
+- tests/test_hooks.py:138-216
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:01.967016+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 5.1: Implement User Memory Sync
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 5.1: Implement User Memory Sync
+## Summary
+Added `sync_user_memories()` method to SyncService for syncing user-level memories from the bare repo at `~/.local/share/memory-plugin/user-memories/`. Fixed 4 failing tests that used incorrect NoteRecord constructor arguments.
+
+## Changes Made
+- Fixed `test_record_to_user_memory_creates_user_domain_id`: Use `make_note_record()` helper instead of invalid NoteRecord constructor args
+- Fixed `test_record_to_user_memory_handles_empty_fields`: Construct NoteRecord with proper `front_matter`, `body`, `raw` fields
+- Fixed `test_syncs_user_memories_from_bare_repo`: Correct mock patch paths to `git_notes_memory.git_ops.GitOps.for_domain`
+- Fixed `test_full_sync_clears_index_first`: Same patch path correction
+
+## Related Files
+- tests/test_sync.py:1295-1449
+- src/git_notes_memory/sync.py:522-638
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.010884+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 5.2: Add Optional Remote Sync for...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 5.2: Add Optional Remote Sync for User Memories
+## Summary
+Added remote sync support for user-memories bare repo via `USER_MEMORIES_REMOTE` environment variable and `sync_user_memories_with_remote()` method.
+
+## Changes Made
+- Added `USER_MEMORIES_REMOTE` env var to config.py docstring
+- Added `get_user_memories_remote()` function to config.py
+- Added `get_remote_url()` and `set_remote_url()` to GitOps for remote management
+- Added `sync_user_memories_with_remote()` to SyncService
+- Added `_ensure_user_remote()` helper to configure origin for user-memories
+- Added 5 tests for remote sync in test_sync.py
+- Added 5 tests for remote configuration in test_git_ops.py
+
+## Related Files
+- src/git_notes_memory/config.py:212-224
+- src/git_notes_memory/git_ops.py:1010-1062
+- src/git_notes_memory/sync.py:684-751
+- tests/test_sync.py:1451-1587
+- tests/test_git_ops.py:1133-1228
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.053691+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 5.3: Add Auto-Sync Hooks for User...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 5.3: Add Auto-Sync Hooks for User Memories
+## Summary
+Added opt-in auto-sync hooks for user memories via `HOOK_SESSION_START_FETCH_USER_REMOTE` and `HOOK_STOP_PUSH_USER_REMOTE` environment variables.
+
+## Changes Made
+- Added `session_start_fetch_user_remote` config field (default: false)
+- Added `stop_push_user_remote` config field (default: false)
+- Added env var parsing for both new config fields
+- Integrated user memory fetch into session_start_handler
+- Integrated user memory push into stop_handler
+- Both hooks fail gracefully (errors logged but don't block session)
+- Updated docstrings with new env vars
+
+## Related Files
+- src/git_notes_memory/hooks/config_loader.py:19,31,136-138,155-156,372-375,425-426
+- src/git_notes_memory/hooks/session_start_handler.py:27,215-228
+- src/git_notes_memory/hooks/stop_handler.py:32,488-502
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.096105+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Updated /memory:status command to show domain-se...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Updated /memory:status command to show domain-separated statistics
+## Summary
+Task 5.4 complete. The `/memory:status` command now displays both project memories (repo-scoped) and user memories (global, cross-project) with detailed breakdowns.
+
+## Changes Made
+- Updated basic status section to show two tables: Project Memories and User Memories
+- Updated verbose status to include domain-specific namespace breakdowns
+- Added user memory storage info: bare repo status, remote sync configuration
+- Extended health metrics: project index consistency, user repo accessibility
+- Updated recommendations with domain-aware suggestions
+- Updated memory capture reminder with domain markers ([global], [user])
+
+## Related Files
+- commands/status.md:65-148 (basic status)
+- commands/status.md:150-288 (verbose status)
+- commands/status.md:293-305 (recommendations)
+- commands/status.md:328-345 (capture reminder)
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.138389+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Added domain filtering to /memory:recall and /me...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Added domain filtering to /memory:recall and /memory:search commands
+## Summary
+Task 5.5 complete. Both `/memory:recall` and `/memory:search` commands now support `--domain` argument for filtering search scope.
+
+## Changes Made
+- Added `--domain=all|user|project` argument to recall command
+- Updated recall help text with domain documentation
+- Added domain indicators (🌐/📁) to search results display
+- Updated `/memory:search` with same domain filtering capability
+- Updated examples in both commands with domain usage patterns
+- Updated memory capture reminders to include global capture syntax
+
+## Related Files
+- commands/recall.md:1-60 (help section with domain docs)
+- commands/recall.md:66-140 (argument parsing and search execution)
+- commands/recall.md:143-177 (results format with domain indicators)
+- commands/search.md:1-57 (help section with domain docs)
+- commands/search.md:91-183 (search execution with domain)
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.181233+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Multi-Domain Memories implementation complete - ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Multi-Domain Memories implementation complete - all 24 tasks across 5 phases done
+## Summary
+Task 5.6 (Update Documentation) complete. The entire Multi-Domain Memories specification (SPEC-2025-12-25-001) is now fully implemented.
+
+## Changes Made
+- Added "Multi-Domain Memory Storage" section to CLAUDE.md
+- Documented Domain enum (PROJECT vs USER) with storage locations
+- Documented domain selection syntax ([global], [user], domain prefixes)
+- Added USER_MEMORIES_REMOTE and related hook env vars to config table
+- Added User Memory Remote Sync section
+- Updated Models section with Domain enum
+
+## Related Files
+- CLAUDE.md:80-98 (Multi-Domain section)
+- CLAUDE.md:150-157 (Models with Domain)
+- CLAUDE.md:197-214 (Hook Configuration with new env vars)
+- CLAUDE.md:229-244 (User Memory Remote Sync)
+- docs/spec/active/2025-12-25-multi-domain-memories/PROGRESS.md (updated to complete)
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.273301+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed deep-clean MAXALL remediation: 8 HIGH ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed deep-clean MAXALL remediation: 8 HIGH priority findings fixed, all tests passing
+## Summary
+Successfully remediated 8 critical and high-priority findings from the comprehensive code review. All 1,955 tests pass, linting is clean, and type checking passes.
+
+## Changes Made
+- **CRIT-001**: Added ThreadPoolExecutor timeout (30s/120s) to embedding operations in `embedding.py`
+- **CRIT-003**: Removed unused thread lock in `index.py`, documented SQLite WAL concurrency
+- **SEC-HIGH-001**: Added symlink verification before user-memories git init in `git_ops.py`
+- **SEC-HIGH-002**: Added 64KB YAML size limit to prevent billion laughs attack in `note_parser.py`
+- **SEC-HIGH-003**: Implemented PID-based stale lock detection in `capture.py`
+- **PERF-HIGH-001**: Added pagination (limit/offset) and generator to `get_all_ids()` in `index.py`
+- **PERF-HIGH-004**: Added 4 composite indexes for common query patterns in `index.py`
+- **QUAL-HIGH-001**: Replaced 10 broad `except Exception:` handlers with specific types
+
+## Related Files
+- src/git_notes_memory/embedding.py:220-248, 302-327
+- src/git_notes_memory/index.py:94-113, 176-183, 751-807
+- src/git_notes_memory/git_ops.py:1332-1346
+- src/git_notes_memory/note_parser.py:70-73, 214-219
+- src/git_notes_memory/capture.py:60-113, 580-582
+- src/git_notes_memory/recall.py:335-337, 453-455, 578-580
+- src/git_notes_memory/sync.py:396-398, 451-453
+- docs/code-review/2025/12/25/REMEDIATION_TASKS.md
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.415414+00:00'
+summary: Looking at the summary, I just completed Task 3.2 (Create User CaptureService
+  Singleton) with all...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Looking at the summary, I just completed Task 3.2 (Create User CaptureService Singleton) with all tests passing. I need to update PROGRESS.md...
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.600507+00:00'
+summary: The parallel research agents completed already. Let me proceed by reading
+  the additional key file...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The parallel research agents completed already. Let me proceed by reading the additional key files directly to complete my understanding:
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:02.728323+00:00'
+summary: '...& Polish | ✓ | User memory sync, remote sync, commands, documentation
+  |
+
+  ### Key Features Impl...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...& Polish | ✓ | User memory sync, remote sync, commands, documentation |
+
+### Key Features Implemented
+
+1. **Two-Domain Architecture**:
+   - PROJECT: Repo-scoped memories in `refs/notes/mem/{namespace}`...
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:03.074482+00:00'
+summary: '...───────────
+
+  **Phase 2 is complete!** Both Phase 1 (Foundation) and Phase 2 (Storage Layer) ar...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...───────────
+
+**Phase 2 is complete!** Both Phase 1 (Foundation) and Phase 2 (Storage Layer) are now done with all 8 tasks completed.
+
+**Summary of what was implemented:**
+- `GitOps.for_domain(domain)`...
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:03.117426+00:00'
+summary: '...complete!** Both Phase 1 (Foundation) and Phase 2 (Storage Layer) are
+  now done with all 8 task...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...complete!** Both Phase 1 (Foundation) and Phase 2 (Storage Layer) are now done with all 8 tasks completed.
+
+**Summary of what was implemented:**
+- `GitOps.for_domain(domain)` - Factory pattern with...
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:03.204980+00:00'
+summary: '...(Tasks 3.1-3.5) which extends CaptureService and RecallService for domain
+  awareness, but I''ve ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...(Tasks 3.1-3.5) which extends CaptureService and RecallService for domain awareness, but I've completed all work that was in the previous session's scope.
+
+---
+type: progress
+timestamp: '2025-12-26T04:09:03.376529+00:00'
+summary: All 1933 tests pass. I've completed Task 4.1 (Add Domain Markers to SignalDetector)
+  and Task 4.2 ...
+tags:
+- auto-captured
+- pre-compact
+---
+
+All 1933 tests pass. I've completed Task 4.1 (Add Domain Markers to SignalDetector) and Task 4.2 (Extend Block Pattern for Domain...
