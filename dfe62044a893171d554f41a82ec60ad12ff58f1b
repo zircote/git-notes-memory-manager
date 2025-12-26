@@ -83,3 +83,21 @@ tags:
 
 #### Task 2.2: Initialize User-Memories Bare Repo
 - **Description**: Create and...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:01:27.953489+00:00'
+summary: '...behavior across methods'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...behavior across methods
+  - [ ] `get_stats()` returns counts by domain
+- **Notes**: Follow same pattern as Task 2.3
+
+### Phase 2 Deliverables
+- [ ] GitOps domain factory
+- [ ] User-memories bare...
