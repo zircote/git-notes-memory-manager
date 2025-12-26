@@ -386,3 +386,19 @@ tags:
 **1. Zero-dependency observability is achievable**
 - Implemented full metrics + tracing without opentelemetry-api or prometheus-client
 - Used stdlib only:...
+
+---
+type: progress
+timestamp: '2025-12-26T03:47:00.637055+00:00'
+summary: '...`from git_notes_memory.observability.metrics import MetricsCollector`
+  loads embedding model'
+tags:
+- auto-captured
+- post-tool-use
+- file:RETROSPECTIVE.md
+---
+
+...`from git_notes_memory.observability.metrics import MetricsCollector` loads embedding model
+- Solution: `__getattr__` in `__init__.py` for lazy module loading
+
+**4. Multi-worktree git notes challenges**...
