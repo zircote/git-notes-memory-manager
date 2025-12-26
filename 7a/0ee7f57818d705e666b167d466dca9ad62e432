@@ -269,3 +269,15 @@ summary: '...input.'
 
 **What WOULD work:**
 -...
+
+---
+type: decisions
+timestamp: '2025-12-26T20:10:42.369169+00:00'
+summary: '...(`▶ learned ───`) → just formatted text, not processed'
+---
+
+...(`▶ learned ───`) → just formatted text, not processed
+
+**What WOULD work:**
+- If YOU write `[decision] Use sync_notes_with_remote` in your message, the hook captures it
+- My blocks are just visual...
