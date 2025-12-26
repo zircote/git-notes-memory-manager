@@ -660,3 +660,14 @@ summary: 'Now I understand the core problem. Let me check what metrics are actua
 ---
 
 Now I understand the core problem. Let me check what metrics are actually being recorded:
+
+---
+type: learnings
+timestamp: '2025-12-26T23:31:59.866965+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
