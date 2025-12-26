@@ -984,3 +984,23 @@ try:
     from opentelemetry.sdk.trace import TracerProvider
     OTEL_AVAILABLE = True
 except...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.206580+00:00'
+summary: '...TracerProvider'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...TracerProvider
+    OTEL_AVAILABLE = True
+except ImportError:
+    OTEL_AVAILABLE = False
+
+# Usage pattern
+def export_traces(spans: list[Span]) -> None:
+    if not OTEL_AVAILABLE:
+        return  #...
