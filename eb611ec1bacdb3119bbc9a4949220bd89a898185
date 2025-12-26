@@ -201,3 +201,19 @@ tags:
 ..."We should implement rate limiting to prevent abuse. "
                 "The pattern involves checking request frequency and blocking "
                 "if it exceeds 100 requests...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:34:46.901164+00:00'
+summary: '...authentication fails, deny access "'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_adversarial.py
+---
+
+...authentication fails, deny access "
+                "rather than allowing through. This is the security best practice.",
+                "Discussing security patterns",
+            ),
+            # Code with...
