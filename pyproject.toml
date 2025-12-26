@@ -48,6 +48,12 @@ subconsciousness = [
     "openai>=1.58.0",
     "httpx>=0.28.0",
 ]
+monitoring = [
+    "opentelemetry-api>=1.29.0",
+    "opentelemetry-sdk>=1.29.0",
+    "opentelemetry-exporter-otlp>=1.29.0",
+    "prometheus-client>=0.21.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/zircote/git-notes-memory"
@@ -162,6 +168,14 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "httpx.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "opentelemetry.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "prometheus_client.*"
 ignore_missing_imports = true
 
 # pytest - Testing

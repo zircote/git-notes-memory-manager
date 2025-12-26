@@ -803,6 +803,16 @@ class CaptureService:
                 labels={"namespace": namespace},
             )
 
+            # Export metrics immediately (don't wait for session end)
+            try:
+                from git_notes_memory.observability.exporters.otlp import (
+                    export_metrics_if_configured,
+                )
+
+                export_metrics_if_configured()
+            except Exception as export_err:
+                logger.debug("Metrics export skipped: %s", export_err)
+
             # Combine all warnings into a single string (or None if no warnings)
             combined_warning = "; ".join(warnings) if warnings else None
 

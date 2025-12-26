@@ -85,17 +85,17 @@ service:
   pipelines:
     metrics:
       receivers: [otlp, prometheus]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, batch]  # resource processor removed - see ADR
       exporters: [prometheusremotewrite, prometheus]
 
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, batch]  # resource processor removed - see ADR
       exporters: [otlp/tempo]
 
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, batch]  # resource processor removed - see ADR
       exporters: [loki]
 
   telemetry:

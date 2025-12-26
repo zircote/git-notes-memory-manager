@@ -554,3 +554,23 @@ def scrub_pii(text: str) -> str:
     for pattern, replacement in _PII_PATTERNS:
         result = pattern.sub(replacement, result)
     return result
+
+
+def flush_metrics_to_otlp() -> bool:
+    """Flush all collected metrics to OTLP endpoint.
+
+    Non-blocking operation - failures are logged but don't raise exceptions.
+
+    Returns:
+        True if export succeeded or OTLP not configured, False on export failure.
+    """
+    try:
+        from git_notes_memory.observability.exporters.otlp import (
+            export_metrics_if_configured,
+        )
+
+        return export_metrics_if_configured()
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.debug("Metrics OTLP export skipped: %s", e)
+        return False

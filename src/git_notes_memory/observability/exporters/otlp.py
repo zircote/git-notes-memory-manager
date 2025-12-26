@@ -73,6 +73,7 @@ class LogRecord:
     trace_id: str | None = None
     span_id: str | None = None
 
+
 logger = logging.getLogger(__name__)
 
 

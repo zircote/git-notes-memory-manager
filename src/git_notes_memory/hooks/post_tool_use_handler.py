@@ -462,6 +462,11 @@ def main() -> None:
         finally:
             cancel_timeout()
 
+    # Flush metrics to OTLP before exit
+    from git_notes_memory.hooks.hook_utils import flush_metrics_to_otlp
+
+    flush_metrics_to_otlp()
+
     sys.exit(0)
 
 
