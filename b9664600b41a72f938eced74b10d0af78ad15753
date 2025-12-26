@@ -8476,3 +8476,20 @@ tags:
 ...JSON Parsing | ✅ Added _safe_float() helper |
 | PROMPT-M-003 | Token Budget Not Enforced | ✅ IMPLEMENTED (filter_memories enforces) |
 | PROMPT-M-004 | Missing Rate Limit Headers | ✅ IMPLEMENTED (retry-after...
+
+---
+type: progress
+timestamp: '2025-12-26T17:17:41.263962+00:00'
+summary: '...✅ IMPLEMENTED (filter_memories enforces) |'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...✅ IMPLEMENTED (filter_memories enforces) |
+| PROMPT-M-004 | Missing Rate Limit Headers | ✅ IMPLEMENTED (retry-after parsing) |
+
+**Resilience (5/5):**
+| ID | Finding | Status |
+|----|---------|--------|...
