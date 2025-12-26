@@ -5589,3 +5589,17 @@ tags:
 ---
 
 ...collecting the remaining agent outputs and proceed with the code review synthesis. All agents have completed - let me gather their findings.
+
+---
+type: progress
+timestamp: '2025-12-26T16:45:14.807307+00:00'
+summary: '...src/git_notes_memory/index/search_engine.py`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...src/git_notes_memory/index/search_engine.py`
+  - Action: Add FTS5 virtual table for text queries
+  - **Completed:** 2025-12-26 - Added FTS5 virtual table `memories_fts` and BM25 ranking in `search_text()`;...
