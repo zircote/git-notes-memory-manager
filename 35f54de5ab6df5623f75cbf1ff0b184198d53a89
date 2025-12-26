@@ -1,0 +1,19 @@
+---
+type: learnings
+timestamp: '2025-12-26T20:35:24.612869+00:00'
+summary: 'Issue #28 validated: Stop hook uses push_notes_to_remote() which causes
+  race conditions'
+---
+
+Issue #28 validated: Stop hook uses push_notes_to_remote() which causes race conditions
+## Summary
+Multi-worktree notes conflicts occur because stop_handler.py:482 calls `push_notes_to_remote()` directly instead of the proper `sync_notes_with_remote(push=True)` method.
+
+## Code Analysis
+- `push_notes_to_remote()` at git_ops.py:1222 pushes without fetching first
+- `sync_notes_with_remote()` at git_ops.py:1238 implements correct fetch→merge→push workflow
+- Fix is straightforward: replace one method call with another
+
+## Related Files
+- src/git_notes_memory/git_ops.py:1222-1281
+- src/git_notes_memory/hooks/stop_handler.py:473-487
