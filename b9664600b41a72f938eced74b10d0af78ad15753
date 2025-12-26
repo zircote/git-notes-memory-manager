@@ -534,3 +534,23 @@ tags:
 ---
 
 ...Now I understand the full issue. Let me check other commands to see if they use a different pattern:
+
+---
+type: patterns
+timestamp: '2025-12-26T14:50:56.411002+00:00'
+summary: '...`"."` (cleaner) |
+
+  `★ Insight ─────────────────────────────────────`
+
+  **Marketplace Structure B...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...`"."` (cleaner) |
+
+`★ Insight ─────────────────────────────────────`
+**Marketplace Structure Best Practice**:
+- `owner` identifies who maintains the marketplace
+- `metadata` contains marketplace-level...
