@@ -97,3 +97,17 @@ tags:
 ...`get_by_namespace()`, `get_by_spec()`, `list_recent()`, `count()`, and `get_stats()`
 
 The pattern is simple: add an optional `domain: str | None = None` parameter and include `AND domain =...
+
+---
+type: patterns
+timestamp: '2025-12-26T01:43:51.830763+00:00'
+summary: '`★ Insight ─────────────────────────────────────`
+
+  The query methods follow a consistent pattern: ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+`★ Insight ─────────────────────────────────────`
+The query methods follow a consistent pattern: build SQL with optional filters, use parameterized queries. Adding domain filtering will follow...
