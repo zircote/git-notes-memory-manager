@@ -45,3 +45,21 @@ The existing architecture provides strong extension points for multi-domain supp
 - src/git_notes_memory/recall.py:72-131 (service initialization)
 - src/git_notes_memory/hooks/signal_detector.py:40-155 (patterns + block markers)
 - src/git_notes_memory/hooks/context_builder.py:340-390 (working memory building)
+
+---
+type: learnings
+timestamp: '2025-12-26T04:09:01.925047+00:00'
+summary: '...sync patterns (collect_notes, reindex)
+
+  3. Gracefully handles missing user-memories repo
+
+  The k...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...sync patterns (collect_notes, reindex)
+3. Gracefully handles missing user-memories repo
+
+The key insight is that user memories live in a separate bare repo at `~/.local/share/memory-plugin/user-memories/`,...
