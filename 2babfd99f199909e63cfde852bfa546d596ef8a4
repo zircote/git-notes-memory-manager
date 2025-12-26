@@ -103,3 +103,17 @@ summary: '...relevant memory context |'
 | UserPromptSubmit | User sends message | Detects `[decision]`, `[learned]` markers |
 | PostToolUse | After Read/Write/Edit | Surfaces related memories |
 | PreCompact...
+
+---
+type: learnings
+timestamp: '2025-12-26T04:33:30.190446+00:00'
+summary: '...Read/Write/Edit | Surfaces related memories |'
+---
+
+...Read/Write/Edit | Surfaces related memories |
+| PreCompact | Before context compaction | Auto-captures important content |
+| Stop | Session ends | Syncs index, performs session analysis |
+
+### Memory Namespaces
+
+Memories...
