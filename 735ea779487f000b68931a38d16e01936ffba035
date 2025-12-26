@@ -1116,3 +1116,28 @@ Created comprehensive specification documents for implementing an LLM-powered su
 - docs/spec/active/2025-12-25-llm-subconsciousness/DECISIONS.md
 - docs/spec/active/2025-12-25-llm-subconsciousness/README.md
 - docs/spec/active/2025-12-25-llm-subconsciousness/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-26T14:14:34.688239+00:00'
+summary: Rebased issue-11-subconsciousness branch onto v1.0.0
+---
+
+Rebased issue-11-subconsciousness branch onto v1.0.0
+## Summary
+Successfully rebased the subconsciousness feature branch onto the v1.0.0 release, resolving 6 merge conflicts and ensuring all quality checks pass.
+
+## Changes Made
+- **pyproject.toml**: Merged mypy overrides for both `detect_secrets.*` (v1.0.0) and `anthropic/openai/httpx` (feature branch)
+- **capture.py**: Kept v1.0.0's robust PID-based stale lock detection with `_is_process_alive()`, `_read_lock_pid()`, `_write_lock_pid()` helpers
+- **hook_utils.py**: Merged `__all__` exports to include both `timed_hook_execution` and `scrub_pii`
+- **session_start_handler.py**: Combined best of both approaches - context manager for cleanup with specific exception types
+- **index.py**: Merged comprehensive composite indexes from v1.0.0 plus `idx_memories_ns_spec_ts` from feature branch
+- **uv.lock**: Regenerated with all dependencies
+
+## Related Files
+- pyproject.toml:151-165
+- src/git_notes_memory/capture.py:65-122, 135-136, 187-192
+- src/git_notes_memory/hooks/hook_utils.py:58-63
+- src/git_notes_memory/hooks/session_start_handler.py:85-94
+- src/git_notes_memory/index.py:107-125
