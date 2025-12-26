@@ -917,3 +917,23 @@ tags:
 **Deciders**: Claude (technical decision)
 
 ###...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:09:59.121908+00:00'
+summary: '...Cannot instrument mid-function without refactoring'
+tags:
+- auto-captured
+- post-tool-use
+- file:DECISIONS.md
+---
+
+...Cannot instrument mid-function without refactoring
+- Decorator order matters
+
+**Neutral:**
+- Pattern is familiar to Python developers
+
+### Alternatives Considered
+
+1. **Context managers everywhere**:...
