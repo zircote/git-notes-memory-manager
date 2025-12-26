@@ -33,3 +33,14 @@ tags:
 ---
 
 There are several hook modules that still use the old logging pattern. Note that `get_hook_logger` in hook_utils.py (line 107) creates file-based loggers for dedicated debug...
+
+---
+type: learnings
+timestamp: '2025-12-26T03:27:56.886451+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
