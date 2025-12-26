@@ -1551,3 +1551,17 @@ summary: '...Root Cause Analysis'
 
 **Primary Issue:**
 - `commands/metrics...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:32:17.850452+00:00'
+summary: '...Issue:**'
+---
+
+...Issue:**
+- `commands/metrics.md:76-77` - Path resolution logic
+- `commands/health.md:76-77` - Same pattern
+- `commands/traces.md:79-80` - Same pattern
+
+**Pattern repeated across 12+ commands:**
+-...
