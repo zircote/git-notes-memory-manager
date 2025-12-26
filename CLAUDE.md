@@ -295,6 +295,14 @@ LSP hooks are configured in `.claude/hooks.json` for immediate feedback on Pytho
   - Note: Phases 5-6 (OpenTelemetry, Docker stack) skipped as optional Tier 3 enhancements
   - Key docs: REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, PROGRESS.md
 
+- `docs/spec/completed/2025-12-25-secrets-filtering/` - Secrets Filtering and Sensitive Data Protection
+  - Completed: 2025-12-25
+  - Outcome: success
+  - GitHub Issue: [#12](https://github.com/zircote/git-notes-memory/issues/12)
+  - Features: detect-secrets integration, custom PII detection (SSN, credit cards with Luhn, phones), 4 filtering strategies (REDACT/MASK/BLOCK/WARN), SOC2/GDPR audit logging
+  - Deliverables: security/ module (7 components), 4 slash commands, 524 tests with 87%+ coverage
+  - Key docs: REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, RETROSPECTIVE.md
+
 - `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes Fetch Refspec
   - Completed: 2025-12-25
   - Outcome: success

@@ -2,6 +2,27 @@
 
 All notable changes to this project specification will be documented in this file.
 
+## [COMPLETED] - 2025-12-25
+
+### Project Closed
+- Final status: success
+- Actual effort: 12 hours (within 8-16 hour estimate)
+- Moved to: docs/spec/completed/2025-12-25-secrets-filtering/
+- Merged: All features merged to main
+
+### Retrospective Summary
+- What went well: Comprehensive security coverage, flexible filtering strategies, production-ready audit trail, graceful degradation, 87%+ test coverage
+- What to improve: User-facing docs for allowlist management, performance caching opportunities, allowlist UX workflow
+
+### Deliverables
+- `security/` module with 7 components (config, detector, pii, redactor, allowlist, audit, service)
+- 4 new slash commands: `/memory:scan-secrets`, `/memory:secrets-allowlist`, `/memory:test-secret`, `/memory:audit-log`
+- 524 new tests with 87%+ coverage
+- detect-secrets integration + custom PII detection (SSN, credit cards with Luhn, phones)
+- Four filtering strategies: REDACT, MASK, BLOCK, WARN
+- SOC2/GDPR-compliant audit logging with rotation
+- All 1949 tests passing
+
 ## [2025-12-26]
 
 ### Approved
