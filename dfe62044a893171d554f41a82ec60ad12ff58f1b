@@ -95,3 +95,21 @@ tags:
 2. **Learnings** - Technical insights, debugging discoveries, "TIL" moments
 3. **Patterns** - Reusable approaches, best practices, anti-patterns
 4. **Blockers**...
+
+---
+type: learnings
+timestamp: '2025-12-26T00:12:04.386485+00:00'
+summary: '...or completions'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...or completions
+
+For each identified memory, output JSON matching the Memory Output Schema.
+
+IMPORTANT:
+- summary must be ≤100 characters and complete (no ellipsis)
+- content should use markdown...
