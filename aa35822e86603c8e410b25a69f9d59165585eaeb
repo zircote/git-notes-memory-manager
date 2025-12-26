@@ -831,3 +831,15 @@ tags:
    - **Option 1**: Quick glob pattern fix
    - **Option 2**: Python module imports (recommended)
    - **Option 3**: Robust hybrid...
+
+---
+type: patterns
+timestamp: '2025-12-26T05:17:35.373944+00:00'
+summary: '...Now I understand the full issue. Let me check other commands to see if
+  they use a different pa...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Now I understand the full issue. Let me check other commands to see if they use a different pattern:
