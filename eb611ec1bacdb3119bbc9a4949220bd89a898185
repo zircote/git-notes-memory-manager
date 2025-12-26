@@ -1101,3 +1101,30 @@ Implemented auto-capture logic with three-tier confidence handling and hook inte
 - src/git_notes_memory/subconsciousness/hook_integration.py:1-318
 - tests/subconsciousness/test_hook_integration.py:1-362
 - tests/subconsciousness/test_implicit_capture_service.py:80-120
+
+---
+type: progress
+timestamp: '2025-12-26T02:13:09.466583+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.11 - /memory:review command
+
+  ##...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.11 - /memory:review command
+## Summary
+Created the `/memory:review` command for reviewing and approving/rejecting pending implicit memories captured by the subconsciousness layer.
+
+## Changes Made
+- Created `commands/review.md` with full command implementation
+- Supports `--list`, `--approve <id>`, `--reject <id>`, `--approve-all`, `--cleanup` options
+- Interactive review flow using AskUserQuestion
+- Partial ID matching for convenience (e.g., `--approve abc` matches `abc123...`)
+- Checks subconsciousness enabled before operations
+
+## Related Files
+- commands/review.md:1-200+
