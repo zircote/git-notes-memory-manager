@@ -328,3 +328,33 @@ Added domain parameter to CaptureService.capture() method enabling multi-domain 
 - tests/test_capture.py:934-1061 (5 new tests)
 - docs/spec/active/2025-12-25-multi-domain-memories/PROGRESS.md
 - docs/spec/active/2025-12-25-multi-domain-memories/IMPLEMENTATION_PLAN.md
+
+---
+type: progress
+timestamp: '2025-12-26T01:43:51.385228+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 3.3: RecallService multi-domain s...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 3.3: RecallService multi-domain search
+## Summary
+Extended RecallService to support searching across both USER and PROJECT domains with merged results, deduplication, and proper ordering.
+
+## Changes Made
+- Added `domain: Domain | None = None` parameter to `search()` method
+- Added `domain: Domain | None = None` parameter to `search_text()` method
+- Implemented `_search_single_domain()` for single-domain queries
+- Implemented `_search_both_domains()` for parallel query + merge
+- Added `_get_user_index()` for lazy user index initialization
+- Project results win at equal distance (tie-breaker)
+- Deduplication by summary to avoid duplicates across domains
+- Added 10 new domain-aware search tests (6 vector + 4 text)
+- All 1904 tests pass
+
+## Related Files
+- src/git_notes_memory/recall.py:141-360
+- tests/test_recall.py:1111-1478
