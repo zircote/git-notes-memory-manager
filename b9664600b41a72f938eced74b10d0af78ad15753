@@ -2793,3 +2793,17 @@ tags:
   - **Completed:** 2025-12-26 - Added `EmbeddingService.warmup()` method to pre-load model and trigger JIT
 
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T15:49:27.888561+00:00'
+summary: '...`stop_handler.py`, `user_prompt_handler.py`'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...`stop_handler.py`, `user_prompt_handler.py`
+  - Action: Add unit tests for each handler
+  - **Completed:** Already exists - `tests/test_hook_handlers.py` has 892 lines with TestSessionStartHandler,...
