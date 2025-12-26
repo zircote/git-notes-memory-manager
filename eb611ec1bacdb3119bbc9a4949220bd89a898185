@@ -2745,3 +2745,31 @@ Created the `AdversarialDetector` that uses an LLM to screen content for securit
 ## Related Files
 - src/git_notes_memory/subconsciousness/adversarial_detector.py:1-215
 - tests/subconsciousness/test_adversarial_detector.py:1-340
+
+---
+type: progress
+timestamp: '2025-12-26T03:17:08.784269+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Task 2.7: Integrated adversarial scree...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Task 2.7: Integrated adversarial screening with implicit capture service
+## Summary
+Created the `ImplicitCaptureService` that provides a unified API for implicit memory capture. The service orchestrates transcript analysis, adversarial screening, and storage in one workflow, ensuring security before persistence.
+
+## Changes Made
+- Created `implicit_capture_service.py` with `ImplicitCaptureService` class
+- Implemented `capture_from_transcript()` for full capture workflow
+- Implemented `_process_memory()` for individual memory screening
+- Implemented `capture_single()` for single memory capture
+- Added `get_pending_captures()`, `approve_capture()`, `reject_capture()` methods
+- Created `CaptureServiceResult` and `CapturedMemory` dataclasses
+- Added 13 tests covering safe/blocked captures, approval workflow, and errors
+
+## Related Files
+- src/git_notes_memory/subconsciousness/implicit_capture_service.py:1-315
+- tests/subconsciousness/test_implicit_capture_service.py:1-390
