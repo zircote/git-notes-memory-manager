@@ -1,0 +1,33 @@
+# Prometheus Configuration for git-notes-memory observability stack
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  external_labels:
+    monitor: 'git-notes-memory'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # OTEL Collector metrics (plugin metrics exposed here)
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8889']
+    metric_relabel_configs:
+      # Keep only memory_* metrics from the plugin
+      - source_labels: [__name__]
+        regex: 'memory_.*'
+        action: keep
+
+  # OTEL Collector self-monitoring
+  - job_name: 'otel-collector-self'
+    static_configs:
+      - targets: ['otel-collector:8888']
+
+# Enable remote write receiver for OTEL Collector
+remote_write: []

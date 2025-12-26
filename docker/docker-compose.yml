@@ -1,0 +1,99 @@
+# Local Observability Stack for git-notes-memory
+#
+# Usage:
+#   docker compose up -d
+#
+# Access:
+#   - Grafana: http://localhost:3000 (admin/admin)
+#   - Prometheus: http://localhost:9090
+#   - OTEL Collector: localhost:4317 (gRPC), localhost:4318 (HTTP)
+#
+# To send metrics from the plugin:
+#   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+
+services:
+  # OpenTelemetry Collector - receives metrics/traces from the plugin
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    container_name: memory-otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Prometheus metrics (collector self-monitoring)
+      - "8889:8889"   # Prometheus exporter (plugin metrics)
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+    restart: unless-stopped
+
+  # Prometheus - metrics storage and querying
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: memory-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--web.enable-remote-write-receiver'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  # Tempo - distributed tracing backend
+  tempo:
+    image: grafana/tempo:2.3.1
+    container_name: memory-tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200"   # Tempo query frontend
+      - "9095:9095"   # Tempo gRPC
+    restart: unless-stopped
+
+  # Loki - log aggregation
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: memory-loki
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./loki.yaml:/etc/loki/loki.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+
+  # Grafana - visualization and dashboards
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: memory-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  tempo-data:
+  loki-data:
+  grafana-data:

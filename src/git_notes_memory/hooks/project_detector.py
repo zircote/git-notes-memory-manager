@@ -15,14 +15,15 @@ The detected project identifier is used for:
 
 from __future__ import annotations
 
-import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from git_notes_memory.observability import get_logger
+
 __all__ = ["detect_project", "ProjectInfo"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Cache for project detection results to avoid repeated file I/O
 _project_cache: dict[str, ProjectInfo] = {}

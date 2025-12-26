@@ -21,7 +21,6 @@ Example::
 from __future__ import annotations
 
 import json
-import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,6 +28,7 @@ from typing import TYPE_CHECKING
 
 from git_notes_memory.hooks.hook_utils import validate_file_path
 from git_notes_memory.hooks.models import CaptureSignal
+from git_notes_memory.observability import get_logger
 
 if TYPE_CHECKING:
     from git_notes_memory.hooks.novelty_checker import NoveltyChecker
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 __all__ = ["SessionAnalyzer", "TranscriptContent"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass(frozen=True)

@@ -34,7 +34,6 @@ Environment Variables:
 from __future__ import annotations
 
 import json
-import logging
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -47,8 +46,10 @@ from git_notes_memory.hooks.hook_utils import (
     read_json_input,
     setup_logging,
     setup_timeout,
+    timed_hook_execution,
 )
 from git_notes_memory.hooks.xml_formatter import XMLBuilder
+from git_notes_memory.observability import get_logger
 
 if TYPE_CHECKING:
     from git_notes_memory.hooks.models import CaptureSignal
@@ -56,7 +57,7 @@ if TYPE_CHECKING:
 
 __all__ = ["main"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Tools that trigger this hook
 TRIGGERING_TOOLS = frozenset({"Read", "Write", "Edit", "MultiEdit"})
@@ -379,81 +380,87 @@ def main() -> None:
     timeout = config.post_tool_use_timeout or DEFAULT_TIMEOUT
     setup_timeout(timeout, hook_name="PostToolUse")
 
-    try:
-        # Read and validate input
-        input_data = read_json_input()
-        logger.debug("Received input: tool_name=%s", input_data.get("tool_name"))
+    with timed_hook_execution("PostToolUse") as timer:
+        try:
+            # Read and validate input
+            input_data = read_json_input()
+            logger.debug("Received input: tool_name=%s", input_data.get("tool_name"))
 
-        # Log full input to file for debugging
-        log_hook_input("PostToolUse", input_data)
+            # Log full input to file for debugging
+            log_hook_input("PostToolUse", input_data)
 
-        # Check if this is a triggering tool
-        tool_name = input_data.get("tool_name", "")
-        if tool_name not in TRIGGERING_TOOLS:
-            logger.debug("Tool %s does not trigger PostToolUse", tool_name)
-            _write_output()
-            sys.exit(0)
+            # Check if this is a triggering tool
+            tool_name = input_data.get("tool_name", "")
+            if tool_name not in TRIGGERING_TOOLS:
+                logger.debug("Tool %s does not trigger PostToolUse", tool_name)
+                timer.set_status("skipped")
+                _write_output()
+                sys.exit(0)
 
-        # Extract file path
-        file_path = _extract_file_path(input_data)
+            # Extract file path
+            file_path = _extract_file_path(input_data)
 
-        # Track outputs
-        context: str | None = None
-        memory_count = 0
-        captured: list[dict[str, Any]] = []
+            # Track outputs
+            context: str | None = None
+            memory_count = 0
+            captured: list[dict[str, Any]] = []
 
-        # Auto-capture signals from written content (Write/Edit/MultiEdit)
-        if config.post_tool_use_auto_capture and tool_name in {
-            "Write",
-            "Edit",
-            "MultiEdit",
-        }:
-            content = _extract_content(input_data)
-            if content:
-                logger.debug("Extracted content length: %d", len(content))
-                signals = _detect_signals(
-                    content,
-                    min_confidence=config.post_tool_use_auto_capture_min_confidence,
+            # Auto-capture signals from written content (Write/Edit/MultiEdit)
+            if config.post_tool_use_auto_capture and tool_name in {
+                "Write",
+                "Edit",
+                "MultiEdit",
+            }:
+                content = _extract_content(input_data)
+                if content:
+                    logger.debug("Extracted content length: %d", len(content))
+                    signals = _detect_signals(
+                        content,
+                        min_confidence=config.post_tool_use_auto_capture_min_confidence,
+                    )
+                    if signals:
+                        logger.debug("Detected %d signals in content", len(signals))
+                        captured = _auto_capture_signals(signals, file_path)
+
+            # Search for related memories based on file path
+            if file_path:
+                logger.debug("Processing file: %s", file_path)
+
+                # Extract domain terms
+                terms = extract_domain_terms(file_path)
+                if terms:
+                    logger.debug("Extracted terms: %s", terms)
+
+                    # Search for related memories
+                    results = _search_related_memories(
+                        terms=terms,
+                        max_results=config.post_tool_use_max_results,
+                        min_similarity=config.post_tool_use_min_similarity,
+                    )
+
+                    if results:
+                        logger.debug("Found %d related memories", len(results))
+                        context = _format_memories_xml(results, file_path)
+                        memory_count = len(results)
+
+            # Output results if we have anything
+            if context or captured:
+                _write_output(
+                    context=context, memory_count=memory_count, captured=captured
                 )
-                if signals:
-                    logger.debug("Detected %d signals in content", len(signals))
-                    captured = _auto_capture_signals(signals, file_path)
+            else:
+                _write_output()
 
-        # Search for related memories based on file path
-        if file_path:
-            logger.debug("Processing file: %s", file_path)
-
-            # Extract domain terms
-            terms = extract_domain_terms(file_path)
-            if terms:
-                logger.debug("Extracted terms: %s", terms)
-
-                # Search for related memories
-                results = _search_related_memories(
-                    terms=terms,
-                    max_results=config.post_tool_use_max_results,
-                    min_similarity=config.post_tool_use_min_similarity,
-                )
-
-                if results:
-                    logger.debug("Found %d related memories", len(results))
-                    context = _format_memories_xml(results, file_path)
-                    memory_count = len(results)
-
-        # Output results if we have anything
-        if context or captured:
-            _write_output(context=context, memory_count=memory_count, captured=captured)
-        else:
-            _write_output()
-
-    except json.JSONDecodeError as e:
-        logger.error("Failed to parse hook input: %s", e)
-        print(json.dumps({"continue": True}))
-    except Exception as e:
-        logger.exception("PostToolUse hook error: %s", e)
-        print(json.dumps({"continue": True}))
-    finally:
-        cancel_timeout()
+        except json.JSONDecodeError as e:
+            timer.set_status("error")
+            logger.error("Failed to parse hook input: %s", e)
+            print(json.dumps({"continue": True}))
+        except Exception as e:
+            timer.set_status("error")
+            logger.exception("PostToolUse hook error: %s", e)
+            print(json.dumps({"continue": True}))
+        finally:
+            cancel_timeout()
 
     sys.exit(0)
 

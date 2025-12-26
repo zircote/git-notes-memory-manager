@@ -22,7 +22,6 @@ Example::
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
 from git_notes_memory.hooks.models import (
@@ -33,6 +32,7 @@ from git_notes_memory.hooks.models import (
     SignalType,
     SuggestedCapture,
 )
+from git_notes_memory.observability import get_logger
 
 if TYPE_CHECKING:
     from git_notes_memory.hooks.config_loader import HookConfig
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
 __all__ = ["CaptureDecider"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class CaptureDecider:

@@ -114,6 +114,7 @@ known-first-party = ["git_notes_memory"]
 "src/git_notes_memory/git_ops.py" = ["S603", "S607"]  # subprocess with validated inputs, git uses partial path
 "src/git_notes_memory/index.py" = ["S608"]  # SQL placeholders are safe (we generate ? only)
 "src/git_notes_memory/sync.py" = ["S324", "S110", "S112"]  # md5 for content hashing (not security), exception handling patterns
+"src/git_notes_memory/observability/exporters/otlp.py" = ["S310"]  # OTLP endpoint is user-configured via env var
 
 # mypy - Type Checking
 [tool.mypy]

@@ -38,10 +38,14 @@ import logging
 import os
 import signal
 import sys
+import time
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
+
+from git_notes_memory.observability import get_logger
+from git_notes_memory.observability.metrics import get_metrics
 
 __all__ = [
     "setup_logging",
@@ -52,11 +56,12 @@ __all__ = [
     "get_hook_logger",
     "log_hook_input",
     "log_hook_output",
+    "timed_hook_execution",
     "MAX_INPUT_SIZE",
     "DEFAULT_TIMEOUT",
 ]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Default timeout for hook execution (seconds)
 DEFAULT_TIMEOUT = 30
@@ -248,6 +253,14 @@ def setup_timeout(
     def timeout_handler(signum: int, frame: Any) -> None:  # noqa: ARG001
         """Handle timeout by exiting gracefully."""
         logger.warning("%s hook timed out after %d seconds", hook_name, timeout)
+
+        # Track timeout event via metrics
+        metrics = get_metrics()
+        metrics.increment(
+            "hook_timeouts_total",
+            labels={"hook": hook_name},
+        )
+
         print(json.dumps(fallback_output))
         sys.exit(0)
 
@@ -273,6 +286,73 @@ def cancel_timeout() -> None:
     """
     if hasattr(signal, "SIGALRM"):
         signal.alarm(0)
+
+
+class timed_hook_execution:
+    """Context manager for timing hook execution with observability.
+
+    Wraps hook processing with tracing and metrics. Tracks execution time,
+    success/failure status, and provides structured spans for distributed tracing.
+
+    Usage::
+
+        with timed_hook_execution("SessionStart") as timer:
+            # ... hook processing ...
+            timer.set_status("success")  # or "error", "skipped"
+
+    Emits:
+        - hook_execution_duration_ms histogram with hook label
+        - hook_executions_total counter with hook and status labels
+        - trace span for hook.{hook_name}
+    """
+
+    def __init__(self, hook_name: str) -> None:
+        """Initialize the timer.
+
+        Args:
+            hook_name: Name of the hook (e.g., "SessionStart", "Stop").
+        """
+        self._hook_name = hook_name
+        self._start_time: float = 0.0
+        self._status = "success"  # Default status
+
+    def set_status(self, status: str) -> None:
+        """Set the execution status for metrics.
+
+        Args:
+            status: One of "success", "error", "skipped", "timeout".
+        """
+        self._status = status
+
+    def __enter__(self) -> timed_hook_execution:
+        """Enter the context: start timing and tracing."""
+        self._start_time = time.perf_counter()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
+        """Exit the context: record metrics and close span."""
+        duration_ms = (time.perf_counter() - self._start_time) * 1000
+
+        # If an exception occurred, mark as error
+        if exc_type is not None:
+            self._status = "error"
+
+        # Record metrics
+        metrics = get_metrics()
+        metrics.observe(
+            "hook_execution_duration_ms",
+            duration_ms,
+            labels={"hook": self._hook_name},
+        )
+        metrics.increment(
+            "hook_executions_total",
+            labels={"hook": self._hook_name, "status": self._status},
+        )
 
 
 def read_json_input(
