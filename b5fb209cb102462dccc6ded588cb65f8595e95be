@@ -14,3 +14,22 @@ tags:
 
 This pattern is consistent with how `status` is handled in the same class.
 `─────────────────────────────────────...
+
+---
+type: patterns
+timestamp: '2025-12-26T04:09:02.365415+00:00'
+summary: '...idempotency
+
+  The migration for domain needs to add the column and create an index, following
+  t...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...idempotency
+
+The migration for domain needs to add the column and create an index, following the exact pattern used for `repo_path` in version 2.
+`─────────────────────────────────────────────────`
+
+Now...
