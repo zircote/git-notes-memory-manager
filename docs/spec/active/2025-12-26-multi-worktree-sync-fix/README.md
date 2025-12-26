@@ -2,24 +2,26 @@
 project_id: SPEC-2025-12-26-001
 project_name: "Multi-Worktree Sync Fix"
 slug: multi-worktree-sync-fix
-status: approved
+status: completed
 created: 2025-12-26T14:23:00Z
 approved: 2025-12-26T19:52:59Z
 approved_by: "Robert Allen <zircote@gmail.com>"
-started: null
-completed: null
+started: 2025-12-26T20:10:00Z
+completed: 2025-12-26T20:30:00Z
 expires: 2026-03-26T14:23:00Z
 superseded_by: null
 tags: [bug-fix, git-notes, hooks, multi-worktree, concurrency]
 stakeholders: []
 github_issue: https://github.com/zircote/git-notes-memory/issues/28
+github_pr: https://github.com/zircote/git-notes-memory/pull/34
 ---
 
 # Multi-Worktree Sync Fix
 
 **Project ID**: SPEC-2025-12-26-001
 **GitHub Issue**: [#28](https://github.com/zircote/git-notes-memory/issues/28)
-**Status**: Approved
+**GitHub PR**: [#34](https://github.com/zircote/git-notes-memory/pull/34)
+**Status**: Completed
 
 ## Summary
 
@@ -49,3 +51,4 @@ Replace `push_notes_to_remote()` with `sync_notes_with_remote(push=True)` in the
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - Technical design
 - [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) - Task breakdown
 - [DECISIONS.md](./DECISIONS.md) - Architecture decisions
+- [PROGRESS.md](./PROGRESS.md) - Implementation tracking
