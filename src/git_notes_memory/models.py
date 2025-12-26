@@ -399,6 +399,7 @@ class IndexStats:
         total_memories: Total number of indexed memories
         by_namespace: Count per namespace
         by_spec: Count per specification
+        by_domain: Count per domain (user, project)
         last_sync: Timestamp of last synchronization
         index_size_bytes: Size of the SQLite database
     """
@@ -406,6 +407,7 @@ class IndexStats:
     total_memories: int
     by_namespace: tuple[tuple[str, int], ...] = field(default_factory=tuple)
     by_spec: tuple[tuple[str, int], ...] = field(default_factory=tuple)
+    by_domain: tuple[tuple[str, int], ...] = field(default_factory=tuple)
     last_sync: datetime | None = None
     index_size_bytes: int = 0
 
@@ -418,6 +420,11 @@ class IndexStats:
     def by_spec_dict(self) -> dict[str, int]:
         """Get spec counts as a dictionary."""
         return dict(self.by_spec)
+
+    @property
+    def by_domain_dict(self) -> dict[str, int]:
+        """Get domain counts as a dictionary."""
+        return dict(self.by_domain)
 
 
 @dataclass(frozen=True)
