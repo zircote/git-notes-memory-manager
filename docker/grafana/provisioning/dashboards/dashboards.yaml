@@ -1,0 +1,15 @@
+# Grafana Dashboard Provisioning for git-notes-memory
+
+apiVersion: 1
+
+providers:
+  - name: 'git-notes-memory'
+    orgId: 1
+    folder: 'Git Notes Memory'
+    folderUid: 'git-notes-memory'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

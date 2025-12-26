@@ -54,10 +54,10 @@ This document tracks implementation progress against the spec plan.
 | 5.4 | Implement prometheus-client integration | skipped | | | Optional Tier 3 - deferred |
 | 5.5 | Update /memory:metrics for OTLP format | skipped | | | Optional Tier 3 - deferred |
 | 5.6 | Documentation for observability | skipped | | | Optional Tier 3 - deferred |
-| 6.1 | Create Docker Compose observability stack | skipped | | | Optional Tier 3 - deferred |
-| 6.2 | Create pre-built Grafana dashboards | skipped | | | Optional Tier 3 - deferred |
-| 6.3 | Create provider configuration documentation | skipped | | | Optional Tier 3 - deferred |
-| 6.4 | Update project documentation | skipped | | | Optional Tier 3 - deferred |
+| 6.1 | Create Docker Compose observability stack | done | 2025-12-26 | 2025-12-26 | docker-compose.yml + OTEL/Prometheus/Tempo/Loki configs |
+| 6.2 | Create pre-built Grafana dashboards | done | 2025-12-26 | 2025-12-26 | memory-operations.json, hook-performance.json |
+| 6.3 | Create provider configuration documentation | skipped | | | Optional - README in docker/ suffices |
+| 6.4 | Update project documentation | skipped | | | Optional - docs/observability.md already created |
 
 ---
 
@@ -70,7 +70,7 @@ This document tracks implementation progress against the spec plan.
 | 3 | Structured Logging | 100% | done |
 | 4 | CLI & Export | 100% | done |
 | 5 | OpenTelemetry | 100% | skipped (optional Tier 3) |
-| 6 | Local Stack & Docs | 100% | skipped (optional Tier 3) |
+| 6 | Local Stack & Docs | 50% | partial (6.1-6.2 done, 6.3-6.4 skipped) |
 
 ---
 
@@ -79,7 +79,8 @@ This document tracks implementation progress against the spec plan.
 | Date | Type | Task ID | Description | Resolution |
 |------|------|---------|-------------|------------|
 | 2025-12-26 | skipped | 5.1-5.6 | Phase 5 OpenTelemetry - Optional Tier 3 | Deferred - Core observability complete |
-| 2025-12-26 | skipped | 6.1-6.4 | Phase 6 Docker Stack - Optional Tier 3 | Deferred - Core observability complete |
+| 2025-12-26 | implemented | 6.1-6.2 | Phase 6 Docker Stack - Added per user request | Docker Compose + Grafana dashboards |
+| 2025-12-26 | skipped | 6.3-6.4 | Phase 6 Docs - Optional | docs/observability.md already covers most |
 
 ---
 
@@ -144,3 +145,18 @@ This document tracks implementation progress against the spec plan.
   - Structured logging with get_logger()
   - Silent failure tracking with metrics
 - **Ready for PR merge**
+
+### 2025-12-26 - Phase 6 Docker Stack Implementation
+- **User requested Docker Compose observability stack** after initial completion
+- **Completed tasks 6.1 and 6.2**:
+  - `docker/docker-compose.yml` - Full observability stack (OTEL Collector, Prometheus, Tempo, Loki, Grafana)
+  - `docker/otel-collector-config.yaml` - OTLP receivers, processors, exporters
+  - `docker/prometheus.yml` - Scrape configs for OTEL collector metrics
+  - `docker/tempo.yaml` - Distributed tracing backend
+  - `docker/loki.yaml` - Log aggregation backend
+  - `docker/grafana/provisioning/datasources/datasources.yaml` - Auto-provisioned datasources
+  - `docker/grafana/provisioning/dashboards/dashboards.yaml` - Dashboard provisioning
+  - `docker/grafana/dashboards/memory-operations.json` - Operations dashboard (captures, searches, latency)
+  - `docker/grafana/dashboards/hook-performance.json` - Hook performance dashboard
+- **Ports**: 3000 (Grafana), 9090 (Prometheus), 4317/4318 (OTEL), 3100 (Loki), 3200 (Tempo)
+- **Tasks 6.3-6.4 skipped**: docs/observability.md already provides documentation
