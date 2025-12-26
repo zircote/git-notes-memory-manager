@@ -137,3 +137,20 @@ tags:
         )
 
 #...
+
+---
+type: patterns
+timestamp: '2025-12-26T02:34:46.761176+00:00'
+summary: '...assert any('
+tags:
+- auto-captured
+- post-tool-use
+- file:test_adversarial.py
+---
+
+...assert any(
+            pattern in result.detection.patterns_found
+            for pattern in expected_patterns
+        )
+
+# =================================================================...
