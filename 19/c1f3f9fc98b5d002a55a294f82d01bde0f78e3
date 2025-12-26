@@ -202,3 +202,28 @@ Completed the implementation of Issue #28 fix and created PR #34.
 ## Related Files
 - src/git_notes_memory/hooks/stop_handler.py:473-490
 - docs/spec/active/2025-12-26-multi-worktree-sync-fix/README.md
+
+---
+type: progress
+timestamp: '2025-12-26T20:26:48.184983+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Specification complete for Issue #31 PLUGIN_ROOT...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Specification complete for Issue #31 PLUGIN_ROOT path resolution fix
+## Summary
+Created full spec documents for bug fix addressing marketplace plugin installation failures.
+
+## Changes Made
+- REQUIREMENTS.md: 12+ affected commands identified, success criteria defined
+- ARCHITECTURE.md: Module import pattern replacing filesystem script execution
+- IMPLEMENTATION_PLAN.md: 16 tasks across 5 phases, ~2-3 hours estimated
+- DECISIONS.md: 5 ADRs documenting key design choices
+- CHANGELOG.md: Spec history
+
+## Related Files
+- docs/spec/active/2025-12-26-plugin-root-path-resolution/
