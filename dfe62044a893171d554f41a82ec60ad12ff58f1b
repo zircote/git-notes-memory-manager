@@ -510,3 +510,19 @@ tags:
 |-----------|---------------|--------------|
 | Pattern matching | <1ms per pattern | Compile regex once, reuse |
 | Entropy calculation | <0.1ms |...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.386686+00:00'
+summary: '...Optimization |'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...Optimization |
+|-----------|---------------|--------------|
+| Pattern matching | <1ms per pattern | Compile regex once, reuse |
+| Entropy calculation | <0.1ms | Cache charset lookups |
+| Full...
