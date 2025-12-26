@@ -1250,3 +1250,22 @@ class PIIDetector:
 
     def __init__(self) -> None:
         self._ssn_pattern = re.compile(r"\b\d{3}-\d{2...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:12:10.650616+00:00'
+summary: '...Phone numbers, potential false positives'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Phone numbers, potential false positives
+
+@dataclass(frozen=True)
+class SecretPattern:
+    """Pattern definition for detection."""
+    regex: str
+    confidence: float
+    severity: Severity...
