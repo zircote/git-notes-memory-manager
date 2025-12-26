@@ -1248,3 +1248,26 @@ tags:
 
 | Query Type | Example | Relevance |
 |------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:31:23.859177+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
