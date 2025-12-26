@@ -25,7 +25,7 @@ import logging
 import sqlite3
 import struct
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
@@ -118,6 +118,8 @@ _CREATE_INDICES = [
     "CREATE INDEX IF NOT EXISTS idx_memories_namespace_domain ON memories(namespace, domain)",
     # Composite index for efficient range queries within namespace
     "CREATE INDEX IF NOT EXISTS idx_memories_namespace_timestamp ON memories(namespace, timestamp DESC)",
+    # LOW-004: Composite index for status-filtered recency queries
+    "CREATE INDEX IF NOT EXISTS idx_memories_status_timestamp ON memories(status, timestamp DESC)",
 ]
 
 # Migration SQL for schema version upgrades
@@ -239,6 +241,11 @@ class IndexService:
             self._initialized = True
 
         except Exception as e:
+            # CRIT-001: Properly close connection before clearing reference
+            # to prevent file handle leaks on initialization failure
+            if self._conn is not None:
+                with suppress(Exception):
+                    self._conn.close()
             self._conn = None
             self._initialized = False
             if isinstance(e, MemoryIndexError):
