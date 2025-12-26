@@ -59,3 +59,24 @@ The existing architecture provides strong extension points for multi-domain supp
 - src/git_notes_memory/recall.py:72-131 (service initialization)
 - src/git_notes_memory/hooks/signal_detector.py:40-155 (patterns + block markers)
 - src/git_notes_memory/hooks/context_builder.py:340-390 (working memory building)
+
+---
+type: learnings
+timestamp: '2025-12-26T00:10:27.606302+00:00'
+summary: CognitiveSubstrate research provides comprehensive theoretical foundation
+---
+
+CognitiveSubstrate research provides comprehensive theoretical foundation
+## Summary
+The existing research documents provide deep theoretical grounding and industry context that must inform the specification.
+
+## Key Insights
+1. **Dual-Process Theory (Kahneman)**: System 1 (fast recall) vs System 2 (deliberate verification) maps directly to the architecture
+2. **Cognitive Architectures (SOAR, ACT-R)**: Base-Level Activation (BLA) concept from ACT-R informs decay/reinforcement scoring
+3. **MemGPT/Letta**: Explicitly supports "conscious" and "subconscious" threads - validates the pattern
+4. **Adversarial Robustness**: Research shows current RAG defenses are inadequate - security is differentiating
+5. **A-MEM (Zettelkasten)**: Dynamic indexing and memory evolution outperforms MemGPT on multi-hop reasoning
+
+## Related Files
+- /Users/AllenR1_1/Projects/zircote/git-notes-memory/docs/research/CognitiveSubstrate/ARCHITECTURE_BRIEF.md
+- /Users/AllenR1_1/Projects/zircote/git-notes-memory/docs/research/CognitiveSubstrate/REFERENCES.md
