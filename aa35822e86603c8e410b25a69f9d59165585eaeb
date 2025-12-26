@@ -117,3 +117,15 @@ summary: '...Read/Write/Edit | Surfaces related memories |'
 ### Memory Namespaces
 
 Memories...
+
+---
+type: learnings
+timestamp: '2025-12-26T05:16:36.892821+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
