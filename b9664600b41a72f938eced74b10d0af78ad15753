@@ -661,3 +661,18 @@ tags:
 
 After all remediations:
 - [ ] `make quality`...
+
+---
+type: patterns
+timestamp: '2025-12-26T14:55:05.137762+00:00'
+summary: '...files are cached in the XDG data directory (models/ subdirectory).'
+tags:
+- auto-captured
+- post-tool-use
+- file:embedding.py
+---
+
+...files are cached in the XDG data directory (models/ subdirectory).
+
+CRIT-001: Circuit breaker pattern prevents repeated calls to a failing model.
+Timeout protection is applied to all encode() operations...
