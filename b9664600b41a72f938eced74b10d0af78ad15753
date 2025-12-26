@@ -7599,3 +7599,21 @@ tags:
 [learnings] Memory index location is project-specific at .memory/index.db  ✓
 [progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
 [progress]  Deep-clean...
+
+---
+type: progress
+timestamp: '2025-12-26T17:05:48.192876+00:00'
+summary: '....memory/index.db  ✓
+
+  [progress]  Updated Claude Code hooks to enforce CI quality checks        ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+....memory/index.db  ✓
+[progress]  Updated Claude Code hooks to enforce CI quality checks          ✓
+[progress]  Deep-clean code review and remediation complete                 ✓
+```
+
+The memory system...
