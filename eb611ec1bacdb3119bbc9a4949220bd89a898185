@@ -3491,3 +3491,49 @@ Created project scaffold from GitHub Issue #11 which provides an extensive featu
 ## Related Files
 - docs/spec/active/2025-12-25-llm-subconsciousness/README.md
 - docs/spec/active/2025-12-25-llm-subconsciousness/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-26T04:08:39.509143+00:00'
+summary: Completed analysis of existing codebase patterns and integration points
+---
+
+Completed analysis of existing codebase patterns and integration points
+## Summary
+Thoroughly analyzed the git-notes-memory codebase to understand architecture and extension points.
+
+## Key Findings
+
+### Service Layer Pattern
+- Singleton via `ServiceRegistry` with `get_default_service()` functions
+- Lazy initialization to avoid loading embedding model at import
+- Dependency injection via constructor or setter methods
+
+### Data Models
+- All `@dataclass(frozen=True)` for immutability
+- `Memory` is the core entity with id format `{namespace}:{commit_sha}:{index}`
+- `MemoryResult` wraps Memory with distance score for vector search
+
+### Database Schema
+- SQLite with `sqlite-vec` extension for vector search
+- Schema versioning with migration system
+- 384-dimension embeddings (all-MiniLM-L6-v2)
+- WAL mode for concurrent access
+
+### Hooks Subsystem
+- Stop handler already has `SessionAnalyzer` and `_auto_capture_signals()`
+- Confidence-based auto-capture with configurable thresholds
+- Integration points exist for implicit capture, transcript analysis
+
+### Extension Points for Subconsciousness
+1. `IndexService` - add decay/reinforcement metadata columns
+2. `CaptureService.capture()` - hook for LLM-based enrichment
+3. `Memory` model - extend with links and decay metadata
+4. `SessionAnalyzer` - enhance with LLM for implicit capture
+5. Hooks - add new agents for proactive surfacing, consolidation
+
+## Related Files
+- src/git_notes_memory/models.py:1-552
+- src/git_notes_memory/capture.py:1-1007
+- src/git_notes_memory/index.py:1-1248
+- src/git_notes_memory/hooks/stop_handler.py:1-510
