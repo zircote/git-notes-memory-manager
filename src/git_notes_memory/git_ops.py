@@ -17,8 +17,10 @@ Git Notes Architecture:
 
 from __future__ import annotations
 
+import logging
 import re
 import subprocess
+import time
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -30,6 +32,10 @@ from git_notes_memory.exceptions import (
     ValidationError,
 )
 from git_notes_memory.models import CommitInfo
+from git_notes_memory.observability.metrics import get_metrics
+from git_notes_memory.observability.tracing import trace_operation
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     pass
@@ -218,16 +224,40 @@ class GitOps:
             StorageError: If command fails and check=True, or if timeout is exceeded.
         """
         cmd = ["git", "-C", str(self.repo_path), *args]
+        metrics = get_metrics()
 
+        # Determine git subcommand for tracing
+        git_subcommand = args[0] if args else "unknown"
+
+        start_time = time.perf_counter()
         try:
-            return subprocess.run(
-                cmd,
-                check=check,
-                capture_output=capture_output,
-                text=True,
-                timeout=timeout,
+            with trace_operation("git.subprocess", labels={"command": git_subcommand}):
+                result = subprocess.run(
+                    cmd,
+                    check=check,
+                    capture_output=capture_output,
+                    text=True,
+                    timeout=timeout,
+                )
+
+            # Record git command execution time
+            duration_ms = (time.perf_counter() - start_time) * 1000
+            metrics.observe(
+                "git_command_duration_ms",
+                duration_ms,
+                labels={"command": git_subcommand},
             )
+            metrics.increment(
+                "git_commands_total",
+                labels={"command": git_subcommand, "status": "success"},
+            )
+
+            return result
         except subprocess.CalledProcessError as e:
+            metrics.increment(
+                "git_commands_total",
+                labels={"command": git_subcommand, "status": "error"},
+            )
             # Parse common git errors for better messages
             # SEC-002: Sanitize paths in error messages to prevent info leakage
             stderr = e.stderr or ""
@@ -278,6 +308,10 @@ class GitOps:
                 "Check git status and try again",
             ) from e
         except subprocess.TimeoutExpired as e:
+            metrics.increment(
+                "git_commands_total",
+                labels={"command": git_subcommand, "status": "timeout"},
+            )
             # HIGH-001: Handle timeout to provide clear error message
             raise StorageError(
                 f"Git command timed out after {timeout}s",
@@ -966,6 +1000,7 @@ class GitOps:
         base = get_git_namespace()
         ns_list = namespaces if namespaces is not None else list(NAMESPACES)
         results: dict[str, bool] = {}
+        metrics = get_metrics()
 
         for ns in ns_list:
             try:
@@ -976,7 +1011,16 @@ class GitOps:
                     check=False,
                 )
                 results[ns] = result.returncode == 0
-            except Exception:
+            except Exception as e:
+                logger.warning(
+                    "Failed to fetch notes for namespace %s: %s",
+                    ns,
+                    e,
+                )
+                metrics.increment(
+                    "silent_failures_total",
+                    labels={"location": "git_ops.fetch_notes"},
+                )
                 results[ns] = False
 
         return results

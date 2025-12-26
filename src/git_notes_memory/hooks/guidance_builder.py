@@ -21,13 +21,14 @@ Detail Levels:
 
 from __future__ import annotations
 
-import logging
 from enum import Enum
 from pathlib import Path
 
+from git_notes_memory.observability import get_logger
+
 __all__ = ["GuidanceBuilder", "GuidanceLevel"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Directory containing Markdown templates
 TEMPLATES_DIR = Path(__file__).parent / "templates"

@@ -20,15 +20,15 @@ Example::
 
 from __future__ import annotations
 
-import logging
 import re
 from typing import ClassVar
 
 from git_notes_memory.hooks.models import CaptureSignal, SignalType
+from git_notes_memory.observability import get_logger
 
 __all__ = ["SignalDetector", "SIGNAL_PATTERNS"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # SEC-001: Maximum text length for signal detection to prevent ReDoS attacks
 # 100KB is generous for user prompts while preventing abuse

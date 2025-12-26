@@ -20,10 +20,10 @@ Example::
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
 from git_notes_memory.hooks.models import CaptureSignal, NoveltyResult
+from git_notes_memory.observability import get_logger
 
 if TYPE_CHECKING:
     from git_notes_memory.embedding import EmbeddingService
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 __all__ = ["NoveltyChecker"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class NoveltyChecker:

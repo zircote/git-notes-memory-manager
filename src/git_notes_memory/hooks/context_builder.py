@@ -14,7 +14,6 @@ The context is structured into:
 
 from __future__ import annotations
 
-import logging
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
@@ -32,6 +31,7 @@ from git_notes_memory.hooks.models import (
     WorkingMemory,
 )
 from git_notes_memory.hooks.xml_formatter import XMLBuilder
+from git_notes_memory.observability import get_logger
 
 if TYPE_CHECKING:
     from git_notes_memory.index import IndexService
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
 __all__ = ["ContextBuilder"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ContextBuilder:

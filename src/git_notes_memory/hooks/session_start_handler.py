@@ -30,7 +30,6 @@ Environment Variables:
 from __future__ import annotations
 
 import json
-import logging
 import sys
 from typing import Any
 
@@ -45,12 +44,14 @@ from git_notes_memory.hooks.hook_utils import (
     read_json_input,
     setup_logging,
     setup_timeout,
+    timed_hook_execution,
 )
 from git_notes_memory.hooks.project_detector import detect_project
+from git_notes_memory.observability import get_logger
 
 __all__ = ["main"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _validate_input(data: dict[str, Any]) -> bool:
@@ -143,120 +144,124 @@ def main() -> None:
     timeout = config.timeout or HOOK_SESSION_START_TIMEOUT
     setup_timeout(timeout, hook_name="SessionStart")
 
-    try:
-        # Read and validate input
-        input_data = read_json_input()
-        logger.debug("Received input: %s", input_data)
-
-        # Log full input to file for debugging
-        log_hook_input("SessionStart", input_data)
-
-        if not _validate_input(input_data):
-            logger.warning("Invalid hook input - missing required fields")
-            sys.exit(0)
-
-        # Extract working directory and session source
-        cwd = input_data["cwd"]
-        session_source = input_data.get("source", "startup")
-
-        # Detect project information
-        project_info = detect_project(cwd)
-        logger.debug(
-            "Detected project: name=%s, spec=%s",
-            project_info.name,
-            project_info.spec_id,
-        )
-
-        # Ensure git notes sync is configured for this repository
-        git_ops: GitOps | None = None
+    with timed_hook_execution("SessionStart") as timer:
         try:
-            git_ops = GitOps(repo_path=cwd)
-            if git_ops.ensure_sync_configured():
-                logger.debug("Git notes sync configured for repository")
-            else:
-                logger.debug(
-                    "Git notes sync not configured (no remote or not a git repo)"
-                )
-        except Exception as e:
-            logger.debug("Could not configure git notes sync: %s", e)
+            # Read and validate input
+            input_data = read_json_input()
+            logger.debug("Received input: %s", input_data)
 
-        # Migrate from old fetch refspec to new tracking refs pattern
-        # This is idempotent and safe to call every session
-        if git_ops is not None:
-            try:
-                if git_ops.migrate_fetch_config():
-                    logger.debug(
-                        "Migrated git notes fetch refspec to tracking refs pattern"
-                    )
-            except Exception as e:
-                logger.debug("Fetch refspec migration skipped: %s", e)
+            # Log full input to file for debugging
+            log_hook_input("SessionStart", input_data)
 
-        # Fetch and merge notes from remote if enabled (opt-in via env var)
-        # This ensures we have the latest memories from collaborators
-        if git_ops is not None and config.session_start_fetch_remote:
-            try:
-                fetch_results = git_ops.fetch_notes_from_remote()
-                merged_count = 0
-                for ns, success in fetch_results.items():
-                    if success and git_ops.merge_notes_from_tracking(ns):
-                        merged_count += 1
-                # Reindex to include fetched memories
-                if merged_count > 0:
-                    from git_notes_memory.sync import get_sync_service as get_sync
+            if not _validate_input(input_data):
+                logger.warning("Invalid hook input - missing required fields")
+                timer.set_status("skipped")
+                sys.exit(0)
 
-                    sync_service = get_sync(repo_path=cwd)
-                    sync_service.reindex()
-                    logger.debug(
-                        "Fetched and merged %d namespaces from remote", merged_count
-                    )
-            except Exception as e:
-                logger.debug("Remote fetch on start skipped: %s", e)
+            # Extract working directory and session source
+            cwd = input_data["cwd"]
+            session_source = input_data.get("source", "startup")
 
-        # Build response guidance if enabled
-        guidance_xml = ""
-        if config.session_start_include_guidance:
-            guidance_builder = GuidanceBuilder()
-            guidance_xml = guidance_builder.build_guidance(
-                config.session_start_guidance_detail.value
-            )
+            # Detect project information
+            project_info = detect_project(cwd)
             logger.debug(
-                "Built response guidance (%d chars, level=%s)",
-                len(guidance_xml),
-                config.session_start_guidance_detail.value,
+                "Detected project: name=%s, spec=%s",
+                project_info.name,
+                project_info.spec_id,
             )
 
-        # Build memory context
-        context_builder = ContextBuilder(config=config)
-        memory_context = context_builder.build_context(
-            project=project_info.name,
-            session_source=session_source,
-            spec_id=project_info.spec_id,
-        )
+            # Ensure git notes sync is configured for this repository
+            git_ops: GitOps | None = None
+            try:
+                git_ops = GitOps(repo_path=cwd)
+                if git_ops.ensure_sync_configured():
+                    logger.debug("Git notes sync configured for repository")
+                else:
+                    logger.debug(
+                        "Git notes sync not configured (no remote or not a git repo)"
+                    )
+            except Exception as e:
+                logger.debug("Could not configure git notes sync: %s", e)
 
-        logger.debug("Built memory context (%d chars)", len(memory_context))
+            # Migrate from old fetch refspec to new tracking refs pattern
+            # This is idempotent and safe to call every session
+            if git_ops is not None:
+                try:
+                    if git_ops.migrate_fetch_config():
+                        logger.debug(
+                            "Migrated git notes fetch refspec to tracking refs pattern"
+                        )
+                except Exception as e:
+                    logger.debug("Fetch refspec migration skipped: %s", e)
 
-        # Combine guidance and memory context
-        if guidance_xml:
-            full_context = f"{guidance_xml}\n\n{memory_context}"
-        else:
-            full_context = memory_context
+            # Fetch and merge notes from remote if enabled (opt-in via env var)
+            # This ensures we have the latest memories from collaborators
+            if git_ops is not None and config.session_start_fetch_remote:
+                try:
+                    fetch_results = git_ops.fetch_notes_from_remote()
+                    merged_count = 0
+                    for ns, success in fetch_results.items():
+                        if success and git_ops.merge_notes_from_tracking(ns):
+                            merged_count += 1
+                    # Reindex to include fetched memories
+                    if merged_count > 0:
+                        from git_notes_memory.sync import get_sync_service as get_sync
 
-        logger.debug("Total context (%d chars)", len(full_context))
+                        sync_service = get_sync(repo_path=cwd)
+                        sync_service.reindex()
+                        logger.debug(
+                            "Fetched and merged %d namespaces from remote", merged_count
+                        )
+                except Exception as e:
+                    logger.debug("Remote fetch on start skipped: %s", e)
 
-        # Get memory count for status message
-        memory_count = _get_memory_count()
+            # Build response guidance if enabled
+            guidance_xml = ""
+            if config.session_start_include_guidance:
+                guidance_builder = GuidanceBuilder()
+                guidance_xml = guidance_builder.build_guidance(
+                    config.session_start_guidance_detail.value
+                )
+                logger.debug(
+                    "Built response guidance (%d chars, level=%s)",
+                    len(guidance_xml),
+                    config.session_start_guidance_detail.value,
+                )
 
-        # Output result with memory count
-        _write_output(full_context, memory_count=memory_count)
+            # Build memory context
+            context_builder = ContextBuilder(config=config)
+            memory_context = context_builder.build_context(
+                project=project_info.name,
+                session_source=session_source,
+                spec_id=project_info.spec_id,
+            )
 
-    except json.JSONDecodeError as e:
-        logger.error("Failed to parse hook input: %s", e)
-        print(json.dumps({"continue": True}))
-    except Exception as e:
-        logger.exception("SessionStart hook error: %s", e)
-        print(json.dumps({"continue": True}))
-    finally:
-        cancel_timeout()
+            logger.debug("Built memory context (%d chars)", len(memory_context))
+
+            # Combine guidance and memory context
+            if guidance_xml:
+                full_context = f"{guidance_xml}\n\n{memory_context}"
+            else:
+                full_context = memory_context
+
+            logger.debug("Total context (%d chars)", len(full_context))
+
+            # Get memory count for status message
+            memory_count = _get_memory_count()
+
+            # Output result with memory count
+            _write_output(full_context, memory_count=memory_count)
+
+        except json.JSONDecodeError as e:
+            timer.set_status("error")
+            logger.error("Failed to parse hook input: %s", e)
+            print(json.dumps({"continue": True}))
+        except Exception as e:
+            timer.set_status("error")
+            logger.exception("SessionStart hook error: %s", e)
+            print(json.dumps({"continue": True}))
+        finally:
+            cancel_timeout()
 
     sys.exit(0)
 

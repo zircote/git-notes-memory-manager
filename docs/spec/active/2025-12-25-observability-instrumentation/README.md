@@ -2,13 +2,13 @@
 project_id: SPEC-2025-12-25-001
 project_name: "Observability Instrumentation and Distributed Tracing"
 slug: observability-instrumentation
-status: approved
+status: completed
 github_issue: 10
 created: 2025-12-25T23:50:00Z
 approved: 2025-12-26T00:31:42Z
 approved_by: "Robert Allen <zircote@gmail.com>"
 started: 2025-12-26T00:35:00Z
-completed: null
+completed: 2025-12-26T03:15:00Z
 expires: 2026-03-25T23:50:00Z
 superseded_by: null
 tags: [observability, metrics, tracing, performance, developer-experience]

@@ -94,43 +94,61 @@ class StructuredLogger:
 
         return extra
 
-    def trace(self, msg: str, **kwargs: Any) -> None:
-        """Log at TRACE level (below DEBUG)."""
+    def trace(self, msg: str, *args: Any, **kwargs: Any) -> None:
+        """Log at TRACE level (below DEBUG).
+
+        Supports both format-string style (msg % args) and structured kwargs.
+        """
         self._ensure_configured()
         config = get_config()
         if config.log_level == LogLevel.TRACE:
             extra = self._build_extra(**kwargs)
-            self._logger.log(TRACE_LEVEL, msg, extra={"structured": extra})
+            self._logger.log(TRACE_LEVEL, msg, *args, extra={"structured": extra})
 
-    def debug(self, msg: str, **kwargs: Any) -> None:
-        """Log at DEBUG level."""
+    def debug(self, msg: str, *args: Any, **kwargs: Any) -> None:
+        """Log at DEBUG level.
+
+        Supports both format-string style (msg % args) and structured kwargs.
+        """
         self._ensure_configured()
         extra = self._build_extra(**kwargs)
-        self._logger.debug(msg, extra={"structured": extra})
+        self._logger.debug(msg, *args, extra={"structured": extra})
 
-    def info(self, msg: str, **kwargs: Any) -> None:
-        """Log at INFO level."""
+    def info(self, msg: str, *args: Any, **kwargs: Any) -> None:
+        """Log at INFO level.
+
+        Supports both format-string style (msg % args) and structured kwargs.
+        """
         self._ensure_configured()
         extra = self._build_extra(**kwargs)
-        self._logger.info(msg, extra={"structured": extra})
+        self._logger.info(msg, *args, extra={"structured": extra})
 
-    def warning(self, msg: str, **kwargs: Any) -> None:
-        """Log at WARNING level."""
+    def warning(self, msg: str, *args: Any, **kwargs: Any) -> None:
+        """Log at WARNING level.
+
+        Supports both format-string style (msg % args) and structured kwargs.
+        """
         self._ensure_configured()
         extra = self._build_extra(**kwargs)
-        self._logger.warning(msg, extra={"structured": extra})
+        self._logger.warning(msg, *args, extra={"structured": extra})
 
-    def error(self, msg: str, **kwargs: Any) -> None:
-        """Log at ERROR level."""
+    def error(self, msg: str, *args: Any, **kwargs: Any) -> None:
+        """Log at ERROR level.
+
+        Supports both format-string style (msg % args) and structured kwargs.
+        """
         self._ensure_configured()
         extra = self._build_extra(**kwargs)
-        self._logger.error(msg, extra={"structured": extra})
+        self._logger.error(msg, *args, extra={"structured": extra})
 
-    def exception(self, msg: str, **kwargs: Any) -> None:
-        """Log at ERROR level with exception info."""
+    def exception(self, msg: str, *args: Any, **kwargs: Any) -> None:
+        """Log at ERROR level with exception info.
+
+        Supports both format-string style (msg % args) and structured kwargs.
+        """
         self._ensure_configured()
         extra = self._build_extra(**kwargs)
-        self._logger.exception(msg, extra={"structured": extra})
+        self._logger.exception(msg, *args, extra={"structured": extra})
 
 
 class JsonFormatter(logging.Formatter):

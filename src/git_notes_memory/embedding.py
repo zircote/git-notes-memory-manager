@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -23,6 +24,9 @@ from git_notes_memory.config import (
     get_models_path,
 )
 from git_notes_memory.exceptions import EmbeddingError
+from git_notes_memory.observability.decorators import measure_duration
+from git_notes_memory.observability.metrics import get_metrics
+from git_notes_memory.observability.tracing import trace_operation
 
 if TYPE_CHECKING:
     from sentence_transformers import SentenceTransformer
@@ -118,65 +122,80 @@ class EmbeddingService:
         if self._model is not None:
             return
 
-        try:
-            # Import here to defer the heavy import
-            from sentence_transformers import SentenceTransformer
+        metrics = get_metrics()
+        start_time = time.perf_counter()
 
-            # Ensure cache directory exists
-            self._cache_dir.mkdir(parents=True, exist_ok=True)
+        with trace_operation("embedding.load", labels={"model": self._model_name}):
+            try:
+                # Import here to defer the heavy import
+                from sentence_transformers import SentenceTransformer
 
-            # Set environment variable for transformers cache
-            # This ensures the model is cached in our directory
-            os.environ.setdefault(
-                "TRANSFORMERS_CACHE",
-                str(self._cache_dir),
-            )
-            os.environ.setdefault(
-                "HF_HOME",
-                str(self._cache_dir),
-            )
+                # Ensure cache directory exists
+                self._cache_dir.mkdir(parents=True, exist_ok=True)
 
-            logger.info(
-                "Loading embedding model '%s' (cache: %s)",
-                self._model_name,
-                self._cache_dir,
-            )
+                # Set environment variable for transformers cache
+                # This ensures the model is cached in our directory
+                os.environ.setdefault(
+                    "TRANSFORMERS_CACHE",
+                    str(self._cache_dir),
+                )
+                os.environ.setdefault(
+                    "HF_HOME",
+                    str(self._cache_dir),
+                )
 
-            self._model = SentenceTransformer(
-                self._model_name,
-                cache_folder=str(self._cache_dir),
-            )
+                logger.info(
+                    "Loading embedding model '%s' (cache: %s)",
+                    self._model_name,
+                    self._cache_dir,
+                )
 
-            # Verify and cache the actual dimensions
-            self._dimensions = self._model.get_sentence_embedding_dimension()
+                self._model = SentenceTransformer(
+                    self._model_name,
+                    cache_folder=str(self._cache_dir),
+                )
 
-            logger.info(
-                "Loaded embedding model '%s' (%d dimensions)",
-                self._model_name,
-                self._dimensions,
-            )
+                # Verify and cache the actual dimensions
+                self._dimensions = self._model.get_sentence_embedding_dimension()
 
-        except MemoryError as e:
-            raise EmbeddingError(
-                "Insufficient memory to load embedding model",
-                "Close other applications or use a smaller model",
-            ) from e
-        except OSError as e:
-            if "corrupt" in str(e).lower() or "invalid" in str(e).lower():
+                # Record model load time as a gauge
+                load_time_ms = (time.perf_counter() - start_time) * 1000
+                metrics.set_gauge(
+                    "embedding_model_load_time_ms",
+                    load_time_ms,
+                    labels={"model": self._model_name},
+                )
+                metrics.increment("embedding_model_loads_total")
+
+                logger.info(
+                    "Loaded embedding model '%s' (%d dimensions) in %.1fms",
+                    self._model_name,
+                    self._dimensions,
+                    load_time_ms,
+                )
+
+            except MemoryError as e:
                 raise EmbeddingError(
-                    "Embedding model cache corrupted",
-                    f"Delete the {self._cache_dir} directory and retry",
+                    "Insufficient memory to load embedding model",
+                    "Close other applications or use a smaller model",
                 ) from e
-            raise EmbeddingError(
-                f"Failed to load embedding model: {e}",
-                "Check network connectivity and retry",
-            ) from e
-        except Exception as e:
-            raise EmbeddingError(
-                f"Failed to load embedding model '{self._model_name}': {e}",
-                "Check model name and network connectivity",
-            ) from e
+            except OSError as e:
+                if "corrupt" in str(e).lower() or "invalid" in str(e).lower():
+                    raise EmbeddingError(
+                        "Embedding model cache corrupted",
+                        f"Delete the {self._cache_dir} directory and retry",
+                    ) from e
+                raise EmbeddingError(
+                    f"Failed to load embedding model: {e}",
+                    "Check network connectivity and retry",
+                ) from e
+            except Exception as e:
+                raise EmbeddingError(
+                    f"Failed to load embedding model '{self._model_name}': {e}",
+                    "Check model name and network connectivity",
+                ) from e
 
+    @measure_duration("embedding_generate")
     def embed(self, text: str) -> list[float]:
         """Generate an embedding for a single text.
 
@@ -201,22 +220,29 @@ class EmbeddingService:
 
         self.load()
 
-        try:
-            assert self._model is not None  # For type checker
-            embedding = self._model.encode(
-                text,
-                convert_to_numpy=True,
-                normalize_embeddings=True,
-            )
-            result: list[float] = embedding.tolist()
-            return result
+        metrics = get_metrics()
 
-        except Exception as e:
-            raise EmbeddingError(
-                f"Failed to generate embedding: {e}",
-                "Check input text and retry",
-            ) from e
+        with trace_operation("embedding.generate"):
+            try:
+                assert self._model is not None  # For type checker
+                embedding = self._model.encode(
+                    text,
+                    convert_to_numpy=True,
+                    normalize_embeddings=True,
+                )
+                result: list[float] = embedding.tolist()
 
+                metrics.increment("embeddings_generated_total")
+
+                return result
+
+            except Exception as e:
+                raise EmbeddingError(
+                    f"Failed to generate embedding: {e}",
+                    "Check input text and retry",
+                ) from e
+
+    @measure_duration("embedding_generate_batch")
     def embed_batch(
         self,
         texts: Sequence[str],
@@ -262,28 +288,37 @@ class EmbeddingService:
 
         self.load()
 
-        try:
-            assert self._model is not None  # For type checker
-            embeddings = self._model.encode(
-                non_empty_texts,
-                batch_size=batch_size,
-                show_progress_bar=show_progress,
-                convert_to_numpy=True,
-                normalize_embeddings=True,
-            )
+        metrics = get_metrics()
 
-            # Reconstruct the full result list
-            result: list[list[float]] = [[0.0] * self.dimensions for _ in texts]
-            for i, embedding in zip(non_empty_indices, embeddings, strict=True):
-                result[i] = embedding.tolist()
+        with trace_operation(
+            "embedding.generate_batch", labels={"batch_size": str(len(texts))}
+        ):
+            try:
+                assert self._model is not None  # For type checker
+                embeddings = self._model.encode(
+                    non_empty_texts,
+                    batch_size=batch_size,
+                    show_progress_bar=show_progress,
+                    convert_to_numpy=True,
+                    normalize_embeddings=True,
+                )
 
-            return result
+                # Reconstruct the full result list
+                result: list[list[float]] = [[0.0] * self.dimensions for _ in texts]
+                for i, embedding in zip(non_empty_indices, embeddings, strict=True):
+                    result[i] = embedding.tolist()
 
-        except Exception as e:
-            raise EmbeddingError(
-                f"Failed to generate batch embeddings: {e}",
-                "Check input texts and retry",
-            ) from e
+                metrics.increment(
+                    "embeddings_generated_total", amount=float(len(non_empty_texts))
+                )
+
+                return result
+
+            except Exception as e:
+                raise EmbeddingError(
+                    f"Failed to generate batch embeddings: {e}",
+                    "Check input texts and retry",
+                ) from e
 
     def similarity(
         self, embedding1: Sequence[float], embedding2: Sequence[float]

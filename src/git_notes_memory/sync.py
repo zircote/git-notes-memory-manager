@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 from git_notes_memory.config import NAMESPACES, get_project_index_path
 from git_notes_memory.exceptions import RecallError
 from git_notes_memory.models import Memory, NoteRecord, VerificationResult
+from git_notes_memory.observability.metrics import get_metrics
 
 if TYPE_CHECKING:
     from git_notes_memory.embedding import EmbeddingService
@@ -430,6 +431,7 @@ class SyncService:
 
         # Check for content mismatches (simplified - just check if exists)
         mismatched: list[str] = []
+        metrics = get_metrics()
         for memory_id in expected_ids & indexed_ids:
             try:
                 memory = index.get(memory_id)
@@ -441,8 +443,16 @@ class SyncService:
                     expected_hash = memory_hashes.get(memory_id, "")
                     if current_hash != expected_hash:
                         mismatched.append(memory_id)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "Failed to verify hash for memory %s: %s",
+                    memory_id,
+                    e,
+                )
+                metrics.increment(
+                    "silent_failures_total",
+                    labels={"location": "sync.hash_verification"},
+                )
 
         is_consistent = (
             len(missing_in_index) == 0

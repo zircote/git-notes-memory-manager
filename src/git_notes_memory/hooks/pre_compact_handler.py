@@ -31,7 +31,6 @@ Environment Variables:
 from __future__ import annotations
 
 import json
-import logging
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -45,16 +44,18 @@ from git_notes_memory.hooks.hook_utils import (
     read_json_input,
     setup_logging,
     setup_timeout,
+    timed_hook_execution,
 )
 from git_notes_memory.hooks.namespace_styles import get_style
 from git_notes_memory.hooks.session_analyzer import SessionAnalyzer
+from git_notes_memory.observability import get_logger
 
 if TYPE_CHECKING:
     from git_notes_memory.hooks.models import CaptureSignal
 
 __all__ = ["main"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Default timeout (seconds)
 DEFAULT_TIMEOUT = 15
@@ -241,108 +242,117 @@ def main() -> None:
     timeout = config.pre_compact_timeout or DEFAULT_TIMEOUT
     setup_timeout(timeout, hook_name="PreCompact", fallback_output={})
 
-    try:
-        # Read input
-        input_data = read_json_input()
-        logger.debug("Received input: trigger=%s", input_data.get("trigger"))
+    with timed_hook_execution("PreCompact") as timer:
+        try:
+            # Read input
+            input_data = read_json_input()
+            logger.debug("Received input: trigger=%s", input_data.get("trigger"))
 
-        # Log full input to file for debugging
-        log_hook_input("PreCompact", input_data)
+            # Log full input to file for debugging
+            log_hook_input("PreCompact", input_data)
 
-        # Get transcript path
-        transcript_path = input_data.get("transcript_path")
-        if not transcript_path:
-            hook_logger.info("No transcript_path in input - exiting")
-            print(json.dumps({}))
-            sys.exit(0)
+            # Get transcript path
+            transcript_path = input_data.get("transcript_path")
+            if not transcript_path:
+                hook_logger.info("No transcript_path in input - exiting")
+                timer.set_status("skipped")
+                print(json.dumps({}))
+                sys.exit(0)
 
-        hook_logger.info("Transcript path: %s", transcript_path)
+            hook_logger.info("Transcript path: %s", transcript_path)
 
-        # Check if transcript exists
-        if not Path(transcript_path).exists():
-            hook_logger.info("Transcript file not found: %s - exiting", transcript_path)
-            print(json.dumps({}))
-            sys.exit(0)
+            # Check if transcript exists
+            if not Path(transcript_path).exists():
+                hook_logger.info(
+                    "Transcript file not found: %s - exiting", transcript_path
+                )
+                timer.set_status("skipped")
+                print(json.dumps({}))
+                sys.exit(0)
 
-        hook_logger.info("Transcript exists, checking config...")
+            hook_logger.info("Transcript exists, checking config...")
 
-        # Check if auto-capture is enabled
-        if not config.pre_compact_auto_capture:
-            hook_logger.info(
-                "Auto-capture disabled via HOOK_PRE_COMPACT_AUTO_CAPTURE=false - exiting"
-            )
-            print(json.dumps({}))
-            sys.exit(0)
+            # Check if auto-capture is enabled
+            if not config.pre_compact_auto_capture:
+                hook_logger.info(
+                    "Auto-capture disabled via HOOK_PRE_COMPACT_AUTO_CAPTURE=false - exiting"
+                )
+                timer.set_status("skipped")
+                print(json.dumps({}))
+                sys.exit(0)
 
-        hook_logger.info("Analyzing transcript for uncaptured signals...")
+            hook_logger.info("Analyzing transcript for uncaptured signals...")
 
-        # Analyze transcript for uncaptured signals
-        analyzer = SessionAnalyzer(
-            min_confidence=config.pre_compact_min_confidence,
-            max_signals=config.pre_compact_max_captures,
-        )
-
-        signals = analyzer.analyze(transcript_path, check_novelty=True)
-
-        if not signals:
-            hook_logger.info("No uncaptured signals found in transcript - exiting")
-            print(json.dumps({}))
-            sys.exit(0)
-
-        hook_logger.info("Found %d uncaptured signals", len(signals))
-        for sig in signals[:5]:
-            hook_logger.info(
-                "  Signal: type=%s, ns=%s, conf=%.2f, match=%s...",
-                sig.type.value,
-                sig.suggested_namespace,
-                sig.confidence,
-                sig.match[:50],
+            # Analyze transcript for uncaptured signals
+            analyzer = SessionAnalyzer(
+                min_confidence=config.pre_compact_min_confidence,
+                max_signals=config.pre_compact_max_captures,
             )
 
-        # Check for suggestion mode (prompt_first)
-        if config.pre_compact_prompt_first:
-            hook_logger.info("Suggestion mode enabled - showing suggestions only")
-            _report_suggestions(signals)
+            signals = analyzer.analyze(transcript_path, check_novelty=True)
+
+            if not signals:
+                hook_logger.info("No uncaptured signals found in transcript - exiting")
+                timer.set_status("skipped")
+                print(json.dumps({}))
+                sys.exit(0)
+
+            hook_logger.info("Found %d uncaptured signals", len(signals))
+            for sig in signals[:5]:
+                hook_logger.info(
+                    "  Signal: type=%s, ns=%s, conf=%.2f, match=%s...",
+                    sig.type.value,
+                    sig.suggested_namespace,
+                    sig.confidence,
+                    sig.match[:50],
+                )
+
+            # Check for suggestion mode (prompt_first)
+            if config.pre_compact_prompt_first:
+                hook_logger.info("Suggestion mode enabled - showing suggestions only")
+                _report_suggestions(signals)
+                print(json.dumps({}))
+                sys.exit(0)
+
+            hook_logger.info("Auto-capturing signals...")
+
+            # Capture the signals
+            captured: list[dict[str, Any]] = []
+
+            for signal in signals:
+                result = _capture_memory(signal, signal.suggested_namespace)
+                captured.append(result)
+
+                if result.get("success"):
+                    hook_logger.info("  Captured: %s", result)
+                else:
+                    hook_logger.info("  Failed: %s", result)
+
+            successful = len([c for c in captured if c.get("success")])
+            hook_logger.info(
+                "Auto-capture result: %d captured, %d remaining",
+                successful,
+                len(signals) - successful,
+            )
+
+            # Report captures to user
+            _report_captures(captured)
+
+            # Output empty JSON (PreCompact is side-effects only)
+            output: dict[str, Any] = {}
+            log_hook_output("PreCompact", output)
+            print(json.dumps(output))
+
+        except json.JSONDecodeError as e:
+            timer.set_status("error")
+            hook_logger.error("Failed to parse hook input: %s", e)
             print(json.dumps({}))
-            sys.exit(0)
-
-        hook_logger.info("Auto-capturing signals...")
-
-        # Capture the signals
-        captured: list[dict[str, Any]] = []
-
-        for signal in signals:
-            result = _capture_memory(signal, signal.suggested_namespace)
-            captured.append(result)
-
-            if result.get("success"):
-                hook_logger.info("  Captured: %s", result)
-            else:
-                hook_logger.info("  Failed: %s", result)
-
-        successful = len([c for c in captured if c.get("success")])
-        hook_logger.info(
-            "Auto-capture result: %d captured, %d remaining",
-            successful,
-            len(signals) - successful,
-        )
-
-        # Report captures to user
-        _report_captures(captured)
-
-        # Output empty JSON (PreCompact is side-effects only)
-        output: dict[str, Any] = {}
-        log_hook_output("PreCompact", output)
-        print(json.dumps(output))
-
-    except json.JSONDecodeError as e:
-        hook_logger.error("Failed to parse hook input: %s", e)
-        print(json.dumps({}))
-    except Exception as e:
-        hook_logger.exception("PreCompact hook error: %s", e)
-        print(json.dumps({}))
-    finally:
-        cancel_timeout()
+        except Exception as e:
+            timer.set_status("error")
+            hook_logger.exception("PreCompact hook error: %s", e)
+            print(json.dumps({}))
+        finally:
+            cancel_timeout()
 
     sys.exit(0)
 

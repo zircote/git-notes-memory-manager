@@ -35,7 +35,6 @@ Environment Variables:
 from __future__ import annotations
 
 import json
-import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -49,12 +48,14 @@ from git_notes_memory.hooks.hook_utils import (
     read_json_input,
     setup_logging,
     setup_timeout,
+    timed_hook_execution,
 )
 from git_notes_memory.hooks.models import CaptureSignal
+from git_notes_memory.observability import get_logger
 
 __all__ = ["main"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _read_input_with_fallback() -> dict[str, Any]:
@@ -387,120 +388,127 @@ def main() -> None:
     timeout = config.timeout or HOOK_STOP_TIMEOUT
     setup_timeout(timeout, hook_name="Stop")
 
-    try:
-        # QUAL-001: Use hook_utils.read_json_input with fallback
-        input_data = _read_input_with_fallback()
-        logger.debug("Received stop hook input: %s", list(input_data.keys()))
+    with timed_hook_execution("Stop") as timer:
+        try:
+            # QUAL-001: Use hook_utils.read_json_input with fallback
+            input_data = _read_input_with_fallback()
+            logger.debug("Received stop hook input: %s", list(input_data.keys()))
 
-        # Log full input to file for debugging
-        log_hook_input("Stop", input_data)
-        hook_logger.info(
-            "Config: stop_auto_capture=%s, stop_prompt_uncaptured=%s, stop_sync_index=%s",
-            config.stop_auto_capture,
-            config.stop_prompt_uncaptured,
-            config.stop_sync_index,
-        )
-
-        # Analyze session transcript for uncaptured content
-        detected_signals: list[CaptureSignal] = []
-        if config.stop_prompt_uncaptured or config.stop_auto_capture:
-            transcript_path = input_data.get("transcript_path")
-            hook_logger.info("Analyzing transcript: %s", transcript_path)
-            detected_signals = _analyze_session(transcript_path)
-            hook_logger.info("Found %d signals in transcript", len(detected_signals))
-            for sig in detected_signals[:5]:  # Log first 5
-                hook_logger.info(
-                    "  Signal: type=%s, ns=%s, conf=%.2f, match=%s...",
-                    sig.type.value,
-                    sig.suggested_namespace,
-                    sig.confidence,
-                    sig.match[:50],
-                )
-        else:
+            # Log full input to file for debugging
+            log_hook_input("Stop", input_data)
             hook_logger.info(
-                "Skipping transcript analysis (auto_capture=%s, prompt_uncaptured=%s)",
+                "Config: stop_auto_capture=%s, stop_prompt_uncaptured=%s, stop_sync_index=%s",
                 config.stop_auto_capture,
                 config.stop_prompt_uncaptured,
+                config.stop_sync_index,
             )
 
-        # Auto-capture high-confidence signals
-        captured: list[dict[str, Any]] = []
-        uncaptured: list[CaptureSignal] = detected_signals
-        if config.stop_auto_capture and detected_signals:
-            hook_logger.info(
-                "Auto-capturing signals (min_conf=%.2f, max=%d)",
-                config.stop_auto_capture_min_confidence,
-                config.stop_max_captures,
-            )
-            captured, uncaptured = _auto_capture_signals(
-                detected_signals,
-                min_confidence=config.stop_auto_capture_min_confidence,
-                max_captures=config.stop_max_captures,
-            )
-            hook_logger.info(
-                "Auto-capture result: %d captured, %d remaining",
-                len(captured),
-                len(uncaptured),
-            )
-            for c in captured:
-                hook_logger.info("  Captured: %s", c)
-            logger.debug(
-                "Auto-capture: %d captured, %d remaining",
-                len(captured),
-                len(uncaptured),
-            )
-        else:
-            hook_logger.info(
-                "Auto-capture skipped (auto_capture=%s, signals=%d)",
-                config.stop_auto_capture,
-                len(detected_signals),
-            )
-
-        # Sync index if enabled (after auto-capture to include new memories)
-        sync_result: dict[str, Any] | None = None
-        if config.stop_sync_index:
-            sync_result = _sync_index()
-            if sync_result.get("success") and not sync_result.get("skipped"):
-                stats = sync_result.get("stats", {})
-                logger.info(
-                    "Index synced: %d memories indexed",
-                    stats.get("indexed", 0),
+            # Analyze session transcript for uncaptured content
+            detected_signals: list[CaptureSignal] = []
+            if config.stop_prompt_uncaptured or config.stop_auto_capture:
+                transcript_path = input_data.get("transcript_path")
+                hook_logger.info("Analyzing transcript: %s", transcript_path)
+                detected_signals = _analyze_session(transcript_path)
+                hook_logger.info(
+                    "Found %d signals in transcript", len(detected_signals)
                 )
-            elif not sync_result.get("success"):
-                logger.warning("Index sync failed: %s", sync_result.get("error"))
+                for sig in detected_signals[:5]:  # Log first 5
+                    hook_logger.info(
+                        "  Signal: type=%s, ns=%s, conf=%.2f, match=%s...",
+                        sig.type.value,
+                        sig.suggested_namespace,
+                        sig.confidence,
+                        sig.match[:50],
+                    )
+            else:
+                hook_logger.info(
+                    "Skipping transcript analysis (auto_capture=%s, prompt_uncaptured=%s)",
+                    config.stop_auto_capture,
+                    config.stop_prompt_uncaptured,
+                )
 
-        # Push notes to remote if enabled (opt-in via env var)
-        # This ensures local memories are shared with collaborators
-        if config.stop_push_remote:
-            cwd = input_data.get("cwd")
-            if cwd:
-                try:
-                    from git_notes_memory.git_ops import GitOps
+            # Auto-capture high-confidence signals
+            captured: list[dict[str, Any]] = []
+            uncaptured: list[CaptureSignal] = detected_signals
+            if config.stop_auto_capture and detected_signals:
+                hook_logger.info(
+                    "Auto-capturing signals (min_conf=%.2f, max=%d)",
+                    config.stop_auto_capture_min_confidence,
+                    config.stop_max_captures,
+                )
+                captured, uncaptured = _auto_capture_signals(
+                    detected_signals,
+                    min_confidence=config.stop_auto_capture_min_confidence,
+                    max_captures=config.stop_max_captures,
+                )
+                hook_logger.info(
+                    "Auto-capture result: %d captured, %d remaining",
+                    len(captured),
+                    len(uncaptured),
+                )
+                for c in captured:
+                    hook_logger.info("  Captured: %s", c)
+                logger.debug(
+                    "Auto-capture: %d captured, %d remaining",
+                    len(captured),
+                    len(uncaptured),
+                )
+            else:
+                hook_logger.info(
+                    "Auto-capture skipped (auto_capture=%s, signals=%d)",
+                    config.stop_auto_capture,
+                    len(detected_signals),
+                )
 
-                    git_ops = GitOps(repo_path=cwd)
-                    if git_ops.push_notes_to_remote():
-                        logger.debug("Pushed notes to remote on session stop")
-                    else:
-                        logger.debug("Push to remote failed (will retry next session)")
-                except Exception as e:
-                    logger.debug("Remote push on stop skipped: %s", e)
+            # Sync index if enabled (after auto-capture to include new memories)
+            sync_result: dict[str, Any] | None = None
+            if config.stop_sync_index:
+                sync_result = _sync_index()
+                if sync_result.get("success") and not sync_result.get("skipped"):
+                    stats = sync_result.get("stats", {})
+                    logger.info(
+                        "Index synced: %d memories indexed",
+                        stats.get("indexed", 0),
+                    )
+                elif not sync_result.get("success"):
+                    logger.warning("Index sync failed: %s", sync_result.get("error"))
 
-        # Output result
-        _write_output(
-            uncaptured=uncaptured,
-            captured=captured,
-            sync_result=sync_result,
-            prompt_uncaptured=config.stop_prompt_uncaptured,
-        )
+            # Push notes to remote if enabled (opt-in via env var)
+            # This ensures local memories are shared with collaborators
+            if config.stop_push_remote:
+                cwd = input_data.get("cwd")
+                if cwd:
+                    try:
+                        from git_notes_memory.git_ops import GitOps
 
-    except json.JSONDecodeError as e:
-        logger.error("Failed to parse hook input: %s", e)
-        print(json.dumps({"continue": True}))
-    except Exception as e:
-        logger.exception("Stop hook error: %s", e)
-        print(json.dumps({"continue": True}))
-    finally:
-        cancel_timeout()
+                        git_ops = GitOps(repo_path=cwd)
+                        if git_ops.push_notes_to_remote():
+                            logger.debug("Pushed notes to remote on session stop")
+                        else:
+                            logger.debug(
+                                "Push to remote failed (will retry next session)"
+                            )
+                    except Exception as e:
+                        logger.debug("Remote push on stop skipped: %s", e)
+
+            # Output result
+            _write_output(
+                uncaptured=uncaptured,
+                captured=captured,
+                sync_result=sync_result,
+                prompt_uncaptured=config.stop_prompt_uncaptured,
+            )
+
+        except json.JSONDecodeError as e:
+            timer.set_status("error")
+            logger.error("Failed to parse hook input: %s", e)
+            print(json.dumps({"continue": True}))
+        except Exception as e:
+            timer.set_status("error")
+            logger.exception("Stop hook error: %s", e)
+            print(json.dumps({"continue": True}))
+        finally:
+            cancel_timeout()
 
     sys.exit(0)
 

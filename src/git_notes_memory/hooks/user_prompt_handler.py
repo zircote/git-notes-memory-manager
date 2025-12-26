@@ -31,7 +31,6 @@ Environment Variables:
 from __future__ import annotations
 
 import json
-import logging
 import sys
 from typing import Any
 
@@ -44,6 +43,7 @@ from git_notes_memory.hooks.hook_utils import (
     read_json_input,
     setup_logging,
     setup_timeout,
+    timed_hook_execution,
 )
 from git_notes_memory.hooks.models import (
     CaptureAction,
@@ -53,10 +53,11 @@ from git_notes_memory.hooks.models import (
 )
 from git_notes_memory.hooks.namespace_parser import NamespaceParser
 from git_notes_memory.hooks.signal_detector import SignalDetector
+from git_notes_memory.observability import get_logger
 
 __all__ = ["main"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _validate_input(data: dict[str, Any]) -> bool:
@@ -244,101 +245,106 @@ def main() -> None:
     timeout = config.timeout or HOOK_USER_PROMPT_TIMEOUT
     setup_timeout(timeout, hook_name="UserPromptSubmit")
 
-    try:
-        # Read and validate input
-        input_data = read_json_input()
-        logger.debug(
-            "Received input with prompt: %s...", input_data.get("prompt", "")[:50]
-        )
-
-        # Log full input to file for debugging
-        log_hook_input("UserPromptSubmit", input_data)
-
-        if not _validate_input(input_data):
-            logger.warning("Invalid hook input - missing prompt field")
-            print(json.dumps({"continue": True}))
-            sys.exit(0)
-
-        prompt = input_data["prompt"]
-
-        # Check for inline markers first (namespace-aware parsing)
-        namespace_parser = NamespaceParser()
-        parsed_marker = namespace_parser.parse(prompt)
-
-        signals: list[CaptureSignal] = []
-
-        if parsed_marker:
-            # Inline marker found - create a high-confidence EXPLICIT signal
-            # with the resolved namespace (explicit or auto-detected)
-            resolved_namespace = namespace_parser.resolve_namespace(parsed_marker)
+    with timed_hook_execution("UserPromptSubmit") as timer:
+        try:
+            # Read and validate input
+            input_data = read_json_input()
             logger.debug(
-                "Found inline marker: type=%s, namespace=%s (resolved: %s)",
-                parsed_marker.marker_type,
-                parsed_marker.namespace,
-                resolved_namespace,
+                "Received input with prompt: %s...", input_data.get("prompt", "")[:50]
             )
 
-            # Create an explicit capture signal
-            signals = [
-                CaptureSignal(
-                    type=SignalType.EXPLICIT,
-                    match=prompt[:50],  # First 50 chars for context
-                    confidence=1.0,  # Inline markers are highest confidence
-                    context=parsed_marker.content,
-                    suggested_namespace=resolved_namespace,
-                    position=0,
+            # Log full input to file for debugging
+            log_hook_input("UserPromptSubmit", input_data)
+
+            if not _validate_input(input_data):
+                logger.warning("Invalid hook input - missing prompt field")
+                timer.set_status("skipped")
+                print(json.dumps({"continue": True}))
+                sys.exit(0)
+
+            prompt = input_data["prompt"]
+
+            # Check for inline markers first (namespace-aware parsing)
+            namespace_parser = NamespaceParser()
+            parsed_marker = namespace_parser.parse(prompt)
+
+            signals: list[CaptureSignal] = []
+
+            if parsed_marker:
+                # Inline marker found - create a high-confidence EXPLICIT signal
+                # with the resolved namespace (explicit or auto-detected)
+                resolved_namespace = namespace_parser.resolve_namespace(parsed_marker)
+                logger.debug(
+                    "Found inline marker: type=%s, namespace=%s (resolved: %s)",
+                    parsed_marker.marker_type,
+                    parsed_marker.namespace,
+                    resolved_namespace,
                 )
-            ]
-        else:
-            # No inline marker - use standard signal detection
-            detector = SignalDetector()
-            signals = list(detector.detect(prompt))
 
-        logger.debug("Detected %d signals in prompt", len(signals))
-
-        if not signals:
-            # No signals detected, pass through
-            print(json.dumps({"continue": True}))
-            sys.exit(0)
-
-        # Decide what action to take
-        decider = CaptureDecider(config=config)
-        decision = decider.decide(signals)
-
-        logger.debug(
-            "Capture decision: %s - %s", decision.action.value, decision.reason
-        )
-
-        # Handle the decision
-        captured: list[dict[str, Any]] = []
-
-        if decision.action == CaptureAction.AUTO:
-            # Capture automatically
-            for suggestion in decision.suggested_captures:
-                result = _capture_memory(suggestion)
-                captured.append(result)
-                if result.get("success"):
-                    logger.info(
-                        "Auto-captured memory: %s (%s)",
-                        result.get("memory_id", "")[:8],
-                        suggestion.namespace,
+                # Create an explicit capture signal
+                signals = [
+                    CaptureSignal(
+                        type=SignalType.EXPLICIT,
+                        match=prompt[:50],  # First 50 chars for context
+                        confidence=1.0,  # Inline markers are highest confidence
+                        context=parsed_marker.content,
+                        suggested_namespace=resolved_namespace,
+                        position=0,
                     )
+                ]
+            else:
+                # No inline marker - use standard signal detection
+                detector = SignalDetector()
+                signals = list(detector.detect(prompt))
 
-        # Output result
-        _write_output(
-            action=decision.action,
-            suggestions=list(decision.suggested_captures),
-            captured=captured if captured else None,
-        )
+            logger.debug("Detected %d signals in prompt", len(signals))
 
-    except json.JSONDecodeError as e:
-        logger.error("Failed to parse hook input: %s", e)
-        print(json.dumps({"continue": True}))
-    except Exception as e:
-        logger.exception("UserPromptSubmit hook error: %s", e)
-        print(json.dumps({"continue": True}))
-    finally:
-        cancel_timeout()
+            if not signals:
+                # No signals detected, pass through
+                timer.set_status("skipped")
+                print(json.dumps({"continue": True}))
+                sys.exit(0)
+
+            # Decide what action to take
+            decider = CaptureDecider(config=config)
+            decision = decider.decide(signals)
+
+            logger.debug(
+                "Capture decision: %s - %s", decision.action.value, decision.reason
+            )
+
+            # Handle the decision
+            captured: list[dict[str, Any]] = []
+
+            if decision.action == CaptureAction.AUTO:
+                # Capture automatically
+                for suggestion in decision.suggested_captures:
+                    result = _capture_memory(suggestion)
+                    captured.append(result)
+                    if result.get("success"):
+                        logger.info(
+                            "Auto-captured memory: %s (%s)",
+                            result.get("memory_id", "")[:8],
+                            suggestion.namespace,
+                        )
+
+            # Output result
+            _write_output(
+                action=decision.action,
+                suggestions=list(decision.suggested_captures),
+                captured=captured if captured else None,
+            )
+
+        except json.JSONDecodeError as e:
+            timer.set_status("error")
+            logger.error("Failed to parse hook input: %s", e)
+            print(json.dumps({"continue": True}))
+        except Exception as e:
+            timer.set_status("error")
+            logger.exception("UserPromptSubmit hook error: %s", e)
+            print(json.dumps({"continue": True}))
+        finally:
+            cancel_timeout()
 
     sys.exit(0)
 

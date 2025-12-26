@@ -27,6 +27,9 @@ from git_notes_memory.models import (
     MemoryResult,
     SpecContext,
 )
+from git_notes_memory.observability.decorators import measure_duration
+from git_notes_memory.observability.metrics import get_metrics
+from git_notes_memory.observability.tracing import trace_operation
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -133,6 +136,7 @@ class RecallService:
     # Search Operations
     # -------------------------------------------------------------------------
 
+    @measure_duration("memory_search")
     def search(
         self,
         query: str,
@@ -169,50 +173,63 @@ class RecallService:
         if not query or not query.strip():
             return []
 
-        try:
-            # Generate embedding for the query
-            embedding_service = self._get_embedding()
-            query_embedding = embedding_service.embed(query)
+        metrics = get_metrics()
 
-            # Search the index
-            index = self._get_index()
-            raw_results = index.search_vector(
-                query_embedding,
-                k=k,
-                namespace=namespace,
-                spec=spec,
-            )
+        with trace_operation("search", labels={"search_type": "semantic"}):
+            try:
+                # Generate embedding for the query
+                with trace_operation("search.embed_query"):
+                    embedding_service = self._get_embedding()
+                    query_embedding = embedding_service.embed(query)
 
-            # Convert to MemoryResult and apply similarity filter
-            results: list[MemoryResult] = []
-            for memory, distance in raw_results:
-                # Convert distance to similarity (assuming L2 distance)
-                # For normalized vectors, similarity = 1 - (distance^2 / 2)
-                # But sqlite-vec returns distance directly, so we use 1 / (1 + distance)
-                similarity = 1.0 / (1.0 + distance) if distance >= 0 else 0.0
+                # Search the index
+                with trace_operation("search.vector_search"):
+                    index = self._get_index()
+                    raw_results = index.search_vector(
+                        query_embedding,
+                        k=k,
+                        namespace=namespace,
+                        spec=spec,
+                    )
 
-                if min_similarity is not None and similarity < min_similarity:
-                    continue
+                # Convert to MemoryResult and apply similarity filter
+                results: list[MemoryResult] = []
+                for memory, distance in raw_results:
+                    # Convert distance to similarity (assuming L2 distance)
+                    # For normalized vectors, similarity = 1 - (distance^2 / 2)
+                    # But sqlite-vec returns distance directly, use 1 / (1 + distance)
+                    similarity = 1.0 / (1.0 + distance) if distance >= 0 else 0.0
 
-                results.append(MemoryResult(memory=memory, distance=distance))
+                    if min_similarity is not None and similarity < min_similarity:
+                        continue
 
-            logger.debug(
-                "Search for '%s' returned %d results (k=%d, namespace=%s, spec=%s)",
-                query[:50],
-                len(results),
-                k,
-                namespace,
-                spec,
-            )
+                    results.append(MemoryResult(memory=memory, distance=distance))
 
-            return results
+                # Track retrieval count
+                metrics.increment(
+                    "memories_retrieved_total",
+                    amount=float(len(results)),
+                    labels={"search_type": "semantic"},
+                )
 
-        except Exception as e:
-            raise RecallError(
-                f"Search failed: {e}",
-                "Check query text and try again",
-            ) from e
+                logger.debug(
+                    "Search for '%s' returned %d results (k=%d, namespace=%s, spec=%s)",
+                    query[:50],
+                    len(results),
+                    k,
+                    namespace,
+                    spec,
+                )
 
+                return results
+
+            except Exception as e:
+                raise RecallError(
+                    f"Search failed: {e}",
+                    "Check query text and try again",
+                ) from e
+
+    @measure_duration("memory_search_text")
     def search_text(
         self,
         query: str,
@@ -245,28 +262,38 @@ class RecallService:
         if not query or not query.strip():
             return []
 
-        try:
-            index = self._get_index()
-            results = index.search_text(
-                query,
-                limit=limit,
-                namespace=namespace,
-                spec=spec,
-            )
+        metrics = get_metrics()
 
-            logger.debug(
-                "Text search for '%s' returned %d results",
-                query[:50],
-                len(results),
-            )
+        with trace_operation("search", labels={"search_type": "text"}):
+            try:
+                index = self._get_index()
+                results = index.search_text(
+                    query,
+                    limit=limit,
+                    namespace=namespace,
+                    spec=spec,
+                )
 
-            return results
+                # Track retrieval count
+                metrics.increment(
+                    "memories_retrieved_total",
+                    amount=float(len(results)),
+                    labels={"search_type": "text"},
+                )
 
-        except Exception as e:
-            raise RecallError(
-                f"Text search failed: {e}",
-                "Check query text and try again",
-            ) from e
+                logger.debug(
+                    "Text search for '%s' returned %d results",
+                    query[:50],
+                    len(results),
+                )
+
+                return results
+
+            except Exception as e:
+                raise RecallError(
+                    f"Text search failed: {e}",
+                    "Check query text and try again",
+                ) from e
 
     # -------------------------------------------------------------------------
     # Direct Retrieval

@@ -21,7 +21,7 @@ Architecture:
 
 from __future__ import annotations
 
-import contextlib
+import logging
 import sqlite3
 import struct
 import threading
@@ -35,6 +35,11 @@ import sqlite_vec
 
 from git_notes_memory.config import EMBEDDING_DIMENSIONS, get_index_path
 from git_notes_memory.exceptions import MemoryIndexError
+from git_notes_memory.observability.decorators import measure_duration
+from git_notes_memory.observability.metrics import get_metrics
+from git_notes_memory.observability.tracing import trace_operation
+
+logger = logging.getLogger(__name__)
 
 
 # PERF-007: Cache compiled struct format for embedding serialization
@@ -297,8 +302,16 @@ class IndexService:
 
             # Create indices (ignore if they already exist)
             for index_sql in _CREATE_INDICES:
-                with contextlib.suppress(sqlite3.OperationalError):
+                try:
                     cursor.execute(index_sql)
+                except sqlite3.OperationalError as e:
+                    # Index likely already exists - this is expected on subsequent inits
+                    logger.debug("Index creation skipped (already exists): %s", e)
+                    metrics = get_metrics()
+                    metrics.increment(
+                        "silent_failures_total",
+                        labels={"location": "index.create_index_skipped"},
+                    )
 
             # Create vector table
             cursor.execute(_CREATE_VEC_TABLE)
@@ -362,6 +375,7 @@ class IndexService:
     # Insert Operations
     # =========================================================================
 
+    @measure_duration("index_insert")
     def insert(
         self,
         memory: Memory,
@@ -389,16 +403,20 @@ class IndexService:
             )
 
         now = datetime.now(UTC).isoformat()
+        metrics = get_metrics()
 
-        with self._cursor() as cursor:
+        with (
+            trace_operation("index.insert", labels={"namespace": memory.namespace}),
+            self._cursor() as cursor,
+        ):
             try:
                 # Insert into memories table
                 cursor.execute(
                     """
                     INSERT INTO memories (
                         id, commit_sha, namespace, summary, content,
-                        timestamp, repo_path, spec, phase, tags, status, relates_to,
-                        created_at, updated_at
+                        timestamp, repo_path, spec, phase, tags, status,
+                        relates_to, created_at, updated_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
@@ -424,6 +442,12 @@ class IndexService:
                     self._insert_embedding(cursor, memory.id, embedding)
 
                 self._conn.commit()  # type: ignore[union-attr]
+
+                metrics.increment(
+                    "index_inserts_total",
+                    labels={"namespace": memory.namespace},
+                )
+
                 return True
 
             except sqlite3.IntegrityError as e:
@@ -989,6 +1013,7 @@ class IndexService:
     # Search Operations
     # =========================================================================
 
+    @measure_duration("index_search_vector")
     def search_vector(
         self,
         query_embedding: Sequence[float],
@@ -1011,48 +1036,56 @@ class IndexService:
             List of (Memory, distance) tuples sorted by distance ascending.
             Lower distance means more similar.
         """
-        # PERF-007: Use cached struct format for embedding packing
-        blob = _get_struct_format(len(query_embedding)).pack(*query_embedding)
+        metrics = get_metrics()
 
-        with self._cursor() as cursor:
-            try:
-                # Build parameterized query with optional filters
-                # Use single JOIN to eliminate N+1 query pattern
-                params: list[object] = [blob, k * 3]
+        with trace_operation("index.search_vector", labels={"k": str(k)}):
+            # PERF-007: Use cached struct format for embedding packing
+            blob = _get_struct_format(len(query_embedding)).pack(*query_embedding)
 
-                sql = """
-                    SELECT m.*, v.distance
-                    FROM vec_memories v
-                    JOIN memories m ON v.id = m.id
-                    WHERE v.embedding MATCH ?
-                      AND k = ?
-                """
+            with self._cursor() as cursor:
+                try:
+                    # Build parameterized query with optional filters
+                    # Use single JOIN to eliminate N+1 query pattern
+                    params: list[object] = [blob, k * 3]
 
-                if namespace is not None:
-                    sql += " AND m.namespace = ?"
-                    params.append(namespace)
-                if spec is not None:
-                    sql += " AND m.spec = ?"
-                    params.append(spec)
+                    sql = """
+                        SELECT m.*, v.distance
+                        FROM vec_memories v
+                        JOIN memories m ON v.id = m.id
+                        WHERE v.embedding MATCH ?
+                          AND k = ?
+                    """
 
-                sql += " ORDER BY v.distance LIMIT ?"
-                params.append(k)
+                    if namespace is not None:
+                        sql += " AND m.namespace = ?"
+                        params.append(namespace)
+                    if spec is not None:
+                        sql += " AND m.spec = ?"
+                        params.append(spec)
 
-                cursor.execute(sql, params)
+                    sql += " ORDER BY v.distance LIMIT ?"
+                    params.append(k)
 
-                results: list[tuple[Memory, float]] = []
-                for row in cursor.fetchall():
-                    memory = self._row_to_memory(row)
-                    distance = row["distance"]
-                    results.append((memory, distance))
+                    cursor.execute(sql, params)
 
-                return results
+                    results: list[tuple[Memory, float]] = []
+                    for row in cursor.fetchall():
+                        memory = self._row_to_memory(row)
+                        distance = row["distance"]
+                        results.append((memory, distance))
 
-            except Exception as e:
-                raise MemoryIndexError(
-                    f"Vector search failed: {e}",
-                    "Check embedding dimensions and retry",
-                ) from e
+                    metrics.increment(
+                        "index_searches_total",
+                        labels={"search_type": "vector"},
+                    )
+
+                    return results
+
+                except Exception as e:
+                    raise MemoryIndexError(
+                        f"Vector search failed: {e}",
+                        "Check embedding dimensions and retry",
+                    ) from e
 
     def search_text(
         self,

@@ -15,6 +15,7 @@ from typing import Any
 __all__ = [
     "export_prometheus_text",
     "export_json",
+    "PrometheusExporter",
 ]
 
 
@@ -26,6 +27,13 @@ def __getattr__(name: str) -> Any:
         )
 
         return export_prometheus_text
+
+    if name == "PrometheusExporter":
+        from git_notes_memory.observability.exporters.prometheus import (
+            PrometheusExporter,
+        )
+
+        return PrometheusExporter
 
     if name == "export_json":
         from git_notes_memory.observability.exporters.json_exporter import (
