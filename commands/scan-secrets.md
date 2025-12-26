@@ -84,7 +84,7 @@ Parse the following flags:
 ```bash
 NAMESPACE="${NAMESPACE:-}"  # Set from parsed arguments or empty
 
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 import sys
 from git_notes_memory import get_recall_service
 from git_notes_memory.security import get_secrets_filtering_service
@@ -159,7 +159,7 @@ print(f'<!-- FINDINGS_COUNT={len(findings)} -->')
 NAMESPACE="${NAMESPACE:-}"
 DRY_RUN="${DRY_RUN:-false}"  # Set from --dry-run flag
 
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 import sys
 from git_notes_memory import get_recall_service, get_capture_service
 from git_notes_memory.security import get_secrets_filtering_service, get_audit_logger

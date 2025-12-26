@@ -95,7 +95,7 @@ If query is empty:
 Use Bash to invoke the Python library:
 
 ```bash
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 from git_notes_memory import get_recall_service
 from git_notes_memory.config import Domain
 

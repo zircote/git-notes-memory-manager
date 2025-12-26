@@ -88,7 +88,7 @@ Parse the subcommand and flags:
 **Show all allowlisted entries**:
 
 ```bash
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 from git_notes_memory.security import get_allowlist_manager
 
 manager = get_allowlist_manager()
@@ -124,7 +124,7 @@ HASH="${HASH}"       # From --hash argument
 NAMESPACE="${NAMESPACE:-}"  # From --namespace argument or empty
 REASON="${REASON}"   # From --reason argument
 
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 import sys
 from git_notes_memory.security import get_allowlist_manager, get_audit_logger
 
@@ -183,7 +183,7 @@ except Exception as e:
 ```bash
 HASH="${HASH}"  # From --hash argument
 
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 import sys
 from git_notes_memory.security import get_allowlist_manager, get_audit_logger
 

@@ -76,7 +76,7 @@ Parse the following options:
 
 **Execute the traces collection**:
 ```bash
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 import sys
 
 # Parse arguments safely

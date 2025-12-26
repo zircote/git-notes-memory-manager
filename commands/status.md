@@ -64,7 +64,7 @@ Check if `--verbose` flag is present.
 
 **Basic Status**:
 ```bash
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 from git_notes_memory import get_sync_service
 from git_notes_memory.index import IndexService
 from git_notes_memory.config import (
@@ -148,7 +148,7 @@ print(f'| Data Directory | {get_data_path()} |')
 
 **Verbose Status**:
 ```bash
-uv run python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
 import subprocess
 from git_notes_memory import get_sync_service
 from git_notes_memory.index import IndexService
