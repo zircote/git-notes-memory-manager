@@ -194,3 +194,17 @@ tags:
     --format=FORMAT       Output format: text (default), json, prometheus
     --filter=PATTERN      Filter metrics by name pattern (e.g., "capture", "hook")
     --export              Export...
+
+---
+type: patterns
+timestamp: '2025-12-26T19:04:57.705873+00:00'
+summary: '...format: text (default), json, prometheus'
+tags:
+- auto-captured
+- post-tool-use
+- file:metrics.md
+---
+
+...format: text (default), json, prometheus
+    --filter=PATTERN      Filter metrics by name pattern (e.g., "capture", "hook")
+    --export              Export metrics/traces to OTLP endpoint...
