@@ -13,3 +13,22 @@ tags:
             # Migrate from old fetch refspec to new tracking refs pattern
             # This is idempotent and safe to call every session
             if git_ops is not...
+
+---
+type: patterns
+timestamp: '2025-12-26T23:28:58.298773+00:00'
+summary: '...bucket_counts", None)'
+tags:
+- auto-captured
+- post-tool-use
+- file:persistent_metrics.py
+---
+
+...bucket_counts", None)
+            entry.pop("percentiles", None)
+
+    try:
+        # Use atomic write pattern: write to temp, then rename
+        temp_file = METRICS_FILE.with_suffix(".tmp")
+
+        with...
