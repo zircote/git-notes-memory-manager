@@ -103,3 +103,21 @@ tags:
 ...REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, RETROSPECTIVE.md
 
 - `docs/spec/completed/2025-12-25-fix-git-notes-fetch-refspec/` - Fix Git Notes Fetch Refspec
+
+---
+type: progress
+timestamp: '2025-12-26T04:15:05.769296+00:00'
+summary: Fixed plugin.json repository URLs pointing to wrong repo
+---
+
+Fixed plugin.json repository URLs pointing to wrong repo
+## Summary
+The marketplace wasn't updating because `plugin.json` had incorrect URLs pointing to `git-notes-memory-manager` instead of `git-notes-memory`.
+
+## Changes Made
+- Fixed `homepage` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Fixed `repository` URL: `git-notes-memory-manager` → `git-notes-memory`
+- Created PR #30 targeting main
+
+## Related Files
+- .claude-plugin/plugin.json:9-10
