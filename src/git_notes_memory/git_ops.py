@@ -23,7 +23,12 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from git_notes_memory.config import NAMESPACES, get_git_namespace
+from git_notes_memory.config import (
+    NAMESPACES,
+    Domain,
+    get_git_namespace,
+    get_user_memories_path,
+)
 from git_notes_memory.exceptions import (
     INVALID_NAMESPACE_ERROR,
     StorageError,
@@ -186,6 +191,10 @@ class GitOps:
         >>> note = git.show_note("decisions", "HEAD")
     """
 
+    # Class-level cache for domain-specific GitOps instances
+    # Key format: "{domain.value}:{repo_path}" for PROJECT, "{domain.value}" for USER
+    _domain_instances: dict[str, GitOps] = {}
+
     def __init__(self, repo_path: Path | str | None = None) -> None:
         """Initialize GitOps for a repository.
 
@@ -193,6 +202,60 @@ class GitOps:
             repo_path: Path to git repository root. If None, uses cwd.
         """
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
+
+    @classmethod
+    def for_domain(
+        cls,
+        domain: Domain,
+        repo_path: Path | str | None = None,
+    ) -> GitOps:
+        """Get a GitOps instance for a specific domain.
+
+        Factory method that returns cached GitOps instances per domain.
+
+        For PROJECT domain:
+            Returns a GitOps instance for the specified repository (or cwd).
+            Each unique repo_path gets its own cached instance.
+
+        For USER domain:
+            Returns a GitOps instance for the user-memories bare repository
+            at ~/.local/share/memory-plugin/user-memories/. The repo_path
+            argument is ignored for USER domain.
+
+        Args:
+            domain: The memory domain (USER or PROJECT).
+            repo_path: Repository path for PROJECT domain. Ignored for USER.
+
+        Returns:
+            Cached GitOps instance for the specified domain.
+
+        Example:
+            >>> project_git = GitOps.for_domain(Domain.PROJECT)
+            >>> user_git = GitOps.for_domain(Domain.USER)
+            >>> user_git.repo_path  # ~/.local/share/memory-plugin/user-memories/
+        """
+        if domain == Domain.USER:
+            cache_key = Domain.USER.value
+            if cache_key not in cls._domain_instances:
+                # User memories use the dedicated bare repo - ensure it's initialized
+                instance = cls.ensure_user_repo_initialized()
+                cls._domain_instances[cache_key] = instance
+            return cls._domain_instances[cache_key]
+        else:
+            # PROJECT domain uses the specified repo or cwd
+            resolved_path = Path(repo_path) if repo_path else Path.cwd()
+            cache_key = f"{Domain.PROJECT.value}:{resolved_path}"
+            if cache_key not in cls._domain_instances:
+                cls._domain_instances[cache_key] = cls(resolved_path)
+            return cls._domain_instances[cache_key]
+
+    @classmethod
+    def clear_domain_cache(cls) -> None:
+        """Clear all cached domain GitOps instances.
+
+        Useful for testing or when configuration changes require fresh instances.
+        """
+        cls._domain_instances.clear()
 
     def _run_git(
         self,
@@ -1167,3 +1230,113 @@ class GitOps:
             check=False,
         )
         return result.returncode == 0
+
+    def is_bare_repository(self) -> bool:
+        """Check if this is a bare repository.
+
+        Returns:
+            True if the repository is bare (no working tree).
+        """
+        result = self._run_git(
+            ["rev-parse", "--is-bare-repository"],
+            check=False,
+        )
+        return result.returncode == 0 and result.stdout.strip() == "true"
+
+    @classmethod
+    def ensure_user_repo_initialized(cls) -> GitOps:
+        """Ensure the user-memories bare repository is initialized.
+
+        Creates and initializes a bare git repository at the user-memories
+        path if it doesn't exist. This method is idempotent - safe to call
+        multiple times.
+
+        The user-memories repo is a bare repo (no working directory) because
+        it only stores git notes. An initial empty commit is created to
+        provide a target for notes attachment.
+
+        Returns:
+            GitOps instance for the initialized user-memories repository.
+
+        Raises:
+            StorageError: If repository initialization fails.
+
+        Note:
+            This method is called automatically by for_domain(Domain.USER)
+            when the user repo doesn't exist yet.
+        """
+        user_path = get_user_memories_path(ensure_exists=True)
+
+        # Check if already initialized
+        git_dir = user_path / "HEAD"  # Bare repos have HEAD at root
+        if git_dir.exists():
+            instance = cls(user_path)
+            # Verify it's actually a git repo
+            if instance.is_git_repository():
+                return instance
+
+        # Initialize bare repository
+        cmd = ["git", "init", "--bare", str(user_path)]
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=30.0,
+            )
+        except subprocess.CalledProcessError as e:
+            raise StorageError(
+                f"Failed to initialize user-memories repository: {e.stderr}",
+                "Check permissions on ~/.local/share/memory-plugin/",
+            ) from e
+
+        instance = cls(user_path)
+
+        # Configure git identity for the bare repo (required for commits)
+        instance._run_git(
+            ["config", "user.email", "memory-plugin@local"],
+            check=False,
+        )
+        instance._run_git(
+            ["config", "user.name", "Memory Plugin"],
+            check=False,
+        )
+
+        # Create initial empty commit for notes attachment
+        # Bare repos need special handling - use git hash-object and update-ref
+        # Create an empty tree
+        result = instance._run_git(
+            ["hash-object", "-t", "tree", "--stdin"],
+            check=False,
+        )
+        if result.returncode != 0:
+            # Fallback: try with /dev/null approach
+            result = subprocess.run(
+                ["git", "-C", str(user_path), "hash-object", "-t", "tree", "/dev/null"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+        if result.returncode == 0:
+            empty_tree = result.stdout.strip()
+            # Create initial commit with empty tree
+            commit_result = instance._run_git(
+                [
+                    "commit-tree",
+                    empty_tree,
+                    "-m",
+                    "Initialize user-memories repository",
+                ],
+                check=False,
+            )
+            if commit_result.returncode == 0:
+                commit_sha = commit_result.stdout.strip()
+                # Update HEAD to point to this commit
+                instance._run_git(
+                    ["update-ref", "HEAD", commit_sha],
+                    check=False,
+                )
+
+        return instance

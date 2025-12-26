@@ -600,6 +600,7 @@ class IndexService:
         spec: str,
         namespace: str | None = None,
         limit: int | None = None,
+        domain: str | None = None,
     ) -> list[Memory]:
         """Get all memories for a specification.
 
@@ -607,6 +608,8 @@ class IndexService:
             spec: The specification slug to filter by.
             namespace: Optional namespace to filter by.
             limit: Optional maximum number of results.
+            domain: Optional domain filter ('user' or 'project').
+                None searches all domains (default, backward compatible).
 
         Returns:
             List of Memory objects matching the criteria.
@@ -617,6 +620,10 @@ class IndexService:
         if namespace is not None:
             query += " AND namespace = ?"
             params.append(namespace)
+
+        if domain is not None:
+            query += " AND domain = ?"
+            params.append(domain)
 
         query += " ORDER BY timestamp DESC"
 
@@ -649,6 +656,7 @@ class IndexService:
         namespace: str,
         spec: str | None = None,
         limit: int | None = None,
+        domain: str | None = None,
     ) -> list[Memory]:
         """Get all memories in a namespace.
 
@@ -656,6 +664,8 @@ class IndexService:
             namespace: The namespace to filter by.
             spec: Optional specification to filter by.
             limit: Optional maximum number of results.
+            domain: Optional domain filter ('user' or 'project').
+                None searches all domains (default, backward compatible).
 
         Returns:
             List of Memory objects matching the criteria.
@@ -666,6 +676,10 @@ class IndexService:
         if spec is not None:
             query += " AND spec = ?"
             params.append(spec)
+
+        if domain is not None:
+            query += " AND domain = ?"
+            params.append(domain)
 
         query += " ORDER BY timestamp DESC"
 
@@ -682,6 +696,7 @@ class IndexService:
         limit: int = 10,
         namespace: str | None = None,
         spec: str | None = None,
+        domain: str | None = None,
     ) -> list[Memory]:
         """Get the most recent memories.
 
@@ -689,6 +704,8 @@ class IndexService:
             limit: Maximum number of results.
             namespace: Optional namespace filter.
             spec: Optional specification filter.
+            domain: Optional domain filter ('user' or 'project').
+                None searches all domains (default, backward compatible).
 
         Returns:
             List of Memory objects ordered by timestamp descending.
@@ -703,6 +720,10 @@ class IndexService:
         if spec is not None:
             query += " AND spec = ?"
             params.append(spec)
+
+        if domain is not None:
+            query += " AND domain = ?"
+            params.append(domain)
 
         query += " ORDER BY timestamp DESC LIMIT ?"
         params.append(limit)
@@ -1010,6 +1031,7 @@ class IndexService:
         k: int = 10,
         namespace: str | None = None,
         spec: str | None = None,
+        domain: str | None = None,
     ) -> list[tuple[Memory, float]]:
         """Search for similar memories using vector similarity.
 
@@ -1021,6 +1043,8 @@ class IndexService:
             k: Number of nearest neighbors to return.
             namespace: Optional namespace filter.
             spec: Optional specification filter.
+            domain: Optional domain filter ('user' or 'project').
+                None searches all domains (default, backward compatible).
 
         Returns:
             List of (Memory, distance) tuples sorted by distance ascending.
@@ -1049,6 +1073,9 @@ class IndexService:
                 if spec is not None:
                     sql += " AND m.spec = ?"
                     params.append(spec)
+                if domain is not None:
+                    sql += " AND m.domain = ?"
+                    params.append(domain)
 
                 sql += " ORDER BY v.distance LIMIT ?"
                 params.append(k)
@@ -1075,6 +1102,7 @@ class IndexService:
         limit: int = 10,
         namespace: str | None = None,
         spec: str | None = None,
+        domain: str | None = None,
     ) -> list[Memory]:
         """Search memories by text in summary and content.
 
@@ -1086,6 +1114,8 @@ class IndexService:
             limit: Maximum number of results.
             namespace: Optional namespace filter.
             spec: Optional specification filter.
+            domain: Optional domain filter ('user' or 'project').
+                None searches all domains (default, backward compatible).
 
         Returns:
             List of matching Memory objects.
@@ -1105,6 +1135,10 @@ class IndexService:
         if spec is not None:
             sql += " AND spec = ?"
             params.append(spec)
+
+        if domain is not None:
+            sql += " AND domain = ?"
+            params.append(domain)
 
         sql += " ORDER BY timestamp DESC LIMIT ?"
         params.append(limit)
@@ -1153,6 +1187,17 @@ class IndexService:
             )
             by_spec = tuple((row[0], row[1]) for row in cursor.fetchall())
 
+            # Count by domain
+            cursor.execute(
+                """
+                SELECT domain, COUNT(*) as count
+                FROM memories
+                GROUP BY domain
+                ORDER BY count DESC
+                """
+            )
+            by_domain = tuple((row[0], row[1]) for row in cursor.fetchall())
+
             # Last sync time
             cursor.execute("SELECT value FROM metadata WHERE key = 'last_sync'")
             row = cursor.fetchone()
@@ -1165,6 +1210,7 @@ class IndexService:
                 total_memories=total,
                 by_namespace=by_namespace,
                 by_spec=by_spec,
+                by_domain=by_domain,
                 last_sync=last_sync,
                 index_size_bytes=index_size,
             )
@@ -1173,12 +1219,15 @@ class IndexService:
         self,
         namespace: str | None = None,
         spec: str | None = None,
+        domain: str | None = None,
     ) -> int:
         """Count memories matching criteria.
 
         Args:
             namespace: Optional namespace filter.
             spec: Optional specification filter.
+            domain: Optional domain filter ('user' or 'project').
+                None counts all domains (default, backward compatible).
 
         Returns:
             Number of matching memories.
@@ -1193,6 +1242,10 @@ class IndexService:
         if spec is not None:
             sql += " AND spec = ?"
             params.append(spec)
+
+        if domain is not None:
+            sql += " AND domain = ?"
+            params.append(domain)
 
         with self._cursor() as cursor:
             cursor.execute(sql, params)
