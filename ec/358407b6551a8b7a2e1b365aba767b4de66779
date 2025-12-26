@@ -418,3 +418,32 @@ Added bash parameter expansion fallback (`${CLAUDE_PLUGIN_ROOT:-.}`) to all 14 c
 - commands/audit-log.md, capture.md, health.md, recall.md, review.md
 - commands/scan-secrets.md, search.md, secrets-allowlist.md
 - commands/status.md, sync.md, test-secret.md, traces.md, validate.md
+
+---
+type: progress
+timestamp: '2025-12-26T21:18:10.189028+00:00'
+summary: Verified OTLP → OTel Collector → Prometheus pipeline is working
+---
+
+Verified OTLP → OTel Collector → Prometheus pipeline is working
+## Summary
+The observability pipeline IS functioning correctly. Metrics pushed via OTLP reach Prometheus within one scrape cycle (15s).
+
+## What Was Happening
+1. **`/memory:metrics` shows empty** — This is expected. It runs in an isolated Python process with a fresh, empty `MetricsCollector` singleton.
+
+2. **Prometheus seemed empty earlier** — The OTel Collector's prometheus exporter only holds data while metrics are being pushed. If no recent pushes, it's empty.
+
+3. **The pipeline works** — When you push metrics (via capture, hooks, etc.), they flow:
+   ```
+   App → OTLP (4318) → OTel Collector → prometheus exporter (8889) → Prometheus scrape
+   ```
+
+## Verified Results
+- `memory_verify_pipeline_counter_total: 1` ✓
+- `memory_verify_pipeline_gauge: 99.9` ✓
+- `memory_debug_test_counter_total: 3` ✓
+
+## Related Files
+- docker/otel-collector-config.yaml:53-55 (prometheus exporter with `namespace: memory`)
+- src/git_notes_memory/observability/exporters/otlp.py:552 (export function)
