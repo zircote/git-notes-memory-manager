@@ -76,3 +76,26 @@ summary: '...(new directory with full spec)'
 - `CLAUDE.md` (modified with Active Spec Projects section)
 
 [decision] Switched to existing v1.0.0 branch which contains merged subconsciousness and multi-domain...
+
+---
+type: decisions
+timestamp: '2025-12-26T03:18:58.085538+00:00'
+summary: Finalized v1 scope and design decisions
+---
+
+Finalized v1 scope and design decisions
+## Summary
+User confirmed scope: Pattern + Entropy detection, PII included, full audit logging, CLI + config allowlist, redact file content.
+
+## Rationale
+- **Detection layers**: Pattern + Entropy (contextual excluded from v1, ML extension points only)
+- **Default action**: Redact (replace with `[REDACTED:type]`)
+- **PII**: Include SSN, credit cards, phone numbers
+- **Audit**: Full audit trail for compliance
+- **Allowlist**: CLI commands + config file
+- **Files**: Redact content (don't skip files)
+- **Scanning**: Yes, with full remediation capability
+- **Dependencies**: Pure Python only
+
+## Related Files
+- docs/spec/active/2025-12-25-secrets-filtering/README.md
