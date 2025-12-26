@@ -19,3 +19,25 @@ claude plugins add .claude-plugin
 
 ## Related Files
 - .claude-plugin/plugin.json:3
+
+---
+type: blockers
+timestamp: '2025-12-26T04:31:48.208424+00:00'
+summary: Plugin cache is stale - 0.4.1 vs repo 0.12.0
+---
+
+Plugin cache is stale - 0.4.1 vs repo 0.12.0
+## Summary
+The `/memory:traces` command fails because the plugin cache has versions 0.3.1-0.4.1 while the repo is at 0.12.0. The command template references `scripts/traces.py` which doesn't exist in cached versions.
+
+## Root Cause
+Plugin cache at `~/.claude/plugins/cache/git-notes-memory/memory-capture/` hasn't been updated in many releases.
+
+## Resolution
+```bash
+rm -rf ~/.claude/plugins/cache/git-notes-memory/memory-capture/
+claude plugins add .claude-plugin
+```
+
+## Related Files
+- .claude-plugin/plugin.json:3
