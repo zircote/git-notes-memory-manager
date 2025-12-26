@@ -75,3 +75,24 @@ Created project workspace at `docs/spec/active/2025-12-25-secrets-filtering/` wi
 ## Related Files
 - docs/spec/active/2025-12-25-secrets-filtering/README.md
 - docs/spec/active/2025-12-25-secrets-filtering/CHANGELOG.md
+
+---
+type: progress
+timestamp: '2025-12-26T02:14:52.120791+00:00'
+summary: Completed comprehensive research phase
+---
+
+Completed comprehensive research phase
+## Summary
+Codebase exploration and security research completed. Research notes have been added to the project.
+
+## Changes Made
+- Explored full codebase architecture and integration points
+- Researched secret detection patterns from industry tools (detect-secrets, TruffleHog, gitleaks)
+- Documented entropy thresholds, regex patterns, and false positive mitigation
+- CHANGELOG.md updated with RESEARCH_NOTES.md entry (by linter)
+
+## Related Files
+- src/git_notes_memory/capture.py:281-300 (validation integration point)
+- src/git_notes_memory/capture.py:530-532 (embedding integration point)
+- docs/spec/active/2025-12-25-secrets-filtering/RESEARCH_NOTES.md
