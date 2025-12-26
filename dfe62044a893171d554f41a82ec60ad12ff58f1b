@@ -315,3 +315,28 @@ temporary:
   - pattern: "ghp_[a-zA-Z0-9]{36}"
     reason: "Documenting GitHub token format change"
     expires: "2024-02-01...
+
+---
+type: patterns
+timestamp: '2025-12-26T00:06:53.135540+00:00'
+summary: '...123"'
+tags:
+- auto-captured
+- post-tool-use
+- file:RESEARCH_NOTES.md
+---
+
+...123"
+```
+
+---
+
+## 5. PII Detection Patterns
+
+### 5.1 US Social Security Numbers (SSN)
+
+```python
+# SSN Pattern: XXX-XX-XXXX
+SSN_PATTERN = r'\b(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b'
+
+# Validation...
