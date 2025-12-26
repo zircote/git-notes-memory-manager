@@ -410,3 +410,15 @@ Replaced `push_notes_to_remote()` with `sync_notes_with_remote(push=True)` in th
 
 ## Related Files
 - src/git_notes_memory/hooks/stop_handler.py:473-490
+
+---
+type: progress
+timestamp: '2025-12-26T20:11:07.939013+00:00'
+summary: The OTLP exporter is actually fully implemented (582 lines)! The issue must
+  be that **it's not be...
+tags:
+- auto-captured
+- pre-compact
+---
+
+The OTLP exporter is actually fully implemented (582 lines)! The issue must be that **it's not being called** anywhere. Let me check the Stop...
