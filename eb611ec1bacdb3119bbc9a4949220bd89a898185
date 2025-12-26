@@ -498,3 +498,22 @@ tags:
 Subtasks:
 - [x] Create `commands/review.md` command file
 - [x] Add...
+
+---
+type: progress
+timestamp: '2025-12-26T01:57:24.409488+00:00'
+summary: '### Task 2.12: Write unit tests'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+### Task 2.12: Write unit tests
+- **Status**: ✅ Complete
+- **Started**: 2025-12-26T18:15:00Z
+- **Completed**: 2025-12-26T18:45:00Z
+
+Subtasks:
+- [x] Add capture store cleanup tests (3 tests)
+- [x] Add...
