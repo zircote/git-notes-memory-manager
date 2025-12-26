@@ -7501,3 +7501,19 @@ tags:
 - [x] DB-M-003: Connection Not Closed on Init Failure (`capture_store.py:184-192`) ✅
   - **Completed:** 2025-12-26 - Added `conn.close()` before setting `_conn = None` in exception handler
 -...
+
+---
+type: progress
+timestamp: '2025-12-26T17:02:58.075537+00:00'
+summary: '...[x] DB-M-004: Missing Composite Index for Pending Query (`capture_store.py:375-384`)
+  ✅'
+tags:
+- auto-captured
+- post-tool-use
+- file:REMEDIATION_TASKS.md
+---
+
+...[x] DB-M-004: Missing Composite Index for Pending Query (`capture_store.py:375-384`) ✅
+  - **Completed:** 2025-12-26 - Added composite index `idx_captures_pending_query (status, expires_at)`
+
+###...
