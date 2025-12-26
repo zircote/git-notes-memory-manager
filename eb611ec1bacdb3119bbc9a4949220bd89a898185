@@ -2970,3 +2970,44 @@ Created comprehensive adversarial test suite covering all attack patterns and fa
 ## Related Files
 - tests/subconsciousness/test_adversarial.py:545-612 (fail-safe behavior tests)
 - src/git_notes_memory/subconsciousness/adversarial_detector.py:144-162 (parse error handling)
+
+---
+type: progress
+timestamp: '2025-12-26T03:17:09.302745+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 2 (Implicit Capture / Dream Harv...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 2 (Implicit Capture / Dream Harvesting) - All 15 tasks done
+## Summary
+Phase 2 is now fully complete with 315 tests passing. All implicit capture features are implemented, tested, and documented.
+
+## Changes Made
+- Task 2.14: Created comprehensive adversarial test suite (56 tests)
+  - 7 prompt injection patterns tested
+  - 10 legitimate content false positive checks
+  - Fail-safe behavior verification (parse error vs exception handling)
+- Task 2.15: Created `docs/SUBCONSCIOUSNESS.md` (650+ lines)
+  - Configuration guide with all environment variables
+  - Pipeline architecture and confidence scoring explanation
+  - Security model with adversarial detection details
+  - Review workflow documentation
+  - Troubleshooting guide
+  - Complete Python API reference
+- Updated `docs/USER_GUIDE.md` with subconsciousness section
+
+## Phase 2 Summary
+- 15/15 tasks completed
+- 315 subconsciousness tests passing
+- mypy strict compliance
+- Comprehensive documentation
+
+## Related Files
+- tests/subconsciousness/test_adversarial.py (56 tests)
+- docs/SUBCONSCIOUSNESS.md (comprehensive guide)
+- docs/USER_GUIDE.md:685-710 (subconsciousness section)
+- docs/spec/active/2025-12-25-llm-subconsciousness/PROGRESS.md
