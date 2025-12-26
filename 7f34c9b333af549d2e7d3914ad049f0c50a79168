@@ -1,0 +1,1836 @@
+---
+type: learnings
+timestamp: '2025-12-26T14:45:47.527279+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T14:45:47.617810+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T14:45:47.666633+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:45:47.716066+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T14:45:47.816728+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:45:48.433014+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:50:55.091502+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T14:50:55.185075+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T14:50:55.230809+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:50:55.277796+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T14:50:55.378261+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:50:56.011121+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:57:11.417137+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T14:57:11.517580+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T14:57:11.564541+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:57:11.609877+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T14:57:11.703376+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T14:57:12.334410+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:26.157835+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:26.251355+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:26.300684+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:26.353883+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:26.463954+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:27.275366+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:27.920064+00:00'
+summary: '...before messages are sent to the provider.
+
+  `─────────────────────────────────────────────────`
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...before messages are sent to the provider.
+`─────────────────────────────────────────────────`
+
+Now I understand the system. I need to:
+1. Import the secrets filtering service in llm_client.py
+2. Add secrets...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:09:27.972080+00:00'
+summary: Now I understand the model. I need to filter the content of each message
+  before sending it to the...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I understand the model. I need to filter the content of each message before sending it to the LLM. Let...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:23:12.138857+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T15:29:44.670974+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T15:29:44.768508+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T15:29:44.815479+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:29:44.867616+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T15:29:44.966886+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:29:46.003010+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:30:38.164034+00:00'
+summary: Port conflict blocking Docker Compose services
+---
+
+Port conflict blocking Docker Compose services
+## Summary
+Another project's Prometheus (`readinesshub-prometheus`) is using port 9090, blocking this stack's Prometheus from starting.
+
+## Details
+- Containers with `depends_on` won't start if dependencies fail
+- Docker shows "Created" state when networking setup fails
+- OTel Collector → depends on Prometheus, Tempo, Loki
+- Grafana → depends on Prometheus, Tempo, Loki
+
+## Related Files
+- docker/docker-compose.yml:46 (port mapping)
+
+---
+type: learnings
+timestamp: '2025-12-26T15:36:57.275906+00:00'
+summary: Port conflict blocking Docker Compose services
+---
+
+Port conflict blocking Docker Compose services
+## Summary
+Another project's Prometheus (`readinesshub-prometheus`) is using port 9090, blocking this stack's Prometheus from starting.
+
+## Details
+- Containers with `depends_on` won't start if dependencies fail
+- Docker shows "Created" state when networking setup fails
+- OTel Collector → depends on Prometheus, Tempo, Loki
+- Grafana → depends on Prometheus, Tempo, Loki
+
+## Related Files
+- docker/docker-compose.yml:46 (port mapping)
+
+---
+type: learnings
+timestamp: '2025-12-26T15:37:54.639075+00:00'
+summary: Port conflict blocking Docker Compose services
+---
+
+Port conflict blocking Docker Compose services
+## Summary
+Another project's Prometheus (`readinesshub-prometheus`) is using port 9090, blocking this stack's Prometheus from starting.
+
+## Details
+- Containers with `depends_on` won't start if dependencies fail
+- Docker shows "Created" state when networking setup fails
+- OTel Collector → depends on Prometheus, Tempo, Loki
+- Grafana → depends on Prometheus, Tempo, Loki
+
+## Related Files
+- docker/docker-compose.yml:46 (port mapping)
+
+---
+type: learnings
+timestamp: '2025-12-26T15:42:11.216128+00:00'
+summary: Port conflict blocking Docker Compose services
+---
+
+Port conflict blocking Docker Compose services
+## Summary
+Another project's Prometheus (`readinesshub-prometheus`) is using port 9090, blocking this stack's Prometheus from starting.
+
+## Details
+- Containers with `depends_on` won't start if dependencies fail
+- Docker shows "Created" state when networking setup fails
+- OTel Collector → depends on Prometheus, Tempo, Loki
+- Grafana → depends on Prometheus, Tempo, Loki
+
+## Related Files
+- docker/docker-compose.yml:46 (port mapping)
+
+---
+type: learnings
+timestamp: '2025-12-26T15:46:12.875450+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T15:50:25.818993+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T15:50:52.746790+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T15:50:52.845926+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T15:50:52.898166+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:50:52.948602+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T15:50:53.053853+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:50:54.322087+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:54:38.878501+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T15:56:48.473969+00:00'
+summary: '..."Query"},'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_providers.py
+---
+
+..."Query"},
+        ]
+
+        result = provider._add_json_instruction(messages)
+
+        assert "IMPORTANT: Respond ONLY with valid JSON" in result[0]["content"]
+        assert result[0]["content"].startswith...
+
+---
+type: learnings
+timestamp: '2025-12-26T15:56:48.498454+00:00'
+summary: '...assert len(result) == 2'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_providers.py
+---
+
+...assert len(result) == 2
+        assert result[0]["role"] == "system"
+        assert "IMPORTANT: Respond ONLY with valid JSON" in result[0]["content"]
+
+    def test_extract_json_object(self)...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:02:48.503400+00:00'
+summary: '...context."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_novelty_checker.py
+---
+
+...context."""
+        signal = CaptureSignal(
+            type=SignalType.LEARNED,
+            match="I learned that SQLite is fast",
+            context=None,
+            line_number=5,
+            suggested_namespace...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:02:48.524957+00:00'
+summary: '...service.search.assert_called_once()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_novelty_checker.py
+---
+
+...service.search.assert_called_once()
+        args, _ = mock_recall_service.search.call_args
+        assert "I learned that SQLite is fast" in args[0]
+
+    def test_uses_suggested_namespace(
+        self,
+        checker:...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:03:23.356524+00:00'
+summary: '...context."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_novelty_checker.py
+---
+
+...context."""
+        signal = CaptureSignal(
+            type=SignalType.LEARNING,
+            match="I learned that SQLite is fast",
+            context="",
+            suggested_namespace="learnings",...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:06:38.543382+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T16:06:38.651216+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:06:38.706290+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:06:38.757420+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:06:38.853477+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:06:40.128127+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:14:58.147711+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:18:22.540193+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:20:32.850368+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:20:38.600745+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T16:20:38.710219+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:20:38.763959+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:20:38.815871+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:20:38.920229+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:20:40.425771+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:27:53.883608+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:29:26.951204+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:31:23.635792+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T16:31:23.746849+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:31:23.801768+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:31:23.859177+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:31:23.970217+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:31:25.592942+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:36:18.285984+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:37:29.009212+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:42:03.428542+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:43:45.695799+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:44:36.522164+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:45:18.534796+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T16:45:18.626948+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:45:18.671259+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:45:18.715058+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:45:18.808174+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:45:20.237599+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:52:21.182996+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T16:56:09.958257+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T16:56:10.056708+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:56:10.104509+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:56:10.150406+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T16:56:10.246820+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T16:56:11.810730+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T17:03:59.353192+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T17:05:48.426602+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T17:05:48.516480+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T17:05:48.559932+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T17:05:48.604068+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T17:05:48.693271+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T17:05:50.208807+00:00'
+summary: '...However, looking at the file, it uses `get_metrics_registry` which doesn''t
+  exist in the codeba...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...However, looking at the file, it uses `get_metrics_registry` which doesn't exist in the codebase (we discovered earlier that the actual function is `get_metrics`). This script appears to be incomplete or...
+
+---
+type: learnings
+timestamp: '2025-12-26T17:18:40.934133+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
+
+---
+type: learnings
+timestamp: '2025-12-26T17:20:06.199364+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory index location is project-specific at .mem...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory index location is project-specific at .memory/index.db
+## Context
+Investigated why index showed 0 memories after sync reported 2692.
+
+## Key Insight
+The SyncService uses `get_project_index_path(repo_path)` which resolves to `.memory/index.db`, NOT `.git/memory-index.db` or the global `~/.local/share/memory-plugin/index.db`.
+
+## Related Files
+- src/git_notes_memory/sync.py:88
+- src/git_notes_memory/config.py
+
+---
+type: learnings
+timestamp: '2025-12-26T17:20:06.295386+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  SessionStart memory retrieval is limited by desig...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+SessionStart memory retrieval is limited by design
+## Key Factors
+- `session_start_max_memories` config (default 30)
+- Token budget split (60% learnings, 40% patterns)
+- Semantic relevance filtering via embedding distance
+- Project name used as search query
+
+## Implication
+Low relevance scores (0.53-0.58) indicate the project name alone isn't a strong semantic match. More specific queries during `/memory:recall` will find more relevant results.
+
+---
+type: learnings
+timestamp: '2025-12-26T17:20:06.345880+00:00'
+summary: '### Key Insight: Specific Queries = Better Results
+
+  | Query Type | Example | Relevance |
+
+  |-------...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+### Key Insight: Specific Queries = Better Results
+
+| Query Type | Example | Relevance |
+|------------|---------|---...
+
+---
+type: learnings
+timestamp: '2025-12-26T17:20:06.393307+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Runtime memory retrieval uses context-specific qu...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Runtime memory retrieval uses context-specific queries
+## Mechanisms
+1. **PostToolUse hook**: Auto-searches using file path terms
+2. **Explicit search**: I can query with specific task-related terms
+3. **Slash commands**: `/memory:recall <query>` for user-initiated search
+
+## Best Practice
+Use task-specific queries (0.77 relevance) rather than generic project names (0.53 relevance). Before modifying code, search for related decisions/patterns/learnings.
+
+## Gap Identified
+I should proactively search memories when starting work on specific components, not just rely on SessionStart context.
+
+---
+type: learnings
+timestamp: '2025-12-26T17:20:06.484710+00:00'
+summary: '...**detailed** | Expanded RULE 5 with tables, code examples, and self-check
+  protocol |
+
+  The key ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...**detailed** | Expanded RULE 5 with tables, code examples, and self-check protocol |
+
+The key insight captured in the templates: SessionStart injects ~5 memories using a generic project name query...
+
+---
+type: learnings
+timestamp: '2025-12-26T17:22:47.871865+00:00'
+summary: test content
+tags:
+- explicit
+- testing
+---
+
+test content
