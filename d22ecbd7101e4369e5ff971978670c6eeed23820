@@ -200,3 +200,14 @@ tags:
 
 > We decided to use JWT tokens for API authentication because:
 > - Stateless authentication reduces server...
+
+---
+type: decisions
+timestamp: '2025-12-26T02:45:01.170520+00:00'
+summary: '...namespace ───`) get 0.99 confidence - explicit structured capture'
+---
+
+...namespace ───`) get 0.99 confidence - explicit structured capture
+2. **Inline patterns** (`[decision]`, natural language) get 0.70-0.98 confidence
+
+The `CaptureSignal` model needs a `domain` field...
