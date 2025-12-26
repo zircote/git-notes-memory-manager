@@ -49,64 +49,41 @@ This document provides the phased implementation plan for secrets filtering. The
 
 ---
 
-## Phase 2: Core Detection
+## Phase 2: Detection Layer
 
-**Goal**: Implement all detection algorithms.
+**Goal**: Integrate detect-secrets and implement custom PII detection.
 
-### Task 2.1: Implement PatternDetector
-**File**: `src/git_notes_memory/security/patterns.py`
-- [ ] PatternRule dataclass
-- [ ] PatternDetector class
-- [ ] OpenAI pattern (sk-proj-*, sk-*)
-- [ ] Anthropic pattern (sk-ant-*)
-- [ ] GitHub patterns (ghp_, gho_, ghu_, ghs_, ghr_)
-- [ ] AWS Access Key pattern (AKIA*)
-- [ ] AWS Secret Key pattern (40-char after aws_secret)
-- [ ] Stripe patterns (sk_live_, pk_live_)
-- [ ] Slack patterns (xoxb-, xoxp-, xoxa-)
-- [ ] Generic password patterns
-- [ ] Basic auth pattern (://user:pass@)
-- [ ] Bearer token pattern
-- [ ] Private key patterns (RSA, DSA, EC, OpenSSH)
-- [ ] Connection string patterns (postgres, mysql, mongodb)
-- [ ] Compile all patterns at init
+### Task 2.1: Add detect-secrets Dependency
+**File**: `pyproject.toml`
+- [ ] Add `detect-secrets>=1.4.0` to dependencies
+- [ ] Run `uv sync` to install
+- [ ] Verify import works
+
+### Task 2.2: Implement DetectSecretsAdapter
+**File**: `src/git_notes_memory/security/detector.py`
+- [ ] DetectSecretsAdapter class wrapping detect-secrets
+- [ ] Configure default plugins (AWS, GitHub, Stripe, Slack, etc.)
 - [ ] detect() method returning tuple[SecretDetection, ...]
+- [ ] Convert detect-secrets results to our SecretDetection model
+- [ ] Handle plugin configuration
 
-### Task 2.2: Write PatternDetector Tests
-**File**: `tests/security/test_patterns.py`
-- [ ] Test each pattern with valid examples
-- [ ] Test patterns don't match false positives
-- [ ] Test performance (<3ms for typical content)
-- [ ] Test edge cases (partial matches, multiple matches)
+### Task 2.3: Write DetectSecretsAdapter Tests
+**File**: `tests/security/test_detector.py`
+- [ ] Test detection of known secret types
+- [ ] Test entropy detection (via Base64/HexHighEntropyString)
+- [ ] Test plugin configuration
+- [ ] Test performance (<5ms for typical content)
 
-### Task 2.3: Implement EntropyAnalyzer
-**File**: `src/git_notes_memory/security/entropy.py`
-- [ ] shannon_entropy() function
-- [ ] EntropyAnalyzer class
-- [ ] Token extraction (split by whitespace, punctuation)
-- [ ] Character set detection (base64, hex, alphanumeric)
-- [ ] Threshold-based detection
-- [ ] Minimum length filtering
-- [ ] analyze() method returning tuple[SecretDetection, ...]
-
-### Task 2.4: Write EntropyAnalyzer Tests
-**File**: `tests/security/test_entropy.py`
-- [ ] Test entropy calculation
-- [ ] Test threshold detection
-- [ ] Test character set detection
-- [ ] Test minimum length
-- [ ] Test performance (<2ms)
-
-### Task 2.5: Implement PIIDetector
+### Task 2.4: Implement PIIDetector (Custom)
 **File**: `src/git_notes_memory/security/pii.py`
-- [ ] PIIDetector class
+- [ ] PIIDetector class (detect-secrets doesn't cover PII)
 - [ ] SSN pattern (XXX-XX-XXXX)
 - [ ] Credit card pattern with Luhn validation
 - [ ] Phone number patterns (US formats)
 - [ ] luhn_check() static method
 - [ ] detect() method returning tuple[SecretDetection, ...]
 
-### Task 2.6: Write PIIDetector Tests
+### Task 2.5: Write PIIDetector Tests
 **File**: `tests/security/test_pii.py`
 - [ ] Test SSN detection
 - [ ] Test credit card detection with Luhn
@@ -157,7 +134,7 @@ This document provides the phased implementation plan for secrets filtering. The
 ### Task 3.5: Implement SecretsFilteringService
 **File**: `src/git_notes_memory/security/service.py`
 - [ ] SecretsFilteringService class
-- [ ] Compose PatternDetector, EntropyAnalyzer, PIIDetector
+- [ ] Compose DetectSecretsAdapter + PIIDetector
 - [ ] Integrate AllowlistManager
 - [ ] Integrate Redactor
 - [ ] filter() method orchestrating all components
@@ -304,11 +281,11 @@ Phase 1 (Foundation)
     └── Task 1.5: Factory Function
           │
           ▼
-Phase 2 (Core Detection) ─ Can run in parallel
+Phase 2 (Detection Layer)
     │
-    ├── Task 2.1-2.2: PatternDetector + Tests
-    ├── Task 2.3-2.4: EntropyAnalyzer + Tests
-    └── Task 2.5-2.6: PIIDetector + Tests
+    ├── Task 2.1: Add detect-secrets dependency
+    ├── Task 2.2-2.3: DetectSecretsAdapter + Tests
+    └── Task 2.4-2.5: PIIDetector + Tests (custom)
           │
           ▼
 Phase 3 (Integration)
@@ -349,11 +326,13 @@ Phase 5 (Testing & Docs)
 | Phase | Tasks | Complexity |
 |-------|-------|------------|
 | Phase 1: Foundation | 5 | Low |
-| Phase 2: Core Detection | 6 | Medium |
-| Phase 3: Integration | 8 | High |
+| Phase 2: Detection Layer | 5 | Low (using detect-secrets) |
+| Phase 3: Integration | 8 | Medium |
 | Phase 4: Commands & Audit | 8 | Medium |
-| Phase 5: Testing & Docs | 4 | Medium |
-| **Total** | **31** | - |
+| Phase 5: Testing & Docs | 4 | Low |
+| **Total** | **30** | - |
+
+**Note**: Using detect-secrets reduces Phase 2 complexity significantly - we wrap an existing library instead of implementing 15+ regex patterns and entropy analysis from scratch.
 
 ---
 

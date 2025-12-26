@@ -4,10 +4,11 @@ This document contains all Architecture Decision Records (ADRs) for the Secrets 
 
 ---
 
-## ADR-001: Pure Python Implementation
+## ADR-001: Use detect-secrets Library
 
-**Status**: Accepted
+**Status**: Accepted (Revised)
 **Date**: 2025-12-25
+**Revised**: 2025-12-25
 
 ### Context
 We need to decide whether to use external dependencies for secrets detection or implement everything in pure Python.
@@ -19,19 +20,22 @@ We need to decide whether to use external dependencies for secrets detection or 
 4. **gitleaks**: Use gitleaks binary
 
 ### Decision
-Use **pure Python** implementation with no additional dependencies.
+Use **detect-secrets** (Yelp) as the detection engine.
 
 ### Rationale
-- Reduces supply chain attack surface
-- No binary dependencies to manage
-- Simpler deployment (pip install only)
-- Full control over detection patterns
-- Existing patterns are well-documented
+- **27+ battle-tested detectors**: AWS, GitHub, Slack, private keys, basic auth, etc.
+- **Entropy detection included**: Base64 and Hex variants built-in
+- **Enterprise-focused**: Lower false positive rates than alternatives
+- **Pure Python**: `pip install detect-secrets` (no binary dependencies)
+- **Library API**: Can be used programmatically, not just CLI
+- **Plugin architecture**: Easy to add custom detectors
+- **Actively maintained**: Yelp uses it in production
 
 ### Consequences
-- More initial implementation work
-- Must maintain patterns ourselves
-- May miss some edge cases that mature tools catch
+- New dependency: `detect-secrets`
+- Leverage existing patterns instead of maintaining our own
+- Still need to build: PIIDetector, Redactor, AllowlistManager, AuditLogger
+- Reduces implementation scope by ~70% for detection layer
 
 ---
 
@@ -96,36 +100,29 @@ Filter **after validation, before serialize_note()**.
 
 ---
 
-## ADR-004: Entropy Thresholds
+## ADR-004: Entropy Thresholds (Superseded)
 
-**Status**: Accepted
+**Status**: Superseded
 **Date**: 2025-12-25
+**Superseded By**: ADR-001 (detect-secrets handles entropy detection)
 
 ### Context
 What entropy thresholds balance detection rate vs false positives?
 
-### Research
+### Decision
+Use **detect-secrets built-in entropy detection** (Base64HighEntropyString, HexHighEntropyString plugins).
+
+### Rationale
+- detect-secrets has battle-tested entropy thresholds
+- Configurable via detect-secrets settings if needed
+- No need to implement/maintain our own entropy analyzer
+
+### Original Research (For Reference)
 - Random base64: ~5.17 bits per character
 - Random hex: ~4.0 bits per character
 - English text: ~1.5-2.0 bits per character
 - Code: ~2.5-4.0 bits per character
 - UUIDs: ~3.8 bits per character
-
-### Decision
-- **Base64 threshold**: 4.5
-- **Hex threshold**: 3.0
-- **Minimum length**: 16 characters
-
-### Rationale
-- 4.5 catches most base64 secrets (API keys typically >5.0)
-- 3.0 catches hex secrets while avoiding short hashes
-- 16 chars minimum avoids short UUIDs and common hashes
-- Thresholds configurable via environment variables
-
-### Consequences
-- Some high-entropy code may false positive (mitigated by allowlist)
-- Very short secrets may evade detection
-- Encoded secrets (base64 of secret) may evade
 
 ---
 
@@ -373,10 +370,10 @@ When memories reference files with secrets, what should we do?
 
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
-| ADR-001 | Pure Python Implementation | Accepted | 2025-12-25 |
+| ADR-001 | Use detect-secrets Library | Accepted | 2025-12-25 |
 | ADR-002 | Default REDACT Strategy | Accepted | 2025-12-25 |
 | ADR-003 | Filter Before Embedding Generation | Accepted | 2025-12-25 |
-| ADR-004 | Entropy Thresholds | Accepted | 2025-12-25 |
+| ADR-004 | Entropy Thresholds | Superseded | 2025-12-25 |
 | ADR-005 | Hash-Based Allowlist | Accepted | 2025-12-25 |
 | ADR-006 | Full Audit Logging | Accepted | 2025-12-25 |
 | ADR-007 | Include PII Detection in v1 | Accepted | 2025-12-25 |
