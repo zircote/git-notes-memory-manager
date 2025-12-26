@@ -184,3 +184,19 @@ tags:
 `★ Insight ─────────────────────────────────────`
 **String vs Enum for dataclass fields**: I chose to store `domain` as a `str` rather than the `Domain` enum because:
 1. **Serialization**: SQLite...
+
+---
+type: decisions
+timestamp: '2025-12-26T02:39:41.739162+00:00'
+summary: '...Decisions: Use JWT for API auth'
+tags:
+- auto-captured
+- post-tool-use
+- file:search.md
+---
+
+...Decisions: Use JWT for API auth
+**Score**: 0.94 | **Date**: 2024-01-15 | **Tags**: auth, api
+
+> We decided to use JWT tokens for API authentication because:
+> - Stateless authentication reduces server...
