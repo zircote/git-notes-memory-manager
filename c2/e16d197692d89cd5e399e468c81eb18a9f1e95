@@ -6872,3 +6872,17 @@ tags:
 ---
 
 ...Implement `get_batch(memory_ids)` → `dict[str, MemoryMetadata]` | done | 2025-12-27 | 2025-12-27 | Completed |
+
+---
+type: progress
+timestamp: '2025-12-27T18:11:21.199874+00:00'
+summary: '| 2.2.1 | Create `SummaryStore` class with git notes backend | done | 2025-12-27
+  | 2025-12-27 | Comp'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+| 2.2.1 | Create `SummaryStore` class with git notes backend | done | 2025-12-27 | 2025-12-27 | Completed |
+| 2.2.2 | Implement `get(summary_id)` → `MemorySummary \| None` | done | 2025-12-27 | 2025-12-27...
