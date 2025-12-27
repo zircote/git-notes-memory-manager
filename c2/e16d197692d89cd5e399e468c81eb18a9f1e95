@@ -7671,3 +7671,17 @@ tags:
 
 ...Completed |
 | 5.3.13 | Integration tests with real index | done | 2025-12-27 | 2025-12-27 | Completed |
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.419570+00:00'
+summary: '...injector.py |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...injector.py |
+| 6.1.2 | Create `SummaryInjectionConfig` dataclass | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.1.3 | Create `SummaryInjectionResult` dataclass | done | 2025-12-27 | 2025-12-27 | Completed...
