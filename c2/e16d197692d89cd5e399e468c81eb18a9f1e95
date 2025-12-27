@@ -3646,3 +3646,21 @@ tags:
         assert "Completed database setup" in result
 
     def test_format_preserves_content(self, sample_memory: MockMemory)...
+
+---
+type: progress
+timestamp: '2025-12-27T16:56:15.239438+00:00'
+summary: '...PostgreSQL",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_prompts.py
+---
+
+...PostgreSQL",
+                    "rationale": "Better reliability",
+                    "outcome": "Implemented",
+                }
+            ],
+            "superseded_facts": [
+                {...
