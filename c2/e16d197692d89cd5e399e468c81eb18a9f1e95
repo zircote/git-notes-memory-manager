@@ -6913,3 +6913,17 @@ tags:
 ---
 
 ...2.2.3 | Implement `save(summary)` with YAML serialization | done | 2025-12-27 | 2025-12-27 | Completed |
+
+---
+type: progress
+timestamp: '2025-12-27T18:11:43.706315+00:00'
+summary: '| 2.4.1 | Create `RunStore` class for consolidation run logs | done | 2025-12-27
+  | 2025-12-27 | Comp'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+| 2.4.1 | Create `RunStore` class for consolidation run logs | done | 2025-12-27 | 2025-12-27 | Completed |
+| 2.4.2 | Implement `log_run(result)` append-only | done | 2025-12-27 | 2025-12-27 | Completed...
