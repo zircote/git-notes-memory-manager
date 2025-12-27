@@ -1464,3 +1464,20 @@ Fixed multiple bugs preventing the LLM subconsciousness from working with OpenAI
 ## Related Files
 - src/git_notes_memory/subconsciousness/providers/openai.py:178-193
 - src/git_notes_memory/subconsciousness/implicit_capture_agent.py:311-318
+
+---
+type: progress
+timestamp: '2025-12-27T12:34:37.807444+00:00'
+summary: '...tag("response_model", response.model)'
+tags:
+- auto-captured
+- post-tool-use
+- file:llm_client.py
+---
+
+...tag("response_model", response.model)
+
+                logger.debug(
+                    "LLM request completed",
+                    provider=provider_name,
+                    model=response.model,...
