@@ -3369,3 +3369,27 @@ Updated namespace enum test to match new 10-namespace list.
 - `src/git_notes_memory/subconsciousness/prompts.py:33-55` (schema)
 - `src/git_notes_memory/subconsciousness/prompts.py:158-201` (prompt)
 - `tests/subconsciousness/test_prompts.py:41-52`
+
+---
+type: progress
+timestamp: '2025-12-27T15:16:01.943342+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed subconsciousness OpenAI provider and parse...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed subconsciousness OpenAI provider and parser bugs
+## Summary
+Fixed multiple bugs preventing the LLM subconsciousness from working with OpenAI.
+
+## Changes Made
+- Fixed OpenAI provider to use `max_completion_tokens` for o1/o3/gpt-5 models
+- Fixed OpenAI provider to skip `temperature` param for reasoning models
+- Fixed agent parser to accept `type`/`details` fields from LLM response (not just `namespace`/`content`)
+
+## Related Files
+- src/git_notes_memory/subconsciousness/providers/openai.py:178-193
+- src/git_notes_memory/subconsciousness/implicit_capture_agent.py:311-318
