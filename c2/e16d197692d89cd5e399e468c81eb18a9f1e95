@@ -7952,3 +7952,18 @@ tags:
 
 ...Implement `get_session_start_additional_context()` helper | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.2.5 | Add tracing for hook integration | done | 2025-12-27 | 2025-12-27 | @traced decorator...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.960271+00:00'
+summary: '...@traced decorator |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...@traced decorator |
+| 6.2.6 | Add metrics for hook execution | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.2.7 | Add structured logging | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.2.8...
