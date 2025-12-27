@@ -6831,3 +6831,17 @@ tags:
 ---
 
 The PROGRESS.md shows all Phase 2 and 3 tasks as pending, but they were completed in previous sessions. Let me update the PROGRESS.md to reflect the actual status:
+
+---
+type: progress
+timestamp: '2025-12-27T18:11:10.421749+00:00'
+summary: '| 2.1.1 | Create `MetadataStore` class with git notes backend | done | 2025-12-27
+  | 2025-12-27 | Com'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+| 2.1.1 | Create `MetadataStore` class with git notes backend | done | 2025-12-27 | 2025-12-27 | Completed |
+| 2.1.2 | Implement `get(memory_id)` → `MemoryMetadata \| None` | done | 2025-12-27 | 2025-12-27...
