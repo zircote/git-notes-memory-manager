@@ -301,3 +301,21 @@ tags:
     timestamp: datetime | None = None,
 ) -> Memory:
     """Create a mock Memory...
+
+---
+type: decisions
+timestamp: '2025-12-27T17:38:05.175301+00:00'
+summary: '...abc1234:0",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_service.py
+---
+
+...abc1234:0",
+    namespace: str = "decisions",
+    summary: str = "Test decision",
+    content: str = "We decided to use Python.",
+    timestamp: datetime | None = None,
+    commit_sha: str = "abc1234",
+) ->...
