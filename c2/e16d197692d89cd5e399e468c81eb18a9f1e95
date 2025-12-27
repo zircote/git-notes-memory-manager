@@ -3714,3 +3714,19 @@ tags:
             summary="Database setup complete",
             content="Completed database setup last week.",
             timestamp=datetime(2024, 1, 20, 14, 0, 0, tzinfo=UTC),...
+
+---
+type: progress
+timestamp: '2025-12-27T17:02:45.720743+00:00'
+summary: '..."""Should detect ''today''."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_temporal.py
+---
+
+..."""Should detect 'today'."""
+        matches = detect_temporal_references("Today we finished the work.")
+
+        assert len(matches) == 1
+        assert matches[0].pattern_name == "today"...
