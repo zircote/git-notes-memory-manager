@@ -7066,3 +7066,18 @@ tags:
 ...Completed |
 | 4.2.2 | Create `REASONING_USER_PROMPT` template | done | 2025-12-27 | 2025-12-27 | Completed |
 | 4.2.3 | Create response parser for `ReasonedAnswer` | done | 2025-12-27 | 2025-12-27 |...
+
+---
+type: progress
+timestamp: '2025-12-27T18:12:16.650131+00:00'
+summary: '...ReasoningResponseParser |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...ReasoningResponseParser |
+| 4.2.4 | Unit tests for prompt formatting | done | 2025-12-27 | 2025-12-27 | Completed |
+| 4.2.5 | Unit tests for response parsing | done | 2025-12-27 | 2025-12-27 | Completed |
+|...
