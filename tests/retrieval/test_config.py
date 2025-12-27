@@ -13,7 +13,6 @@ import pytest
 
 from git_notes_memory.retrieval.config import HybridSearchConfig
 
-
 # =============================================================================
 # Test: Default Configuration
 # =============================================================================

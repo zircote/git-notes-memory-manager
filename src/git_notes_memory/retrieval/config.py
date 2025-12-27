@@ -122,15 +122,21 @@ class HybridSearchConfig:
 
         # Validate mode
         mode_value = get_str("MODE", "hybrid")
-        if mode_value not in ("hybrid", "vector", "bm25", "entity"):
+        valid_modes = ("hybrid", "vector", "bm25", "entity")
+        if mode_value not in valid_modes:
             logger.warning(
                 "Invalid search mode: %s, using 'hybrid'",
                 mode_value,
             )
             mode_value = "hybrid"
 
+        # Cast to SearchMode type
+        validated_mode: SearchMode = (
+            mode_value if mode_value in valid_modes else "hybrid"
+        )
+
         return cls(
-            mode=mode_value,
+            mode=validated_mode,
             rrf_k=get_int("RRF_K", 60),
             vector_weight=get_float("VECTOR_WEIGHT", 1.0),
             bm25_weight=get_float("BM25_WEIGHT", 1.0),

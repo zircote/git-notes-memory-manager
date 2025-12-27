@@ -14,12 +14,10 @@ from dataclasses import dataclass
 import pytest
 
 from git_notes_memory.index.rrf_fusion import (
-    FusedResult,
     RankedItem,
     RRFConfig,
     RRFFusionEngine,
 )
-
 
 # =============================================================================
 # Fixtures

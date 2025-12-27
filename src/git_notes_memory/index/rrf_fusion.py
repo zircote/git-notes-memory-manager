@@ -101,10 +101,12 @@ class RRFFusionEngine:
         ...     RankedItem("doc2", rank=1),
         ...     RankedItem("doc1", rank=2),
         ... ]
-        >>> fused = engine.fuse([
-        ...     ("vector", vector_results),
-        ...     ("bm25", bm25_results),
-        ... ])
+        >>> fused = engine.fuse(
+        ...     [
+        ...         ("vector", vector_results),
+        ...         ("bm25", bm25_results),
+        ...     ]
+        ... )
         >>> print(fused[0].item_id)  # doc1 or doc2, depending on weights
     """
 
@@ -143,7 +145,7 @@ class RRFFusionEngine:
             return []
 
         # Validate inputs
-        for source_name, items in ranked_lists:
+        for _source_name, items in ranked_lists:
             for item in items:
                 if item.rank <= 0:
                     msg = f"Rank must be > 0, got {item.rank} for {item.item_id}"
