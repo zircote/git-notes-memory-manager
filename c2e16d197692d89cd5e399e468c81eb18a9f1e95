@@ -713,3 +713,19 @@ tags:
         result = injector.inject_summaries(context)
 
         assert...
+
+---
+type: learnings
+timestamp: '2025-12-27T17:55:23.250737+00:00'
+summary: '...content</memory_context>"'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_summary_injector.py
+---
+
+...content</memory_context>"
+        result = injector.inject_summaries(context)
+
+        assert "Important content" in result.modified_context
+        assert "<memory_consolidated_summaries>" in result.modified...
