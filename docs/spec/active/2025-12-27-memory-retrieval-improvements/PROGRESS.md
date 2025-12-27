@@ -3,7 +3,7 @@ document_type: progress
 project_id: SPEC-2025-12-27-002
 project_name: "Memory Retrieval Performance Improvements"
 started: 2025-12-27T19:00:00Z
-last_updated: 2025-12-27T19:00:00Z
+last_updated: 2025-12-27T20:00:00Z
 ---
 
 # Implementation Progress
@@ -12,22 +12,22 @@ last_updated: 2025-12-27T19:00:00Z
 
 | Metric | Value |
 |--------|-------|
-| **Phase** | 1 of 5 |
-| **Tasks Completed** | 0/21 |
-| **Progress** | 0% |
+| **Phase** | 1 of 5 (completed) |
+| **Tasks Completed** | 4/21 |
+| **Progress** | 19% |
 | **Status** | in-progress |
 
-## Phase 1: Foundation
+## Phase 1: Foundation ✅
 
 | Task | Status | Started | Completed | Notes |
 |------|--------|---------|-----------|-------|
-| 1.1 Schema v5 Migration | pending | - | - | |
-| 1.2 RRF Fusion Engine | pending | - | - | |
-| 1.3 HybridSearchConfig | pending | - | - | |
-| 1.4 Retrieval Module Scaffold | pending | - | - | |
+| 1.1 Schema v5 Migration | done | 2025-12-27 | 2025-12-27 | Added entities, memory_entities, temporal_refs tables |
+| 1.2 RRF Fusion Engine | done | 2025-12-27 | 2025-12-27 | 28 tests passing |
+| 1.3 HybridSearchConfig | done | 2025-12-27 | 2025-12-27 | Env var loading, 23 tests |
+| 1.4 Retrieval Module Scaffold | done | 2025-12-27 | 2025-12-27 | Module structure with lazy imports |
 
-**Phase Status**: pending
-**Phase Progress**: 0/4 tasks
+**Phase Status**: done
+**Phase Progress**: 4/4 tasks
 
 ## Phase 2: Hybrid Search
 
@@ -94,3 +94,5 @@ _None yet._
 
 - Implementation started: 2025-12-27
 - Target: 90%+ accuracy (18/20 questions)
+- Phase 1 completed: Schema v5, RRF fusion, config, retrieval module scaffold
+- 141 tests passing for Phase 1 components
