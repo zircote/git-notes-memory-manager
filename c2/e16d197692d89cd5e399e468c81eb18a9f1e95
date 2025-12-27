@@ -120,3 +120,23 @@ Updated namespace enum test to match new 10-namespace list.
 - `src/git_notes_memory/subconsciousness/prompts.py:33-55` (schema)
 - `src/git_notes_memory/subconsciousness/prompts.py:158-201` (prompt)
 - `tests/subconsciousness/test_prompts.py:41-52`
+
+---
+type: progress
+timestamp: '2025-12-27T15:44:22.394167+00:00'
+summary: '...[REQUIREMENTS.md](./REQUIREMENTS.md)'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...[REQUIREMENTS.md](./REQUIREMENTS.md)
+
+---
+
+## Task Status
+
+| ID | Description | Status | Started | Completed | Notes |
+|----|-------------|--------|---------|-----------|-------|
+| 1.1.1 | Add `MemoryTier`...
