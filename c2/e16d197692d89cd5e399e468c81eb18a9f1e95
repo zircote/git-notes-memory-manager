@@ -7445,3 +7445,17 @@ tags:
 ...|
 | 5.1.20 | Property tests: consolidation is idempotent | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.2.1 | Create `ReasonedRecallService` dataclass with dependencies | done | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:09.742259+00:00'
+summary: '...recall_with_reasoning(query, mode, require_temporal)` main method | done
+  | 2025-12-27 | 2025-12-2'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...recall_with_reasoning(query, mode, require_temporal)` main method | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.2.3 | Implement `_format_memories_with_timestamps(memories)` for LLM context | done...
