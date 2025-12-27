@@ -27,3 +27,20 @@ tags:
     "patterns": 0.85,  # Patterns are reusable knowledge
     # Medium importance (0.7): Project context
     "progress": 0.7,  # Progress...
+
+---
+type: patterns
+timestamp: '2025-12-27T16:46:13.446424+00:00'
+summary: '...subcon_config.cluster_batch_size'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_clustering.py
+---
+
+...subcon_config.cluster_batch_size
+
+    def test_singleton_config(self) -> None:
+        """Test singleton pattern for clustering config."""
+        config1 = get_clustering_config()
+        config2 = get_clustering...
