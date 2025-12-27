@@ -106,3 +106,21 @@ tags:
 def get_consolidation_service() -> ConsolidationService:
     try:
         from .consolidation...
+
+---
+type: patterns
+timestamp: '2025-12-27T15:21:33.100218+00:00'
+summary: '...Reasoning Flow'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...Reasoning Flow
+
+```
+1. Query received (e.g., "When did X happen?")
+2. Check if reasoning needed (pattern match or --reason flag)
+3. Retrieve memories with RecallService
+4. Format memories with explicit...
