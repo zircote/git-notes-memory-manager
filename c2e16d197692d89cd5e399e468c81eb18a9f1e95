@@ -548,3 +548,19 @@ tags:
         """Test that pattern matches multiline blocks."""
         context = """<memory_consolidated_summaries>
   <summary...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:55:23.203623+00:00'
+summary: '...not None'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_summary_injector.py
+---
+
+...not None
+
+    def test_pattern_no_match_without_block(self) -> None:
+        """Test that pattern doesn't match without block."""
+        context = "<memory_context>No summaries here</memory_context...
