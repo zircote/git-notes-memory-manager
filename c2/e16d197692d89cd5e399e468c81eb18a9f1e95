@@ -4642,3 +4642,29 @@ The code was using only `.expanduser()` which expands `~` but NOT `$HOME`. When 
 ## Related Files
 - src/git_notes_memory/config.py:261-264
 - src/git_notes_memory/observability/config.py:213-214
+
+---
+type: progress
+timestamp: '2025-12-27T17:17:24.821029+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Added make sync-plugin target for live plugin de...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Added make sync-plugin target for live plugin development
+## Summary
+Created a Makefile target that syncs source files to the plugin cache directory, enabling rapid iteration during plugin development without needing to reinstall.
+
+## Changes Made
+- Added `sync-plugin` to `.PHONY` targets
+- Added "Plugin Development" section to help output
+- Added `sync-plugin` target that:
+  - Auto-detects installed version from cache directory
+  - Uses rsync with appropriate excludes (`.venv`, `__pycache__`, etc.)
+  - Provides clear feedback on sync status
+
+## Related Files
+- Makefile:209-242
