@@ -8834,3 +8834,22 @@ tags:
 - Lazy import pattern already implemented in `consolidation/__init__.py`
 - Helpful error message in `_require_consolidation()` function
 -...
+
+---
+type: progress
+timestamp: '2025-12-27T19:10:42.182530+00:00'
+summary: Fixed subconsciousness OpenAI provider and parser bugs
+---
+
+Fixed subconsciousness OpenAI provider and parser bugs
+## Summary
+Fixed multiple bugs preventing the LLM subconsciousness from working with OpenAI.
+
+## Changes Made
+- Fixed OpenAI provider to use `max_completion_tokens` for o1/o3/gpt-5 models
+- Fixed OpenAI provider to skip `temperature` param for reasoning models
+- Fixed agent parser to accept `type`/`details` fields from LLM response (not just `namespace`/`content`)
+
+## Related Files
+- src/git_notes_memory/subconsciousness/providers/openai.py:178-193
+- src/git_notes_memory/subconsciousness/implicit_capture_agent.py:311-318
