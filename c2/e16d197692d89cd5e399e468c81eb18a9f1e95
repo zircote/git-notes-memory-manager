@@ -1,0 +1,12 @@
+---
+type: decisions
+timestamp: '2025-12-27T15:41:14.046664+00:00'
+summary: '...using markers anywhere in your messages:'
+---
+
+...using markers anywhere in your messages:
+- `[remember] <insight>` - Captures a learning
+- `[decision] <choice>` - Captures a decision
+- `/memory:capture <namespace> <content>` - Explicit capture
+
+Available...
