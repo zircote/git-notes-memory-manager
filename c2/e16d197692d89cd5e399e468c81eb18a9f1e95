@@ -1023,3 +1023,20 @@ tags:
 
 #### Phase 1.1 - Models (Tasks 1.1.1-1.1.15) ✅
 - Added 4 enums: `MemoryTier`,...
+
+---
+type: progress
+timestamp: '2025-12-27T16:02:54.541932+00:00'
+summary: '..."""Record metrics for a consolidation run.'
+tags:
+- auto-captured
+- post-tool-use
+- file:observability.py
+---
+
+..."""Record metrics for a consolidation run.
+
+    Args:
+        success: Whether the run completed successfully.
+        duration_ms: Total duration in milliseconds.
+        phases_completed:...
