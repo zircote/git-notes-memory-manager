@@ -2000,3 +2000,17 @@ tags:
         assert result.outcome == "Implemented successfully"
         assert result.source_memory_id == "decisions:abc1234:0"
         assert...
+
+---
+type: progress
+timestamp: '2025-12-27T16:21:40.625386+00:00'
+summary: '...rationale="Need ACID compliance and complex queries",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_summary_store.py
+---
+
+...rationale="Need ACID compliance and complex queries",
+                    outcome="Implemented successfully",
+                    source_memory_id="decisions:abc1234:0",...
