@@ -325,3 +325,19 @@ tags:
         return Memory(
             id="decisions:abc1234:0",
             namespace="decisions...
+
+---
+type: learnings
+timestamp: '2025-12-27T16:39:07.545655+00:00'
+summary: '...important_memory_high_score('
+tags:
+- auto-captured
+- post-tool-use
+- file:test_retention.py
+---
+
+...important_memory_high_score(
+        self, recent_hot_memory: Memory
+    ) -> None:
+        """Test recent important memory has high score."""
+        score = compute_retention_score(recent_hot_memory)...
