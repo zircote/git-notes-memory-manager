@@ -457,3 +457,20 @@ tags:
         service = ExtendedRecallService()
 
         assert...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:48:08.467171+00:00'
+summary: '...test_patterns_are_strings(self) -> None:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_recall_extension.py
+---
+
+...test_patterns_are_strings(self) -> None:
+        """Test that all patterns are strings."""
+        for pattern in TEMPORAL_QUERY_PATTERNS:
+            assert isinstance(pattern, str)
+
+    def test_key_patterns_included...
