@@ -32,3 +32,22 @@ tags:
         temp_file = METRICS_FILE.with_suffix(".tmp")
 
         with...
+
+---
+type: patterns
+timestamp: '2025-12-27T01:11:56.464717+00:00'
+summary: '...bucket_counts", None)'
+tags:
+- auto-captured
+- post-tool-use
+- file:persistent_metrics.py
+---
+
+...bucket_counts", None)
+            entry.pop("percentiles", None)
+
+    try:
+        # Use atomic write pattern: write to temp, then rename
+        temp_file = metrics_file.with_suffix(".tmp")
+
+        with...
