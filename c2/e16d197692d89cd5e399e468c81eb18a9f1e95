@@ -4334,3 +4334,21 @@ tags:
 ---
 
 The PROGRESS.md shows all Phase 2 and 3 tasks as pending, but they were completed in previous sessions. Let me update the PROGRESS.md to reflect the actual status:
+
+---
+type: progress
+timestamp: '2025-12-27T17:13:32.675119+00:00'
+summary: '...= ConsolidationPhase.PERSIST'
+tags:
+- auto-captured
+- post-tool-use
+- file:service.py
+---
+
+...= ConsolidationPhase.PERSIST
+
+            logger.info(
+                "Consolidation run completed",
+                extra={
+                    "run_id": run_id,
+                    "memories_scanned...
