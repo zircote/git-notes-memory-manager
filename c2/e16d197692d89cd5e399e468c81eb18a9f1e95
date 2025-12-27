@@ -8789,3 +8789,14 @@ tags:
 ---
 
 The PROGRESS.md shows all Phase 2 and 3 tasks as pending, but they were completed in previous sessions. Let me update the PROGRESS.md to reflect the actual status:
+
+---
+type: progress
+timestamp: '2025-12-27T18:19:30.862610+00:00'
+summary: 'Let me check how the existing `/memory:*` commands are implemented:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Let me check how the existing `/memory:*` commands are implemented:
