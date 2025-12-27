@@ -161,3 +161,19 @@ tags:
             assert pattern in TEMPORAL_PATTERNS, f"Missing {pattern}"
 
     def...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:02:45.606856+00:00'
+summary: '..."tomorrow", "last_week", "last_month"]'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_temporal.py
+---
+
+..."tomorrow", "last_week", "last_month"]
+        for pattern in essential:
+            assert pattern in TEMPORAL_PATTERNS, f"Missing {pattern}"
+
+    def test_ago_patterns_exist(self) -> None:...
