@@ -3735,3 +3735,20 @@ tags:
 ...toggles for consolidation, forgetting, surfacing, and linking - but these features are not implemented. Without memory consolidation:
 
 1. **Unbounded memory growth** - Early memories pollute search...
+
+---
+type: progress
+timestamp: '2025-12-27T15:19:10.878287+00:00'
+summary: '...unresolved** - Superseded information is returned alongside current,
+  causing confusion'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...unresolved** - Superseded information is returned alongside current, causing confusion
+
+## Solution Overview
+
+Extend the existing subconsciousness module with a memory consolidation pipeline...
