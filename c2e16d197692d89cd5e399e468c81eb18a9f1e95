@@ -308,3 +308,20 @@ This module implements the retention scoring algorithm that determines
 how important a memory is to keep in the active (hot/warm) tiers.
 
 The retention score is a weighted combination...
+
+---
+type: learnings
+timestamp: '2025-12-27T16:39:07.506596+00:00'
+summary: '...@pytest.fixture'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_retention.py
+---
+
+...@pytest.fixture
+    def recent_hot_memory(self) -> Memory:
+        """Create a recent, important memory."""
+        return Memory(
+            id="decisions:abc1234:0",
+            namespace="decisions...
