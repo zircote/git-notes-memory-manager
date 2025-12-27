@@ -2356,3 +2356,40 @@ Fixed multiple bugs preventing the LLM subconsciousness from working with OpenAI
 ## Related Files
 - src/git_notes_memory/subconsciousness/providers/openai.py:178-193
 - src/git_notes_memory/subconsciousness/implicit_capture_agent.py:311-318
+
+---
+type: progress
+timestamp: '2025-12-27T13:12:24.170631+00:00'
+summary: Added comprehensive observability to subconsciousness module
+---
+
+Added comprehensive observability to subconsciousness module
+## Summary
+Implemented full tracing, metrics, and structured logging across the entire subconsciousness module for LLM-powered implicit memory capture.
+
+## Changes Made
+- **LLM Client** (`llm_client.py`):
+  - Added trace spans for `llm.complete_request` and `llm.execute_single`
+  - Metrics for request latency, tokens, costs, errors, circuit breaker events
+  - Structured logging with trace context injection
+
+- **Implicit Capture Agent** (`implicit_capture_agent.py`):
+  - Added spans for `agent.analyze_transcript`, `agent.process_chunk`, `agent.screen_memories`
+  - Metrics for chunks processed, memories extracted, confidence scores, adversarial detections
+  - Rich logging with memory extraction details
+
+- **Implicit Capture Service** (`implicit_capture_service.py`):
+  - Added span for `service.capture_from_transcript`
+  - Metrics for auto-approved, queued, blocked, discarded memories
+  - Detailed logging of capture pipeline results
+
+- **OpenAI Provider** (`providers/openai.py`):
+  - Added span for `provider.openai.complete`
+  - Metrics for provider latency, tokens, errors, retries, rate limits
+  - Comprehensive retry/error logging
+
+## Related Files
+- src/git_notes_memory/subconsciousness/llm_client.py:17-35, 458-583, 653-800
+- src/git_notes_memory/subconsciousness/implicit_capture_agent.py:17-40, 109-216, 218-282, 284-383
+- src/git_notes_memory/subconsciousness/implicit_capture_service.py:22-52, 140-336
+- src/git_notes_memory/subconsciousness/providers/openai.py:16-47, 145-291, 373-545
