@@ -1498,3 +1498,20 @@ tags:
                 "Transcript analysis completed",
                 chunks_processed=len(chunks),
                 memories_extracted=len(all_memories...
+
+---
+type: progress
+timestamp: '2025-12-27T12:38:20.550688+00:00'
+summary: '...span.set_tag("duration_ms", duration_ms)'
+tags:
+- auto-captured
+- post-tool-use
+- file:implicit_capture_service.py
+---
+
+...span.set_tag("duration_ms", duration_ms)
+
+            logger.info(
+                "Transcript capture completed",
+                captured=len(captured),
+                auto_approved=len(auto_approved),...
