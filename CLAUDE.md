@@ -213,9 +213,40 @@ def capture_service(tmp_path, monkeypatch):
     return get_capture_service(repo_path=tmp_path)
 ```
 
-## Environment Variables
+## Configuration
 
-### Core Configuration
+### Configuration File (Recommended)
+
+All environment variables can be centralized in `~/.local/share/memory-plugin/env`. This file is loaded by both the Python library and Claude Code hooks, avoiding the need to pollute shell profiles.
+
+**Location:**
+- Unix/macOS: `~/.local/share/memory-plugin/env` (same directory as plugin data)
+- Windows: `%LOCALAPPDATA%\memory-plugin\env`
+
+**Why use a config file?** Claude Code runs hooks in a clean environment that doesn't inherit shell env vars. The config file ensures consistent configuration across all contexts.
+
+**Example ~/.local/share/memory-plugin/env:**
+```bash
+# Core
+export MEMORY_PLUGIN_DATA_DIR="$HOME/.local/share/memory-plugin"
+
+# Hooks
+export HOOK_ENABLED=true
+export HOOK_SESSION_START_ENABLED=true
+export HOOK_SESSION_START_FETCH_REMOTE=true
+export HOOK_STOP_PUSH_REMOTE=true
+
+# Observability
+export MEMORY_PLUGIN_OTLP_ENDPOINT="http://localhost:4318"
+export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
+export MEMORY_PLUGIN_LOG_LEVEL=info
+```
+
+See the full config at `~/.local/share/memory-plugin/env`.
+
+### Environment Variables Reference
+
+#### Core Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -223,7 +254,7 @@ def capture_service(tmp_path, monkeypatch):
 | `MEMORY_PLUGIN_GIT_NAMESPACE` | Git notes ref prefix | `refs/notes/mem` |
 | `MEMORY_PLUGIN_EMBEDDING_MODEL` | Embedding model | `all-MiniLM-L6-v2` |
 
-### Hook Configuration
+#### Hook Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -242,7 +273,7 @@ def capture_service(tmp_path, monkeypatch):
 | `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance level: minimal/standard/detailed | `standard` |
 | `USER_MEMORIES_REMOTE` | Remote URL for user memories sync | (none) |
 
-### Secrets Filtering Configuration
+#### Secrets Filtering Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -253,20 +284,17 @@ def capture_service(tmp_path, monkeypatch):
 | `SECRETS_FILTER_AUDIT_ENABLED` | Enable audit logging | `true` |
 | `SECRETS_FILTER_AUDIT_DIR` | Audit log directory | `~/.local/share/memory-plugin/audit/` |
 
-### Observability Configuration (OTLP)
+#### Observability Configuration (OTLP)
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `MEMORY_PLUGIN_OTLP_ENDPOINT` | OTLP HTTP endpoint (e.g., `http://localhost:4318`) | (none) |
 | `MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL` | Allow internal/localhost endpoints (SEC-H-001 SSRF override) | `false` |
-
-To enable observability with the local Docker stack:
-
-```bash
-# Add to ~/.bashrc or ~/.zshrc for persistence
-export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
-export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
-```
+| `MEMORY_PLUGIN_OBSERVABILITY_ENABLED` | Enable all observability features | `true` |
+| `MEMORY_PLUGIN_LOG_LEVEL` | Logging level: quiet/info/debug/trace | `info` |
+| `MEMORY_PLUGIN_LOG_FORMAT` | Log format: json/text | `json` |
+| `MEMORY_PLUGIN_METRICS_ENABLED` | Enable metrics collection | `true` |
+| `MEMORY_PLUGIN_TRACING_ENABLED` | Enable distributed tracing | `true` |
 
 **Note**: The `ALLOW_INTERNAL` flag is required because the OTLP exporter has SSRF protection (SEC-H-001) that blocks localhost/private IPs by default. This is a security feature for production environments.
 

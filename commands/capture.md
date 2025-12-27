@@ -87,7 +87,7 @@ If `$ARGUMENTS` is empty or very short (< 10 characters):
 Use Bash to invoke the Python library:
 
 ```bash
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory import get_capture_service
 
 capture = get_capture_service()
@@ -159,7 +159,7 @@ For structured captures, the library also provides:
 
 If the capture fails:
 1. Check if we're in a git repository: `git rev-parse --git-dir`
-2. Check if the library is installed: `uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "import git_notes_memory"`
+2. Check if the library is installed: `uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "import git_notes_memory"`
 3. Show helpful error message with recovery action
 
 </error_handling>

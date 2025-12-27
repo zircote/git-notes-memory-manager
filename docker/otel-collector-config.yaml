@@ -85,7 +85,7 @@ service:
   pipelines:
     metrics:
       receivers: [otlp, prometheus]
-      processors: [memory_limiter, batch]  # resource processor removed - see ADR
+      processors: [memory_limiter, batch]
       exporters: [prometheusremotewrite, prometheus]
 
     traces:

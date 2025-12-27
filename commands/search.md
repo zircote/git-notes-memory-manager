@@ -94,7 +94,7 @@ Use Bash to invoke the Python library:
 
 **Semantic Search** (default - vector similarity):
 ```bash
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory import get_recall_service
 from git_notes_memory.config import Domain
 
@@ -134,7 +134,7 @@ else:
 
 **Text Search** (keyword/FTS matching):
 ```bash
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory import get_recall_service
 from git_notes_memory.config import Domain
 

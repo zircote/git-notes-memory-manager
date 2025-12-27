@@ -66,7 +66,7 @@ You will validate that the memory system is functioning correctly by testing all
 Execute the validation script:
 
 ```bash
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 << 'VALIDATION_SCRIPT'
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 << 'VALIDATION_SCRIPT'
 import json
 import os
 import subprocess

@@ -74,7 +74,7 @@ Parse the following options:
 
 **Execute the metrics collection**:
 ```bash
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory.observability.metrics import get_metrics
 from git_notes_memory.observability.exporters.prometheus import export_prometheus_text
 import sys

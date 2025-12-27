@@ -98,7 +98,7 @@ EVENT_TYPE="${EVENT_TYPE:-}"
 JSON_OUTPUT="${JSON_OUTPUT:-false}"
 LIMIT="${LIMIT:-50}"
 
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import json
 import sys
 from datetime import UTC, datetime, timedelta
@@ -204,7 +204,7 @@ else:
 **Show overall statistics**:
 
 ```bash
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory.security import get_audit_logger
 
 logger = get_audit_logger()

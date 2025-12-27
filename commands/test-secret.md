@@ -86,7 +86,7 @@ The entire argument is the value to test. Handle quoted strings.
 ```bash
 TEST_VALUE="${TEST_VALUE}"  # From arguments
 
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import sys
 from git_notes_memory.security import get_secrets_filtering_service
 from git_notes_memory.security.models import FilterAction

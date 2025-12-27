@@ -73,7 +73,7 @@ Parse the following options:
 
 **Execute the health check**:
 ```bash
-uv run --directory "${CLAUDE_PLUGIN_ROOT}" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import subprocess
 import sys
 
