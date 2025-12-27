@@ -3825,3 +3825,22 @@ tags:
 
 1. **No deferrals** - All tasks are completed, none skipped or pushed to future work
 2. **Deep observability** - Every module, method, and...
+
+---
+type: progress
+timestamp: '2025-12-27T15:26:06.072685+00:00'
+summary: '...cost 50x retrieval'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...cost 50x retrieval
+4. Contradictions unresolved - superseded info returned with current
+
+## Solution
+
+A 6-phase background pipeline:
+1. **SCAN** - Load memories, compute retention scores
+2. **CLUSTER**...
