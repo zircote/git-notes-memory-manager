@@ -3876,3 +3876,17 @@ tags:
 ...Research: `docs/research/CognitiveSubstrate/memory-consolidation-*.md`
 - Completed: `docs/spec/completed/2025-12-25-llm-subconsciousness/` (LLM foundation)
 - Completed: `docs/spec/completed/2025-12-25-observability...
+
+---
+type: progress
+timestamp: '2025-12-27T15:26:06.204934+00:00'
+summary: '...consolidation-*.md`'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...consolidation-*.md`
+- Completed: `docs/spec/completed/2025-12-25-llm-subconsciousness/` (LLM foundation)
+- Completed: `docs/spec/completed/2025-12-25-observability-instrumentation/` (Observability)
