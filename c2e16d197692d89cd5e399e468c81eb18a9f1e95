@@ -341,3 +341,20 @@ tags:
     ) -> None:
         """Test recent important memory has high score."""
         score = compute_retention_score(recent_hot_memory)...
+
+---
+type: learnings
+timestamp: '2025-12-27T16:39:07.568962+00:00'
+summary: '...superseded'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_retention.py
+---
+
+...superseded
+        assert score.supersession_penalty == SUPERSESSION_PENALTY
+        # Even a recent important memory gets low score when superseded
+        assert score.overall < 0.5
+
+    def test_score_has_factor...
