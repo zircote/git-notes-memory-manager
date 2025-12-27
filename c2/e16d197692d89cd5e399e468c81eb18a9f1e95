@@ -7783,3 +7783,17 @@ tags:
 
 ...6.1.9 | Implement `_compute_recency_score(summary)` scoring | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.1.10 | Implement `_format_summary_block(summaries)` with token budget | done | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.644838+00:00'
+summary: '...Implement `_format_summary_block(summaries)` with token budget | done
+  | 2025-12-27 | 2025-12-27 |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Implement `_format_summary_block(summaries)` with token budget | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.1.11 | Implement `_format_single_summary(summary)` formatting | done | 2025-12-27 |...
