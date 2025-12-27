@@ -8145,3 +8145,18 @@ asyncio.run(run())
 **Dry Run** (with `--dry-run`):
 ```bash
 uv run...
+
+---
+type: progress
+timestamp: '2025-12-27T18:16:54.944550+00:00'
+summary: '...Run ID | {result.run_id[:8]}... |'')'
+tags:
+- auto-captured
+- post-tool-use
+- file:consolidate.md
+---
+
+...Run ID | {result.run_id[:8]}... |')
+    print(f'| Status | Dry Run |')
+    print(f'| Phase Completed | {result.phase_completed.value if result.phase_completed else \"N/A\"} |')
+    print(f'|...
