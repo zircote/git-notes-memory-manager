@@ -2849,3 +2849,36 @@ Created a Makefile target that syncs source files to the plugin cache directory,
 
 ## Related Files
 - Makefile:209-242
+
+---
+type: progress
+timestamp: '2025-12-27T16:42:58.533581+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Created formal spec project for Memory Consolida...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Created formal spec project for Memory Consolidation from research documents
+## Summary
+Migrated research documents from `docs/research/CognitiveSubstrate/` into formal spec structure at `docs/spec/active/2025-12-27-memory-consolidation/`.
+
+## Deliverables Created
+- **REQUIREMENTS.md**: 11 functional requirements, 6 non-functional requirements including deep observability
+- **ARCHITECTURE.md**: Component architecture, data flow, observability instrumentation by module, trace hierarchy
+- **IMPLEMENTATION_PLAN.md**: 220 tasks across 7 phases with no deferrals
+- **README.md**: Project summary and metadata
+
+## Key Design Points
+- Deep observability at every level (not just hooks)
+- 220 implementation tasks - no skipping, no deferring
+- Feature-gated via pip extras `[consolidation]`
+- Idempotent SessionStart summary injection
+
+## Related Files
+- docs/spec/active/2025-12-27-memory-consolidation/REQUIREMENTS.md
+- docs/spec/active/2025-12-27-memory-consolidation/ARCHITECTURE.md
+- docs/spec/active/2025-12-27-memory-consolidation/IMPLEMENTATION_PLAN.md
+- docs/spec/active/2025-12-27-memory-consolidation/README.md
