@@ -7910,3 +7910,17 @@ tags:
 
 ...Integration tests: multiple Start events don't accumulate | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.1.21 | Integration tests: non-summary context preserved | done | 2025-12-27 | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.880504+00:00'
+summary: '...6.1.21 | Integration tests: non-summary context preserved | done | 2025-12-27
+  | 2025-12-27 | Comp'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...6.1.21 | Integration tests: non-summary context preserved | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.2.1 | Add `is_consolidation_available()` feature detection | done | 2025-12-27 | 2025-12-27...
