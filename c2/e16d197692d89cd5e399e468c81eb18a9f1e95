@@ -6886,3 +6886,17 @@ tags:
 
 | 2.2.1 | Create `SummaryStore` class with git notes backend | done | 2025-12-27 | 2025-12-27 | Completed |
 | 2.2.2 | Implement `get(summary_id)` → `MemorySummary \| None` | done | 2025-12-27 | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:11:21.243387+00:00'
+summary: '...| Implement `get(summary_id)` → `MemorySummary \| None` | done | 2025-12-27
+  | 2025-12-27 | Comple'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...| Implement `get(summary_id)` → `MemorySummary \| None` | done | 2025-12-27 | 2025-12-27 | Completed |
+| 2.2.3 | Implement `save(summary)` with YAML serialization | done | 2025-12-27 | 2025-12-27...
