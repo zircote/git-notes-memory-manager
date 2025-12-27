@@ -7868,3 +7868,17 @@ tags:
 ...Completed |
 | 6.1.16 | Create `get_summary_injector()` factory | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.1.17 | Unit tests for block removal (idempotency) | done | 2025-12-27 | 2025-12-27 |...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.800463+00:00'
+summary: '...tests pass |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...tests pass |
+| 6.1.18 | Unit tests for summary selection | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.1.19 | Unit tests for token budget enforcement | done | 2025-12-27 | 2025-12-27 | Completed...
