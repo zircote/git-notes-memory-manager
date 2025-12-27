@@ -813,3 +813,21 @@ tags:
 </memory_context>"""
 
         result = service.inject_consolidated...
+
+---
+type: learnings
+timestamp: '2025-12-27T18:02:22.924557+00:00'
+summary: '...consolidated_summaries(original, context)'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_hook_integration.py
+---
+
+...consolidated_summaries(original, context)
+
+        # Original content should be preserved
+        assert "Important blocker" in result.modified_context
+        assert "working_memory" in result.modified_context
+
+#...
