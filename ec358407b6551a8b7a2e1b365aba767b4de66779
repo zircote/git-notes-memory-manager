@@ -994,3 +994,25 @@ The OTLP telemetry pipeline is fully functional. Metrics were appearing empty be
 - src/git_notes_memory/hooks/hook_utils.py:329-387 (timed_hook_execution context manager)
 - src/git_notes_memory/observability/exporters/otlp.py:152-566 (OTLPExporter)
 - src/git_notes_memory/observability/persistent_metrics.py:1-150 (persistence layer)
+
+---
+type: learnings
+timestamp: '2025-12-27T13:12:33.974702+00:00'
+summary: Telemetry pipeline works correctly but metrics appear empty until hooks execute
+---
+
+Telemetry pipeline works correctly but metrics appear empty until hooks execute
+## Summary
+The OTLP telemetry pipeline is fully functional. Metrics were appearing empty because few hooks had executed, not due to a configuration issue.
+
+## Key Insights
+- OTLP export from hooks works (http://localhost:4318)
+- OTEL collector forwards to Prometheus via remote write
+- Prometheus scrape interval is 15s - must wait for fresh data
+- Metrics persist across hook invocations via ~/.local/share/memory-plugin/metrics_state.json
+- Grafana dashboards are pre-configured at http://localhost:3000
+
+## Related Files
+- src/git_notes_memory/hooks/hook_utils.py:329-387 (timed_hook_execution context manager)
+- src/git_notes_memory/observability/exporters/otlp.py:152-566 (OTLPExporter)
+- src/git_notes_memory/observability/persistent_metrics.py:1-150 (persistence layer)
