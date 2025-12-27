@@ -793,3 +793,23 @@ tags:
 ---
 
 Now I understand the schema structure. For Task 2.5, I need to extend the index schema to support consolidation...
+
+---
+type: learnings
+timestamp: '2025-12-27T18:02:22.883035+00:00'
+summary: '...summaries([create_mock_summary()])'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_hook_integration.py
+---
+
+...summaries([create_mock_summary()])
+
+        original = """<memory_context>
+<working_memory>
+<blockers>Important blocker</blockers>
+</working_memory>
+</memory_context>"""
+
+        result = service.inject_consolidated...
