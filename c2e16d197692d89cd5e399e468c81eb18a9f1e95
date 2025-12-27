@@ -358,3 +358,20 @@ tags:
         assert score.overall < 0.5
 
     def test_score_has_factor...
+
+---
+type: learnings
+timestamp: '2025-12-27T16:40:43.264365+00:00'
+summary: '...@pytest.fixture'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_retention.py
+---
+
+...@pytest.fixture
+    def recent_hot_memory(self) -> Memory:
+        """Create a recent, important memory."""
+        return Memory(
+            id="decisions:abc1234:0",
+            commit_sha="abc1234...
