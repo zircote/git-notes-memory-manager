@@ -1421,3 +1421,22 @@ summary: '...that doesn''t inherit your shell''s environment variables like `MEM
 ...that doesn't inherit your shell's environment variables like `MEMORY_PLUGIN_OTLP_ENDPOINT`.
 
 The fix is to source your shell profile in `run-hook.sh` or read config from a file. Let me add support...
+
+---
+type: progress
+timestamp: '2025-12-27T12:31:20.063149+00:00'
+summary: Fixed subconsciousness OpenAI provider and parser bugs
+---
+
+Fixed subconsciousness OpenAI provider and parser bugs
+## Summary
+Fixed multiple bugs preventing the LLM subconsciousness from working with OpenAI.
+
+## Changes Made
+- Fixed OpenAI provider to use `max_completion_tokens` for o1/o3/gpt-5 models
+- Fixed OpenAI provider to skip `temperature` param for reasoning models
+- Fixed agent parser to accept `type`/`details` fields from LLM response (not just `namespace`/`content`)
+
+## Related Files
+- src/git_notes_memory/subconsciousness/providers/openai.py:178-193
+- src/git_notes_memory/subconsciousness/implicit_capture_agent.py:311-318
