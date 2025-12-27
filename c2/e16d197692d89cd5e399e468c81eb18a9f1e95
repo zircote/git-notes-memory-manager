@@ -7811,3 +7811,17 @@ tags:
 
 ...Implement `_format_single_summary(summary)` formatting | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.1.12 | Implement `_estimate_tokens(text)` for budget enforcement | done | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.697134+00:00'
+summary: '...Implement `_estimate_tokens(text)` for budget enforcement | done | 2025-12-27
+  | 2025-12-27 | Comp'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Implement `_estimate_tokens(text)` for budget enforcement | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.1.13 | Add tracing spans for injection operations | done | 2025-12-27 | 2025-12-27 |...
