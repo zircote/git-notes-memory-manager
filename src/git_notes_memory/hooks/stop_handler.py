@@ -29,12 +29,14 @@ Environment Variables:
     HOOK_STOP_PROMPT_UNCAPTURED: Prompt for uncaptured content (default: true)
     HOOK_STOP_SYNC_INDEX: Sync index on session end (default: true)
     HOOK_STOP_PUSH_REMOTE: Push notes to remote on stop (default: false)
+    HOOK_STOP_PUSH_USER_REMOTE: Push user memories to remote on stop (default: false)
     HOOK_DEBUG: Enable debug logging (default: false)
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -51,19 +53,10 @@ from git_notes_memory.hooks.hook_utils import (
     timed_hook_execution,
 )
 from git_notes_memory.hooks.models import CaptureSignal
-from git_notes_memory.observability import get_logger
-from git_notes_memory.observability.exporters.otlp import (
-    export_metrics_if_configured,
-    export_traces_if_configured,
-)
-from git_notes_memory.observability.tracing import (
-    clear_completed_spans,
-    get_completed_spans,
-)
 
 __all__ = ["main"]
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _read_input_with_fallback() -> dict[str, Any]:
@@ -241,43 +234,6 @@ def _auto_capture_signals(
     return captured, remaining
 
 
-def _flush_telemetry() -> dict[str, Any]:
-    """Flush accumulated telemetry to OTLP endpoint.
-
-    Exports all collected traces and metrics to the configured OTLP
-    endpoint (if any). Called at session end to ensure telemetry is shipped.
-
-    Returns:
-        Dict with export results.
-    """
-    result: dict[str, Any] = {"traces": False, "metrics": False}
-
-    try:
-        # Export traces
-        spans = get_completed_spans()
-        if spans:
-            if export_traces_if_configured(spans):
-                result["traces"] = True
-                result["trace_count"] = len(spans)
-                clear_completed_spans()
-                logger.debug("Exported %d traces to OTLP", len(spans))
-            else:
-                logger.debug("Trace export skipped (no endpoint or failed)")
-
-        # Export metrics
-        if export_metrics_if_configured():
-            result["metrics"] = True
-            logger.debug("Exported metrics to OTLP")
-        else:
-            logger.debug("Metrics export skipped (no endpoint or failed)")
-
-    except Exception as e:
-        logger.debug("Telemetry flush error: %s", e)
-        result["error"] = str(e)
-
-    return result
-
-
 def _signal_to_dict(signal: CaptureSignal) -> dict[str, Any]:
     """Convert a CaptureSignal to a JSON-serializable dict.
 
@@ -433,7 +389,7 @@ def main() -> None:
     timeout = config.timeout or HOOK_STOP_TIMEOUT
     setup_timeout(timeout, hook_name="Stop")
 
-    with timed_hook_execution("Stop") as timer:
+    with timed_hook_execution("Stop"):
         try:
             # QUAL-001: Use hook_utils.read_json_input with fallback
             input_data = _read_input_with_fallback()
@@ -518,8 +474,9 @@ def main() -> None:
                 elif not sync_result.get("success"):
                     logger.warning("Index sync failed: %s", sync_result.get("error"))
 
-            # Push notes to remote if enabled (opt-in via env var)
-            # This ensures local memories are shared with collaborators
+            # Sync notes with remote if enabled (opt-in via env var)
+            # Uses fetch→merge→push to avoid race conditions in multi-worktree
+            # environments (Issue #28: prevents non-fast-forward push failures)
             if config.stop_push_remote:
                 cwd = input_data.get("cwd")
                 if cwd:
@@ -527,24 +484,133 @@ def main() -> None:
                         from git_notes_memory.git_ops import GitOps
 
                         git_ops = GitOps(repo_path=cwd)
-                        if git_ops.push_notes_to_remote():
-                            logger.debug("Pushed notes to remote on session stop")
-                        else:
+                        sync_result = git_ops.sync_notes_with_remote(push=True)
+                        if any(sync_result.values()):
                             logger.debug(
-                                "Push to remote failed (will retry next session)"
+                                "Synced notes with remote on session stop: %s",
+                                sync_result,
                             )
+                        else:
+                            logger.debug("Sync with remote had no changes")
                     except Exception as e:
-                        logger.debug("Remote push on stop skipped: %s", e)
+                        logger.debug("Remote sync on stop skipped: %s", e)
 
-            # Flush telemetry to OTLP endpoint (if configured)
-            telemetry_result = _flush_telemetry()
-            if telemetry_result.get("traces") or telemetry_result.get("metrics"):
-                hook_logger.info(
-                    "Telemetry flushed: traces=%s (count=%d), metrics=%s",
-                    telemetry_result.get("traces"),
-                    telemetry_result.get("trace_count", 0),
-                    telemetry_result.get("metrics"),
+            # Push user memories to remote if enabled (opt-in via env var)
+            if config.stop_push_user_remote:
+                try:
+                    from git_notes_memory.config import get_user_memories_remote
+
+                    if get_user_memories_remote():
+                        cwd = input_data.get("cwd")
+                        from git_notes_memory.sync import get_sync_service as get_sync
+
+                        sync_service = get_sync(repo_path=cwd if cwd else None)
+                        sync_service.sync_user_memories_with_remote(push=True)
+                        logger.debug("Pushed user memories to remote on session stop")
+                except Exception as e:
+                    # Don't block session - just log and continue
+                    logger.debug("User memory remote push skipped: %s", e)
+
+            # Export metrics, traces, and logs to OTLP collector before session ends
+            try:
+                from git_notes_memory.observability.exporters import (
+                    LogRecord,
+                    export_logs_if_configured,
+                    export_metrics_if_configured,
+                    export_traces_if_configured,
                 )
+                from git_notes_memory.observability.exporters.otlp import (
+                    get_otlp_exporter,
+                )
+                from git_notes_memory.observability.tracing import get_completed_spans
+
+                exporter = get_otlp_exporter()
+                hook_logger.info(
+                    "OTLP export: enabled=%s, endpoint=%s",
+                    exporter.enabled,
+                    exporter.endpoint,
+                )
+
+                # Export any collected traces
+                completed_spans = get_completed_spans()
+                traces_ok = False
+                if completed_spans:
+                    traces_ok = export_traces_if_configured(completed_spans)
+                    hook_logger.info(
+                        "OTLP traces export: success=%s, count=%d",
+                        traces_ok,
+                        len(completed_spans),
+                    )
+                else:
+                    hook_logger.info("OTLP traces export: no spans to export")
+
+                # Export metrics
+                metrics_ok = export_metrics_if_configured()
+                hook_logger.info("OTLP metrics export: success=%s", metrics_ok)
+
+                # Export session summary logs
+                logs: list[LogRecord] = []
+
+                # Log session end with capture stats
+                if captured:
+                    logs.append(
+                        LogRecord(
+                            body=f"Session ended with {len(captured)} memories captured",
+                            severity="INFO",
+                            attributes={
+                                "event": "session_end",
+                                "memories_captured": len(captured),
+                                "namespaces": ", ".join(
+                                    sorted(
+                                        {
+                                            m.get("namespace", "unknown")
+                                            for m in captured
+                                        }
+                                    )
+                                ),
+                            },
+                        )
+                    )
+
+                # Log each captured memory
+                for memory in captured:
+                    logs.append(
+                        LogRecord(
+                            body=f"Memory captured: {memory.get('summary', 'No summary')[:100]}",
+                            severity="INFO",
+                            attributes={
+                                "event": "memory_captured",
+                                "namespace": memory.get("namespace", "unknown"),
+                                "memory_id": memory.get("id", "unknown"),
+                            },
+                        )
+                    )
+
+                # Log uncaptured content warnings
+                if uncaptured:
+                    logs.append(
+                        LogRecord(
+                            body=f"Session ended with {len(uncaptured)} uncaptured items",
+                            severity="WARN",
+                            attributes={
+                                "event": "uncaptured_content",
+                                "count": len(uncaptured),
+                            },
+                        )
+                    )
+
+                if logs:
+                    logs_ok = export_logs_if_configured(logs)
+                    hook_logger.info(
+                        "OTLP logs export: success=%s, count=%d", logs_ok, len(logs)
+                    )
+                else:
+                    hook_logger.info("OTLP logs export: no logs to export")
+
+            except Exception as e:
+                # Don't block session - telemetry export is best-effort
+                hook_logger.info("OTLP export error: %s", e)
+                logger.debug("OTLP export skipped: %s", e)
 
             # Output result
             _write_output(
@@ -555,11 +621,9 @@ def main() -> None:
             )
 
         except json.JSONDecodeError as e:
-            timer.set_status("error")
             logger.error("Failed to parse hook input: %s", e)
             print(json.dumps({"continue": True}))
         except Exception as e:
-            timer.set_status("error")
             logger.exception("Stop hook error: %s", e)
             print(json.dumps({"continue": True}))
         finally:

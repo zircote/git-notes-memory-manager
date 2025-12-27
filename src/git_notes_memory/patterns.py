@@ -68,6 +68,19 @@ MIN_CONFIDENCE_FOR_VALIDATION = 0.6
 # Minimum occurrences for automatic promotion
 MIN_OCCURRENCES_FOR_PROMOTION = 5
 
+# MED-007: Extracted magic numbers to named constants for clarity
+# Scoring weights for pattern confidence calculation
+NORMALIZED_SCORE_WEIGHT = 0.6  # Weight for normalized score in confidence
+OCCURRENCE_FACTOR_WEIGHT = 0.4  # Weight for occurrence factor in confidence
+RECENCY_BOOST_FACTOR = 0.2  # Multiplier for recency boost
+
+# Evidence and term importance scaling factors
+EVIDENCE_IMPORTANCE_EXPONENT = 0.5  # Square root prevents evidence count dominance
+TERM_BONUS_EXPONENT = 0.3  # Mild bonus for more terms
+
+# Pattern promotion boost
+EVIDENCE_PROMOTION_BOOST = 0.05  # Confidence boost per evidence
+
 # Stop words for term analysis (common English words to filter)
 STOP_WORDS: frozenset[str] = frozenset(
     {
@@ -333,9 +346,10 @@ class PatternCandidate:
         occurrence_factor = min(
             1.0, self.occurrence_count / MIN_OCCURRENCES_FOR_PROMOTION
         )
-        confidence = (self.normalized_score * 0.6 + occurrence_factor * 0.4) * (
-            1.0 + self.recency_boost * 0.2
-        )
+        confidence = (
+            self.normalized_score * NORMALIZED_SCORE_WEIGHT
+            + occurrence_factor * OCCURRENCE_FACTOR_WEIGHT
+        ) * (1.0 + self.recency_boost * RECENCY_BOOST_FACTOR)
         confidence = min(1.0, max(0.0, confidence))
 
         return Pattern(
@@ -508,7 +522,8 @@ class PatternManager:
             )
 
         # Step 1: Extract terms from all memories
-        term_memory_map: dict[str, set[str]] = defaultdict(set)
+        # QUAL-M-007: Use defaultdict type annotation for accuracy
+        term_memory_map: defaultdict[str, set[str]] = defaultdict(set)
         memory_terms: dict[str, set[str]] = {}
         all_terms: set[str] = set()
 
@@ -679,6 +694,9 @@ class PatternManager:
 
         return terms
 
+    # Maximum terms to analyze to prevent O(n²) explosion in clustering
+    MAX_TERMS_FOR_CLUSTERING: int = 100
+
     def _find_term_clusters(
         self,
         term_memory_map: dict[str, set[str]],
@@ -688,6 +706,9 @@ class PatternManager:
 
         Uses a simple co-occurrence algorithm to find term groups that
         appear together in multiple memories.
+
+        To prevent O(n²) explosion with large vocabularies, only the top
+        MAX_TERMS_FOR_CLUSTERING terms by occurrence count are analyzed.
 
         Args:
             term_memory_map: Mapping from terms to memory IDs.
@@ -705,6 +726,17 @@ class PatternManager:
 
         if not frequent_terms:
             return []
+
+        # Limit terms to top N by occurrence count to prevent O(n²) explosion
+        # Sort by occurrence count (descending) and take top terms
+        sorted_terms = sorted(
+            frequent_terms.keys(),
+            key=lambda t: len(frequent_terms[t]),
+            reverse=True,
+        )
+        if len(sorted_terms) > self.MAX_TERMS_FOR_CLUSTERING:
+            sorted_terms = sorted_terms[: self.MAX_TERMS_FOR_CLUSTERING]
+            frequent_terms = {t: frequent_terms[t] for t in sorted_terms}
 
         # Find term pairs with high co-occurrence
         term_list = list(frequent_terms.keys())
@@ -781,9 +813,9 @@ class PatternManager:
 
         avg_specificity = specificity_sum / len(terms) if terms else 0.0
 
-        # Combine factors
-        evidence_factor = len(evidence_ids) ** 0.5  # Square root to prevent dominance
-        term_factor = len(terms) ** 0.3  # Mild bonus for more terms
+        # Combine factors using named constants
+        evidence_factor = len(evidence_ids) ** EVIDENCE_IMPORTANCE_EXPONENT
+        term_factor = len(terms) ** TERM_BONUS_EXPONENT
 
         score: float = avg_specificity * evidence_factor * term_factor
         return score
@@ -1072,7 +1104,7 @@ class PatternManager:
         # Recalculate confidence with more evidence
         new_confidence = min(
             1.0,
-            pattern.confidence + 0.05,  # Small boost per evidence
+            pattern.confidence + EVIDENCE_PROMOTION_BOOST,
         )
 
         updated = Pattern(

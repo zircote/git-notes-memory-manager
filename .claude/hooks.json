@@ -3,44 +3,55 @@
   "hooks": [
     {
       "name": "format-on-edit",
-      "description": "Run ruff format on edited Python files",
+      "description": "Auto-format Python files with ruff (matches CI: ruff format)",
       "event": "PostToolUse",
       "matcher": "Write|Edit|str_replace_editor",
       "type": "command",
-      "command": "cd /Users/AllenR1_1/Projects/zircote/git-notes-memory-manager && uv run ruff format $CLAUDE_FILE_PATHS 2>/dev/null || true",
+      "command": "cd \"$CLAUDE_PROJECT_DIR\" && uv run ruff format $CLAUDE_FILE_PATHS 2>/dev/null || true",
       "conditions": {
         "fileExtensions": [".py", ".pyi"]
       }
     },
     {
       "name": "lint-check-on-edit",
-      "description": "Check for lint errors after Python edits",
+      "description": "Check lint errors with ruff (matches CI: ruff check src/ tests/)",
       "event": "PostToolUse",
       "matcher": "Write|Edit|str_replace_editor",
       "type": "command",
-      "command": "cd /Users/AllenR1_1/Projects/zircote/git-notes-memory-manager && uv run ruff check $CLAUDE_FILE_PATHS --output-format=concise 2>/dev/null | head -20 || true",
+      "command": "cd \"$CLAUDE_PROJECT_DIR\" && uv run ruff check $CLAUDE_FILE_PATHS --output-format=concise 2>/dev/null | head -20 || true",
       "conditions": {
         "fileExtensions": [".py", ".pyi"]
       }
     },
     {
       "name": "typecheck-on-edit",
-      "description": "Run mypy on edited files to catch type errors",
+      "description": "Type check with mypy strict mode (matches CI: mypy src/)",
       "event": "PostToolUse",
       "matcher": "Write|Edit|str_replace_editor",
       "type": "command",
-      "command": "cd /Users/AllenR1_1/Projects/zircote/git-notes-memory-manager && uv run mypy $CLAUDE_FILE_PATHS 2>&1 | grep -E 'error:' | head -10 || true",
+      "command": "cd \"$CLAUDE_PROJECT_DIR\" && uv run mypy $CLAUDE_FILE_PATHS 2>&1 | grep -E 'error:' | head -10 || true",
       "conditions": {
         "fileExtensions": [".py", ".pyi"]
       }
     },
     {
+      "name": "security-scan-on-edit",
+      "description": "Security scan with bandit (matches CI: bandit -r src/ -ll)",
+      "event": "PostToolUse",
+      "matcher": "Write|Edit|str_replace_editor",
+      "type": "command",
+      "command": "cd \"$CLAUDE_PROJECT_DIR\" && uv run bandit -ll $CLAUDE_FILE_PATHS 2>/dev/null | grep -E '^>>' | head -10 || true",
+      "conditions": {
+        "fileExtensions": [".py"]
+      }
+    },
+    {
       "name": "pre-commit-quality-gate",
-      "description": "Full quality check before git commits",
+      "description": "Full CI quality check before git commits (format, lint, typecheck, security, tests)",
       "event": "PreToolUse",
       "matcher": "Bash",
       "type": "command",
-      "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'git commit'; then cd /Users/AllenR1_1/Projects/zircote/git-notes-memory-manager && make quality; fi",
+      "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'git commit'; then cd \"$CLAUDE_PROJECT_DIR\" && make quality; fi",
       "blocking": true
     }
   ]

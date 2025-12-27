@@ -8,14 +8,18 @@ Tests the signal detection system including:
 - Deduplication of overlapping matches
 - detect_all_types() grouping functionality
 - Edge cases (empty text, unicode, special characters)
+- Domain marker detection ([global], [user], [project], [local])
+- Block pattern domain prefix (global:decision, user:learned)
 """
 
 from __future__ import annotations
 
 import pytest
 
+from git_notes_memory.config import Domain
 from git_notes_memory.hooks.models import CaptureSignal, SignalType
 from git_notes_memory.hooks.signal_detector import (
+    DOMAIN_MARKERS,
     SIGNAL_PATTERNS,
     SignalDetector,
 )
@@ -1104,3 +1108,273 @@ class TestUnicodeBlockMarkers:
         signals = detector.detect(text)
         assert len(signals) == 1
         assert signals[0].confidence >= 0.95
+
+
+# =============================================================================
+# Domain Marker Detection Tests
+# =============================================================================
+
+
+class TestDomainMarkerDetection:
+    """Test domain marker detection for multi-domain memory storage."""
+
+    def test_domain_markers_constant_structure(self) -> None:
+        """Test DOMAIN_MARKERS constant has expected structure."""
+        assert "global" in DOMAIN_MARKERS
+        assert "user" in DOMAIN_MARKERS
+        assert "project" in DOMAIN_MARKERS
+        assert "local" in DOMAIN_MARKERS
+        assert DOMAIN_MARKERS["global"] == Domain.USER
+        assert DOMAIN_MARKERS["user"] == Domain.USER
+        assert DOMAIN_MARKERS["project"] == Domain.PROJECT
+        assert DOMAIN_MARKERS["local"] == Domain.PROJECT
+
+    def test_signal_default_domain_is_project(self, detector: SignalDetector) -> None:
+        """Test that signals default to PROJECT domain."""
+        text = "I decided to use PostgreSQL for storage"
+        signals = detector.detect(text)
+        assert len(signals) >= 1
+        # Without domain markers, should default to PROJECT
+        assert signals[0].domain == Domain.PROJECT
+
+    def test_inline_global_marker_sets_user_domain(
+        self, detector: SignalDetector
+    ) -> None:
+        """Test [global] marker sets USER domain on subsequent signals."""
+        text = "[global] I decided to use consistent code style across all projects"
+        signals = detector.detect(text)
+        decision_signals = [s for s in signals if s.type == SignalType.DECISION]
+        assert len(decision_signals) >= 1
+        assert decision_signals[0].domain == Domain.USER
+
+    def test_inline_user_marker_sets_user_domain(
+        self, detector: SignalDetector
+    ) -> None:
+        """Test [user] marker sets USER domain."""
+        text = "[user] I learned that pytest fixtures are powerful"
+        signals = detector.detect(text)
+        learning_signals = [s for s in signals if s.type == SignalType.LEARNING]
+        assert len(learning_signals) >= 1
+        assert learning_signals[0].domain == Domain.USER
+
+    def test_inline_project_marker_sets_project_domain(
+        self, detector: SignalDetector
+    ) -> None:
+        """Test [project] marker explicitly sets PROJECT domain."""
+        text = "[project] I decided to use SQLite for this specific project"
+        signals = detector.detect(text)
+        decision_signals = [s for s in signals if s.type == SignalType.DECISION]
+        assert len(decision_signals) >= 1
+        assert decision_signals[0].domain == Domain.PROJECT
+
+    def test_inline_local_marker_sets_project_domain(
+        self, detector: SignalDetector
+    ) -> None:
+        """Test [local] marker sets PROJECT domain."""
+        text = "[local] I learned about the project-specific API quirks"
+        signals = detector.detect(text)
+        learning_signals = [s for s in signals if s.type == SignalType.LEARNING]
+        assert len(learning_signals) >= 1
+        assert learning_signals[0].domain == Domain.PROJECT
+
+    def test_domain_markers_case_insensitive(self, detector: SignalDetector) -> None:
+        """Test domain markers are case-insensitive."""
+        cases = [
+            "[GLOBAL] I decided to proceed",
+            "[Global] I decided to proceed",
+            "[gLoBAL] I decided to proceed",
+        ]
+        for text in cases:
+            signals = detector.detect(text)
+            decision_signals = [s for s in signals if s.type == SignalType.DECISION]
+            assert len(decision_signals) >= 1, f"No decision signal in: {text}"
+            assert decision_signals[0].domain == Domain.USER, f"Wrong domain in: {text}"
+
+    def test_domain_marker_applies_to_following_signal(
+        self, detector: SignalDetector
+    ) -> None:
+        """Test domain marker applies to signals that follow it."""
+        text = "Some context here. [global] Later I decided to use a common pattern."
+        signals = detector.detect(text)
+        decision_signals = [s for s in signals if s.type == SignalType.DECISION]
+        assert len(decision_signals) >= 1
+        assert decision_signals[0].domain == Domain.USER
+
+    def test_distant_marker_does_not_apply(self, detector: SignalDetector) -> None:
+        """Test domain marker beyond lookback window doesn't apply."""
+        # Create text where marker is far from the signal (beyond 2x context_window)
+        padding = "x" * 300  # Default context_window is 100, lookback is 200
+        text = f"[global] {padding} I decided to proceed with local option"
+        signals = detector.detect(text)
+        decision_signals = [s for s in signals if s.type == SignalType.DECISION]
+        assert len(decision_signals) >= 1
+        # Should be PROJECT since [global] is too far away
+        assert decision_signals[0].domain == Domain.PROJECT
+
+
+# =============================================================================
+# Block Pattern Domain Prefix Tests
+# =============================================================================
+
+
+class TestBlockPatternDomainPrefix:
+    """Test unicode block patterns with domain prefixes."""
+
+    def test_block_without_domain_defaults_to_project(
+        self, detector: SignalDetector
+    ) -> None:
+        """Test blocks without domain prefix default to PROJECT."""
+        text = (
+            "▶ decision ─────────────────────────────────────\n"
+            "Use PostgreSQL for JSONB support\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].domain == Domain.PROJECT
+
+    def test_global_prefix_sets_user_domain(self, detector: SignalDetector) -> None:
+        """Test global: prefix sets USER domain on blocks."""
+        text = (
+            "▶ global:decision ─────────────────────────────────────\n"
+            "Always use conventional commits across all projects\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].type == SignalType.DECISION
+        assert signals[0].domain == Domain.USER
+        assert "conventional commits" in signals[0].context
+
+    def test_user_prefix_sets_user_domain(self, detector: SignalDetector) -> None:
+        """Test user: prefix sets USER domain on blocks."""
+        text = (
+            "▶ user:learned ─────────────────────────────────────\n"
+            "pytest fixtures with module scope share state\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].type == SignalType.LEARNING
+        assert signals[0].domain == Domain.USER
+
+    def test_project_prefix_sets_project_domain(self, detector: SignalDetector) -> None:
+        """Test project: prefix explicitly sets PROJECT domain."""
+        text = (
+            "▶ project:blocker ─────────────────────────────────────\n"
+            "Circular FK dependency in this specific schema\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].type == SignalType.BLOCKER
+        assert signals[0].domain == Domain.PROJECT
+
+    def test_local_prefix_sets_project_domain(self, detector: SignalDetector) -> None:
+        """Test local: prefix sets PROJECT domain."""
+        text = (
+            "▶ local:progress ─────────────────────────────────────\n"
+            "Implemented JWT auth for this application\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].type == SignalType.PROGRESS
+        assert signals[0].domain == Domain.PROJECT
+
+    def test_all_block_types_with_domain_prefix(self, detector: SignalDetector) -> None:
+        """Test all block types work with domain prefix."""
+        block_types = [
+            ("decision", SignalType.DECISION),
+            ("learned", SignalType.LEARNING),
+            ("learning", SignalType.LEARNING),
+            ("blocker", SignalType.BLOCKER),
+            ("progress", SignalType.PROGRESS),
+            ("pattern", SignalType.PATTERN),
+            ("remember", SignalType.EXPLICIT),
+        ]
+
+        for block_type, expected_signal_type in block_types:
+            text = (
+                f"▶ global:{block_type} ─────────────────────────────────────\n"
+                f"Test content for {block_type}\n"
+                "────────────────────────────────────────────────"
+            )
+            signals = detector.detect(text)
+            assert len(signals) == 1, f"No signal for {block_type}"
+            assert signals[0].type == expected_signal_type, (
+                f"Wrong type for {block_type}"
+            )
+            assert signals[0].domain == Domain.USER, f"Wrong domain for {block_type}"
+
+    def test_block_domain_prefix_case_insensitive(
+        self, detector: SignalDetector
+    ) -> None:
+        """Test block domain prefixes are case-insensitive."""
+        # Note: The regex uses lowercase, so we test lowercase explicitly
+        text = (
+            "▶ global:decision ─────────────────────────────────────\n"
+            "Use consistent style\n"
+            "────────────────────────────────────────────────"
+        )
+        signals = detector.detect(text)
+        assert len(signals) == 1
+        assert signals[0].domain == Domain.USER
+
+
+# =============================================================================
+# CaptureSignal Domain Field Tests
+# =============================================================================
+
+
+class TestCaptureSignalDomainField:
+    """Test the domain field on CaptureSignal dataclass."""
+
+    def test_signal_has_domain_attribute(self, detector: SignalDetector) -> None:
+        """Test signals have domain attribute."""
+        text = "I decided to use Python"
+        signals = detector.detect(text)
+        assert len(signals) >= 1
+        assert hasattr(signals[0], "domain")
+
+    def test_signal_domain_is_domain_enum(self, detector: SignalDetector) -> None:
+        """Test signal domain is a Domain enum value."""
+        text = "[global] I decided to proceed"
+        signals = detector.detect(text)
+        decision_signals = [s for s in signals if s.type == SignalType.DECISION]
+        assert len(decision_signals) >= 1
+        assert isinstance(decision_signals[0].domain, Domain)
+
+    def test_signal_domain_immutable(self, detector: SignalDetector) -> None:
+        """Test signal domain cannot be modified (frozen dataclass)."""
+        text = "I decided to proceed"
+        signals = detector.detect(text)
+        assert len(signals) >= 1
+
+        with pytest.raises(AttributeError):
+            signals[0].domain = Domain.USER  # type: ignore[misc]
+
+    def test_create_signal_with_domain(self) -> None:
+        """Test manually creating CaptureSignal with domain."""
+        signal = CaptureSignal(
+            type=SignalType.DECISION,
+            match="decided",
+            confidence=0.9,
+            context="I decided to proceed",
+            suggested_namespace="decisions",
+            position=2,
+            domain=Domain.USER,
+        )
+        assert signal.domain == Domain.USER
+
+    def test_create_signal_defaults_to_project(self) -> None:
+        """Test CaptureSignal defaults to PROJECT domain."""
+        signal = CaptureSignal(
+            type=SignalType.LEARNING,
+            match="learned",
+            confidence=0.85,
+            context="I learned something",
+            suggested_namespace="learnings",
+            position=0,
+        )
+        assert signal.domain == Domain.PROJECT

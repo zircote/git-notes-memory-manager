@@ -23,10 +23,11 @@ from __future__ import annotations
 import re
 from typing import ClassVar
 
+from git_notes_memory.config import Domain
 from git_notes_memory.hooks.models import CaptureSignal, SignalType
 from git_notes_memory.observability import get_logger
 
-__all__ = ["SignalDetector", "SIGNAL_PATTERNS"]
+__all__ = ["SignalDetector", "SIGNAL_PATTERNS", "DOMAIN_MARKERS"]
 
 logger = get_logger(__name__)
 
@@ -154,12 +155,34 @@ BLOCK_MARKERS: dict[str, SignalType] = {
     "remember": SignalType.EXPLICIT,
 }
 
-# Regex to capture unicode block markers
-# Format: ▶ namespace ───...
+# Domain markers - inline markers that indicate where to store the memory
+# USER domain: global memories that persist across projects
+# PROJECT domain: project-local memories (default)
+DOMAIN_MARKERS: dict[str, Domain] = {
+    "global": Domain.USER,
+    "user": Domain.USER,
+    "project": Domain.PROJECT,
+    "local": Domain.PROJECT,
+}
+
+# Inline domain marker patterns for detection
+# Format: [global], [user], [project], [local]
+DOMAIN_MARKER_PATTERN = re.compile(
+    r"\[(?:global|user|project|local)\]",
+    re.IGNORECASE,
+)
+
+# Regex to capture unicode block markers with optional domain prefix
+# Format: ▶ [domain:]namespace ───...
 #         content lines
 #         ────────────────
+# Examples:
+#   ▶ decision ───          (PROJECT domain, default)
+#   ▶ global:decision ───   (USER domain)
+#   ▶ user:learned ───      (USER domain)
 BLOCK_PATTERN = re.compile(
-    r"▶\s+(decision|learned|learning|blocker|progress|pattern|remember)\s+─+"
+    r"▶\s+(?:(global|user|project|local):)?"  # Optional domain prefix
+    r"(decision|learned|learning|blocker|progress|pattern|remember)\s+─+"
     r"(?:\s+([^\n]+))?"  # Optional summary on same line
     r"\n(.*?)"  # Body content
     r"^─+$",  # Closing line of dashes
@@ -286,17 +309,32 @@ class SignalDetector:
 
         signals: list[CaptureSignal] = []
         block_positions: set[tuple[int, int]] = set()
+        domain_marker_positions: dict[int, Domain] = {}
 
-        # FIRST: Detect unicode block markers (▶ namespace ─── ... ────)
+        # FIRST: Detect inline domain markers [global], [user], [project], [local]
+        # These set the domain for subsequent signals in the same context
+        for match in DOMAIN_MARKER_PATTERN.finditer(text):
+            marker = match.group(0)[1:-1].lower()  # Strip brackets
+            domain = DOMAIN_MARKERS.get(marker, Domain.PROJECT)
+            domain_marker_positions[match.start()] = domain
+
+        # SECOND: Detect unicode block markers (▶ [domain:]namespace ─── ... ────)
         for match in BLOCK_PATTERN.finditer(text):
-            namespace_keyword = match.group(1).lower()
-            title = (match.group(2) or "").strip()
-            body = (match.group(3) or "").strip()
+            domain_prefix = (match.group(1) or "").lower()
+            namespace_keyword = match.group(2).lower()
+            title = (match.group(3) or "").strip()
+            body = (match.group(4) or "").strip()
 
             # Look up the signal type for this namespace keyword
             signal_type = BLOCK_MARKERS.get(namespace_keyword)
             if signal_type is None:
                 continue
+
+            # Determine domain from prefix or default to PROJECT
+            if domain_prefix:
+                domain = DOMAIN_MARKERS.get(domain_prefix, Domain.PROJECT)
+            else:
+                domain = Domain.PROJECT
 
             # Build the full block content (title + body)
             full_content = title
@@ -313,13 +351,14 @@ class SignalDetector:
                 context=full_content,  # Just the content without markers
                 suggested_namespace=signal_type.suggested_namespace,
                 position=match.start(),
+                domain=domain,
             )
             signals.append(signal)
             block_positions.add((match.start(), match.end()))
 
         logger.debug("Detected %d block markers in text", len(block_positions))
 
-        # SECOND: Detect inline patterns (skip positions covered by blocks)
+        # THIRD: Detect inline patterns (skip positions covered by blocks)
         for signal_type, patterns in self._compiled_patterns.items():
             for pattern, base_confidence in patterns:
                 for match in pattern.finditer(text):
@@ -342,6 +381,11 @@ class SignalDetector:
                     if confidence < self.min_confidence:
                         continue
 
+                    # Determine domain from nearest preceding domain marker
+                    signal_domain = self._find_nearest_domain(
+                        pos, domain_marker_positions
+                    )
+
                     signal = CaptureSignal(
                         type=signal_type,
                         match=match.group(),
@@ -349,6 +393,7 @@ class SignalDetector:
                         context=context,
                         suggested_namespace=signal_type.suggested_namespace,
                         position=match.start(),
+                        domain=signal_domain,
                     )
                     signals.append(signal)
 
@@ -455,6 +500,42 @@ class SignalDetector:
                 confidence = min(1.0, confidence + 0.05)
 
         return round(confidence, 3)
+
+    def _find_nearest_domain(
+        self,
+        position: int,
+        domain_markers: dict[int, Domain],
+    ) -> Domain:
+        """Find the nearest preceding domain marker for a signal position.
+
+        Looks for domain markers ([global], [user], etc.) that appear before
+        the signal position within the same context window. If no marker is
+        found, returns PROJECT as the default domain.
+
+        Args:
+            position: Character position of the signal in the text.
+            domain_markers: Dictionary mapping positions to Domain values.
+
+        Returns:
+            Domain from nearest preceding marker, or PROJECT if none found.
+        """
+        if not domain_markers:
+            return Domain.PROJECT
+
+        # Find markers that precede this position within context window
+        max_lookback = self.context_window * 2  # Look back within 2x context
+        preceding_markers = [
+            (pos, domain)
+            for pos, domain in domain_markers.items()
+            if position - max_lookback <= pos < position
+        ]
+
+        if not preceding_markers:
+            return Domain.PROJECT
+
+        # Return domain from the closest preceding marker
+        _, closest_domain = max(preceding_markers, key=lambda x: x[0])
+        return closest_domain
 
     def _deduplicate_signals(
         self,

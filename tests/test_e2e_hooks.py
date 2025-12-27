@@ -555,8 +555,10 @@ class TestSessionStartHookExecution:
         from unittest.mock import MagicMock
 
         mock_recall = MagicMock()
-        mock_recall.get_by_namespace.side_effect = lambda ns, spec=None, limit=None: (  # noqa: ARG005
-            [old_memory, recent_memory] if ns == "decisions" else []
+        mock_recall.get_by_namespace.side_effect = (
+            lambda ns, spec=None, limit=None, domain=None: (  # noqa: ARG005
+                [old_memory, recent_memory] if ns == "decisions" else []
+            )
         )
         mock_recall.search.return_value = []
 
@@ -600,7 +602,9 @@ class TestSessionStartHookExecution:
 
         mock_recall = MagicMock()
         mock_recall.get_by_namespace.side_effect = (
-            lambda ns, spec=None, limit=None: [memory] if ns == "decisions" else []  # noqa: ARG005
+            lambda ns, spec=None, limit=None, domain=None: [memory]  # noqa: ARG005
+            if ns == "decisions"
+            else []
         )
         mock_recall.search.return_value = []
 

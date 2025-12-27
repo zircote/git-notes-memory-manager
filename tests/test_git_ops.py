@@ -7,6 +7,7 @@ Also includes integration tests that work with real git repositories.
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Generator
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
@@ -14,6 +15,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from git_notes_memory import config
+from git_notes_memory.config import Domain
 from git_notes_memory.exceptions import StorageError, ValidationError
 from git_notes_memory.git_ops import CommitInfo, GitOps, validate_path
 
@@ -925,7 +927,10 @@ class TestGitOpsMigrationMocked:
             args_str = " ".join(str(a) for a in args)
             result = MagicMock(returncode=0)
 
-            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+            if "--version" in args_str:
+                # Return git version for git_supports_fixed_value()
+                result.stdout = "git version 2.45.0"
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
                 # Return old pattern
                 result.stdout = "refs/notes/mem/*:refs/notes/mem/*"
             elif "--unset" in args_str or "--add" in args_str:
@@ -947,7 +952,9 @@ class TestGitOpsMigrationMocked:
             args_str = " ".join(str(a) for a in args)
             result = MagicMock(returncode=0)
 
-            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+            if "--version" in args_str:
+                result.stdout = "git version 2.45.0"
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
                 # Return new pattern (no old pattern)
                 result.stdout = "+refs/notes/mem/*:refs/notes/origin/mem/*"
             return result
@@ -966,7 +973,9 @@ class TestGitOpsMigrationMocked:
             args_str = " ".join(str(a) for a in args)
             result = MagicMock(returncode=0)
 
-            if "--get-all" in args_str and "remote.origin.fetch" in args_str:
+            if "--version" in args_str:
+                result.stdout = "git version 2.45.0"
+            elif "--get-all" in args_str and "remote.origin.fetch" in args_str:
                 # Return both patterns
                 result.stdout = (
                     "refs/notes/mem/*:refs/notes/mem/*\n"
@@ -1126,6 +1135,104 @@ class TestGitOpsRemoteSyncMocked:
 
             # Push should not have been called
             assert len(push_called) == 0
+
+
+# =============================================================================
+# GitOps Remote Configuration Tests
+# =============================================================================
+
+
+class TestGitOpsRemoteConfiguration:
+    """Tests for get_remote_url and set_remote_url methods."""
+
+    def test_get_remote_url_returns_url_when_exists(self, tmp_path: Path) -> None:
+        """Test get_remote_url returns the configured URL."""
+        git = GitOps(tmp_path)
+
+        def mock_run(args: list[str], **kwargs):
+            result = MagicMock(returncode=0)
+            result.stdout = "git@github.com:user/repo.git\n"
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            url = git.get_remote_url("origin")
+
+            assert url == "git@github.com:user/repo.git"
+
+    def test_get_remote_url_returns_none_when_not_exists(self, tmp_path: Path) -> None:
+        """Test get_remote_url returns None when remote doesn't exist."""
+        git = GitOps(tmp_path)
+        mock_result = MagicMock(returncode=128)  # git error code for missing remote
+
+        with patch("subprocess.run", return_value=mock_result):
+            url = git.get_remote_url("origin")
+
+            assert url is None
+
+    def test_set_remote_url_adds_new_remote(self, tmp_path: Path) -> None:
+        """Test set_remote_url adds a new remote."""
+        git = GitOps(tmp_path)
+        calls = []
+
+        def mock_run(args: list[str], **kwargs):
+            calls.append(args)
+            result = MagicMock()
+            if "get-url" in args:
+                result.returncode = 128  # Remote doesn't exist
+            else:
+                result.returncode = 0  # Add succeeds
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            success = git.set_remote_url("origin", "git@github.com:user/repo.git")
+
+            assert success is True
+            # Verify 'remote add' was called
+            add_call = [c for c in calls if "add" in c]
+            assert len(add_call) == 1
+            assert "origin" in add_call[0]
+            assert "git@github.com:user/repo.git" in add_call[0]
+
+    def test_set_remote_url_updates_existing(self, tmp_path: Path) -> None:
+        """Test set_remote_url updates an existing remote."""
+        git = GitOps(tmp_path)
+        calls = []
+
+        def mock_run(args: list[str], **kwargs):
+            calls.append(args)
+            result = MagicMock(returncode=0)
+            if "get-url" in args:
+                result.stdout = "old-url.git\n"  # Existing different URL
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            success = git.set_remote_url("origin", "new-url.git")
+
+            assert success is True
+            # Verify 'remote set-url' was called
+            set_url_call = [c for c in calls if "set-url" in c]
+            assert len(set_url_call) == 1
+            assert "new-url.git" in set_url_call[0]
+
+    def test_set_remote_url_skips_if_same(self, tmp_path: Path) -> None:
+        """Test set_remote_url does nothing if URL already matches."""
+        git = GitOps(tmp_path)
+        calls = []
+
+        def mock_run(args: list[str], **kwargs):
+            calls.append(args)
+            result = MagicMock(returncode=0)
+            if "get-url" in args:
+                result.stdout = "same-url.git\n"
+            return result
+
+        with patch("subprocess.run", side_effect=mock_run):
+            success = git.set_remote_url("origin", "same-url.git")
+
+            assert success is True
+            # Only get-url should be called, not set-url or add
+            assert len(calls) == 1
+            assert "get-url" in calls[0]
 
 
 # =============================================================================
@@ -1513,3 +1620,205 @@ class TestGitOpsDivergedNotesIntegration:
         status = git.is_sync_configured()
         assert status.get("fetch_new") is True
         assert status.get("fetch_old") is False
+
+
+# =============================================================================
+# GitOps Domain Factory Tests (Task 2.1)
+# =============================================================================
+
+
+class TestGitOpsDomainFactory:
+    """Tests for GitOps.for_domain() factory method."""
+
+    @pytest.fixture(autouse=True)
+    def clear_cache(self) -> Generator[None, None, None]:
+        """Clear domain instance cache before each test."""
+        GitOps.clear_domain_cache()
+        yield
+        GitOps.clear_domain_cache()
+
+    def test_for_domain_project_returns_gitops(self, tmp_path: Path) -> None:
+        """Test for_domain with PROJECT returns GitOps for repo path."""
+        git = GitOps.for_domain(Domain.PROJECT, tmp_path)
+
+        assert isinstance(git, GitOps)
+        assert git.repo_path == tmp_path
+
+    def test_for_domain_project_uses_cwd_when_none(self) -> None:
+        """Test for_domain PROJECT with no path uses current directory."""
+        git = GitOps.for_domain(Domain.PROJECT)
+
+        assert git.repo_path == Path.cwd()
+
+    def test_for_domain_project_cached_per_path(self, tmp_path: Path) -> None:
+        """Test for_domain PROJECT caches instances per path."""
+        path1 = tmp_path / "repo1"
+        path1.mkdir()
+        path2 = tmp_path / "repo2"
+        path2.mkdir()
+
+        git1a = GitOps.for_domain(Domain.PROJECT, path1)
+        git1b = GitOps.for_domain(Domain.PROJECT, path1)
+        git2 = GitOps.for_domain(Domain.PROJECT, path2)
+
+        # Same path returns same instance
+        assert git1a is git1b
+        # Different paths return different instances
+        assert git1a is not git2
+
+    def test_for_domain_user_returns_gitops_for_user_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test for_domain USER returns GitOps for user-memories path."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git = GitOps.for_domain(Domain.USER)
+
+        assert isinstance(git, GitOps)
+        expected_path = tmp_path / "user-memories"
+        assert git.repo_path == expected_path
+
+    def test_for_domain_user_ignores_repo_path_argument(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test for_domain USER ignores repo_path argument."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+        other_path = tmp_path / "other_repo"
+        other_path.mkdir()
+
+        git = GitOps.for_domain(Domain.USER, other_path)
+
+        # Should use user-memories path, not other_path
+        expected_path = tmp_path / "user-memories"
+        assert git.repo_path == expected_path
+
+    def test_for_domain_user_cached_singleton(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test for_domain USER returns same cached instance."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git1 = GitOps.for_domain(Domain.USER)
+        git2 = GitOps.for_domain(Domain.USER)
+
+        assert git1 is git2
+
+    def test_for_domain_user_initializes_bare_repo(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test for_domain USER initializes bare repo if not exists."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git = GitOps.for_domain(Domain.USER)
+
+        # Should have created bare repo
+        assert git.is_git_repository()
+        assert git.is_bare_repository()
+
+    def test_clear_domain_cache_clears_all(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test clear_domain_cache clears all cached instances."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        # Create instances
+        git_project = GitOps.for_domain(Domain.PROJECT, tmp_path)
+        git_user = GitOps.for_domain(Domain.USER)
+
+        # Clear cache
+        GitOps.clear_domain_cache()
+
+        # New instances should be different objects
+        git_project2 = GitOps.for_domain(Domain.PROJECT, tmp_path)
+        git_user2 = GitOps.for_domain(Domain.USER)
+
+        assert git_project is not git_project2
+        assert git_user is not git_user2
+
+
+# =============================================================================
+# GitOps User Repo Initialization Tests (Task 2.2)
+# =============================================================================
+
+
+class TestGitOpsUserRepoInit:
+    """Tests for GitOps.ensure_user_repo_initialized()."""
+
+    @pytest.fixture(autouse=True)
+    def clear_cache(self) -> Generator[None, None, None]:
+        """Clear domain instance cache before each test."""
+        GitOps.clear_domain_cache()
+        yield
+        GitOps.clear_domain_cache()
+
+    def test_ensure_user_repo_creates_bare_repo(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test ensure_user_repo_initialized creates bare repository."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git = GitOps.ensure_user_repo_initialized()
+
+        # Bare repo should exist
+        user_memories_path = tmp_path / "user-memories"
+        assert user_memories_path.exists()
+        assert (user_memories_path / "HEAD").exists()
+        assert git.is_bare_repository()
+
+    def test_ensure_user_repo_idempotent(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test ensure_user_repo_initialized is idempotent."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        # Call twice
+        git1 = GitOps.ensure_user_repo_initialized()
+        git2 = GitOps.ensure_user_repo_initialized()
+
+        # Both should return valid GitOps (not necessarily same instance)
+        assert git1.is_git_repository()
+        assert git2.is_git_repository()
+
+    def test_ensure_user_repo_has_initial_commit(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test ensure_user_repo_initialized creates initial commit."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        git = GitOps.ensure_user_repo_initialized()
+
+        # Should have at least one commit (for notes attachment)
+        assert git.has_commits()
+
+    def test_ensure_user_repo_configures_git_identity(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test ensure_user_repo_initialized configures git user."""
+        monkeypatch.setenv("MEMORY_PLUGIN_DATA_DIR", str(tmp_path))
+
+        GitOps.ensure_user_repo_initialized()
+
+        # Check git config
+        user_memories_path = tmp_path / "user-memories"
+        result = subprocess.run(
+            ["git", "config", "user.email"],
+            cwd=user_memories_path,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0
+        assert "memory-plugin@local" in result.stdout
+
+    def test_is_bare_repository_true_for_bare(self, tmp_path: Path) -> None:
+        """Test is_bare_repository returns True for bare repo."""
+        # Create bare repo
+        bare_path = tmp_path / "bare.git"
+        subprocess.run(["git", "init", "--bare", str(bare_path)], check=True)
+
+        git = GitOps(bare_path)
+        assert git.is_bare_repository() is True
+
+    def test_is_bare_repository_false_for_regular(self, git_repo: Path) -> None:
+        """Test is_bare_repository returns False for regular repo."""
+        git = GitOps(git_repo)
+        assert git.is_bare_repository() is False

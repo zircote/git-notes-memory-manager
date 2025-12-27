@@ -1,6 +1,6 @@
 ---
 description: Display observability metrics for the memory system
-argument-hint: "[--format=text|json|prometheus] [--filter=<pattern>]"
+argument-hint: "[--format=text|json|prometheus] [--filter=<pattern>] [--export]"
 allowed-tools: ["Bash", "Read"]
 ---
 
@@ -19,7 +19,7 @@ NAME
     metrics - Display observability metrics for the memory system
 
 SYNOPSIS
-    /memory:metrics [--format=text|json|prometheus] [--filter=<pattern>]
+    /memory:metrics [--format=text|json|prometheus] [--filter=<pattern>] [--export]
 
 DESCRIPTION
     Display collected observability metrics including counters, histograms, and gauges.
@@ -29,6 +29,7 @@ OPTIONS
     --help, -h            Show this help message
     --format=FORMAT       Output format: text (default), json, prometheus
     --filter=PATTERN      Filter metrics by name pattern (e.g., "capture", "hook")
+    --export              Export metrics/traces to OTLP endpoint (for Grafana)
 
 EXAMPLES
     /memory:metrics
@@ -73,8 +74,41 @@ Parse the following options:
 
 **Execute the metrics collection**:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 "$PLUGIN_ROOT/scripts/metrics.py" $ARGUMENTS
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
+from git_notes_memory.observability.metrics import get_metrics
+from git_notes_memory.observability.exporters.prometheus import export_prometheus_text
+import sys
+
+format_arg = 'text'
+filter_arg = None
+export_flag = False
+
+for arg in sys.argv[1:]:
+    if arg.startswith('--format='):
+        format_arg = arg.split('=')[1]
+    elif arg.startswith('--filter='):
+        filter_arg = arg.split('=')[1]
+    elif arg == '--export':
+        export_flag = True
+
+if export_flag:
+    from git_notes_memory.observability.exporters.otlp import export_metrics_if_configured
+    if export_metrics_if_configured():
+        print('Metrics exported to OTLP endpoint')
+    else:
+        print('OTLP export not configured (set MEMORY_PLUGIN_OTLP_ENDPOINT)')
+else:
+    metrics = get_metrics()
+    if format_arg == 'json':
+        print(metrics.export_json())
+    elif format_arg == 'prometheus':
+        print(export_prometheus_text())
+    else:
+        output = metrics.export_text()
+        if filter_arg:
+            output = '\n'.join(line for line in output.split('\n') if filter_arg.lower() in line.lower())
+        print(output)
+" \$ARGUMENTS
 ```
 
 </step>

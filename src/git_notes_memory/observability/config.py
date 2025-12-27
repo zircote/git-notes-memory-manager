@@ -3,6 +3,13 @@
 Provides centralized configuration for all observability features
 via environment variables with sensible defaults.
 
+Configuration File:
+    The library checks for a config file before reading env vars.
+    Priority order:
+    1. ~/.local/memory-plugin.env
+    2. ~/.local/share/memory-plugin/env
+    3. Environment variables
+
 Environment Variables:
     MEMORY_PLUGIN_OBSERVABILITY_ENABLED: Enable/disable all observability (default: true)
     MEMORY_PLUGIN_LOG_LEVEL: Logging level - quiet/info/debug/trace (default: info)
@@ -20,6 +27,7 @@ import os
 from dataclasses import dataclass
 from enum import Enum
 from functools import lru_cache
+from pathlib import Path
 
 
 class LogLevel(str, Enum):
@@ -114,6 +122,106 @@ class ObservabilityConfig:
         return self.log_level == LogLevel.TRACE
 
 
+_config_loaded = False
+
+
+def _load_env_file() -> None:
+    """Load environment variables from a config file.
+
+    This enables configuration of the memory-plugin library without requiring
+    shell profile modifications. Useful for:
+    - Claude Code hooks (run in clean environment without shell env vars)
+    - System services or cron jobs
+    - Docker containers without env passthrough
+
+    File Locations (checked in order):
+
+    Unix/macOS:
+        1. ~/.local/share/memory-plugin/env (recommended - same dir as data)
+
+    Windows:
+        1. %LOCALAPPDATA%/memory-plugin/env
+
+    File Format:
+        # Comments start with #
+        export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+        MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
+
+        Both 'export VAR=value' and 'VAR=value' syntaxes are supported.
+        Values can be quoted with single or double quotes.
+
+    Behavior:
+        - Only loads once per process (cached)
+        - Does NOT override existing environment variables
+        - Silently skips if file doesn't exist or can't be read
+
+    Example ~/.local/share/memory-plugin/env:
+        # Memory Plugin Configuration
+        # See CLAUDE.md for full documentation
+
+        # OTLP/Observability
+        export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+        export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
+
+        # Hook behavior
+        export HOOK_SESSION_START_ENABLED=true
+        export HOOK_STOP_ENABLED=true
+
+        # Remote sync (optional)
+        # export HOOK_SESSION_START_FETCH_REMOTE=true
+        # export HOOK_STOP_PUSH_REMOTE=true
+    """
+    global _config_loaded
+    if _config_loaded:
+        return
+
+    # Platform-specific config paths
+    if os.name == "nt":  # Windows
+        # Windows: use LOCALAPPDATA or APPDATA
+        local_app_data = os.environ.get("LOCALAPPDATA", "")
+        app_data = os.environ.get("APPDATA", "")
+        config_paths = []
+        if local_app_data:
+            config_paths.append(Path(local_app_data) / "memory-plugin" / "env")
+        if app_data:
+            config_paths.append(Path(app_data) / "memory-plugin" / "env")
+    else:
+        # Unix/macOS
+        config_paths = [
+            Path.home() / ".local" / "share" / "memory-plugin" / "env",
+        ]
+
+    for config_path in config_paths:
+        if config_path.exists():
+            try:
+                with open(config_path) as f:
+                    for line in f:
+                        line = line.strip()
+                        # Skip comments and empty lines
+                        if not line or line.startswith("#"):
+                            continue
+                        # Handle 'export VAR=value' or 'VAR=value'
+                        if line.startswith("export "):
+                            line = line[7:]
+                        if "=" in line:
+                            key, _, value = line.partition("=")
+                            key = key.strip()
+                            # Strip inline comments (# after value)
+                            if "#" in value:
+                                value = value.split("#", 1)[0]
+                            value = value.strip().strip("\"'")
+                            # Expand shell variables ($HOME, $USER, etc.)
+                            value = os.path.expandvars(value)
+                            # Only set if not already in environment
+                            if key not in os.environ:
+                                os.environ[key] = value
+            except (OSError, PermissionError):
+                pass  # Silently skip if file can't be read
+            break  # Stop after first file found
+
+    _config_loaded = True
+
+
 def _parse_bool(value: str | None, default: bool = True) -> bool:
     """Parse boolean from environment variable."""
     if value is None:
@@ -132,7 +240,14 @@ def _parse_int(value: str | None, default: int) -> int:
 
 
 def _load_config_from_env() -> ObservabilityConfig:
-    """Load configuration from environment variables."""
+    """Load configuration from environment variables.
+
+    First loads from config file (~/.local/memory-plugin.env) if present,
+    then reads from environment variables.
+    """
+    # Load from config file first
+    _load_env_file()
+
     # Master switch
     enabled = _parse_bool(
         os.environ.get("MEMORY_PLUGIN_OBSERVABILITY_ENABLED"), default=True

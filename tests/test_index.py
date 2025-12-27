@@ -85,7 +85,7 @@ class TestInitialization:
 
     def test_init_with_default_path(self) -> None:
         """Test initialization uses default path when none provided."""
-        with patch("git_notes_memory.index.get_index_path") as mock_path:
+        with patch("git_notes_memory.index.service.get_index_path") as mock_path:
             mock_path.return_value = Path("/tmp/default.db")
             service = IndexService()
             assert service.db_path == Path("/tmp/default.db")
@@ -153,7 +153,7 @@ class TestInitialization:
         cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
         row = cursor.fetchone()
         assert row is not None
-        assert row[0] == "2"  # Schema v2 adds repo_path column
+        assert row[0] == "4"  # Schema v4 adds FTS5 full-text search
 
         service.close()
 
@@ -187,6 +187,93 @@ class TestInitialization:
         service.close()  # Should not raise
 
 
+class TestSchemaMigration:
+    """Test schema migration behavior."""
+
+    def test_migration_from_v2_to_v3_adds_domain_column(self, db_path: Path) -> None:
+        """Test migration from v2 to v3 adds domain column."""
+        # Create a v2 database manually
+        import sqlite3
+
+        import sqlite_vec
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        conn.enable_load_extension(True)
+        sqlite_vec.load(conn)
+        conn.enable_load_extension(False)
+
+        # Create v2 schema (without domain column)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS memories (
+                id TEXT PRIMARY KEY,
+                commit_sha TEXT NOT NULL,
+                namespace TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                content TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                repo_path TEXT,
+                spec TEXT,
+                phase TEXT,
+                tags TEXT,
+                status TEXT DEFAULT 'active',
+                relates_to TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        """)
+        conn.execute("INSERT INTO metadata (key, value) VALUES ('schema_version', '2')")
+        conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_memories USING vec0(
+                id TEXT PRIMARY KEY,
+                embedding FLOAT[384]
+            )
+        """)
+        conn.commit()
+        conn.close()
+
+        # Now initialize IndexService - it should run migration
+        service = IndexService(db_path)
+        service.initialize()
+
+        # Check that domain column exists
+        cursor = service._conn.cursor()
+        cursor.execute("PRAGMA table_info(memories)")
+        columns = {row["name"] for row in cursor.fetchall()}
+        assert "domain" in columns
+
+        # Check schema version updated to 4 (latest)
+        cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
+        row = cursor.fetchone()
+        assert row[0] == "4"
+
+        # Check index exists
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_memories_domain'"
+        )
+        assert cursor.fetchone() is not None
+
+        service.close()
+
+    def test_new_database_has_domain_column(self, db_path: Path) -> None:
+        """Test a fresh database has domain column from start."""
+        service = IndexService(db_path)
+        service.initialize()
+
+        cursor = service._conn.cursor()
+        cursor.execute("PRAGMA table_info(memories)")
+        columns = {row["name"] for row in cursor.fetchall()}
+        assert "domain" in columns
+
+        service.close()
+
+
 class TestInitializationErrors:
     """Test error handling during initialization."""
 
@@ -194,7 +281,9 @@ class TestInitializationErrors:
         """Test error when sqlite-vec fails to load."""
         service = IndexService(db_path)
 
-        with patch("git_notes_memory.index.sqlite_vec.load") as mock_load:
+        with patch(
+            "git_notes_memory.index.schema_manager.sqlite_vec.load"
+        ) as mock_load:
             mock_load.side_effect = Exception("Extension not found")
             with pytest.raises(MemoryIndexError) as exc_info:
                 service.initialize()
@@ -281,6 +370,52 @@ class TestInsertOperations:
         assert retrieved.tags == sample_memory.tags
         assert retrieved.status == sample_memory.status
         assert retrieved.relates_to == sample_memory.relates_to
+        assert retrieved.domain == sample_memory.domain
+
+    def test_insert_memory_with_user_domain(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test inserting memory with user domain."""
+        memory = Memory(
+            id="user:decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="A user-level decision",
+            content="This applies across all projects",
+            timestamp=datetime.now(UTC),
+            domain="user",
+        )
+        result = index_service.insert(memory)
+        assert result is True
+
+        retrieved = index_service.get(memory.id)
+        assert retrieved is not None
+        assert retrieved.domain == "user"
+        assert retrieved.is_user_domain is True
+        assert retrieved.is_project_domain is False
+
+    def test_insert_memory_default_domain_is_project(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test inserting memory without explicit domain defaults to project."""
+        memory = Memory(
+            id="decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            summary="A project decision",
+            content="This applies to this project only",
+            timestamp=datetime.now(UTC),
+        )
+        result = index_service.insert(memory)
+        assert result is True
+
+        retrieved = index_service.get(memory.id)
+        assert retrieved is not None
+        assert retrieved.domain == "project"
+        assert retrieved.is_project_domain is True
+        assert retrieved.is_user_domain is False
 
     def test_insert_memory_with_none_optional_fields(
         self,
@@ -506,6 +641,38 @@ class TestReadOperations:
         """Test exists returns False for nonexistent memory."""
         assert index_service.exists("nonexistent:id:0") is False
 
+    def test_get_existing_ids_batch(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test batch existence check for PERF-H-002."""
+        memories = [
+            Memory(
+                id=f"test:{i}:0",
+                commit_sha=f"sha{i}",
+                namespace="learnings",
+                summary=f"Memory {i}",
+                content=f"Content {i}",
+                timestamp=datetime.now(UTC),
+            )
+            for i in range(5)
+        ]
+        index_service.insert_batch(memories)
+
+        # Check mix of existing and non-existing IDs
+        check_ids = ["test:0:0", "test:2:0", "nonexistent:1:0", "test:4:0"]
+        existing = index_service.get_existing_ids(check_ids)
+
+        assert existing == {"test:0:0", "test:2:0", "test:4:0"}
+        assert "nonexistent:1:0" not in existing
+
+    def test_get_existing_ids_empty_input(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test batch existence check with empty input."""
+        assert index_service.get_existing_ids([]) == set()
+
     def test_get_all_ids(
         self,
         index_service: IndexService,
@@ -695,6 +862,134 @@ class TestReadByFilters:
         results = index_service.list_recent(limit=10, namespace="decisions")
         assert len(results) == 2
         assert all(m.namespace == "decisions" for m in results)
+
+    def test_get_by_spec_with_domain_filter(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test get_by_spec with domain filter."""
+        memories = [
+            Memory(
+                id="user:decisions:sha1:0",
+                commit_sha="sha1",
+                namespace="decisions",
+                summary="User decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                spec="my-project",
+                domain="user",
+            ),
+            Memory(
+                id="project:decisions:sha2:0",
+                commit_sha="sha2",
+                namespace="decisions",
+                summary="Project decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                spec="my-project",
+                domain="project",
+            ),
+        ]
+        for memory in memories:
+            index_service.insert(memory)
+
+        # Filter by user domain
+        user_results = index_service.get_by_spec("my-project", domain="user")
+        assert len(user_results) == 1
+        assert user_results[0].domain == "user"
+
+        # Filter by project domain
+        project_results = index_service.get_by_spec("my-project", domain="project")
+        assert len(project_results) == 1
+        assert project_results[0].domain == "project"
+
+        # No filter returns both
+        all_results = index_service.get_by_spec("my-project")
+        assert len(all_results) == 2
+
+    def test_get_by_namespace_with_domain_filter(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test get_by_namespace with domain filter."""
+        memories = [
+            Memory(
+                id="user:learnings:sha1:0",
+                commit_sha="sha1",
+                namespace="learnings",
+                summary="User learning",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="project:learnings:sha2:0",
+                commit_sha="sha2",
+                namespace="learnings",
+                summary="Project learning",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="project",
+            ),
+        ]
+        for memory in memories:
+            index_service.insert(memory)
+
+        # Filter by user domain
+        user_results = index_service.get_by_namespace("learnings", domain="user")
+        assert len(user_results) == 1
+        assert user_results[0].domain == "user"
+
+        # Filter by project domain
+        project_results = index_service.get_by_namespace("learnings", domain="project")
+        assert len(project_results) == 1
+        assert project_results[0].domain == "project"
+
+        # No filter returns both
+        all_results = index_service.get_by_namespace("learnings")
+        assert len(all_results) == 2
+
+    def test_list_recent_with_domain_filter(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test list_recent with domain filter."""
+        memories = [
+            Memory(
+                id="user:learnings:sha1:0",
+                commit_sha="sha1",
+                namespace="learnings",
+                summary="User learning",
+                content="Content",
+                timestamp=datetime(2024, 1, 1, tzinfo=UTC),
+                domain="user",
+            ),
+            Memory(
+                id="project:learnings:sha2:0",
+                commit_sha="sha2",
+                namespace="learnings",
+                summary="Project learning",
+                content="Content",
+                timestamp=datetime(2024, 1, 2, tzinfo=UTC),
+                domain="project",
+            ),
+        ]
+        for memory in memories:
+            index_service.insert(memory)
+
+        # Filter by user domain
+        user_results = index_service.list_recent(limit=10, domain="user")
+        assert len(user_results) == 1
+        assert user_results[0].domain == "user"
+
+        # Filter by project domain
+        project_results = index_service.list_recent(limit=10, domain="project")
+        assert len(project_results) == 1
+        assert project_results[0].domain == "project"
+
+        # No filter returns both
+        all_results = index_service.list_recent(limit=10)
+        assert len(all_results) == 2
 
 
 # =============================================================================
@@ -1027,6 +1322,101 @@ class TestVectorSearch:
         # Identical vectors should have zero distance
         assert results[0][1] < 0.01
 
+    def test_search_vector_with_domain_filter(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test vector search with domain filter."""
+        # Insert memories with different domains
+        # Note: domain comes from the Memory object, not as an insert parameter
+        user_memory = Memory(
+            id="user:learnings:sha1:0",
+            commit_sha="sha1",
+            namespace="learnings",
+            summary="User learning",
+            content="Content from user domain",
+            timestamp=datetime.now(UTC),
+            domain="user",
+        )
+        project_memory = Memory(
+            id="project:learnings:sha2:0",
+            commit_sha="sha2",
+            namespace="learnings",
+            summary="Project learning",
+            content="Content from project domain",
+            timestamp=datetime.now(UTC),
+            domain="project",
+        )
+        embedding = [0.5] * 384
+
+        index_service.insert(user_memory, embedding)
+        index_service.insert(project_memory, embedding)
+
+        query = [0.5] * 384
+
+        # Filter by user domain
+        user_results = index_service.search_vector(query, k=10, domain="user")
+        assert len(user_results) == 1
+        assert user_results[0][0].domain == "user"
+
+        # Filter by project domain
+        project_results = index_service.search_vector(query, k=10, domain="project")
+        assert len(project_results) == 1
+        assert project_results[0][0].domain == "project"
+
+        # No filter returns both
+        all_results = index_service.search_vector(query, k=10)
+        assert len(all_results) == 2
+
+    def test_search_vector_domain_filter_with_other_filters(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test vector search with domain filter combined with namespace filter."""
+        memories = [
+            Memory(
+                id="user:decisions:sha1:0",
+                commit_sha="sha1",
+                namespace="decisions",
+                summary="User decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="user:learnings:sha2:0",
+                commit_sha="sha2",
+                namespace="learnings",
+                summary="User learning",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="project:decisions:sha3:0",
+                commit_sha="sha3",
+                namespace="decisions",
+                summary="Project decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="project",
+            ),
+        ]
+        embedding = [0.5] * 384
+
+        for memory in memories:
+            index_service.insert(memory, embedding)
+
+        query = [0.5] * 384
+
+        # Filter by user domain AND decisions namespace
+        results = index_service.search_vector(
+            query, k=10, domain="user", namespace="decisions"
+        )
+        assert len(results) == 1
+        assert results[0][0].domain == "user"
+        assert results[0][0].namespace == "decisions"
+
 
 class TestTextSearch:
     """Test text-based search."""
@@ -1129,6 +1519,92 @@ class TestTextSearch:
         # Search with different case
         results = index_service.search_text("postgresql")
         assert len(results) == 1
+
+    def test_search_text_with_domain_filter(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test text search with domain filter."""
+        # Insert memories with different domains
+        user_memory = Memory(
+            id="user:learnings:sha1:0",
+            commit_sha="sha1",
+            namespace="learnings",
+            summary="User PostgreSQL decision",
+            content="Content from user domain",
+            timestamp=datetime.now(UTC),
+            domain="user",
+        )
+        project_memory = Memory(
+            id="project:learnings:sha2:0",
+            commit_sha="sha2",
+            namespace="learnings",
+            summary="Project PostgreSQL decision",
+            content="Content from project domain",
+            timestamp=datetime.now(UTC),
+            domain="project",
+        )
+        index_service.insert(user_memory)
+        index_service.insert(project_memory)
+
+        # Filter by user domain
+        user_results = index_service.search_text("PostgreSQL", domain="user")
+        assert len(user_results) == 1
+        assert user_results[0].domain == "user"
+
+        # Filter by project domain
+        project_results = index_service.search_text("PostgreSQL", domain="project")
+        assert len(project_results) == 1
+        assert project_results[0].domain == "project"
+
+        # No filter returns both
+        all_results = index_service.search_text("PostgreSQL")
+        assert len(all_results) == 2
+
+    def test_search_text_domain_filter_with_other_filters(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test text search with domain filter combined with namespace filter."""
+        memories = [
+            Memory(
+                id="user:decisions:sha1:0",
+                commit_sha="sha1",
+                namespace="decisions",
+                summary="User database decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="user:learnings:sha2:0",
+                commit_sha="sha2",
+                namespace="learnings",
+                summary="User database learning",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="project:decisions:sha3:0",
+                commit_sha="sha3",
+                namespace="decisions",
+                summary="Project database decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="project",
+            ),
+        ]
+        for memory in memories:
+            index_service.insert(memory)
+
+        # Filter by user domain AND decisions namespace
+        results = index_service.search_text(
+            "database", domain="user", namespace="decisions"
+        )
+        assert len(results) == 1
+        assert results[0].domain == "user"
+        assert results[0].namespace == "decisions"
 
 
 # =============================================================================
@@ -1268,6 +1744,102 @@ class TestStatisticsOperations:
         assert index_service.count(namespace="learnings") == 2
         assert index_service.count(spec="project-a") == 2
         assert index_service.count(namespace="learnings", spec="project-a") == 1
+
+    def test_count_with_domain_filter(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test count with domain filter."""
+        memories = [
+            Memory(
+                id="user:decisions:sha1:0",
+                commit_sha="sha1",
+                namespace="decisions",
+                summary="User decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="user:learnings:sha2:0",
+                commit_sha="sha2",
+                namespace="learnings",
+                summary="User learning",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="project:decisions:sha3:0",
+                commit_sha="sha3",
+                namespace="decisions",
+                summary="Project decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="project",
+            ),
+        ]
+        for memory in memories:
+            index_service.insert(memory)
+
+        # Count by domain
+        assert index_service.count(domain="user") == 2
+        assert index_service.count(domain="project") == 1
+
+        # Count by domain and namespace
+        assert index_service.count(domain="user", namespace="decisions") == 1
+        assert index_service.count(domain="user", namespace="learnings") == 1
+
+        # No filter returns all
+        assert index_service.count() == 3
+
+    def test_get_stats_includes_domain_counts(
+        self,
+        index_service: IndexService,
+    ) -> None:
+        """Test get_stats includes domain breakdown."""
+        memories = [
+            Memory(
+                id="user:learnings:sha1:0",
+                commit_sha="sha1",
+                namespace="learnings",
+                summary="User learning 1",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="user:learnings:sha2:0",
+                commit_sha="sha2",
+                namespace="learnings",
+                summary="User learning 2",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="user",
+            ),
+            Memory(
+                id="project:decisions:sha3:0",
+                commit_sha="sha3",
+                namespace="decisions",
+                summary="Project decision",
+                content="Content",
+                timestamp=datetime.now(UTC),
+                domain="project",
+            ),
+        ]
+        for memory in memories:
+            index_service.insert(memory)
+
+        stats = index_service.get_stats()
+        assert stats.total_memories == 3
+
+        # Check domain counts
+        by_domain = dict(stats.by_domain)
+        assert by_domain["user"] == 2
+        assert by_domain["project"] == 1
+
+        # Also verify by_domain_dict property
+        assert stats.by_domain_dict == {"user": 2, "project": 1}
 
 
 # =============================================================================

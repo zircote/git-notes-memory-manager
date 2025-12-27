@@ -12,6 +12,7 @@ This guide covers how to use `git-notes-memory` as both a Python library and a C
 - [Searching Memories](#searching-memories)
 - [Configuration](#configuration)
 - [Hooks Integration](#hooks-integration)
+- [Subconsciousness (Implicit Capture)](#subconsciousness-implicit-capture)
 - [Debugging, Discovery & Memory Review](#debugging-discovery--memory-review)
 - [Troubleshooting](#troubleshooting)
 
@@ -678,6 +679,35 @@ These markers are processed by the UserPromptSubmit hook when enabled.
 1. Increase confidence threshold: `export HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE=0.8`
 2. Disable auto-capture: `export HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD=1.0`
 3. Disable hook entirely: `export HOOK_USER_PROMPT_ENABLED=false`
+
+---
+
+## Subconsciousness (Implicit Capture)
+
+The subconsciousness layer provides **LLM-powered automatic memory capture** from Claude Code sessions. Instead of requiring explicit markers, it analyzes your conversations and extracts valuable insights automatically.
+
+### Key Features
+
+- **Zero friction**: Memories captured without explicit `/memory:capture` commands
+- **LLM-powered**: Uses Claude/GPT/Ollama to understand semantic value
+- **Adversarial screening**: Blocks prompt injection and malicious content
+- **Confidence-based routing**: High confidence → auto-approve, medium → queue for review
+
+### Quick Start
+
+```bash
+# Enable subconsciousness
+export MEMORY_SUBCONSCIOUSNESS_ENABLED=true
+export MEMORY_LLM_PROVIDER=anthropic  # or openai, ollama
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Review captured memories
+/memory:review
+```
+
+### Learn More
+
+For comprehensive documentation on configuration, security, and troubleshooting, see the [Subconsciousness Guide](SUBCONSCIOUSNESS.md).
 
 ---
 

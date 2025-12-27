@@ -66,8 +66,7 @@ You will validate that the memory system is functioning correctly by testing all
 Execute the validation script:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 << 'VALIDATION_SCRIPT'
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 << 'VALIDATION_SCRIPT'
 import json
 import os
 import subprocess

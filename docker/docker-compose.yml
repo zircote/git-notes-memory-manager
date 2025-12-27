@@ -8,8 +8,17 @@
 #   - Prometheus: http://localhost:9090
 #   - OTEL Collector: localhost:4317 (gRPC), localhost:4318 (HTTP)
 #
-# To send metrics from the plugin:
-#   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+# To send metrics/traces from the plugin, set these environment variables:
+#   export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+#   export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
+#
+# The ALLOW_INTERNAL flag is required because the OTLP exporter has SSRF
+# protection that blocks localhost/private IPs by default (SEC-H-001).
+#
+# For persistent configuration, add to your shell profile (~/.bashrc, ~/.zshrc):
+#   # git-notes-memory observability
+#   export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+#   export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
 
 services:
   # OpenTelemetry Collector - receives metrics/traces from the plugin

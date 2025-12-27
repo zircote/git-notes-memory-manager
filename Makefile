@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test test-cov lint typecheck security coverage format format-check clean build quality bump bump-patch bump-minor bump-major bump-dry version release release-patch release-minor release-major publish
+.PHONY: help install install-dev test test-cov lint typecheck security coverage format format-check clean build quality bump bump-patch bump-minor bump-major bump-dry version release release-patch release-minor release-major publish sync-plugin
 
 .DEFAULT_GOAL := help
 
@@ -26,6 +26,9 @@ help:  ## Show this help message
 	@echo ''
 	@echo 'Release:'
 	@grep -E '^(release|release-patch|release-minor|release-major|publish):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@echo ''
+	@echo 'Plugin Development:'
+	@grep -E '^(sync-plugin):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 	@echo ''
 
 install:  ## Install package
@@ -198,3 +201,42 @@ publish:  ## Publish to PyPI (requires PYPI_TOKEN)
 	uv run twine upload dist/*
 	@echo ""
 	@echo "✓ Published to PyPI"
+
+# =============================================================================
+# Plugin Development
+# =============================================================================
+
+# Plugin cache location
+PLUGIN_CACHE := $(HOME)/.claude/plugins/cache/zircote-claude-marketplace/memory-capture
+
+sync-plugin:  ## Sync source to plugin cache for live development
+	@CACHE_BASE="$(PLUGIN_CACHE)"; \
+	if [ ! -d "$$CACHE_BASE" ]; then \
+		echo "Error: Plugin not installed. Run /plugin install first."; \
+		exit 1; \
+	fi; \
+	INSTALLED_VERSION=$$(ls -1 "$$CACHE_BASE" 2>/dev/null | head -1); \
+	if [ -z "$$INSTALLED_VERSION" ]; then \
+		echo "Error: No version found in plugin cache"; \
+		exit 1; \
+	fi; \
+	CACHE_DIR="$$CACHE_BASE/$$INSTALLED_VERSION"; \
+	echo "Syncing to $$CACHE_DIR (installed: $$INSTALLED_VERSION)..."; \
+	rsync -av --delete \
+		--exclude='.venv' \
+		--exclude='.git' \
+		--exclude='__pycache__' \
+		--exclude='.debug' \
+		--exclude='.memory' \
+		--exclude='*.pyc' \
+		--exclude='.pytest_cache' \
+		--exclude='.mypy_cache' \
+		--exclude='.ruff_cache' \
+		--exclude='htmlcov' \
+		--exclude='.coverage' \
+		--exclude='dist' \
+		--exclude='build' \
+		--exclude='*.egg-info' \
+		./ "$$CACHE_DIR/"; \
+	echo ""; \
+	echo "✓ Plugin synced. Restart Claude Code to pick up changes."

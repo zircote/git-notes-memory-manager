@@ -49,6 +49,134 @@ def clean_env() -> Iterator[None]:
 
 
 # =============================================================================
+# Domain Configuration Tests
+# =============================================================================
+
+
+class TestDomainEnum:
+    """Tests for Domain enum."""
+
+    def test_domain_values(self) -> None:
+        """Test Domain enum has USER and PROJECT values."""
+        assert config.Domain.USER.value == "user"
+        assert config.Domain.PROJECT.value == "project"
+
+    def test_domain_membership(self) -> None:
+        """Test Domain enum has exactly two members."""
+        assert len(config.Domain) == 2
+
+    def test_domain_is_enum(self) -> None:
+        """Test Domain is an Enum class."""
+        from enum import Enum
+
+        assert issubclass(config.Domain, Enum)
+
+    def test_domain_user_is_distinct(self) -> None:
+        """Test USER and PROJECT are distinct enum values."""
+        assert config.Domain.USER != config.Domain.PROJECT
+
+    def test_domain_str_representation(self) -> None:
+        """Test Domain string representation."""
+        assert str(config.Domain.USER) == "Domain.USER"
+        assert str(config.Domain.PROJECT) == "Domain.PROJECT"
+
+
+class TestUserMemoriesPath:
+    """Tests for get_user_memories_path() function."""
+
+    def test_returns_path(self, clean_env: None) -> None:
+        """Test get_user_memories_path returns a Path."""
+        result = config.get_user_memories_path()
+        assert isinstance(result, Path)
+
+    def test_default_path(self, clean_env: None) -> None:
+        """Test default path is in XDG data directory."""
+        result = config.get_user_memories_path()
+        expected = Path.home() / ".local" / "share" / "memory-plugin" / "user-memories"
+        assert result == expected
+
+    def test_respects_data_dir_override(self, clean_env: None) -> None:
+        """Test path respects MEMORY_PLUGIN_DATA_DIR override."""
+        os.environ["MEMORY_PLUGIN_DATA_DIR"] = "/custom/data"
+        result = config.get_user_memories_path()
+        assert result == Path("/custom/data/user-memories")
+
+    def test_respects_xdg_data_home(self, clean_env: None) -> None:
+        """Test path respects XDG_DATA_HOME."""
+        os.environ["XDG_DATA_HOME"] = "/custom/xdg"
+        result = config.get_user_memories_path()
+        assert result == Path("/custom/xdg/memory-plugin/user-memories")
+
+    def test_does_not_create_directory_by_default(
+        self, tmp_path: Path, clean_env: None
+    ) -> None:
+        """Test get_user_memories_path does not create directory by default."""
+        os.environ["MEMORY_PLUGIN_DATA_DIR"] = str(tmp_path)
+        result = config.get_user_memories_path()
+        # Path is returned but directory is not created
+        assert result == tmp_path / "user-memories"
+        assert not result.exists()
+
+    def test_creates_directory_with_ensure_exists(
+        self, tmp_path: Path, clean_env: None
+    ) -> None:
+        """Test get_user_memories_path creates directory when ensure_exists=True."""
+        os.environ["MEMORY_PLUGIN_DATA_DIR"] = str(tmp_path)
+        result = config.get_user_memories_path(ensure_exists=True)
+        assert result.exists()
+        assert result.is_dir()
+
+
+class TestUserIndexPath:
+    """Tests for get_user_index_path() function."""
+
+    def test_returns_path(self, clean_env: None) -> None:
+        """Test get_user_index_path returns a Path."""
+        result = config.get_user_index_path()
+        assert isinstance(result, Path)
+
+    def test_default_path(self, clean_env: None) -> None:
+        """Test default path is in XDG data directory."""
+        result = config.get_user_index_path()
+        expected = (
+            Path.home() / ".local" / "share" / "memory-plugin" / "user" / "index.db"
+        )
+        assert result == expected
+
+    def test_respects_data_dir_override(self, clean_env: None) -> None:
+        """Test path respects MEMORY_PLUGIN_DATA_DIR override."""
+        os.environ["MEMORY_PLUGIN_DATA_DIR"] = "/custom/data"
+        result = config.get_user_index_path()
+        assert result == Path("/custom/data/user/index.db")
+
+    def test_does_not_create_directory_by_default(
+        self, tmp_path: Path, clean_env: None
+    ) -> None:
+        """Test get_user_index_path does not create directory by default."""
+        os.environ["MEMORY_PLUGIN_DATA_DIR"] = str(tmp_path)
+        result = config.get_user_index_path()
+        # Path is returned but parent directory is not created
+        assert result == tmp_path / "user" / "index.db"
+        assert not result.parent.exists()
+
+    def test_creates_parent_directory_with_ensure_exists(
+        self, tmp_path: Path, clean_env: None
+    ) -> None:
+        """Test get_user_index_path creates parent directory when ensure_exists=True."""
+        os.environ["MEMORY_PLUGIN_DATA_DIR"] = str(tmp_path)
+        result = config.get_user_index_path(ensure_exists=True)
+        assert result.parent.exists()
+        assert result.parent.is_dir()
+        # The file itself should NOT be created, just the directory
+        assert not result.exists()
+
+    def test_filename_is_index_db(self, clean_env: None) -> None:
+        """Test the filename is index.db."""
+        result = config.get_user_index_path()
+        assert result.name == "index.db"
+
+
+# =============================================================================
 # Namespace Tests
 # =============================================================================
 
@@ -561,6 +689,9 @@ class TestModuleExports:
     def test_important_exports_in_all(self) -> None:
         """Test important items are exported in __all__."""
         important = [
+            "Domain",
+            "get_user_memories_path",
+            "get_user_index_path",
             "NAMESPACES",
             "DEFAULT_GIT_NAMESPACE",
             "DEFAULT_EMBEDDING_MODEL",

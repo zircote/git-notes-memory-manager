@@ -7,7 +7,6 @@ from conversation context and recall relevant memories.
 """
 
 import re
-from typing import Optional
 
 
 def extract_concepts(text: str) -> list[str]:
@@ -69,7 +68,7 @@ def build_query(concepts: list[str], max_terms: int = 5) -> str:
 
 def auto_recall(
     conversation_text: str,
-    namespace: Optional[str] = None,
+    namespace: str | None = None,
     threshold: float = 0.7,
     limit: int = 3
 ) -> dict:

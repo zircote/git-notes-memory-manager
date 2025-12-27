@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
@@ -27,8 +28,17 @@ class TestOTLPExporter:
 
     def setup_method(self) -> None:
         """Reset singletons before each test."""
+        # Clear endpoint env var first to ensure clean state
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ENDPOINT", None)
         reset_otlp_exporter()
         reset_config()
+        # SEC-H-001: Allow internal endpoints for testing
+        os.environ["MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL"] = "true"
+
+    def teardown_method(self) -> None:
+        """Clean up environment after each test."""
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL", None)
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ENDPOINT", None)
 
     def test_exporter_disabled_without_endpoint(self) -> None:
         """Exporter should be disabled when no endpoint configured."""
@@ -164,8 +174,69 @@ class TestOTLPExporter:
         assert attr_dict["telemetry.sdk.language"] == "python"
 
 
+class TestSSRFProtection:
+    """Tests for SEC-H-001: SSRF protection."""
+
+    def setup_method(self) -> None:
+        """Reset singletons before each test."""
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ENDPOINT", None)
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL", None)
+        reset_otlp_exporter()
+        reset_config()
+
+    def teardown_method(self) -> None:
+        """Clean up environment after each test."""
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL", None)
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ENDPOINT", None)
+
+    def test_internal_endpoint_blocked_by_default(self) -> None:
+        """Internal endpoints should be blocked by default for SSRF safety."""
+        exporter = OTLPExporter(endpoint="http://localhost:4318")
+        assert not exporter.enabled
+
+    def test_internal_endpoint_allowed_with_override(self) -> None:
+        """Internal endpoints allowed when MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true."""
+        os.environ["MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL"] = "true"
+        exporter = OTLPExporter(endpoint="http://localhost:4318")
+        assert exporter.enabled
+
+    def test_private_ip_blocked_by_default(self) -> None:
+        """Private IP addresses should be blocked by default."""
+        exporter = OTLPExporter(endpoint="http://192.168.1.100:4318")
+        assert not exporter.enabled
+
+    def test_loopback_ip_blocked_by_default(self) -> None:
+        """Loopback IP addresses should be blocked by default."""
+        exporter = OTLPExporter(endpoint="http://127.0.0.1:4318")
+        assert not exporter.enabled
+
+    def test_public_endpoint_allowed(self) -> None:
+        """Public endpoints should be allowed without override."""
+        # This won't actually connect, but it should be enabled
+        exporter = OTLPExporter(endpoint="https://api.example.com:4318")
+        assert exporter.enabled
+
+    def test_invalid_scheme_blocked(self) -> None:
+        """Non-http/https schemes should be blocked."""
+        exporter = OTLPExporter(endpoint="ftp://example.com:4318")
+        assert not exporter.enabled
+
+
 class TestOTLPExporterIntegration:
     """Integration tests with mock HTTP server."""
+
+    def setup_method(self) -> None:
+        """Set up test environment."""
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ENDPOINT", None)
+        reset_otlp_exporter()
+        reset_config()
+        # SEC-H-001: Allow internal endpoints for testing
+        os.environ["MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL"] = "true"
+
+    def teardown_method(self) -> None:
+        """Clean up environment after each test."""
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL", None)
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ENDPOINT", None)
 
     @pytest.fixture
     def mock_otlp_server(self) -> tuple[HTTPServer, list[dict[str, Any]]]:
@@ -264,8 +335,16 @@ class TestConvenienceFunctions:
 
     def setup_method(self) -> None:
         """Reset singletons before each test."""
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ENDPOINT", None)
         reset_otlp_exporter()
         reset_config()
+        # SEC-H-001: Allow internal endpoints for testing
+        os.environ["MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL"] = "true"
+
+    def teardown_method(self) -> None:
+        """Clean up environment after each test."""
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL", None)
+        os.environ.pop("MEMORY_PLUGIN_OTLP_ENDPOINT", None)
 
     def test_get_otlp_exporter_singleton(self) -> None:
         """get_otlp_exporter returns same instance."""

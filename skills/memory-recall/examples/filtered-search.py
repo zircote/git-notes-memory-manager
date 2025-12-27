@@ -8,17 +8,16 @@ with namespace filtering and advanced query options.
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Optional
 
 
 @dataclass
 class SearchFilter:
     """Filters for memory search."""
-    namespace: Optional[str] = None
-    namespaces: Optional[list[str]] = None
-    since: Optional[datetime] = None
-    until: Optional[datetime] = None
-    tags: Optional[list[str]] = None
+    namespace: str | None = None
+    namespaces: list[str] | None = None
+    since: datetime | None = None
+    until: datetime | None = None
+    tags: list[str] | None = None
     min_score: float = 0.5
 
 
@@ -136,7 +135,7 @@ def search_with_filters(
 def search_recent(
     query: str,
     days: int = 7,
-    namespace: Optional[str] = None,
+    namespace: str | None = None,
     limit: int = 5
 ) -> list:
     """Search memories from recent days."""
@@ -149,7 +148,7 @@ def search_recent(
 
 def search_by_tags(
     tags: list[str],
-    query: Optional[str] = None,
+    query: str | None = None,
     limit: int = 10
 ) -> list:
     """Search memories with specific tags."""

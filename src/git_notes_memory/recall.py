@@ -14,11 +14,17 @@ spec into SpecContext objects for comprehensive context retrieval.
 from __future__ import annotations
 
 import logging
+import threading
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from git_notes_memory.config import TOKENS_PER_CHAR, get_project_index_path
-from git_notes_memory.exceptions import RecallError
+from git_notes_memory.config import (
+    TOKENS_PER_CHAR,
+    Domain,
+    get_project_index_path,
+    get_user_index_path,
+)
+from git_notes_memory.exceptions import MemoryIndexError, RecallError
 from git_notes_memory.models import (
     CommitInfo,
     HydratedMemory,
@@ -27,9 +33,6 @@ from git_notes_memory.models import (
     MemoryResult,
     SpecContext,
 )
-from git_notes_memory.observability.decorators import measure_duration
-from git_notes_memory.observability.metrics import get_metrics
-from git_notes_memory.observability.tracing import trace_operation
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -97,6 +100,9 @@ class RecallService:
         self._index_service = index_service
         self._embedding_service = embedding_service
         self._git_ops = git_ops
+        # RES-M-001: Lock for thread-safe user index initialization
+        self._user_index_lock = threading.Lock()
+        self._user_index_service: IndexService | None = None
 
     @property
     def index_path(self) -> Path:
@@ -132,11 +138,31 @@ class RecallService:
             self._git_ops = GitOps()
         return self._git_ops
 
+    def _get_user_git_ops(self) -> GitOps:
+        """Get or create the user domain GitOps instance."""
+        if not hasattr(self, "_user_git_ops") or self._user_git_ops is None:
+            from git_notes_memory.git_ops import GitOps
+
+            self._user_git_ops: GitOps | None = GitOps.for_domain(Domain.USER)
+        return self._user_git_ops
+
+    def _get_git_ops_for_memory(self, memory: Memory) -> GitOps:
+        """Get the appropriate GitOps instance for a memory based on its domain.
+
+        Args:
+            memory: The memory to get GitOps for.
+
+        Returns:
+            GitOps instance for the memory's domain.
+        """
+        if memory.is_user_domain:
+            return self._get_user_git_ops()
+        return self._get_git_ops()
+
     # -------------------------------------------------------------------------
     # Search Operations
     # -------------------------------------------------------------------------
 
-    @measure_duration("memory_search")
     def search(
         self,
         query: str,
@@ -145,6 +171,7 @@ class RecallService:
         namespace: str | None = None,
         spec: str | None = None,
         min_similarity: float | None = None,
+        domain: Domain | None = None,
     ) -> list[MemoryResult]:
         """Search for memories semantically similar to the query.
 
@@ -158,6 +185,9 @@ class RecallService:
             spec: Optional spec identifier to filter results.
             min_similarity: Minimum similarity threshold (0-1).
                 Results with similarity below this are filtered out.
+            domain: Optional domain filter. If None, searches both domains
+                and merges results with project memories taking precedence
+                at equal relevance.
 
         Returns:
             List of MemoryResult objects sorted by relevance (most similar first).
@@ -169,67 +199,198 @@ class RecallService:
             >>> results = service.search("authentication flow")
             >>> results = service.search("error handling", namespace="decisions")
             >>> results = service.search("api design", k=5, min_similarity=0.5)
+            >>> results = service.search("global preferences", domain=Domain.USER)
         """
         if not query or not query.strip():
             return []
 
-        metrics = get_metrics()
+        try:
+            # Generate embedding for the query
+            embedding_service = self._get_embedding()
+            query_embedding = embedding_service.embed(query)
 
-        with trace_operation("search", labels={"search_type": "semantic"}):
-            try:
-                # Generate embedding for the query
-                with trace_operation("search.embed_query"):
-                    embedding_service = self._get_embedding()
-                    query_embedding = embedding_service.embed(query)
-
-                # Search the index
-                with trace_operation("search.vector_search"):
-                    index = self._get_index()
-                    raw_results = index.search_vector(
-                        query_embedding,
-                        k=k,
-                        namespace=namespace,
-                        spec=spec,
-                    )
-
-                # Convert to MemoryResult and apply similarity filter
-                results: list[MemoryResult] = []
-                for memory, distance in raw_results:
-                    # Convert distance to similarity (assuming L2 distance)
-                    # For normalized vectors, similarity = 1 - (distance^2 / 2)
-                    # But sqlite-vec returns distance directly, use 1 / (1 + distance)
-                    similarity = 1.0 / (1.0 + distance) if distance >= 0 else 0.0
-
-                    if min_similarity is not None and similarity < min_similarity:
-                        continue
-
-                    results.append(MemoryResult(memory=memory, distance=distance))
-
-                # Track retrieval count
-                metrics.increment(
-                    "memories_retrieved_total",
-                    amount=float(len(results)),
-                    labels={"search_type": "semantic"},
+            # Determine which domains to search
+            if domain is not None:
+                # Search a single domain
+                raw_results = self._search_single_domain(
+                    query_embedding=query_embedding,
+                    domain=domain,
+                    k=k,
+                    namespace=namespace,
+                    spec=spec,
+                )
+            else:
+                # Search both domains and merge results
+                raw_results = self._search_both_domains(
+                    query_embedding=query_embedding,
+                    k=k,
+                    namespace=namespace,
+                    spec=spec,
                 )
 
-                logger.debug(
-                    "Search for '%s' returned %d results (k=%d, namespace=%s, spec=%s)",
-                    query[:50],
-                    len(results),
-                    k,
-                    namespace,
-                    spec,
-                )
+            # Convert to MemoryResult and apply similarity filter
+            results: list[MemoryResult] = []
+            for memory, distance in raw_results:
+                # Convert distance to similarity (assuming L2 distance)
+                # For normalized vectors, similarity = 1 - (distance^2 / 2)
+                # But sqlite-vec returns distance directly, so we use 1 / (1 + distance)
+                similarity = 1.0 / (1.0 + distance) if distance >= 0 else 0.0
 
-                return results
+                if min_similarity is not None and similarity < min_similarity:
+                    continue
 
-            except Exception as e:
-                raise RecallError(
-                    f"Search failed: {e}",
-                    "Check query text and try again",
-                ) from e
+                results.append(MemoryResult(memory=memory, distance=distance))
 
-    @measure_duration("memory_search_text")
+            logger.debug(
+                "Search for '%s' returned %d results (k=%d, namespace=%s, spec=%s, domain=%s)",
+                query[:50],
+                len(results),
+                k,
+                namespace,
+                spec,
+                domain.value if domain else "all",
+            )
+
+            return results
+
+        except Exception as e:
+            raise RecallError(
+                f"Search failed: {e}",
+                "Check query text and try again",
+            ) from e
+
+    def _search_single_domain(
+        self,
+        query_embedding: Sequence[float],
+        domain: Domain,
+        k: int,
+        namespace: str | None,
+        spec: str | None,
+    ) -> list[tuple[Memory, float]]:
+        """Search a single domain's index.
+
+        Args:
+            query_embedding: The query embedding vector.
+            domain: The domain to search.
+            k: Maximum number of results.
+            namespace: Optional namespace filter.
+            spec: Optional spec filter.
+
+        Returns:
+            List of (Memory, distance) tuples.
+        """
+        if domain == Domain.USER:
+            # Use user index
+            index = self._get_user_index()
+        else:
+            # Use project index
+            index = self._get_index()
+
+        return index.search_vector(
+            query_embedding,
+            k=k,
+            namespace=namespace,
+            spec=spec,
+            domain=domain.value,
+        )
+
+    def _search_both_domains(
+        self,
+        query_embedding: Sequence[float],
+        k: int,
+        namespace: str | None,
+        spec: str | None,
+    ) -> list[tuple[Memory, float]]:
+        """Search both project and user domains and merge results.
+
+        Searches both indexes and merges results, with project memories
+        taking precedence at equal relevance. Also deduplicates similar
+        memories that appear in both domains.
+
+        Args:
+            query_embedding: The query embedding vector.
+            k: Maximum number of results.
+            namespace: Optional namespace filter.
+            spec: Optional spec filter.
+
+        Returns:
+            List of (Memory, distance) tuples sorted by distance,
+            with project results first at equal distance.
+        """
+        # Query both domains
+        project_results = self._get_index().search_vector(
+            query_embedding,
+            k=k,
+            namespace=namespace,
+            spec=spec,
+            domain=Domain.PROJECT.value,
+        )
+
+        # Get user index - may not exist if user has no memories
+        try:
+            user_index = self._get_user_index()
+            user_results = user_index.search_vector(
+                query_embedding,
+                k=k,
+                namespace=namespace,
+                spec=spec,
+                domain=Domain.USER.value,
+            )
+        except (OSError, RecallError, MemoryIndexError):
+            # QUAL-HIGH-001: User index doesn't exist or is inaccessible
+            user_results = []
+
+        # Merge results, preferring project at equal distance
+        # Sort key: (distance, is_user) so project (is_user=False) comes first
+        merged = [(mem, dist, False) for mem, dist in project_results] + [
+            (mem, dist, True) for mem, dist in user_results
+        ]
+
+        # Sort by distance, then by is_user (False/project before True/user)
+        merged.sort(key=lambda x: (x[1], x[2]))
+
+        # Deduplicate based on content similarity
+        # Keep track of seen content hashes to avoid duplicates
+        seen_summaries: set[str] = set()
+        deduplicated: list[tuple[Memory, float]] = []
+
+        for mem, dist, _ in merged:
+            # Use summary as a quick proxy for content similarity
+            # If we've seen a very similar summary, skip this memory
+            summary_key = mem.summary.lower().strip()
+            if summary_key not in seen_summaries:
+                seen_summaries.add(summary_key)
+                deduplicated.append((mem, dist))
+
+            if len(deduplicated) >= k:
+                break
+
+        return deduplicated[:k]
+
+    def _get_user_index(self) -> IndexService:
+        """Get or create the user domain IndexService instance.
+
+        RES-M-001: Thread-safe lazy initialization using double-checked locking.
+        Prevents race condition where two threads could create separate instances.
+
+        Returns:
+            IndexService configured for the user domain.
+        """
+        # Fast path: return existing instance without lock
+        if self._user_index_service is not None:
+            return self._user_index_service
+
+        # Slow path: acquire lock and create if still None
+        with self._user_index_lock:
+            # Double-check after acquiring lock
+            if self._user_index_service is None:
+                from git_notes_memory.index import IndexService
+
+                user_index_path = get_user_index_path(ensure_exists=True)
+                self._user_index_service = IndexService(user_index_path)
+                self._user_index_service.initialize()
+        return self._user_index_service
+
     def search_text(
         self,
         query: str,
@@ -237,6 +398,7 @@ class RecallService:
         *,
         namespace: str | None = None,
         spec: str | None = None,
+        domain: Domain | None = None,
     ) -> list[Memory]:
         """Search for memories using text matching (FTS5).
 
@@ -248,6 +410,8 @@ class RecallService:
             limit: Maximum number of results to return.
             namespace: Optional namespace to filter results.
             spec: Optional spec identifier to filter results.
+            domain: Optional domain filter. If None, searches both domains
+                and merges results with project memories first.
 
         Returns:
             List of Memory objects matching the query.
@@ -258,42 +422,77 @@ class RecallService:
         Examples:
             >>> memories = service.search_text("API endpoint")
             >>> memories = service.search_text("bug fix", namespace="decisions")
+            >>> memories = service.search_text("preferences", domain=Domain.USER)
         """
         if not query or not query.strip():
             return []
 
-        metrics = get_metrics()
+        try:
+            results: list[Memory]
+            if domain is not None:
+                # Search single domain
+                if domain == Domain.USER:
+                    index = self._get_user_index()
+                else:
+                    index = self._get_index()
 
-        with trace_operation("search", labels={"search_type": "text"}):
-            try:
-                index = self._get_index()
                 results = index.search_text(
                     query,
                     limit=limit,
                     namespace=namespace,
                     spec=spec,
+                    domain=domain.value,
+                )
+            else:
+                # Search both domains and merge
+                project_results = self._get_index().search_text(
+                    query,
+                    limit=limit,
+                    namespace=namespace,
+                    spec=spec,
+                    domain=Domain.PROJECT.value,
                 )
 
-                # Track retrieval count
-                metrics.increment(
-                    "memories_retrieved_total",
-                    amount=float(len(results)),
-                    labels={"search_type": "text"},
-                )
+                try:
+                    user_index = self._get_user_index()
+                    user_results = user_index.search_text(
+                        query,
+                        limit=limit,
+                        namespace=namespace,
+                        spec=spec,
+                        domain=Domain.USER.value,
+                    )
+                except (OSError, RecallError, MemoryIndexError):
+                    # QUAL-HIGH-001: User index doesn't exist or is inaccessible
+                    user_results = []
 
-                logger.debug(
-                    "Text search for '%s' returned %d results",
-                    query[:50],
-                    len(results),
-                )
+                # Merge: project results first, then user, up to limit
+                # Deduplicate by summary
+                seen_summaries: set[str] = set()
+                results = []
 
-                return results
+                for mem in project_results + user_results:
+                    summary_key = mem.summary.lower().strip()
+                    if summary_key not in seen_summaries:
+                        seen_summaries.add(summary_key)
+                        results.append(mem)
+                    if len(results) >= limit:
+                        break
 
-            except Exception as e:
-                raise RecallError(
-                    f"Text search failed: {e}",
-                    "Check query text and try again",
-                ) from e
+            logger.debug(
+                "Text search for '%s' returned %d results (domain=%s)",
+                query[:50],
+                len(results),
+                domain.value if domain else "all",
+            )
+
+            return results
+
+        except Exception as e:
+            raise RecallError(
+                f"Text search failed: {e}",
+                "Check query text and try again",
+            ) from e
 
     # -------------------------------------------------------------------------
     # Direct Retrieval
@@ -350,6 +549,7 @@ class RecallService:
         *,
         spec: str | None = None,
         limit: int | None = None,
+        domain: Domain | None = None,
     ) -> list[Memory]:
         """Retrieve all memories in a namespace.
 
@@ -357,6 +557,8 @@ class RecallService:
             namespace: The namespace to retrieve from.
             spec: Optional spec identifier to filter results.
             limit: Maximum number of results to return.
+            domain: Filter by domain. None searches both domains with
+                project memories prioritized before user memories.
 
         Returns:
             List of Memory objects in the namespace.
@@ -364,10 +566,38 @@ class RecallService:
         Examples:
             >>> decisions = service.get_by_namespace("decisions")
             >>> spec_learnings = service.get_by_namespace("learnings", spec="SPEC-001")
+            >>> user_decisions = service.get_by_namespace(
+            ...     "decisions", domain=Domain.USER
+            ... )
         """
         try:
-            index = self._get_index()
-            return index.get_by_namespace(namespace, spec=spec, limit=limit)
+            if domain is not None:
+                # Query single domain
+                if domain == Domain.USER:
+                    index = self._get_user_index()
+                else:
+                    index = self._get_index()
+                return index.get_by_namespace(
+                    namespace, spec=spec, limit=limit, domain=domain.value
+                )
+            else:
+                # Query both domains and merge (project first)
+                project_results = self._get_index().get_by_namespace(
+                    namespace, spec=spec, limit=limit, domain=Domain.PROJECT.value
+                )
+                try:
+                    user_results = self._get_user_index().get_by_namespace(
+                        namespace, spec=spec, limit=limit, domain=Domain.USER.value
+                    )
+                except (OSError, RecallError, MemoryIndexError):
+                    # QUAL-HIGH-001: User index doesn't exist or is inaccessible
+                    user_results = []
+
+                # Combine with project first, then user
+                combined = list(project_results) + list(user_results)
+                if limit:
+                    combined = combined[:limit]
+                return combined
         except Exception as e:
             logger.warning("Failed to get memories for namespace %s: %s", namespace, e)
             return []
@@ -481,7 +711,8 @@ class RecallService:
             return HydratedMemory(result=result)
 
         try:
-            git_ops = self._get_git_ops()
+            # Use domain-specific GitOps for the memory
+            git_ops = self._get_git_ops_for_memory(memory)
 
             # FULL level - load note content
             full_content: str | None = None
@@ -566,22 +797,26 @@ class RecallService:
             else:
                 results.append(m)
 
-        # PERF-003: Group memories by namespace for batch git operations
-        git_ops = self._get_git_ops()
-
-        # Collect unique (namespace, commit_sha) pairs
-        namespace_commits: dict[str, list[str]] = {}
+        # PERF-003: Group memories by domain and namespace for batch git operations
+        # Key: (domain, namespace) -> list of commit_shas
+        domain_namespace_commits: dict[tuple[str, str], list[str]] = {}
         for r in results:
-            ns = r.memory.namespace
-            if ns not in namespace_commits:
-                namespace_commits[ns] = []
-            if r.memory.commit_sha not in namespace_commits[ns]:
-                namespace_commits[ns].append(r.memory.commit_sha)
+            key = (r.memory.domain, r.memory.namespace)
+            if key not in domain_namespace_commits:
+                domain_namespace_commits[key] = []
+            if r.memory.commit_sha not in domain_namespace_commits[key]:
+                domain_namespace_commits[key].append(r.memory.commit_sha)
 
-        # Batch fetch note contents by namespace
-        note_contents: dict[str, dict[str, str | None]] = {}
-        for ns, commit_shas in namespace_commits.items():
-            note_contents[ns] = git_ops.show_notes_batch(ns, commit_shas)
+        # Batch fetch note contents by (domain, namespace)
+        # Key: (domain, namespace) -> {commit_sha -> content}
+        note_contents: dict[tuple[str, str], dict[str, str | None]] = {}
+        for (domain, ns), commit_shas in domain_namespace_commits.items():
+            # Get the appropriate GitOps for this domain
+            if domain == Domain.USER.value:
+                git_ops = self._get_user_git_ops()
+            else:
+                git_ops = self._get_git_ops()
+            note_contents[(domain, ns)] = git_ops.show_notes_batch(ns, commit_shas)
 
         # Build hydrated memories using cached contents
         hydrated: list[HydratedMemory] = []
@@ -592,11 +827,13 @@ class RecallService:
             files: tuple[tuple[str, str], ...] = ()
 
             if level.value >= HydrationLevel.FULL.value:
-                # Get from batch-fetched contents
-                ns_contents = note_contents.get(memory.namespace, {})
+                # Get from batch-fetched contents using (domain, namespace) key
+                key = (memory.domain, memory.namespace)
+                ns_contents = note_contents.get(key, {})
                 full_content = ns_contents.get(memory.commit_sha)
 
-                # Get commit info (not batched - less critical for perf)
+                # Get commit info using domain-specific GitOps
+                git_ops = self._get_git_ops_for_memory(memory)
                 try:
                     commit_info = git_ops.get_commit_info(memory.commit_sha)
                 except Exception as e:
@@ -605,7 +842,7 @@ class RecallService:
                     )
 
             if level == HydrationLevel.FILES:
-                files = self._load_files_at_commit(memory.commit_sha)
+                files = self._load_files_at_commit_for_memory(memory)
 
             hydrated.append(
                 HydratedMemory(
@@ -619,7 +856,7 @@ class RecallService:
         return hydrated
 
     def _load_files_at_commit(self, commit_sha: str) -> tuple[tuple[str, str], ...]:
-        """Load file snapshots at a specific commit.
+        """Load file snapshots at a specific commit (project domain).
 
         Args:
             commit_sha: The commit SHA to load files from.
@@ -627,19 +864,90 @@ class RecallService:
         Returns:
             Tuple of (path, content) pairs for changed files.
         """
-        try:
-            git_ops = self._get_git_ops()
+        return self._load_files_with_git_ops(commit_sha, self._get_git_ops())
 
+    def _load_files_at_commit_for_memory(
+        self, memory: Memory
+    ) -> tuple[tuple[str, str], ...]:
+        """Load file snapshots for a memory, using the correct domain GitOps.
+
+        Args:
+            memory: The memory to load files for.
+
+        Returns:
+            Tuple of (path, content) pairs for changed files.
+        """
+        git_ops = self._get_git_ops_for_memory(memory)
+        return self._load_files_with_git_ops(memory.commit_sha, git_ops)
+
+    # RES-M-005: Memory limits for file loading
+    _MAX_FILES_PER_COMMIT = 50  # Maximum number of files to load per commit
+    _MAX_FILE_SIZE_BYTES = 512 * 1024  # 512KB max per file
+    _MAX_TOTAL_SIZE_BYTES = 5 * 1024 * 1024  # 5MB total max
+
+    def _load_files_with_git_ops(
+        self, commit_sha: str, git_ops: GitOps
+    ) -> tuple[tuple[str, str], ...]:
+        """Load file snapshots using a specific GitOps instance.
+
+        RES-M-005: Applies memory limits to prevent exhaustion:
+        - Maximum 50 files per commit
+        - Maximum 512KB per individual file
+        - Maximum 5MB total content loaded
+
+        Args:
+            commit_sha: The commit SHA to load files from.
+            git_ops: The GitOps instance to use.
+
+        Returns:
+            Tuple of (path, content) pairs for changed files.
+        """
+        try:
             # Get list of changed files in the commit
             changed_files = git_ops.get_changed_files(commit_sha)
 
-            # Load content for each file
+            # RES-M-005: Limit number of files to process
+            if len(changed_files) > self._MAX_FILES_PER_COMMIT:
+                logger.debug(
+                    "Commit %s has %d files, limiting to %d",
+                    commit_sha[:7],
+                    len(changed_files),
+                    self._MAX_FILES_PER_COMMIT,
+                )
+                changed_files = changed_files[: self._MAX_FILES_PER_COMMIT]
+
+            # Load content for each file with size limits
             files: list[tuple[str, str]] = []
+            total_size = 0
             for path in changed_files:
                 try:
                     content = git_ops.get_file_at_commit(path, commit_sha)
-                    if content is not None:
-                        files.append((path, content))
+                    if content is None:
+                        continue
+
+                    content_size = len(content.encode("utf-8", errors="replace"))
+
+                    # RES-M-005: Skip files that are too large
+                    if content_size > self._MAX_FILE_SIZE_BYTES:
+                        logger.debug(
+                            "Skipping large file %s (%d bytes > %d limit)",
+                            path,
+                            content_size,
+                            self._MAX_FILE_SIZE_BYTES,
+                        )
+                        continue
+
+                    # RES-M-005: Stop if total size limit exceeded
+                    if total_size + content_size > self._MAX_TOTAL_SIZE_BYTES:
+                        logger.debug(
+                            "Total size limit reached (%d bytes), stopping file load",
+                            total_size,
+                        )
+                        break
+
+                    files.append((path, content))
+                    total_size += content_size
+
                 except Exception as e:
                     logger.debug(
                         "Failed to load file %s at %s: %s", path, commit_sha, e
@@ -797,6 +1105,85 @@ class RecallService:
             results = [r for r in results if r.memory.id != memory.id][:k]
 
         return results
+
+    # -------------------------------------------------------------------------
+    # Domain-Specific Convenience Methods
+    # -------------------------------------------------------------------------
+
+    def search_user(
+        self,
+        query: str,
+        k: int = 10,
+        *,
+        namespace: str | None = None,
+        spec: str | None = None,
+        min_similarity: float | None = None,
+    ) -> list[MemoryResult]:
+        """Search for memories in the user (global) domain only.
+
+        Convenience method that wraps search() with domain=Domain.USER.
+        User memories are global, cross-project memories stored in the
+        user's data directory.
+
+        Args:
+            query: The search query text.
+            k: Maximum number of results to return.
+            namespace: Optional namespace to filter results.
+            spec: Optional spec identifier to filter results.
+            min_similarity: Minimum similarity threshold (0-1).
+
+        Returns:
+            List of MemoryResult objects from the user domain.
+
+        Examples:
+            >>> results = service.search_user("my coding preferences")
+            >>> results = service.search_user("terminal setup", namespace="learnings")
+        """
+        return self.search(
+            query,
+            k=k,
+            namespace=namespace,
+            spec=spec,
+            min_similarity=min_similarity,
+            domain=Domain.USER,
+        )
+
+    def search_project(
+        self,
+        query: str,
+        k: int = 10,
+        *,
+        namespace: str | None = None,
+        spec: str | None = None,
+        min_similarity: float | None = None,
+    ) -> list[MemoryResult]:
+        """Search for memories in the project domain only.
+
+        Convenience method that wraps search() with domain=Domain.PROJECT.
+        Project memories are repository-scoped memories stored in git notes.
+
+        Args:
+            query: The search query text.
+            k: Maximum number of results to return.
+            namespace: Optional namespace to filter results.
+            spec: Optional spec identifier to filter results.
+            min_similarity: Minimum similarity threshold (0-1).
+
+        Returns:
+            List of MemoryResult objects from the project domain.
+
+        Examples:
+            >>> results = service.search_project("authentication flow")
+            >>> results = service.search_project("API design", namespace="decisions")
+        """
+        return self.search(
+            query,
+            k=k,
+            namespace=namespace,
+            spec=spec,
+            min_similarity=min_similarity,
+            domain=Domain.PROJECT,
+        )
 
 
 # =============================================================================

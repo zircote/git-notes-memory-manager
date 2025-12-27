@@ -64,28 +64,84 @@ class SecretsFilteringService:
     ) -> None:
         """Initialize the secrets filtering service.
 
+        ARCH-H-004: Initialization order is explicit and validated:
+        1. Config loaded first (all components depend on it)
+        2. Detectors initialized (independent, use config)
+        3. Allowlist manager (independent, uses data_dir)
+        4. Redactor (depends on config.default_strategy)
+
         Args:
             config: Configuration for filtering. Uses defaults if not provided.
             data_dir: Directory for allowlist files. Uses default if not provided.
+
+        Raises:
+            RuntimeError: If initialization fails for any component.
         """
+        # Step 1: Load configuration (required by other components)
         self._config = config or get_secrets_config()
 
-        # Initialize detectors
-        self._secrets_detector = DetectSecretsAdapter(
-            disabled_plugins=self._config.detectors_disabled,
-        )
-        self._pii_detector = PIIDetector()
+        # Step 2: Initialize detectors (independent of each other)
+        try:
+            self._secrets_detector = DetectSecretsAdapter(
+                disabled_plugins=self._config.detectors_disabled,
+            )
+        except Exception as e:
+            _logger.error("Failed to initialize secrets detector: %s", e)
+            raise RuntimeError(f"SecretsFilteringService init failed: {e}") from e
 
-        # Initialize allowlist manager
-        self._allowlist = AllowlistManager(data_dir=data_dir)
+        try:
+            self._pii_detector = PIIDetector()
+        except Exception as e:
+            _logger.error("Failed to initialize PII detector: %s", e)
+            raise RuntimeError(f"SecretsFilteringService init failed: {e}") from e
 
-        # Initialize redactor with strategy from config
-        # Convert namespace_strategies (namespace -> strategy) to type overrides
-        # Note: The config has namespace strategies, but the redactor uses type strategies
-        # For now, use default strategy only - per-type overrides can be added later
-        self._redactor = Redactor(
-            default_strategy=self._config.default_strategy,
-        )
+        # Step 3: Initialize allowlist manager
+        try:
+            self._allowlist = AllowlistManager(data_dir=data_dir)
+        except Exception as e:
+            _logger.error("Failed to initialize allowlist manager: %s", e)
+            raise RuntimeError(f"SecretsFilteringService init failed: {e}") from e
+
+        # Step 4: Initialize redactor (depends on config strategy)
+        try:
+            self._redactor = Redactor(
+                default_strategy=self._config.default_strategy,
+            )
+        except Exception as e:
+            _logger.error("Failed to initialize redactor: %s", e)
+            raise RuntimeError(f"SecretsFilteringService init failed: {e}") from e
+
+        # Validate all components are properly initialized
+        self._validate_initialization()
+
+    def _validate_initialization(self) -> None:
+        """Validate that all components are properly initialized.
+
+        ARCH-H-004: Ensures no partial initialization state by verifying
+        all required attributes are set and valid.
+
+        Raises:
+            RuntimeError: If any component is not properly initialized.
+        """
+        required_attrs = [
+            ("_config", SecretsConfig),
+            ("_secrets_detector", DetectSecretsAdapter),
+            ("_pii_detector", PIIDetector),
+            ("_allowlist", AllowlistManager),
+            ("_redactor", Redactor),
+        ]
+
+        for attr_name, expected_type in required_attrs:
+            if not hasattr(self, attr_name):
+                raise RuntimeError(
+                    f"SecretsFilteringService missing required attribute: {attr_name}"
+                )
+            attr_value = getattr(self, attr_name)
+            if not isinstance(attr_value, expected_type):
+                raise RuntimeError(
+                    f"SecretsFilteringService.{attr_name} has wrong type: "
+                    f"expected {expected_type.__name__}, got {type(attr_value).__name__}"
+                )
 
     @property
     def config(self) -> SecretsConfig:

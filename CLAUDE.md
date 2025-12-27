@@ -77,6 +77,25 @@ Recall:
       → Memory objects with distance scores
 ```
 
+### Multi-Domain Memory Storage
+
+Memories are organized into two domains:
+
+| Domain | Scope | Storage Location | Use Case |
+|--------|-------|------------------|----------|
+| **PROJECT** | Repo-scoped | `refs/notes/mem/{namespace}` in project repo | Project-specific decisions, progress, learnings |
+| **USER** | Global, cross-project | `~/.local/share/memory-plugin/user-memories/` (bare repo) | Patterns, preferences, cross-project learnings |
+
+**Domain Selection:**
+- Default captures go to PROJECT domain (repo-scoped)
+- Use `[global]` or `[user]` inline markers for USER domain
+- Use domain prefix in blocks: `global:decision`, `user:learned`
+- Commands support `--domain=all|user|project` filter
+
+**Memory ID Format:**
+- Project: `{namespace}:{commit_sha[:7]}:{index}` (e.g., `decisions:abc1234:0`)
+- User: `user:{namespace}:{commit_sha[:7]}:{index}` (e.g., `user:learnings:def5678:0`)
+
 ### Git Notes Storage
 
 Memories are stored under `refs/notes/mem/{namespace}` where namespace is one of:
@@ -90,6 +109,7 @@ timestamp: 2024-01-15T10:30:00Z
 summary: Use PostgreSQL for persistence
 spec: my-project
 tags: [database, architecture]
+domain: project  # or "user" for global memories
 ---
 ## Context
 ...
@@ -157,10 +177,11 @@ Content → PIIDetector → DetectSecretsAdapter → Deduplicate → AllowlistCh
 ### Models
 
 All models are immutable (`@dataclass(frozen=True)`):
-- `Memory` - Core entity with id format `{namespace}:{commit_sha}:{index}`
-- `MemoryResult` - Memory + distance score from vector search
+- `Memory` - Core entity with id format `{namespace}:{commit_sha}:{index}` or `user:{namespace}:{commit_sha}:{index}`
+- `MemoryResult` - Memory + distance score from vector search + domain
 - `CaptureResult` - Operation result with success/warning status
 - `HydrationLevel` - SUMMARY → FULL → FILES progressive loading
+- `Domain` - Enum: `PROJECT` (repo-scoped) or `USER` (global, cross-project)
 
 ### Claude Code Plugin Integration
 
@@ -192,9 +213,40 @@ def capture_service(tmp_path, monkeypatch):
     return get_capture_service(repo_path=tmp_path)
 ```
 
-## Environment Variables
+## Configuration
 
-### Core Configuration
+### Configuration File (Recommended)
+
+All environment variables can be centralized in `~/.local/share/memory-plugin/env`. This file is loaded by both the Python library and Claude Code hooks, avoiding the need to pollute shell profiles.
+
+**Location:**
+- Unix/macOS: `~/.local/share/memory-plugin/env` (same directory as plugin data)
+- Windows: `%LOCALAPPDATA%\memory-plugin\env`
+
+**Why use a config file?** Claude Code runs hooks in a clean environment that doesn't inherit shell env vars. The config file ensures consistent configuration across all contexts.
+
+**Example ~/.local/share/memory-plugin/env:**
+```bash
+# Core
+export MEMORY_PLUGIN_DATA_DIR="$HOME/.local/share/memory-plugin"
+
+# Hooks
+export HOOK_ENABLED=true
+export HOOK_SESSION_START_ENABLED=true
+export HOOK_SESSION_START_FETCH_REMOTE=true
+export HOOK_STOP_PUSH_REMOTE=true
+
+# Observability
+export MEMORY_PLUGIN_OTLP_ENDPOINT="http://localhost:4318"
+export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
+export MEMORY_PLUGIN_LOG_LEVEL=info
+```
+
+See the full config at `~/.local/share/memory-plugin/env`.
+
+### Environment Variables Reference
+
+#### Core Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -202,23 +254,26 @@ def capture_service(tmp_path, monkeypatch):
 | `MEMORY_PLUGIN_GIT_NAMESPACE` | Git notes ref prefix | `refs/notes/mem` |
 | `MEMORY_PLUGIN_EMBEDDING_MODEL` | Embedding model | `all-MiniLM-L6-v2` |
 
-### Hook Configuration
+#### Hook Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `HOOK_ENABLED` | Master switch for all hooks | `true` |
 | `HOOK_SESSION_START_ENABLED` | Enable SessionStart context injection | `true` |
-| `HOOK_SESSION_START_FETCH_REMOTE` | Fetch notes from remote on session start | `false` |
+| `HOOK_SESSION_START_FETCH_REMOTE` | Fetch project notes from remote on session start | `false` |
+| `HOOK_SESSION_START_FETCH_USER_REMOTE` | Fetch user memories from remote on session start | `false` |
 | `HOOK_USER_PROMPT_ENABLED` | Enable capture marker detection | `false` |
 | `HOOK_POST_TOOL_USE_ENABLED` | Enable file-contextual memory injection | `true` |
 | `HOOK_PRE_COMPACT_ENABLED` | Enable auto-capture before compaction | `true` |
 | `HOOK_STOP_ENABLED` | Enable Stop hook processing | `true` |
-| `HOOK_STOP_PUSH_REMOTE` | Push notes to remote on session stop | `false` |
+| `HOOK_STOP_PUSH_REMOTE` | Push project notes to remote on session stop | `false` |
+| `HOOK_STOP_PUSH_USER_REMOTE` | Push user memories to remote on session stop | `false` |
 | `HOOK_DEBUG` | Enable debug logging to stderr | `false` |
 | `HOOK_SESSION_START_INCLUDE_GUIDANCE` | Include response guidance templates | `true` |
 | `HOOK_SESSION_START_GUIDANCE_DETAIL` | Guidance level: minimal/standard/detailed | `standard` |
+| `USER_MEMORIES_REMOTE` | Remote URL for user memories sync | (none) |
 
-### Secrets Filtering Configuration
+#### Secrets Filtering Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -229,21 +284,60 @@ def capture_service(tmp_path, monkeypatch):
 | `SECRETS_FILTER_AUDIT_ENABLED` | Enable audit logging | `true` |
 | `SECRETS_FILTER_AUDIT_DIR` | Audit log directory | `~/.local/share/memory-plugin/audit/` |
 
+#### Observability Configuration (OTLP)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MEMORY_PLUGIN_OTLP_ENDPOINT` | OTLP HTTP endpoint (e.g., `http://localhost:4318`) | (none) |
+| `MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL` | Allow internal/localhost endpoints (SEC-H-001 SSRF override) | `false` |
+| `MEMORY_PLUGIN_OBSERVABILITY_ENABLED` | Enable all observability features | `true` |
+| `MEMORY_PLUGIN_LOG_LEVEL` | Logging level: quiet/info/debug/trace | `info` |
+| `MEMORY_PLUGIN_LOG_FORMAT` | Log format: json/text | `json` |
+| `MEMORY_PLUGIN_METRICS_ENABLED` | Enable metrics collection | `true` |
+| `MEMORY_PLUGIN_TRACING_ENABLED` | Enable distributed tracing | `true` |
+
+**Note**: The `ALLOW_INTERNAL` flag is required because the OTLP exporter has SSRF protection (SEC-H-001) that blocks localhost/private IPs by default. This is a security feature for production environments.
+
+Start the observability stack with:
+```bash
+cd docker && docker compose up -d
+```
+
+Access dashboards:
+- **Grafana**: http://localhost:3000 (admin/admin) - Memory Operations and Hook Performance dashboards
+- **Prometheus**: http://localhost:9090 - Direct metrics queries
+- **Tempo traces**: Access via Grafana → Explore → Tempo datasource (no direct web UI)
+
 ### Remote Sync (Team Collaboration)
 
 For team environments where multiple developers share memories:
 
 ```bash
-# Enable automatic sync with remote (opt-in)
-export HOOK_SESSION_START_FETCH_REMOTE=true  # Fetch from remote on session start
-export HOOK_STOP_PUSH_REMOTE=true            # Push to remote on session stop
+# Project memories - sync with origin repository (opt-in)
+export HOOK_SESSION_START_FETCH_REMOTE=true  # Fetch project memories on session start
+export HOOK_STOP_PUSH_REMOTE=true            # Push project memories on session stop
 ```
 
-With these enabled, memories are automatically synchronized with the origin repository:
+With these enabled, project memories are automatically synchronized with the origin repository:
 - **Session start**: Fetches and merges remote notes using `cat_sort_uniq` strategy
 - **Session stop**: Pushes local notes to remote
 
 Manual sync is always available via `/memory:sync --remote`.
+
+### User Memory Remote Sync
+
+For syncing global (user-level) memories across machines:
+
+```bash
+# Configure remote for user memories
+export USER_MEMORIES_REMOTE=git@github.com:username/my-memories.git
+
+# Enable automatic sync (opt-in)
+export HOOK_SESSION_START_FETCH_USER_REMOTE=true  # Fetch user memories on session start
+export HOOK_STOP_PUSH_USER_REMOTE=true            # Push user memories on session stop
+```
+
+User memories are stored in a bare git repo at `~/.local/share/memory-plugin/user-memories/` and can be synced to a personal remote repository for cross-machine access.
 
 ## Code Intelligence (LSP)
 
@@ -251,12 +345,15 @@ LSP hooks are configured in `.claude/hooks.json` for immediate feedback on Pytho
 
 ### Installed Hooks
 
-| Hook | Trigger | Action |
-|------|---------|--------|
-| `format-on-edit` | PostToolUse (Write/Edit) | Runs `ruff format` on changed files |
-| `lint-check-on-edit` | PostToolUse (Write/Edit) | Runs `ruff check` on changed files |
-| `typecheck-on-edit` | PostToolUse (Write/Edit) | Runs `mypy` on changed files |
-| `pre-commit-quality-gate` | PreToolUse (git commit) | Runs full `make quality` before commit |
+These hooks mirror the CI workflow (`.github/workflows/ci.yml`) to catch issues before push:
+
+| Hook | Trigger | CI Equivalent | Action |
+|------|---------|---------------|--------|
+| `format-on-edit` | PostToolUse (Write/Edit) | `ruff format` | Auto-formats Python files |
+| `lint-check-on-edit` | PostToolUse (Write/Edit) | `ruff check` | Reports lint violations |
+| `typecheck-on-edit` | PostToolUse (Write/Edit) | `mypy src/` | Type checks with strict mode |
+| `security-scan-on-edit` | PostToolUse (Write/Edit) | `bandit -r src/ -ll` | Scans for security issues |
+| `pre-commit-quality-gate` | PreToolUse (git commit) | Full CI | Runs `make quality` (blocking) |
 
 ### Navigation & Understanding
 
@@ -285,6 +382,17 @@ LSP hooks are configured in `.claude/hooks.json` for immediate feedback on Pytho
 
 
 ## Completed Spec Projects
+
+- `docs/spec/completed/2025-12-25-llm-subconsciousness/` - LLM-Powered Subconsciousness for Intelligent Memory Management
+  - Completed: 2025-12-26
+  - Outcome: success
+  - GitHub Issue: [#11](https://github.com/zircote/git-notes-memory/issues/11)
+  - GitHub PR: [#26](https://github.com/zircote/git-notes-memory/pull/26) (open, ready for merge)
+  - Features: Provider-agnostic LLM client (Anthropic/OpenAI/Ollama), implicit memory capture with confidence scoring, approval queue, hook integration
+  - Deliverables: Phases 1-2 completed (30/85 tasks), 134 tests with 87%+ coverage, 13 ADRs, security fix (command injection)
+  - Scope: LLM Foundation + Implicit Capture delivered; Phases 3-6 deferred (Semantic Linking, Memory Decay, Consolidation, Proactive Surfacing)
+  - Effort: ~14 hours (planned: ~80-100 hours, -86% under budget)
+  - Key docs: REQUIREMENTS.md, ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DECISIONS.md, RETROSPECTIVE.md, PROGRESS.md
 
 - `docs/spec/completed/2025-12-25-observability-instrumentation/` - Observability Instrumentation
   - Completed: 2025-12-26

@@ -53,8 +53,7 @@ exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
     namespace: memory
-    const_labels:
-      service: git-notes-memory
+    # Note: const_labels removed to avoid duplicate label conflict with resource attributes
 
   # Export traces to Tempo
   otlp/tempo:
@@ -65,12 +64,9 @@ exporters:
   # Export logs to Loki
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
-    labels:
-      attributes:
-        service.name: "service"
-        level: "level"
-      resource:
-        deployment.environment: "environment"
+    default_labels_enabled:
+      exporter: false
+      job: true
 
   # Debug output (disable in production)
   debug:
@@ -89,17 +85,17 @@ service:
   pipelines:
     metrics:
       receivers: [otlp, prometheus]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, batch]
       exporters: [prometheusremotewrite, prometheus]
 
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, batch]  # resource processor removed - see ADR
       exporters: [otlp/tempo]
 
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, batch]  # resource processor removed - see ADR
       exporters: [loki]
 
   telemetry:

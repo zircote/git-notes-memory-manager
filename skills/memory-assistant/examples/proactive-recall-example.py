@@ -67,7 +67,7 @@ def recall_for_error(error_message: str) -> None:
     """Recall memories related to an error."""
     recall = get_recall_service()
 
-    print(f"## Searching for similar issues...\n")
+    print("## Searching for similar issues...\n")
 
     # Lower threshold for troubleshooting
     results = recall.search(

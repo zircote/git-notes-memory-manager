@@ -11,6 +11,39 @@
 
 set -euo pipefail
 
+# Source environment variables for OTLP and other config
+# Claude Code runs hooks in a clean environment, so we need to restore user's env
+#
+# Priority order:
+# 1. ~/.local/share/memory-plugin/env (recommended - same dir as data)
+# 2. User's shell profile (fallback, may be slow)
+#
+# Example ~/.local/share/memory-plugin/env:
+#   export MEMORY_PLUGIN_OTLP_ENDPOINT=http://localhost:4318
+#   export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
+#   export HOOK_SESSION_START_ENABLED=true
+
+for env_file in \
+    "${HOME}/.local/share/memory-plugin/env"; do
+    if [[ -f "$env_file" ]]; then
+        # shellcheck disable=SC1090
+        source "$env_file" 2>/dev/null || true
+        break
+    fi
+done
+
+# Fallback: source shell profile if no dedicated env file found
+# This is slower but ensures env vars are available
+if [[ -z "${MEMORY_PLUGIN_OTLP_ENDPOINT:-}" ]]; then
+    for profile in "${HOME}/.zshrc" "${HOME}/.bashrc" "${HOME}/.profile"; do
+        if [[ -f "$profile" ]]; then
+            # shellcheck disable=SC1090
+            source "$profile" 2>/dev/null || true
+            break
+        fi
+    done
+fi
+
 # Get the plugin root (parent of hooks directory)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="${SCRIPT_DIR%/hooks}"

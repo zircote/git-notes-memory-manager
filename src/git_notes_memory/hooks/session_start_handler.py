@@ -24,12 +24,14 @@ Environment Variables:
     HOOK_ENABLED: Master switch for hooks (default: true)
     HOOK_SESSION_START_ENABLED: Enable this hook (default: true)
     HOOK_SESSION_START_FETCH_REMOTE: Fetch notes from remote on start (default: false)
+    HOOK_SESSION_START_FETCH_USER_REMOTE: Fetch user memories from remote on start (default: false)
     HOOK_DEBUG: Enable debug logging (default: false)
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from typing import Any
 
@@ -47,11 +49,10 @@ from git_notes_memory.hooks.hook_utils import (
     timed_hook_execution,
 )
 from git_notes_memory.hooks.project_detector import detect_project
-from git_notes_memory.observability import get_logger
 
 __all__ = ["main"]
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _validate_input(data: dict[str, Any]) -> bool:
@@ -83,13 +84,14 @@ def _get_memory_count() -> int:
         if not index_path.exists():
             return 0
         # Use direct SQLite query for performance (skip full initialization)
-        conn = sqlite3.connect(str(index_path))
-        cursor = conn.execute("SELECT COUNT(*) FROM memories")
-        row = cursor.fetchone()
-        conn.close()
-        return int(row[0]) if row else 0
-    except Exception:
-        logger.debug("Failed to get memory count from index", exc_info=True)
+        # Use context manager to ensure connection cleanup on any error
+        with sqlite3.connect(str(index_path)) as conn:
+            cursor = conn.execute("SELECT COUNT(*) FROM memories")
+            row = cursor.fetchone()
+            return int(row[0]) if row else 0
+    except (OSError, sqlite3.Error) as e:
+        # Specific exceptions for file/database access
+        logger.debug("Failed to get memory count from index: %s", e)
         return 0
 
 
@@ -144,7 +146,7 @@ def main() -> None:
     timeout = config.timeout or HOOK_SESSION_START_TIMEOUT
     setup_timeout(timeout, hook_name="SessionStart")
 
-    with timed_hook_execution("SessionStart") as timer:
+    with timed_hook_execution("SessionStart"):
         try:
             # Read and validate input
             input_data = read_json_input()
@@ -155,7 +157,6 @@ def main() -> None:
 
             if not _validate_input(input_data):
                 logger.warning("Invalid hook input - missing required fields")
-                timer.set_status("skipped")
                 sys.exit(0)
 
             # Extract working directory and session source
@@ -215,6 +216,21 @@ def main() -> None:
                 except Exception as e:
                     logger.debug("Remote fetch on start skipped: %s", e)
 
+            # Fetch user memories from remote if enabled (opt-in via env var)
+            if config.session_start_fetch_user_remote:
+                try:
+                    from git_notes_memory.config import get_user_memories_remote
+
+                    if get_user_memories_remote():
+                        from git_notes_memory.sync import get_sync_service as get_sync
+
+                        sync_service = get_sync(repo_path=cwd)
+                        sync_service.sync_user_memories_with_remote(push=False)
+                        logger.debug("Fetched user memories from remote")
+                except Exception as e:
+                    # Don't block session - just log and continue
+                    logger.debug("User memory remote fetch skipped: %s", e)
+
             # Build response guidance if enabled
             guidance_xml = ""
             if config.session_start_include_guidance:
@@ -253,11 +269,9 @@ def main() -> None:
             _write_output(full_context, memory_count=memory_count)
 
         except json.JSONDecodeError as e:
-            timer.set_status("error")
             logger.error("Failed to parse hook input: %s", e)
             print(json.dumps({"continue": True}))
         except Exception as e:
-            timer.set_status("error")
             logger.exception("SessionStart hook error: %s", e)
             print(json.dumps({"continue": True}))
         finally:

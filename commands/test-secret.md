@@ -84,10 +84,9 @@ The entire argument is the value to test. Handle quoted strings.
 **Analyze the value**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 TEST_VALUE="${TEST_VALUE}"  # From arguments
 
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import sys
 from git_notes_memory.security import get_secrets_filtering_service
 from git_notes_memory.security.models import FilterAction

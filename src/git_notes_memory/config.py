@@ -8,6 +8,7 @@ Environment Variables:
     MEMORY_PLUGIN_GIT_NAMESPACE: Override the git notes namespace
     MEMORY_PLUGIN_EMBEDDING_MODEL: Override the embedding model name
     MEMORY_PLUGIN_AUTO_CAPTURE: Enable/disable auto-capture (1/true/yes/on)
+    USER_MEMORIES_REMOTE: Remote URL for user-memories bare repo sync
 
 XDG Compliance:
     By default, data is stored in $XDG_DATA_HOME/memory-plugin/ which
@@ -21,6 +22,7 @@ XDG Compliance:
 from __future__ import annotations
 
 import os
+from enum import Enum
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -30,6 +32,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 __all__ = [
+    # Domain Configuration
+    "Domain",
+    "get_user_memories_path",
+    "get_user_index_path",
+    "get_user_memories_remote",
     # Namespaces
     "NAMESPACES",
     # Git Configuration
@@ -137,6 +144,87 @@ AUTO_CAPTURE_NAMESPACES: frozenset[str] = frozenset(
 
 
 # =============================================================================
+# Domain Configuration
+# =============================================================================
+
+
+class Domain(Enum):
+    """Memory storage domain.
+
+    Defines where memories are stored:
+    - USER: Global, cross-project memories stored in ~/.local/share/memory-plugin/user-memories/
+    - PROJECT: Repository-scoped memories stored in git notes (existing behavior)
+
+    User memories persist across all projects and capture universal learnings,
+    preferences, and practices. Project memories remain scoped to their repository.
+    """
+
+    USER = "user"
+    PROJECT = "project"
+
+
+# Directory name for user-memories bare repo
+USER_MEMORIES_DIR_NAME = "user-memories"
+# Subdirectory for user-specific data (separate from project data)
+USER_DATA_DIR_NAME = "user"
+
+
+def get_user_memories_path(ensure_exists: bool = False) -> Path:
+    """Get the path to the user-memories bare git repository.
+
+    This is where global, cross-project memories are stored as git notes.
+    The repository is created lazily on first capture to the user domain.
+
+    Environment override: MEMORY_PLUGIN_DATA_DIR (affects base path)
+
+    Args:
+        ensure_exists: If True, create the directory if it doesn't exist.
+
+    Returns:
+        Path to user-memories bare repository (default: ~/.local/share/memory-plugin/user-memories/).
+    """
+    path = get_data_path() / USER_MEMORIES_DIR_NAME
+    if ensure_exists:
+        path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def get_user_index_path(ensure_exists: bool = False) -> Path:
+    """Get the path to the user-domain SQLite index database.
+
+    User memories have their own separate index, distinct from project indexes.
+    This enables fast cross-project recall without affecting project-specific indices.
+
+    Environment override: MEMORY_PLUGIN_DATA_DIR (affects base path)
+
+    Args:
+        ensure_exists: If True, create the parent directory if it doesn't exist.
+
+    Returns:
+        Path to user index.db file (default: ~/.local/share/memory-plugin/user/index.db).
+    """
+    path = get_data_path() / USER_DATA_DIR_NAME
+    if ensure_exists:
+        path.mkdir(parents=True, exist_ok=True)
+    return path / INDEX_DB_NAME
+
+
+def get_user_memories_remote() -> str | None:
+    """Get the remote URL for user-memories synchronization.
+
+    This enables syncing global, cross-project memories to a remote git repository.
+    When set, the user-memories bare repo can push/pull notes from this remote.
+
+    Environment override: USER_MEMORIES_REMOTE
+
+    Returns:
+        Remote URL if configured, None otherwise.
+    """
+    remote = os.environ.get("USER_MEMORIES_REMOTE")
+    return remote if remote else None
+
+
+# =============================================================================
 # Git Configuration
 # =============================================================================
 
@@ -171,7 +259,9 @@ def get_data_path() -> Path:
     """
     override = os.environ.get("MEMORY_PLUGIN_DATA_DIR")
     if override:
-        return Path(override).expanduser()
+        # Expand both shell variables ($HOME) and user paths (~)
+        expanded = os.path.expandvars(override)
+        return Path(expanded).expanduser()
 
     xdg_data_home = os.environ.get("XDG_DATA_HOME")
     if xdg_data_home:

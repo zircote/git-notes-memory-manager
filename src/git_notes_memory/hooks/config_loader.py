@@ -16,6 +16,7 @@ Environment Variables:
     HOOK_SESSION_START_MAX_MEMORIES: Maximum memories to retrieve (default: 30)
     HOOK_SESSION_START_AUTO_EXPAND_THRESHOLD: Relevance threshold for auto-expand hints (default: 0.85)
     HOOK_SESSION_START_FETCH_REMOTE: Fetch notes from remote on session start (default: false)
+    HOOK_SESSION_START_FETCH_USER_REMOTE: Fetch user memories from remote on session start (default: false)
     HOOK_CAPTURE_DETECTION_ENABLED: Enable capture signal detection
     HOOK_CAPTURE_DETECTION_MIN_CONFIDENCE: Minimum confidence for suggestions
     HOOK_CAPTURE_DETECTION_AUTO_THRESHOLD: Confidence for auto-capture
@@ -27,12 +28,14 @@ Environment Variables:
     HOOK_STOP_AUTO_CAPTURE_MIN_CONFIDENCE: Minimum confidence for auto-capture (default: 0.8)
     HOOK_STOP_MAX_CAPTURES: Maximum auto-captures per session (default: 5)
     HOOK_STOP_PUSH_REMOTE: Push notes to remote on session stop (default: false)
+    HOOK_STOP_PUSH_USER_REMOTE: Push user memories to remote on session stop (default: false)
     HOOK_POST_TOOL_USE_ENABLED: Enable PostToolUse hook
     HOOK_POST_TOOL_USE_MIN_SIMILARITY: Minimum similarity for memory recall
     HOOK_POST_TOOL_USE_MAX_RESULTS: Maximum memories to inject
     HOOK_POST_TOOL_USE_TIMEOUT: PostToolUse timeout in seconds
     HOOK_PRE_COMPACT_ENABLED: Enable PreCompact hook
-    HOOK_PRE_COMPACT_AUTO_CAPTURE: Auto-capture without user prompt
+    HOOK_PRE_COMPACT_CONSENT_GIVEN: User has explicitly consented to auto-capture (MED-011)
+    HOOK_PRE_COMPACT_AUTO_CAPTURE: Auto-capture without user prompt (requires consent)
     HOOK_PRE_COMPACT_PROMPT_FIRST: Show suggestions before capturing (suggestion mode)
     HOOK_PRE_COMPACT_MIN_CONFIDENCE: Minimum confidence for auto-capture
     HOOK_PRE_COMPACT_MAX_CAPTURES: Maximum memories to auto-capture
@@ -133,6 +136,9 @@ class HookConfig:
     session_start_fetch_remote: bool = (
         False  # Fetch notes from remote on start (opt-in)
     )
+    session_start_fetch_user_remote: bool = (
+        False  # Fetch user memories from remote on start (opt-in)
+    )
 
     # Capture detection settings
     capture_detection_enabled: bool = True  # Enabled by default when plugin is active
@@ -150,6 +156,7 @@ class HookConfig:
     stop_auto_capture_min_confidence: float = 0.8  # Minimum confidence for auto-capture
     stop_max_captures: int = 50  # Maximum auto-captures per session
     stop_push_remote: bool = False  # Push notes to remote on stop (opt-in)
+    stop_push_user_remote: bool = False  # Push user memories to remote on stop (opt-in)
 
     # UserPromptSubmit hook settings
     user_prompt_enabled: bool = True  # Enabled by default when plugin is active
@@ -164,13 +171,24 @@ class HookConfig:
 
     # PreCompact hook settings
     pre_compact_enabled: bool = True
-    pre_compact_auto_capture: bool = True
+    # MED-011: Consent mechanism for GDPR compliance
+    # Auto-capture requires explicit user consent via HOOK_PRE_COMPACT_CONSENT_GIVEN=true
+    # Without consent, only suggestions are shown (prompt_first mode)
+    pre_compact_consent_given: bool = False  # Must be explicitly enabled by user
+    pre_compact_auto_capture: bool = True  # Only active when consent_given=True
     pre_compact_prompt_first: bool = (
         False  # Suggestion mode: show what would be captured
     )
     pre_compact_min_confidence: float = 0.85
     pre_compact_max_captures: int = 50
     pre_compact_timeout: int = 15
+
+    def can_auto_capture_pre_compact(self) -> bool:
+        """Check if auto-capture is both enabled and consented to.
+
+        MED-011: Ensures GDPR compliance by requiring explicit consent.
+        """
+        return self.pre_compact_auto_capture and self.pre_compact_consent_given
 
     # Performance settings
     timeout: int = 30
@@ -363,6 +381,10 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
         kwargs["session_start_fetch_remote"] = _parse_bool(
             env["HOOK_SESSION_START_FETCH_REMOTE"]
         )
+    if "HOOK_SESSION_START_FETCH_USER_REMOTE" in env:
+        kwargs["session_start_fetch_user_remote"] = _parse_bool(
+            env["HOOK_SESSION_START_FETCH_USER_REMOTE"]
+        )
 
     # Capture detection settings
     if "HOOK_CAPTURE_DETECTION_ENABLED" in env:
@@ -412,6 +434,8 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
         )
     if "HOOK_STOP_PUSH_REMOTE" in env:
         kwargs["stop_push_remote"] = _parse_bool(env["HOOK_STOP_PUSH_REMOTE"])
+    if "HOOK_STOP_PUSH_USER_REMOTE" in env:
+        kwargs["stop_push_user_remote"] = _parse_bool(env["HOOK_STOP_PUSH_USER_REMOTE"])
 
     # PostToolUse hook settings
     if "HOOK_POST_TOOL_USE_ENABLED" in env:
@@ -444,6 +468,11 @@ def load_hook_config(env: dict[str, str] | None = None) -> HookConfig:
     # PreCompact hook settings
     if "HOOK_PRE_COMPACT_ENABLED" in env:
         kwargs["pre_compact_enabled"] = _parse_bool(env["HOOK_PRE_COMPACT_ENABLED"])
+    # MED-011: Consent mechanism for auto-capture
+    if "HOOK_PRE_COMPACT_CONSENT_GIVEN" in env:
+        kwargs["pre_compact_consent_given"] = _parse_bool(
+            env["HOOK_PRE_COMPACT_CONSENT_GIVEN"]
+        )
     if "HOOK_PRE_COMPACT_AUTO_CAPTURE" in env:
         kwargs["pre_compact_auto_capture"] = _parse_bool(
             env["HOOK_PRE_COMPACT_AUTO_CAPTURE"]

@@ -141,6 +141,27 @@ class ServiceRegistry:
             logger.debug("Registered service instance: %s", service_type.__name__)
 
     @classmethod
+    def has(cls, service_type: type) -> bool:
+        """Check if a service type is registered.
+
+        Thread Safety:
+            Uses single read operation which is atomic in Python.
+
+        Args:
+            service_type: The service class type to check.
+
+        Returns:
+            True if the service type has a registered instance.
+
+        Example::
+
+            if not ServiceRegistry.has(CaptureService):
+                # Need to create it manually
+                ...
+        """
+        return service_type in cls._services
+
+    @classmethod
     def reset(cls) -> None:
         """Reset all service singletons.
 

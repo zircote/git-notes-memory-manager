@@ -1,6 +1,6 @@
 ---
 description: Search memories with advanced filtering options
-argument-hint: "<query> [--type=semantic|text] [--namespace=ns] [--limit=n]"
+argument-hint: "<query> [--type=semantic|text] [--namespace=ns] [--limit=n] [--domain=all|user|project]"
 allowed-tools: ["Bash", "Read"]
 ---
 
@@ -19,16 +19,31 @@ NAME
     search - Search memories with advanced filtering options
 
 SYNOPSIS
-    /memory:search <query> [--type=semantic|text] [--namespace=ns] [--limit=n]
+    /memory:search <query> [--type=semantic|text] [--namespace=ns] [--limit=n] [--domain=all|user|project]
 
 DESCRIPTION
-    Search memories with advanced filtering options
+    Search memories with advanced filtering options.
+    Supports searching across domains: user (global) and project (repo-scoped).
 
 OPTIONS
+    --type=TYPE               Search type: semantic (default) or text
+    --namespace=ns            Filter by namespace (decisions, learnings, etc.)
+    --spec=SPEC               Filter by specification ID
+    --limit=n                 Maximum results to return (default: 10)
+    --domain=DOMAIN           Search scope: all (default), user, or project
+    --verbose                 Show full content in results
     --help, -h                Show this help message
 
+DOMAIN VALUES
+    all       Search both user (global) and project (repo-scoped) memories
+    user      Search only user memories (cross-project, global)
+    project   Search only project memories (repo-scoped)
+
 EXAMPLES
-    /memory:search
+    /memory:search "authentication patterns" --type=semantic
+    /memory:search pytest --namespace=learnings
+    /memory:search --domain=user database patterns
+    /memory:search --domain=project --namespace=decisions
     /memory:search --help
 
 SEE ALSO
@@ -60,10 +75,16 @@ Parse the arguments:
 2. Extract `--namespace=<ns>` if present
 3. Extract `--spec=<spec>` if present
 4. Extract `--limit=<n>` if present (default: 10)
-5. Extract `--verbose` flag if present
-6. Everything else is the search query
+5. Extract `--domain=<domain>` if present (one of: `all`, `user`, `project`; default: `all`)
+6. Extract `--verbose` flag if present
+7. Everything else is the search query
 
 If query is missing, use AskUserQuestion to prompt for it.
+
+**Domain values:**
+- `all` - Search both user (global) and project (repo-scoped) memories (default)
+- `user` - Search only user memories (cross-project, global)
+- `project` - Search only project memories (repo-scoped, current repository)
 
 </step>
 
@@ -73,26 +94,39 @@ Use Bash to invoke the Python library:
 
 **Semantic Search** (default - vector similarity):
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory import get_recall_service
+from git_notes_memory.config import Domain
 
 recall = get_recall_service()
+
+# Map domain string to Domain enum (None means search all)
+domain_str = '''$DOMAIN'''
+if domain_str == 'user':
+    domain = Domain.USER
+elif domain_str == 'project':
+    domain = Domain.PROJECT
+else:
+    domain = None  # 'all' or default - search both domains
+
 results = recall.search(
     query='''$QUERY''',
     k=$LIMIT,
     namespace=$NAMESPACE,
     spec=$SPEC,
+    domain=domain,
 )
 
-print(f'## Search Results for \"{'''$QUERY'''}\" ({len(results)} found)\n')
+domain_label = {'user': '(user)', 'project': '(project)', 'all': ''}[domain_str or 'all']
+print(f'## Search Results for \"{'''$QUERY'''}\" ({len(results)} found) {domain_label}\n')
 if results:
-    print('| # | Namespace | Summary | Score | Date |')
-    print('|---|-----------|---------|-------|------|')
+    print('| # | Domain | Namespace | Summary | Score | Date |')
+    print('|---|--------|-----------|---------|-------|------|')
     for i, r in enumerate(results, 1):
-        summary = r.summary[:40].replace('|', '\\|')
+        d_icon = '🌐' if hasattr(r, 'domain') and r.domain == Domain.USER else '📁'
+        summary = r.summary[:35].replace('|', '\\|')
         date = r.timestamp.strftime('%Y-%m-%d')
-        print(f'| {i} | {r.namespace} | {summary} | {r.score:.2f} | {date} |')
+        print(f'| {i} | {d_icon} | {r.namespace} | {summary} | {r.score:.2f} | {date} |')
 else:
     print('No results found.')
 "
@@ -100,26 +134,39 @@ else:
 
 **Text Search** (keyword/FTS matching):
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory import get_recall_service
+from git_notes_memory.config import Domain
 
 recall = get_recall_service()
+
+# Map domain string to Domain enum (None means search all)
+domain_str = '''$DOMAIN'''
+if domain_str == 'user':
+    domain = Domain.USER
+elif domain_str == 'project':
+    domain = Domain.PROJECT
+else:
+    domain = None  # 'all' or default - search both domains
+
 results = recall.search_text(
     query='''$QUERY''',
     limit=$LIMIT,
     namespace=$NAMESPACE,
     spec=$SPEC,
+    domain=domain,
 )
 
-print(f'## Text Search Results for \"{'''$QUERY'''}\" ({len(results)} found)\n')
+domain_label = {'user': '(user)', 'project': '(project)', 'all': ''}[domain_str or 'all']
+print(f'## Text Search Results for \"{'''$QUERY'''}\" ({len(results)} found) {domain_label}\n')
 if results:
-    print('| # | Namespace | Summary | Date |')
-    print('|---|-----------|---------|------|')
+    print('| # | Domain | Namespace | Summary | Date |')
+    print('|---|--------|-----------|---------|------|')
     for i, m in enumerate(results, 1):
-        summary = m.summary[:40].replace('|', '\\|')
+        d_icon = '🌐' if hasattr(m, 'domain') and m.domain == Domain.USER else '📁'
+        summary = m.summary[:35].replace('|', '\\|')
         date = m.timestamp.strftime('%Y-%m-%d')
-        print(f'| {i} | {m.namespace} | {summary} | {date} |')
+        print(f'| {i} | {d_icon} | {m.namespace} | {summary} | {date} |')
 else:
     print('No results found.')
 "
@@ -130,6 +177,7 @@ Replace:
 - `$LIMIT` with limit (default 10)
 - `$NAMESPACE` with `'ns'` or `None`
 - `$SPEC` with `'spec'` or `None`
+- `$DOMAIN` with `'all'`, `'user'`, or `'project'` (default: `'all'`)
 
 </step>
 
@@ -139,17 +187,21 @@ Replace:
 ```
 ## Search Results for "authentication" (5 found)
 
-| # | Namespace | Summary | Score | Date |
-|---|-----------|---------|-------|------|
-| 1 | decisions | Use JWT for API auth | 0.94 | 2024-01-15 |
-| 2 | learnings | OAuth2 flow patterns | 0.89 | 2024-01-12 |
-| 3 | blockers | Auth middleware issue | 0.82 | 2024-01-10 |
-| 4 | patterns | Token refresh pattern | 0.75 | 2024-01-05 |
+| # | Domain | Namespace | Summary | Score | Date |
+|---|--------|-----------|---------|-------|------|
+| 1 | 📁 | decisions | Use JWT for API auth | 0.94 | 2024-01-15 |
+| 2 | 🌐 | learnings | OAuth2 flow patterns | 0.89 | 2024-01-12 |
+| 3 | 📁 | blockers | Auth middleware issue | 0.82 | 2024-01-10 |
+| 4 | 🌐 | patterns | Token refresh pattern | 0.75 | 2024-01-05 |
 ```
+
+**Domain indicators:**
+- 🌐 = User memory (global, cross-project)
+- 📁 = Project memory (repo-scoped)
 
 **Verbose output** (includes full content):
 ```
-### 1. Decisions: Use JWT for API auth
+### 1. 📁 Decisions: Use JWT for API auth
 **Score**: 0.94 | **Date**: 2024-01-15 | **Tags**: auth, api
 
 > We decided to use JWT tokens for API authentication because:
@@ -170,16 +222,22 @@ Replace:
 ## Examples
 
 **User**: `/memory:search "authentication patterns" --type=semantic`
-**Action**: Find conceptually similar memories about authentication
+**Action**: Find conceptually similar memories about authentication in both domains
 
 **User**: `/memory:search pytest --namespace=learnings`
-**Action**: Find learnings containing "pytest"
+**Action**: Find learnings containing "pytest" in both domains
+
+**User**: `/memory:search --domain=user database patterns`
+**Action**: Search only user (global) memories for database patterns
+
+**User**: `/memory:search --domain=project --namespace=decisions`
+**Action**: Search only project memories for decisions
 
 **User**: `/memory:search database --spec=my-project --verbose`
-**Action**: Find memories for specific spec with full content
+**Action**: Find project memories for specific spec with full content
 
 **User**: `/memory:search "API design" --limit=20`
-**Action**: Return up to 20 results for API design
+**Action**: Return up to 20 results for API design in both domains
 
 ## Memory Capture Reminder
 
@@ -187,11 +245,15 @@ After search results, if patterns emerge or insights are gained from reviewing m
 
 ```
 **Capture tip**: Did you notice a pattern or gain an insight? Use:
-- `[remember] <pattern or insight>` - Inline capture
-- `/memory:capture patterns <description>` - Capture a pattern
+- `[remember] <pattern or insight>` - Inline capture to project
+- `[global] <pattern or insight>` - Inline capture to user (cross-project)
+- `/memory:capture patterns <description>` - Project pattern
+- `/memory:capture --global patterns <description>` - User pattern (cross-project)
 ```
 
 Search results often reveal connections worth preserving as new memories.
+- Project-specific patterns → project memories (default)
+- Cross-project patterns → user memories (`--global`)
 
 ## Related Commands
 

@@ -18,6 +18,7 @@ import fcntl
 import logging
 import os
 import random
+import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -29,6 +30,7 @@ from git_notes_memory.config import (
     MAX_CONTENT_BYTES,
     MAX_SUMMARY_CHARS,
     NAMESPACES,
+    Domain,
     get_lock_path,
 )
 from git_notes_memory.exceptions import (
@@ -50,9 +52,24 @@ if TYPE_CHECKING:
 __all__ = [
     "CaptureService",
     "get_default_service",
+    "get_user_capture_service",
 ]
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Lock Retry Constants (QUAL-M-006)
+# =============================================================================
+
+# Initial delay between lock acquisition attempts (seconds)
+LOCK_RETRY_BASE_INTERVAL_S = 0.05  # 50ms
+
+# Maximum delay between lock acquisition attempts (seconds)
+LOCK_RETRY_MAX_INTERVAL_S = 2.0
+
+# Default lock timeout (seconds)
+DEFAULT_LOCK_TIMEOUT_S = 10.0
 
 
 # =============================================================================
@@ -60,8 +77,66 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 
+def _is_process_alive(pid: int) -> bool:
+    """Check if a process with the given PID is alive.
+
+    Args:
+        pid: Process ID to check.
+
+    Returns:
+        True if process exists and is running, False otherwise.
+    """
+    try:
+        # Signal 0 doesn't actually send a signal, just checks if process exists
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        # Process exists but we don't have permission to signal it
+        return True
+    except OSError:
+        return False
+
+
+def _read_lock_pid(fd: int) -> int | None:
+    """Read PID from lock file.
+
+    Args:
+        fd: File descriptor of lock file.
+
+    Returns:
+        PID if valid, None otherwise.
+    """
+    try:
+        os.lseek(fd, 0, os.SEEK_SET)
+        content = os.read(fd, 32).decode("utf-8", errors="ignore").strip()
+        if content and content.isdigit():
+            return int(content)
+    except OSError:
+        pass
+    return None
+
+
+def _write_lock_pid(fd: int) -> None:
+    """Write current PID to lock file.
+
+    Args:
+        fd: File descriptor of lock file.
+    """
+    try:
+        os.ftruncate(fd, 0)
+        os.lseek(fd, 0, os.SEEK_SET)
+        os.write(fd, f"{os.getpid()}\n".encode())
+        os.fsync(fd)
+    except OSError:
+        pass  # Best effort - lock still works without PID
+
+
 @contextmanager
-def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
+def _acquire_lock(
+    lock_path: Path, timeout: float = DEFAULT_LOCK_TIMEOUT_S
+) -> Iterator[None]:
     """Acquire an exclusive file lock for capture operations.
 
     Uses fcntl advisory locking to prevent concurrent corruption. The lock
@@ -69,6 +144,9 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
 
     Uses non-blocking lock with retry loop to implement timeout, preventing
     indefinite blocking if another process holds the lock.
+
+    SEC-HIGH-003: Includes stale lock detection - if the lock is held by a
+    dead process, we log a warning and attempt to recover by acquiring the lock.
 
     Args:
         lock_path: Path to the lock file.
@@ -83,7 +161,15 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
     # Ensure parent directory exists
     lock_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # SEC-H-003: REMOVED unsafe mtime-based file deletion (TOCTOU race).
+    # With flock(), deleting a lock file while another process holds it
+    # creates a new inode - allowing two processes to hold "locks" on
+    # different inodes simultaneously. Instead, we rely on:
+    # 1. flock() auto-releasing locks when processes die (fd close)
+    # 2. PID-based stale detection in the retry loop below
+
     fd = None
+    stale_warning_logged = False
     try:
         # Open or create lock file with restrictive permissions (MED-001)
         # O_NOFOLLOW prevents symlink attacks (HIGH-005: TOCTOU mitigation)
@@ -96,20 +182,40 @@ def _acquire_lock(lock_path: Path, timeout: float = 10.0) -> Iterator[None]:
         # Acquire exclusive lock with timeout using non-blocking retry loop
         # CRIT-001: Prevents indefinite blocking if lock is held
         # Uses exponential backoff with jitter to reduce contention under high concurrency
+        # QUAL-M-006: Uses named constants for retry intervals
         deadline = time.monotonic() + timeout
-        base_interval = 0.05  # Start with 50ms
-        max_interval = 2.0  # Cap at 2 seconds
+        base_interval = LOCK_RETRY_BASE_INTERVAL_S
+        max_interval = LOCK_RETRY_MAX_INTERVAL_S
         attempt = 0
 
         while True:
             try:
                 fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                logger.debug("Acquired capture lock: %s", lock_path)
+                # SEC-HIGH-003: Write our PID to lock file for stale detection
+                _write_lock_pid(fd)
+                logger.debug(
+                    "Acquired capture lock: %s (pid=%d)", lock_path, os.getpid()
+                )
                 break
             except BlockingIOError:
+                # SEC-HIGH-003: Check if holder is alive before timing out
+                if not stale_warning_logged:
+                    holder_pid = _read_lock_pid(fd)
+                    if holder_pid is not None and not _is_process_alive(holder_pid):
+                        logger.warning(
+                            "Lock held by dead process (pid=%d), will acquire on next attempt",
+                            holder_pid,
+                        )
+                        stale_warning_logged = True
+                        # The lock should become available when we retry since
+                        # the holding process is dead. flock locks are released
+                        # when the file descriptor is closed (process exit).
+
                 if time.monotonic() >= deadline:
+                    holder_pid = _read_lock_pid(fd)
+                    holder_info = f" (held by pid={holder_pid})" if holder_pid else ""
                     raise CaptureError(
-                        f"Lock acquisition timed out after {timeout}s",
+                        f"Lock acquisition timed out after {timeout}s{holder_info}",
                         "Another capture may be in progress, wait and retry",
                     ) from None
                 # Exponential backoff: 50ms, 100ms, 200ms, ... up to max_interval
@@ -446,6 +552,7 @@ class CaptureService:
         summary: str,
         content: str,
         *,
+        domain: Domain = Domain.PROJECT,
         spec: str | None = None,
         tags: list[str] | tuple[str, ...] | None = None,
         phase: str | None = None,
@@ -463,6 +570,8 @@ class CaptureService:
             namespace: Memory type (decisions, learnings, blockers, etc.)
             summary: One-line summary (max 100 characters)
             content: Full markdown content
+            domain: Storage domain (USER for global, PROJECT for repo-scoped).
+                Defaults to PROJECT for backward compatibility.
             spec: Specification slug this memory belongs to
             tags: Categorization tags
             phase: Lifecycle phase (planning, implementation, review, etc.)
@@ -531,6 +640,7 @@ class CaptureService:
                 content=filtered_content,
                 note_content=note_content,
                 timestamp=timestamp,
+                domain=domain,
                 spec=spec,
                 phase=phase,
                 tags=tags_tuple,
@@ -547,6 +657,7 @@ class CaptureService:
                 content=filtered_content,
                 note_content=note_content,
                 timestamp=timestamp,
+                domain=domain,
                 spec=spec,
                 phase=phase,
                 tags=tags_tuple,
@@ -564,6 +675,7 @@ class CaptureService:
         content: str,
         note_content: str,
         timestamp: datetime,
+        domain: Domain,
         spec: str | None,
         phase: str | None,
         tags: tuple[str, ...],
@@ -582,10 +694,16 @@ class CaptureService:
         metrics = get_metrics()
 
         with trace_operation("capture", labels={"namespace": namespace}):
+            # Get the appropriate GitOps instance for this domain
+            if domain == Domain.USER:
+                git_ops = GitOps.for_domain(domain)
+            else:
+                git_ops = self.git_ops
+
             # Resolve commit SHA
             with trace_operation("capture.resolve_commit"):
                 try:
-                    commit_info = self.git_ops.get_commit_info(commit)
+                    commit_info = git_ops.get_commit_info(commit)
                     commit_sha = commit_info.sha
                 except Exception as e:
                     raise CaptureError(
@@ -596,16 +714,16 @@ class CaptureService:
             # Determine note index (count existing notes by "---" pairs)
             with trace_operation("capture.count_existing"):
                 try:
-                    existing_note = self.git_ops.show_note(namespace, commit_sha)
+                    existing_note = git_ops.show_note(namespace, commit_sha)
                     index = (
                         existing_note.count("\n---\n") // 2 + 1 if existing_note else 0
                     )
-                except Exception as e:
+                except (OSError, subprocess.SubprocessError):
+                    # QUAL-HIGH-001: Specific exceptions for git operations
                     logger.warning(
-                        "Failed to count existing notes for %s:%s: %s",
+                        "Failed to count existing notes for %s:%s",
                         namespace,
                         commit_sha[:8],
-                        e,
                     )
                     metrics.increment(
                         "silent_failures_total",
@@ -613,21 +731,26 @@ class CaptureService:
                     )
                     index = 0
 
-            # Build memory ID
-            memory_id = f"{namespace}:{commit_sha}:{index}"
+            # Build memory ID with domain prefix for USER domain
+            if domain == Domain.USER:
+                memory_id = f"user:{namespace}:{commit_sha}:{index}"
+            else:
+                memory_id = f"{namespace}:{commit_sha}:{index}"
 
             # Write to git notes (append for safety)
             with trace_operation("capture.git_append"):
                 try:
-                    self.git_ops.append_note(namespace, note_content, commit_sha)
-                    logger.info("Captured memory: %s", memory_id)
+                    git_ops.append_note(namespace, note_content, commit_sha)
+                    logger.info(
+                        "Captured memory: %s (domain=%s)", memory_id, domain.value
+                    )
                 except Exception as e:
                     raise CaptureError(
                         f"Failed to write git note: {e}",
                         "Check git repository status and permissions",
                     ) from e
 
-            # Create Memory object
+            # Create Memory object with domain
             memory = Memory(
                 id=memory_id,
                 commit_sha=commit_sha,
@@ -635,6 +758,7 @@ class CaptureService:
                 summary=summary,
                 content=content,
                 timestamp=timestamp,
+                domain=domain.value,
                 spec=spec,
                 phase=phase,
                 tags=tags,
@@ -678,6 +802,16 @@ class CaptureService:
                 "memories_captured_total",
                 labels={"namespace": namespace},
             )
+
+            # Export metrics immediately (don't wait for session end)
+            try:
+                from git_notes_memory.observability.exporters.otlp import (
+                    export_metrics_if_configured,
+                )
+
+                export_metrics_if_configured()
+            except Exception as export_err:
+                logger.debug("Metrics export skipped: %s", export_err)
 
             # Combine all warnings into a single string (or None if no warnings)
             combined_warning = "; ".join(warnings) if warnings else None
@@ -1142,3 +1276,77 @@ def get_default_service() -> CaptureService:
         logger.debug("Git notes sync auto-configuration skipped: %s", e)
 
     return service
+
+
+# CRIT-003: UserCaptureService wrapper for ServiceRegistry
+# Using a distinct type allows the registry to manage project and user services separately
+
+
+class UserCaptureService(CaptureService):
+    """CaptureService subclass for user-domain (global) memories.
+
+    This class exists solely to provide a distinct type for ServiceRegistry,
+    allowing separate singleton management for project and user capture services.
+
+    CRIT-003: Replaces module-level _user_capture_service global with
+    ServiceRegistry-based singleton management for thread safety and
+    proper test isolation.
+
+    Usage:
+        # Get user capture service via factory function
+        service = get_user_capture_service()
+
+        # Or directly via ServiceRegistry
+        service = ServiceRegistry.get(UserCaptureService, ...)
+    """
+
+    pass
+
+
+def get_user_capture_service() -> CaptureService:
+    """Get the user-domain capture service singleton.
+
+    CRIT-003: Now uses ServiceRegistry instead of module-level global.
+    This provides thread safety and proper test isolation via ServiceRegistry.reset().
+
+    Returns a CaptureService pre-configured for the USER domain with:
+    - GitOps pointing to user-memories bare repo
+    - Index service pointing to user index database
+
+    The service is lazily initialized on first use via ServiceRegistry.
+
+    Returns:
+        A CaptureService configured for user-domain capture.
+
+    Note:
+        This service is separate from the project capture service.
+        Use get_default_service() for project-scoped memories.
+    """
+    from git_notes_memory.registry import ServiceRegistry
+
+    # CRIT-003: Check if already registered (fast path)
+    # Using has() + get() pattern for thread safety.
+    # We can't use ServiceRegistry.get() alone because CaptureService
+    # accepts optional args, so UserCaptureService() would create an
+    # empty instance without the user-domain configuration we need.
+    if ServiceRegistry.has(UserCaptureService):
+        # Safe to use get() - no auto-creation will occur
+        return ServiceRegistry.get(UserCaptureService)
+
+    # Slow path: create new UserCaptureService with user-domain config
+    user_git_ops = GitOps.for_domain(Domain.USER)
+
+    # Lazy import to avoid circular dependencies
+    from git_notes_memory.config import get_user_index_path
+    from git_notes_memory.index import IndexService
+
+    user_index = IndexService(db_path=get_user_index_path(ensure_exists=True))
+
+    # Create and register with ServiceRegistry
+    user_service = UserCaptureService(
+        git_ops=user_git_ops,
+        index_service=user_index,
+    )
+    ServiceRegistry.register(UserCaptureService, user_service)
+
+    return user_service

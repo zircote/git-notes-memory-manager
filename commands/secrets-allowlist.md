@@ -88,9 +88,7 @@ Parse the subcommand and flags:
 **Show all allowlisted entries**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory.security import get_allowlist_manager
 
 manager = get_allowlist_manager()
@@ -122,12 +120,11 @@ print(f'\n**Total entries:** {len(entries)}')
 **Add a new allowlist entry**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 HASH="${HASH}"       # From --hash argument
 NAMESPACE="${NAMESPACE:-}"  # From --namespace argument or empty
 REASON="${REASON}"   # From --reason argument
 
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import sys
 from git_notes_memory.security import get_allowlist_manager, get_audit_logger
 
@@ -184,10 +181,9 @@ except Exception as e:
 **Remove an allowlist entry**:
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
 HASH="${HASH}"  # From --hash argument
 
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import sys
 from git_notes_memory.security import get_allowlist_manager, get_audit_logger
 

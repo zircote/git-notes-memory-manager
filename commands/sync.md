@@ -84,8 +84,7 @@ Use Bash to invoke the Python library based on mode:
 
 **Incremental Sync** (default):
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import time
 from git_notes_memory import get_sync_service
 
@@ -104,8 +103,7 @@ print(f'| Duration | {duration:.2f}s |')
 
 **Full Reindex**:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import time
 from git_notes_memory import get_sync_service
 
@@ -124,8 +122,7 @@ print(f'| Duration | {duration:.2f}s |')
 
 **Verify Consistency**:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory import get_sync_service
 
 sync = get_sync_service()
@@ -148,8 +145,7 @@ else:
 
 **Repair**:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory import get_sync_service
 
 sync = get_sync_service()
@@ -177,8 +173,7 @@ else:
 
 If `--dry-run` is specified, show what would happen without making changes:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory import get_sync_service
 
 sync = get_sync_service()
@@ -202,8 +197,7 @@ If `--remote` flag is present, synchronize with the remote origin repository.
 
 **Remote Sync** (fetch → merge → push):
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 import time
 from git_notes_memory import get_sync_service
 
@@ -231,8 +225,7 @@ print(f'**Summary**: {success_count}/{total_count} namespaces synced in {duratio
 
 **Remote Sync Dry Run** (fetch only, no merge/push):
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 -c "
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
 from git_notes_memory.git_ops import GitOps
 
 git_ops = GitOps()

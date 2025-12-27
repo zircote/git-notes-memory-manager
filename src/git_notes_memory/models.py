@@ -9,6 +9,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from git_notes_memory.config import Domain
 
 __all__ = [
     # Enums
@@ -99,12 +103,15 @@ class Memory:
     captured piece of context attached to a git commit.
 
     Attributes:
-        id: Unique identifier (typically <namespace>:<commit_sha>:<index>)
+        id: Unique identifier. Format depends on domain:
+            - PROJECT: <namespace>:<commit_sha>:<index>
+            - USER: user:<namespace>:<commit_sha>:<index>
         commit_sha: Git commit this memory is attached to
         namespace: Memory type (decisions, learnings, blockers, etc.)
         summary: One-line summary (max 100 chars)
         content: Full markdown content of the note
         timestamp: When the memory was captured
+        domain: Storage domain (USER for global, PROJECT for repo-scoped)
         repo_path: Absolute path to the git repository containing this memory
         spec: Specification slug this memory belongs to (may be None for global)
         phase: Lifecycle phase (planning, implementation, review, etc.)
@@ -119,12 +126,30 @@ class Memory:
     summary: str
     content: str
     timestamp: datetime
+    domain: str = "project"  # Domain value as string for serialization; use Domain enum via property
     repo_path: str | None = None
     spec: str | None = None
     phase: str | None = None
     tags: tuple[str, ...] = field(default_factory=tuple)
     status: str = "active"
     relates_to: tuple[str, ...] = field(default_factory=tuple)
+
+    @property
+    def domain_enum(self) -> Domain:
+        """Get domain as Domain enum for programmatic use."""
+        from git_notes_memory.config import Domain
+
+        return Domain(self.domain)
+
+    @property
+    def is_user_domain(self) -> bool:
+        """Check if this memory is in the user (global) domain."""
+        return self.domain == "user"
+
+    @property
+    def is_project_domain(self) -> bool:
+        """Check if this memory is in the project (repo-scoped) domain."""
+        return self.domain == "project"
 
 
 @dataclass(frozen=True)
@@ -197,6 +222,21 @@ class MemoryResult:
     def relates_to(self) -> tuple[str, ...]:
         """Get related memory IDs."""
         return self.memory.relates_to
+
+    @property
+    def domain(self) -> str:
+        """Get the domain."""
+        return self.memory.domain
+
+    @property
+    def is_user_domain(self) -> bool:
+        """Check if this memory is in the user (global) domain."""
+        return self.memory.is_user_domain
+
+    @property
+    def is_project_domain(self) -> bool:
+        """Check if this memory is in the project (repo-scoped) domain."""
+        return self.memory.is_project_domain
 
     @property
     def score(self) -> float:
@@ -359,6 +399,7 @@ class IndexStats:
         total_memories: Total number of indexed memories
         by_namespace: Count per namespace
         by_spec: Count per specification
+        by_domain: Count per domain (user, project)
         last_sync: Timestamp of last synchronization
         index_size_bytes: Size of the SQLite database
     """
@@ -366,6 +407,7 @@ class IndexStats:
     total_memories: int
     by_namespace: tuple[tuple[str, int], ...] = field(default_factory=tuple)
     by_spec: tuple[tuple[str, int], ...] = field(default_factory=tuple)
+    by_domain: tuple[tuple[str, int], ...] = field(default_factory=tuple)
     last_sync: datetime | None = None
     index_size_bytes: int = 0
 
@@ -378,6 +420,11 @@ class IndexStats:
     def by_spec_dict(self) -> dict[str, int]:
         """Get spec counts as a dictionary."""
         return dict(self.by_spec)
+
+    @property
+    def by_domain_dict(self) -> dict[str, int]:
+        """Get domain counts as a dictionary."""
+        return dict(self.by_domain)
 
 
 @dataclass(frozen=True)

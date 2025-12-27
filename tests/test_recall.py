@@ -1106,3 +1106,642 @@ class TestRecallServiceIntegration:
         assert "decisions" in ctx.by_namespace
         assert "learnings" in ctx.by_namespace
         assert ctx.token_estimate > 0
+
+
+# =============================================================================
+# Domain-Aware Search Tests
+# =============================================================================
+
+
+class TestDomainAwareSearch:
+    """Tests for multi-domain search functionality."""
+
+    @pytest.fixture
+    def project_memory(self) -> Memory:
+        """Create a sample project-domain memory."""
+        return Memory(
+            id="decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            timestamp=datetime.now(UTC),
+            summary="Project-specific database decision",
+            content="We use PostgreSQL in this project.",
+            domain="project",
+        )
+
+    @pytest.fixture
+    def user_memory(self) -> Memory:
+        """Create a sample user-domain memory."""
+        return Memory(
+            id="user:learnings:def456:0",
+            commit_sha="def456",
+            namespace="learnings",
+            timestamp=datetime.now(UTC),
+            summary="Global preference for type hints",
+            content="Always use type hints in Python code.",
+            domain="user",
+        )
+
+    def test_search_with_explicit_project_domain(
+        self,
+        project_memory: Memory,
+    ) -> None:
+        """Test search with explicit PROJECT domain filter."""
+        from git_notes_memory.config import Domain
+
+        mock_index = MagicMock()
+        mock_index.search_vector.return_value = [(project_memory, 0.5)]
+
+        mock_embedding = MagicMock()
+        mock_embedding.embed.return_value = [0.1] * 384
+
+        service = RecallService(
+            index_service=mock_index,
+            embedding_service=mock_embedding,
+        )
+
+        results = service.search("database", k=5, domain=Domain.PROJECT)
+
+        assert len(results) == 1
+        assert results[0].memory.domain == "project"
+        # Verify search_vector was called with domain filter
+        mock_index.search_vector.assert_called_once()
+        call_kwargs = mock_index.search_vector.call_args
+        assert call_kwargs.kwargs.get("domain") == "project"
+
+    def test_search_with_explicit_user_domain(
+        self,
+        user_memory: Memory,
+    ) -> None:
+        """Test search with explicit USER domain filter."""
+        from git_notes_memory.config import Domain
+
+        mock_user_index = MagicMock()
+        mock_user_index.search_vector.return_value = [(user_memory, 0.3)]
+        mock_user_index.initialize = MagicMock()
+
+        mock_embedding = MagicMock()
+        mock_embedding.embed.return_value = [0.1] * 384
+
+        service = RecallService(
+            embedding_service=mock_embedding,
+        )
+        # Manually set the user index
+        service._user_index_service = mock_user_index
+
+        results = service.search("type hints", k=5, domain=Domain.USER)
+
+        assert len(results) == 1
+        assert results[0].memory.domain == "user"
+
+    def test_search_both_domains_merges_results(
+        self,
+        project_memory: Memory,
+        user_memory: Memory,
+    ) -> None:
+        """Test search with no domain filter merges both domains."""
+        mock_project_index = MagicMock()
+        mock_project_index.search_vector.return_value = [(project_memory, 0.5)]
+
+        mock_user_index = MagicMock()
+        mock_user_index.search_vector.return_value = [(user_memory, 0.3)]
+        mock_user_index.initialize = MagicMock()
+
+        mock_embedding = MagicMock()
+        mock_embedding.embed.return_value = [0.1] * 384
+
+        service = RecallService(
+            index_service=mock_project_index,
+            embedding_service=mock_embedding,
+        )
+        service._user_index_service = mock_user_index
+
+        results = service.search("preferences", k=10, domain=None)
+
+        # Should get results from both domains
+        assert len(results) == 2
+        # User result has lower distance (0.3) so it comes first
+        assert results[0].memory.domain == "user"
+        assert results[1].memory.domain == "project"
+
+    def test_search_both_domains_project_wins_on_tie(
+        self,
+    ) -> None:
+        """Test that project results come before user at equal distance."""
+        project_mem = Memory(
+            id="decisions:proj123:0",
+            commit_sha="proj123",
+            namespace="decisions",
+            timestamp=datetime.now(UTC),
+            summary="Project-level decision",
+            content="Project content",
+            domain="project",
+        )
+        user_mem = Memory(
+            id="user:decisions:user456:0",
+            commit_sha="user456",
+            namespace="decisions",
+            timestamp=datetime.now(UTC),
+            summary="User-level decision",
+            content="User content",
+            domain="user",
+        )
+
+        mock_project_index = MagicMock()
+        mock_project_index.search_vector.return_value = [(project_mem, 0.5)]
+
+        mock_user_index = MagicMock()
+        mock_user_index.search_vector.return_value = [(user_mem, 0.5)]  # Same distance
+        mock_user_index.initialize = MagicMock()
+
+        mock_embedding = MagicMock()
+        mock_embedding.embed.return_value = [0.1] * 384
+
+        service = RecallService(
+            index_service=mock_project_index,
+            embedding_service=mock_embedding,
+        )
+        service._user_index_service = mock_user_index
+
+        results = service.search("decision", k=10, domain=None)
+
+        # At equal distance, project should come first
+        assert len(results) == 2
+        assert results[0].memory.domain == "project"
+        assert results[1].memory.domain == "user"
+
+    def test_search_both_domains_deduplicates_by_summary(
+        self,
+    ) -> None:
+        """Test that duplicate memories (same summary) are deduplicated."""
+        project_mem = Memory(
+            id="decisions:proj123:0",
+            commit_sha="proj123",
+            namespace="decisions",
+            timestamp=datetime.now(UTC),
+            summary="Use PostgreSQL for database",  # Same summary
+            content="Project content",
+            domain="project",
+        )
+        user_mem = Memory(
+            id="user:decisions:user456:0",
+            commit_sha="user456",
+            namespace="decisions",
+            timestamp=datetime.now(UTC),
+            summary="Use PostgreSQL for database",  # Same summary
+            content="User content",
+            domain="user",
+        )
+
+        mock_project_index = MagicMock()
+        mock_project_index.search_vector.return_value = [(project_mem, 0.3)]
+
+        mock_user_index = MagicMock()
+        mock_user_index.search_vector.return_value = [(user_mem, 0.5)]
+        mock_user_index.initialize = MagicMock()
+
+        mock_embedding = MagicMock()
+        mock_embedding.embed.return_value = [0.1] * 384
+
+        service = RecallService(
+            index_service=mock_project_index,
+            embedding_service=mock_embedding,
+        )
+        service._user_index_service = mock_user_index
+
+        results = service.search("postgresql", k=10, domain=None)
+
+        # Should deduplicate to 1 result (project has lower distance)
+        assert len(results) == 1
+        assert results[0].memory.domain == "project"
+
+    def test_search_handles_missing_user_index(
+        self,
+        project_memory: Memory,
+    ) -> None:
+        """Test search gracefully handles missing user index."""
+        mock_project_index = MagicMock()
+        mock_project_index.search_vector.return_value = [(project_memory, 0.5)]
+
+        mock_embedding = MagicMock()
+        mock_embedding.embed.return_value = [0.1] * 384
+
+        service = RecallService(
+            index_service=mock_project_index,
+            embedding_service=mock_embedding,
+        )
+        # Don't set user index - it will fail on first access
+
+        # Patch _get_user_index to raise an exception
+        # QUAL-HIGH-001: Use specific exception type that we catch
+        with patch.object(
+            service, "_get_user_index", side_effect=OSError("No user index")
+        ):
+            results = service.search("database", k=10, domain=None)
+
+        # Should still return project results
+        assert len(results) == 1
+        assert results[0].memory.domain == "project"
+
+
+class TestDomainAwareTextSearch:
+    """Tests for domain-aware text search."""
+
+    @pytest.fixture
+    def project_memory(self) -> Memory:
+        """Create a sample project-domain memory."""
+        return Memory(
+            id="decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            timestamp=datetime.now(UTC),
+            summary="Project database setup",
+            content="PostgreSQL configuration.",
+            domain="project",
+        )
+
+    @pytest.fixture
+    def user_memory(self) -> Memory:
+        """Create a sample user-domain memory."""
+        return Memory(
+            id="user:learnings:def456:0",
+            commit_sha="def456",
+            namespace="learnings",
+            timestamp=datetime.now(UTC),
+            summary="Global Python preferences",
+            content="Type hints are great.",
+            domain="user",
+        )
+
+    def test_search_text_with_project_domain(
+        self,
+        project_memory: Memory,
+    ) -> None:
+        """Test text search with explicit PROJECT domain."""
+        from git_notes_memory.config import Domain
+
+        mock_index = MagicMock()
+        mock_index.search_text.return_value = [project_memory]
+
+        service = RecallService(index_service=mock_index)
+
+        results = service.search_text("database", domain=Domain.PROJECT)
+
+        assert len(results) == 1
+        assert results[0].domain == "project"
+
+    def test_search_text_with_user_domain(
+        self,
+        user_memory: Memory,
+    ) -> None:
+        """Test text search with explicit USER domain."""
+        from git_notes_memory.config import Domain
+
+        mock_user_index = MagicMock()
+        mock_user_index.search_text.return_value = [user_memory]
+        mock_user_index.initialize = MagicMock()
+
+        service = RecallService()
+        service._user_index_service = mock_user_index
+
+        results = service.search_text("Python", domain=Domain.USER)
+
+        assert len(results) == 1
+        assert results[0].domain == "user"
+
+    def test_search_text_both_domains_merges_results(
+        self,
+        project_memory: Memory,
+        user_memory: Memory,
+    ) -> None:
+        """Test text search with no domain filter merges both."""
+        mock_project_index = MagicMock()
+        mock_project_index.search_text.return_value = [project_memory]
+
+        mock_user_index = MagicMock()
+        mock_user_index.search_text.return_value = [user_memory]
+        mock_user_index.initialize = MagicMock()
+
+        service = RecallService(index_service=mock_project_index)
+        service._user_index_service = mock_user_index
+
+        results = service.search_text("preferences", limit=10, domain=None)
+
+        # Should get both results, project first
+        assert len(results) == 2
+        assert results[0].domain == "project"
+        assert results[1].domain == "user"
+
+    def test_search_text_respects_limit_across_domains(
+        self,
+    ) -> None:
+        """Test text search limit applies to merged results."""
+        project_mems = [
+            Memory(
+                id=f"decisions:proj{i}:0",
+                commit_sha=f"proj{i}",
+                namespace="decisions",
+                timestamp=datetime.now(UTC),
+                summary=f"Project decision {i}",
+                content=f"Content {i}",
+                domain="project",
+            )
+            for i in range(5)
+        ]
+        user_mems = [
+            Memory(
+                id=f"user:learnings:user{i}:0",
+                commit_sha=f"user{i}",
+                namespace="learnings",
+                timestamp=datetime.now(UTC),
+                summary=f"User learning {i}",
+                content=f"User content {i}",
+                domain="user",
+            )
+            for i in range(5)
+        ]
+
+        mock_project_index = MagicMock()
+        mock_project_index.search_text.return_value = project_mems
+
+        mock_user_index = MagicMock()
+        mock_user_index.search_text.return_value = user_mems
+        mock_user_index.initialize = MagicMock()
+
+        service = RecallService(index_service=mock_project_index)
+        service._user_index_service = mock_user_index
+
+        results = service.search_text("content", limit=3, domain=None)
+
+        # Should respect limit of 3
+        assert len(results) == 3
+        # All from project (they come first)
+        for r in results:
+            assert r.domain == "project"
+
+
+class TestDomainConvenienceMethods:
+    """Tests for domain-specific convenience methods."""
+
+    @pytest.fixture
+    def user_memory(self) -> Memory:
+        """Create a sample user-domain memory."""
+        return Memory(
+            id="user:learnings:def456:0",
+            commit_sha="def456",
+            namespace="learnings",
+            timestamp=datetime.now(UTC),
+            summary="User preference for terminal",
+            content="Use iTerm2 with specific settings.",
+            domain="user",
+        )
+
+    @pytest.fixture
+    def project_memory(self) -> Memory:
+        """Create a sample project-domain memory."""
+        return Memory(
+            id="decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            timestamp=datetime.now(UTC),
+            summary="Project uses PostgreSQL",
+            content="Database choice for this project.",
+            domain="project",
+        )
+
+    def test_search_user_delegates_to_search(
+        self,
+        user_memory: Memory,
+    ) -> None:
+        """Test search_user delegates to search with USER domain."""
+
+        mock_user_index = MagicMock()
+        mock_user_index.search_vector.return_value = [(user_memory, 0.3)]
+        mock_user_index.initialize = MagicMock()
+
+        mock_embedding = MagicMock()
+        mock_embedding.embed.return_value = [0.1] * 384
+
+        service = RecallService(embedding_service=mock_embedding)
+        service._user_index_service = mock_user_index
+
+        results = service.search_user("terminal", k=5, namespace="learnings")
+
+        assert len(results) == 1
+        assert results[0].memory.domain == "user"
+
+    def test_search_user_passes_all_parameters(
+        self,
+    ) -> None:
+        """Test search_user passes all parameters to search."""
+        service = RecallService()
+
+        # Mock the search method
+        with patch.object(service, "search", return_value=[]) as mock_search:
+            service.search_user(
+                "query",
+                k=20,
+                namespace="decisions",
+                spec="SPEC-001",
+                min_similarity=0.8,
+            )
+
+            mock_search.assert_called_once()
+            from git_notes_memory.config import Domain
+
+            call_kwargs = mock_search.call_args
+            assert call_kwargs.args[0] == "query"
+            assert call_kwargs.kwargs["k"] == 20
+            assert call_kwargs.kwargs["namespace"] == "decisions"
+            assert call_kwargs.kwargs["spec"] == "SPEC-001"
+            assert call_kwargs.kwargs["min_similarity"] == 0.8
+            assert call_kwargs.kwargs["domain"] == Domain.USER
+
+    def test_search_project_delegates_to_search(
+        self,
+        project_memory: Memory,
+    ) -> None:
+        """Test search_project delegates to search with PROJECT domain."""
+        mock_index = MagicMock()
+        mock_index.search_vector.return_value = [(project_memory, 0.5)]
+
+        mock_embedding = MagicMock()
+        mock_embedding.embed.return_value = [0.1] * 384
+
+        service = RecallService(
+            index_service=mock_index,
+            embedding_service=mock_embedding,
+        )
+
+        results = service.search_project("database", k=5)
+
+        assert len(results) == 1
+        assert results[0].memory.domain == "project"
+
+    def test_search_project_passes_all_parameters(
+        self,
+    ) -> None:
+        """Test search_project passes all parameters to search."""
+        service = RecallService()
+
+        # Mock the search method
+        with patch.object(service, "search", return_value=[]) as mock_search:
+            service.search_project(
+                "api design",
+                k=15,
+                namespace="decisions",
+                spec="SPEC-002",
+                min_similarity=0.6,
+            )
+
+            mock_search.assert_called_once()
+            from git_notes_memory.config import Domain
+
+            call_kwargs = mock_search.call_args
+            assert call_kwargs.args[0] == "api design"
+            assert call_kwargs.kwargs["k"] == 15
+            assert call_kwargs.kwargs["namespace"] == "decisions"
+            assert call_kwargs.kwargs["spec"] == "SPEC-002"
+            assert call_kwargs.kwargs["min_similarity"] == 0.6
+            assert call_kwargs.kwargs["domain"] == Domain.PROJECT
+
+
+class TestDomainAwareHydration:
+    """Tests for domain-aware memory hydration."""
+
+    @pytest.fixture
+    def project_memory(self) -> Memory:
+        """Create a sample project-domain memory."""
+        return Memory(
+            id="decisions:abc123:0",
+            commit_sha="abc123",
+            namespace="decisions",
+            timestamp=datetime.now(UTC),
+            summary="Project database decision",
+            content="PostgreSQL config.",
+            domain="project",
+        )
+
+    @pytest.fixture
+    def user_memory(self) -> Memory:
+        """Create a sample user-domain memory."""
+        return Memory(
+            id="user:learnings:def456:0",
+            commit_sha="def456",
+            namespace="learnings",
+            timestamp=datetime.now(UTC),
+            summary="User terminal preferences",
+            content="iTerm2 settings.",
+            domain="user",
+        )
+
+    def test_hydrate_project_memory_uses_project_gitops(
+        self,
+        project_memory: Memory,
+    ) -> None:
+        """Test that project memories are hydrated using project GitOps."""
+        mock_git_ops = MagicMock()
+        mock_git_ops.show_note.return_value = "Full content from project"
+        mock_git_ops.get_commit_info.return_value = CommitInfo(
+            sha="abc123",
+            author_name="Test",
+            author_email="test@example.com",
+            date="2025-01-01",
+            message="Test commit",
+        )
+
+        service = RecallService(git_ops=mock_git_ops)
+
+        result = service.hydrate(project_memory, HydrationLevel.FULL)
+
+        assert result.full_content == "Full content from project"
+        mock_git_ops.show_note.assert_called_once()
+
+    def test_hydrate_user_memory_uses_user_gitops(
+        self,
+        user_memory: Memory,
+    ) -> None:
+        """Test that user memories are hydrated using user GitOps."""
+        mock_user_git_ops = MagicMock()
+        mock_user_git_ops.show_note.return_value = "Full content from user"
+        mock_user_git_ops.get_commit_info.return_value = CommitInfo(
+            sha="def456",
+            author_name="User",
+            author_email="user@example.com",
+            date="2025-01-01",
+            message="User commit",
+        )
+
+        service = RecallService()
+        service._user_git_ops = mock_user_git_ops
+
+        result = service.hydrate(user_memory, HydrationLevel.FULL)
+
+        assert result.full_content == "Full content from user"
+        mock_user_git_ops.show_note.assert_called_once()
+
+    def test_hydrate_batch_uses_correct_gitops_per_domain(
+        self,
+        project_memory: Memory,
+        user_memory: Memory,
+    ) -> None:
+        """Test hydrate_batch uses appropriate GitOps per memory domain."""
+        mock_project_git_ops = MagicMock()
+        mock_project_git_ops.show_notes_batch.return_value = {
+            "abc123": "Project batch content"
+        }
+        mock_project_git_ops.get_commit_info.return_value = CommitInfo(
+            sha="abc123",
+            author_name="Test",
+            author_email="test@example.com",
+            date="2025-01-01",
+            message="Project commit",
+        )
+
+        mock_user_git_ops = MagicMock()
+        mock_user_git_ops.show_notes_batch.return_value = {
+            "def456": "User batch content"
+        }
+        mock_user_git_ops.get_commit_info.return_value = CommitInfo(
+            sha="def456",
+            author_name="User",
+            author_email="user@example.com",
+            date="2025-01-01",
+            message="User commit",
+        )
+
+        service = RecallService(git_ops=mock_project_git_ops)
+        service._user_git_ops = mock_user_git_ops
+
+        memories = [project_memory, user_memory]
+        results = service.hydrate_batch(memories, HydrationLevel.FULL)
+
+        # Should get both hydrated
+        assert len(results) == 2
+
+        # Project memory used project GitOps
+        mock_project_git_ops.show_notes_batch.assert_called_once()
+        project_call = mock_project_git_ops.show_notes_batch.call_args
+        assert project_call.args[0] == "decisions"
+
+        # User memory used user GitOps
+        mock_user_git_ops.show_notes_batch.assert_called_once()
+        user_call = mock_user_git_ops.show_notes_batch.call_args
+        assert user_call.args[0] == "learnings"
+
+    def test_memory_result_domain_property(
+        self,
+        project_memory: Memory,
+        user_memory: Memory,
+    ) -> None:
+        """Test MemoryResult exposes domain correctly."""
+        project_result = MemoryResult(memory=project_memory, distance=0.5)
+        user_result = MemoryResult(memory=user_memory, distance=0.3)
+
+        assert project_result.domain == "project"
+        assert project_result.is_project_domain is True
+        assert project_result.is_user_domain is False
+
+        assert user_result.domain == "user"
+        assert user_result.is_user_domain is True
+        assert user_result.is_project_domain is False

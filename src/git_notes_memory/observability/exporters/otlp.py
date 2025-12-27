@@ -1,4 +1,4 @@
-"""OTLP HTTP exporter for metrics and traces.
+"""OTLP HTTP exporter for metrics, traces, and logs.
 
 Exports telemetry to OpenTelemetry Collector via OTLP/HTTP protocol.
 Uses stdlib only - no external dependencies required.
@@ -6,6 +6,7 @@ Uses stdlib only - no external dependencies required.
 The exporter pushes to:
 - {endpoint}/v1/traces for spans
 - {endpoint}/v1/metrics for metrics
+- {endpoint}/v1/logs for log records
 
 Usage:
     from git_notes_memory.observability.exporters.otlp import OTLPExporter
@@ -13,6 +14,7 @@ Usage:
     exporter = OTLPExporter("http://localhost:4318")
     exporter.export_traces(spans)
     exporter.export_metrics(metrics)
+    exporter.export_logs([LogRecord(body="test", severity="INFO")])
 
 Environment:
     MEMORY_PLUGIN_OTLP_ENDPOINT: OTLP HTTP endpoint (e.g., http://localhost:4318)
@@ -20,12 +22,16 @@ Environment:
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import logging
+import os
 import time
 import urllib.error
 import urllib.request
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlparse
 
 from git_notes_memory.observability.config import get_config
 
@@ -33,7 +39,114 @@ if TYPE_CHECKING:
     from git_notes_memory.observability.metrics import MetricsCollector
     from git_notes_memory.observability.tracing import Span
 
+
+# OTLP severity numbers (SeverityNumber)
+SEVERITY_MAP: dict[str, int] = {
+    "TRACE": 1,
+    "DEBUG": 5,
+    "INFO": 9,
+    "WARN": 13,
+    "WARNING": 13,
+    "ERROR": 17,
+    "FATAL": 21,
+    "CRITICAL": 21,
+}
+
+
+@dataclass
+class LogRecord:
+    """A log record for OTLP export.
+
+    Attributes:
+        body: The log message body.
+        severity: Log level (DEBUG, INFO, WARN, ERROR, etc.).
+        timestamp: Unix timestamp in seconds (defaults to now).
+        attributes: Additional key-value attributes.
+        trace_id: Optional trace ID for correlation.
+        span_id: Optional span ID for correlation.
+    """
+
+    body: str
+    severity: str = "INFO"
+    timestamp: float = field(default_factory=time.time)
+    attributes: dict[str, str | int | float | bool] = field(default_factory=dict)
+    trace_id: str | None = None
+    span_id: str | None = None
+
+
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# SEC-H-001: SSRF Prevention
+# =============================================================================
+
+
+def _is_private_ip(hostname: str) -> bool:
+    """Check if hostname resolves to a private/internal IP address.
+
+    Args:
+        hostname: The hostname or IP address to check.
+
+    Returns:
+        True if the address is private/internal (RFC 1918, loopback, link-local).
+    """
+    try:
+        # Check if it's already an IP address
+        addr = ipaddress.ip_address(hostname)
+        return addr.is_private or addr.is_loopback or addr.is_link_local
+    except ValueError:
+        # It's a hostname, check common internal names
+        lower = hostname.lower()
+        return lower in ("localhost", "127.0.0.1", "::1") or lower.endswith(
+            (".local", ".internal", ".localhost")
+        )
+
+
+def _validate_otlp_endpoint(endpoint: str) -> tuple[bool, str]:
+    """Validate an OTLP endpoint URL for SSRF safety.
+
+    SEC-H-001: Validates endpoint to prevent SSRF attacks via
+    malicious OTLP configuration.
+
+    Args:
+        endpoint: The endpoint URL to validate.
+
+    Returns:
+        Tuple of (is_valid, error_message). If valid, error_message is empty.
+    """
+    try:
+        parsed = urlparse(endpoint)
+
+        # Check scheme
+        if parsed.scheme not in ("http", "https"):
+            return False, f"Invalid scheme '{parsed.scheme}': only http/https allowed"
+
+        # Check hostname exists
+        if not parsed.hostname:
+            return False, "Missing hostname in endpoint URL"
+
+        # Check for private IPs (warn but allow with env var override)
+        if _is_private_ip(parsed.hostname):
+            allow_internal = os.environ.get(
+                "MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL", ""
+            ).lower() in ("true", "1", "yes")
+
+            if not allow_internal:
+                return (
+                    False,
+                    f"Internal endpoint '{parsed.hostname}' blocked for SSRF safety. "
+                    "Set MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true to allow.",
+                )
+            logger.warning(
+                "SEC-H-001: Internal OTLP endpoint '%s' allowed via override",
+                parsed.hostname,
+            )
+
+        return True, ""
+
+    except Exception as e:
+        return False, f"Failed to parse endpoint URL: {e}"
 
 
 class OTLPExporter:
@@ -61,7 +174,17 @@ class OTLPExporter:
         self.endpoint = endpoint or config.otlp_endpoint
         self.timeout = timeout
         self.service_name = service_name or config.service_name
-        self._enabled = self.endpoint is not None
+
+        # SEC-H-001: Validate endpoint for SSRF safety
+        if self.endpoint:
+            is_valid, error = _validate_otlp_endpoint(self.endpoint)
+            if not is_valid:
+                logger.warning("SEC-H-001: OTLP endpoint validation failed: %s", error)
+                self._enabled = False
+            else:
+                self._enabled = True
+        else:
+            self._enabled = False
 
     @property
     def enabled(self) -> bool:
@@ -149,6 +272,67 @@ class OTLPExporter:
         }
 
         return self._post(f"{self.endpoint}/v1/traces", payload)
+
+    def _log_to_otlp(self, record: LogRecord) -> dict[str, Any]:
+        """Convert LogRecord to OTLP log format."""
+        time_ns = int(record.timestamp * 1e9)
+        severity_number = SEVERITY_MAP.get(record.severity.upper(), 9)  # Default INFO
+
+        # Build attributes
+        attributes: list[dict[str, Any]] = []
+        for key, value in record.attributes.items():
+            if isinstance(value, bool):
+                attributes.append({"key": key, "value": {"boolValue": value}})
+            elif isinstance(value, int):
+                attributes.append({"key": key, "value": {"intValue": str(value)}})
+            elif isinstance(value, float):
+                attributes.append({"key": key, "value": {"doubleValue": value}})
+            else:
+                attributes.append({"key": key, "value": {"stringValue": str(value)}})
+
+        otlp_log: dict[str, Any] = {
+            "timeUnixNano": str(time_ns),
+            "severityNumber": severity_number,
+            "severityText": record.severity.upper(),
+            "body": {"stringValue": record.body},
+            "attributes": attributes,
+        }
+
+        if record.trace_id:
+            otlp_log["traceId"] = record.trace_id
+        if record.span_id:
+            otlp_log["spanId"] = record.span_id
+
+        return otlp_log
+
+    def export_logs(self, logs: list[LogRecord]) -> bool:
+        """Export log records to OTLP endpoint.
+
+        Args:
+            logs: List of LogRecord objects.
+
+        Returns:
+            True if export succeeded, False otherwise.
+        """
+        if not self._enabled or not logs:
+            return False
+
+        # Build OTLP logs payload
+        payload = {
+            "resourceLogs": [
+                {
+                    "resource": self._make_resource(),
+                    "scopeLogs": [
+                        {
+                            "scope": {"name": "git-notes-memory"},
+                            "logRecords": [self._log_to_otlp(log) for log in logs],
+                        }
+                    ],
+                }
+            ]
+        }
+
+        return self._post(f"{self.endpoint}/v1/logs", payload)
 
     def _counter_to_otlp(
         self,
@@ -379,3 +563,20 @@ def export_metrics_if_configured() -> bool:
     if not exporter.enabled:
         return True  # No endpoint = success (nothing to do)
     return exporter.export_metrics(get_metrics())
+
+
+def export_logs_if_configured(logs: list[LogRecord]) -> bool:
+    """Export logs if OTLP endpoint is configured.
+
+    Convenience function that checks configuration before attempting export.
+
+    Args:
+        logs: List of LogRecord objects.
+
+    Returns:
+        True if export succeeded or no endpoint configured, False on failure.
+    """
+    exporter = get_otlp_exporter()
+    if not exporter.enabled:
+        return True  # No endpoint = success (nothing to do)
+    return exporter.export_logs(logs)

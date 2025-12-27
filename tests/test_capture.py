@@ -991,3 +991,256 @@ class TestCaptureServiceIntegration:
         )
         assert "First decision" in show_result.stdout
         assert "Second decision" in show_result.stdout
+
+
+# =============================================================================
+# Domain-Aware Capture Tests
+# =============================================================================
+
+
+class TestDomainAwareCapture:
+    """Tests for domain-aware capture functionality."""
+
+    @pytest.fixture
+    def mock_capture_service(self, tmp_path: Path) -> CaptureService:
+        """Create a CaptureService with mocked GitOps."""
+        mock_git_ops = MagicMock()
+        mock_git_ops.get_commit_info.return_value = MagicMock(sha="abc123def456")
+        mock_git_ops.show_note.return_value = None
+        return CaptureService(git_ops=mock_git_ops, repo_path=tmp_path)
+
+    def test_capture_default_domain_is_project(
+        self, mock_capture_service: CaptureService
+    ) -> None:
+        """Test capture defaults to PROJECT domain."""
+
+        result = mock_capture_service.capture(
+            namespace="decisions",
+            summary="Default domain test",
+            content="This should be in project domain.",
+        )
+
+        assert result.success is True
+        assert result.memory is not None
+        assert result.memory.domain == "project"
+        assert result.memory.is_project_domain is True
+        assert result.memory.is_user_domain is False
+
+    def test_capture_explicit_project_domain(
+        self, mock_capture_service: CaptureService
+    ) -> None:
+        """Test capture with explicit PROJECT domain."""
+        from git_notes_memory.config import Domain
+
+        result = mock_capture_service.capture(
+            namespace="learnings",
+            summary="Explicit project domain",
+            content="Test content.",
+            domain=Domain.PROJECT,
+        )
+
+        assert result.success is True
+        assert result.memory is not None
+        assert result.memory.domain == "project"
+        # Project domain uses standard ID format: namespace:sha:index
+        assert result.memory.id == "learnings:abc123def456:0"
+
+    def test_capture_user_domain_id_format(
+        self, mock_capture_service: CaptureService, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test USER domain uses correct memory ID format with 'user:' prefix."""
+        from git_notes_memory.config import Domain
+        from git_notes_memory.git_ops import GitOps
+
+        # Mock GitOps.for_domain to return the same mock git_ops
+        mock_user_git_ops = MagicMock()
+        mock_user_git_ops.get_commit_info.return_value = MagicMock(sha="user789abc")
+        mock_user_git_ops.show_note.return_value = None
+        monkeypatch.setattr(
+            GitOps,
+            "for_domain",
+            classmethod(lambda cls, d: mock_user_git_ops),  # noqa: ARG005
+        )
+
+        result = mock_capture_service.capture(
+            namespace="learnings",
+            summary="User domain learning",
+            content="Universal insight.",
+            domain=Domain.USER,
+        )
+
+        assert result.success is True
+        assert result.memory is not None
+        assert result.memory.domain == "user"
+        # USER domain uses prefixed ID format: user:namespace:sha:index
+        assert result.memory.id == "user:learnings:user789abc:0"
+        assert result.memory.is_user_domain is True
+        assert result.memory.is_project_domain is False
+
+    def test_capture_user_domain_uses_domain_gitops(
+        self, mock_capture_service: CaptureService, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test USER domain capture uses GitOps.for_domain()."""
+        from git_notes_memory.config import Domain
+        from git_notes_memory.git_ops import GitOps
+
+        # Mock GitOps.for_domain to track calls
+        mock_user_git_ops = MagicMock()
+        mock_user_git_ops.get_commit_info.return_value = MagicMock(sha="usergit123")
+        mock_user_git_ops.show_note.return_value = None
+
+        for_domain_mock = MagicMock(return_value=mock_user_git_ops)
+        monkeypatch.setattr(GitOps, "for_domain", for_domain_mock)
+
+        result = mock_capture_service.capture(
+            namespace="decisions",
+            summary="User decision",
+            content="Cross-project decision.",
+            domain=Domain.USER,
+        )
+
+        assert result.success is True
+        # Verify GitOps.for_domain was called with USER domain
+        for_domain_mock.assert_called_once_with(Domain.USER)
+        # Verify the user GitOps was used for append_note
+        mock_user_git_ops.append_note.assert_called_once()
+
+    def test_capture_project_domain_uses_instance_gitops(
+        self, mock_capture_service: CaptureService, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test PROJECT domain capture uses instance git_ops, not GitOps.for_domain()."""
+        from git_notes_memory.config import Domain
+        from git_notes_memory.git_ops import GitOps
+
+        for_domain_mock = MagicMock()
+        monkeypatch.setattr(GitOps, "for_domain", for_domain_mock)
+
+        result = mock_capture_service.capture(
+            namespace="progress",
+            summary="Project progress",
+            content="Local progress update.",
+            domain=Domain.PROJECT,
+        )
+
+        assert result.success is True
+        # GitOps.for_domain should NOT be called for PROJECT domain
+        for_domain_mock.assert_not_called()
+        # Instance git_ops should be used
+        assert mock_capture_service.git_ops.append_note.called
+
+
+class TestGetUserCaptureService:
+    """Tests for get_user_capture_service singleton."""
+
+    def test_returns_capture_service(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test get_user_capture_service returns a CaptureService."""
+        import git_notes_memory.config as config_module
+        from git_notes_memory.capture import get_user_capture_service
+        from git_notes_memory.git_ops import GitOps
+
+        # Note: ServiceRegistry is reset by conftest fixture (reset_services)
+
+        # Mock GitOps.for_domain to return a mock GitOps
+        mock_git_ops = MagicMock()
+        mock_git_ops.ensure_user_repo_initialized.return_value = None
+        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)  # noqa: ARG005
+
+        # Mock get_user_index_path to use temp path
+        monkeypatch.setattr(
+            config_module,
+            "get_user_index_path",
+            lambda ensure_exists=False: tmp_path / "user" / "index.db",  # noqa: ARG005
+        )
+
+        service = get_user_capture_service()
+        assert isinstance(service, CaptureService)
+
+    def test_returns_same_instance(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test get_user_capture_service returns the same instance."""
+        import git_notes_memory.config as config_module
+        from git_notes_memory.capture import get_user_capture_service
+        from git_notes_memory.git_ops import GitOps
+
+        # Note: ServiceRegistry is reset by conftest fixture (reset_services)
+
+        # Mock GitOps.for_domain to return a mock GitOps
+        mock_git_ops = MagicMock()
+        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)  # noqa: ARG005
+
+        # Mock get_user_index_path to use temp path
+        monkeypatch.setattr(
+            config_module,
+            "get_user_index_path",
+            lambda ensure_exists=False: tmp_path / "user" / "index.db",  # noqa: ARG005
+        )
+
+        service1 = get_user_capture_service()
+        service2 = get_user_capture_service()
+        assert service1 is service2
+
+    def test_uses_user_gitops(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test get_user_capture_service uses GitOps.for_domain(USER)."""
+        import git_notes_memory.config as config_module
+        from git_notes_memory.capture import get_user_capture_service
+        from git_notes_memory.config import Domain
+        from git_notes_memory.git_ops import GitOps
+
+        # Note: ServiceRegistry is reset by conftest fixture (reset_services)
+
+        # Track GitOps.for_domain calls
+        mock_git_ops = MagicMock()
+        for_domain_calls: list[Domain] = []
+
+        def track_for_domain(domain: Domain) -> MagicMock:
+            for_domain_calls.append(domain)
+            return mock_git_ops
+
+        monkeypatch.setattr(GitOps, "for_domain", track_for_domain)
+
+        # Mock get_user_index_path to use temp path
+        monkeypatch.setattr(
+            config_module,
+            "get_user_index_path",
+            lambda ensure_exists=False: tmp_path / "user" / "index.db",  # noqa: ARG005
+        )
+
+        _ = get_user_capture_service()
+
+        # Verify GitOps.for_domain was called with USER domain
+        assert len(for_domain_calls) == 1
+        assert for_domain_calls[0] == Domain.USER
+
+    def test_has_index_service(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test get_user_capture_service returns service with IndexService."""
+        import git_notes_memory.config as config_module
+        from git_notes_memory.capture import get_user_capture_service
+        from git_notes_memory.git_ops import GitOps
+        from git_notes_memory.index import IndexService
+
+        # Note: ServiceRegistry is reset by conftest fixture (reset_services)
+
+        # Mock GitOps.for_domain
+        mock_git_ops = MagicMock()
+        monkeypatch.setattr(GitOps, "for_domain", lambda d: mock_git_ops)  # noqa: ARG005
+
+        # Mock get_user_index_path to use temp path
+        user_index_path = tmp_path / "user" / "index.db"
+        monkeypatch.setattr(
+            config_module,
+            "get_user_index_path",
+            lambda ensure_exists=False: user_index_path,  # noqa: ARG005
+        )
+
+        service = get_user_capture_service()
+
+        # Verify service has an IndexService configured
+        assert service.index_service is not None
+        assert isinstance(service.index_service, IndexService)

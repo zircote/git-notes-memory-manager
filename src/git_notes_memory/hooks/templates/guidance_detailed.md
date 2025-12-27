@@ -151,6 +151,54 @@ Need authentication that works across multiple servers.
 
 ---
 
+## RULE 5: PROACTIVE MEMORY SEARCH — BEFORE YOU ACT
+
+**Before modifying code or making decisions, SEARCH for relevant memories.**
+
+### Why Session Start Context Is Insufficient
+
+| Context Source | Query Used | Typical Relevance |
+|----------------|------------|-------------------|
+| SessionStart injection | Generic project name | 0.50-0.60 (low) |
+| **Task-specific search** | Component/feature terms | **0.75-0.90 (high)** |
+
+The ~5 memories injected at session start use a generic query. **You MUST search proactively** for task-relevant context.
+
+### When to Search
+
+| Trigger | Action | Example Query |
+|---------|--------|---------------|
+| Before modifying a file | Search for that file/component | `"index.py SQLite connection handling"` |
+| Before implementing a feature | Search for related decisions | `"authentication JWT session handling"` |
+| Before fixing a bug | Search for related patterns | `"error handling retry backoff"` |
+| Before architectural changes | Search for prior decisions | `"service registry dependency injection"` |
+
+### How to Search
+
+```python
+from git_notes_memory import get_recall_service
+recall = get_recall_service()
+
+# Before working on authentication
+results = recall.search("authentication session JWT", k=5)
+for r in results:
+    print(f"[{r.memory.namespace}] {r.memory.summary}")
+```
+
+Or via command: `/memory:recall authentication session JWT`
+
+### Self-Check Before Major Changes
+
+Before modifying any significant code:
+- [ ] Did I search for memories about this component?
+- [ ] Are there prior decisions that should guide this work?
+- [ ] Did we learn something in a previous session that applies?
+- [ ] Is there a pattern I should follow or avoid?
+
+**SEARCH FIRST, THEN ACT.** Prior context prevents contradicting past decisions and repeating mistakes.
+
+---
+
 ## FAILURE MODES — ACTIVELY AVOID THESE
 
 | Failure | Why It Happens | How to Avoid |
@@ -161,6 +209,7 @@ Need authentication that works across multiple servers.
 | ❌ Skipping meaningful work | Rationalization | Capture decisions, learnings, progress |
 | ❌ Inline when block fits | Convenience | Default to blocks |
 | ❌ No Related Files | Laziness | Always include when applicable |
+| ❌ Skipping proactive search | Relying on SessionStart | Search before modifying code |
 
 ---
 

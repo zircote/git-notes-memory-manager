@@ -73,8 +73,103 @@ Parse the following options:
 
 **Execute the health check**:
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(ls -d ~/.claude/plugins/cache/git-notes-memory/memory-capture/*/ 2>/dev/null | head -1)}"
-uv run --directory "$PLUGIN_ROOT" python3 "$PLUGIN_ROOT/scripts/health.py" $ARGUMENTS
+uv run --directory "${CLAUDE_PLUGIN_ROOT:-.}" python3 -c "
+import subprocess
+import sys
+
+# Parse args
+show_timing = '--timing' in sys.argv
+verbose = '--verbose' in sys.argv
+
+print('## Memory System Health\n')
+checks = []
+
+# Git repository check
+try:
+    result = subprocess.run(['git', 'rev-parse', '--git-dir'], capture_output=True, text=True, timeout=10)
+    git_ok = result.returncode == 0
+    checks.append(('Git Repository', git_ok, 'Accessible' if git_ok else 'Not found'))
+except Exception as e:
+    checks.append(('Git Repository', False, str(e)))
+
+# Git notes check
+try:
+    result = subprocess.run(['git', 'notes', 'list'], capture_output=True, text=True, timeout=10)
+    notes_ok = result.returncode == 0
+    checks.append(('Git Notes', notes_ok, 'Accessible' if notes_ok else 'Not configured'))
+except Exception as e:
+    checks.append(('Git Notes', False, str(e)))
+
+# Index check
+try:
+    from git_notes_memory.config import get_project_index_path
+    index_path = get_project_index_path()
+    index_ok = index_path.exists()
+    checks.append(('Index', index_ok, 'Initialized' if index_ok else 'Not initialized'))
+except Exception as e:
+    checks.append(('Index', False, str(e)))
+
+# Embedding model check
+try:
+    from git_notes_memory.embedding import EmbeddingService
+    _ = EmbeddingService()
+    checks.append(('Embedding Model', True, 'Available'))
+except Exception:
+    checks.append(('Embedding Model', False, 'Not loaded'))
+
+# Hook system check
+try:
+    from git_notes_memory.hooks.config_loader import load_hook_config
+    config = load_hook_config()
+    hooks_ok = config.enabled
+    checks.append(('Hook System', hooks_ok, 'Enabled' if hooks_ok else 'Disabled'))
+except Exception as e:
+    checks.append(('Hook System', False, str(e)))
+
+# Display results
+print('| Component | Status | Details |')
+print('|-----------|--------|---------|')
+all_ok = True
+for name, ok, details in checks:
+    status = '✓' if ok else '✗'
+    if not ok:
+        all_ok = False
+    print(f'| {name} | {status} | {details} |')
+
+print()
+if all_ok:
+    print('**Overall**: ✓ Healthy')
+else:
+    print('**Overall**: ⚠ Issues detected')
+print()
+
+# Timing section
+if show_timing:
+    print('### Latency Percentiles\n')
+    from git_notes_memory.observability.metrics import get_metrics
+    metrics = get_metrics()
+    with metrics._lock:
+        histograms = list(metrics._histograms.items())
+    if not histograms:
+        print('No timing data collected yet.')
+    else:
+        print('| Metric | p50 | p95 | p99 | Avg |')
+        print('|--------|-----|-----|-----|-----|')
+        for hist_name, hist_label_values in sorted(histograms):
+            for labels, histogram in hist_label_values.items():
+                if histogram.count == 0:
+                    continue
+                samples = histogram.samples
+                if samples:
+                    sorted_samples = sorted(samples)
+                    n = len(sorted_samples)
+                    p50 = sorted_samples[int(n * 0.5)] if n > 0 else 0
+                    p95 = sorted_samples[int(n * 0.95)] if n > 0 else 0
+                    p99 = sorted_samples[int(n * 0.99)] if n > 0 else 0
+                    avg = histogram.sum_value / histogram.count if histogram.count > 0 else 0
+                    print(f'| {hist_name} | {p50:.1f}ms | {p95:.1f}ms | {p99:.1f}ms | {avg:.1f}ms |')
+    print()
+" $ARGUMENTS
 ```
 
 </step>
