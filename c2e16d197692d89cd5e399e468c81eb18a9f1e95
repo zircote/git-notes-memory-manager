@@ -734,3 +734,15 @@ tags:
 
 #### Files Created (Session 3-5)
 -...
+
+---
+type: patterns
+timestamp: '2025-12-27T18:19:30.065633+00:00'
+summary: '...including "yesterday", so it doesn''t overlap with the "yesterday" match.
+  I need to fix the pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...including "yesterday", so it doesn't overlap with the "yesterday" match. I need to fix the pattern to require "yesterday" to be in the match:
