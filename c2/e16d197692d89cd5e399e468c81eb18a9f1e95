@@ -3630,3 +3630,19 @@ tags:
             namespace="progress",
             summary="Completed database setup",
             content="PostgreSQL and Redis are now configured.",...
+
+---
+type: progress
+timestamp: '2025-12-27T16:56:15.216575+00:00'
+summary: '...assert "Use PostgreSQL" in result'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_prompts.py
+---
+
+...assert "Use PostgreSQL" in result
+        assert "Add Redis" in result
+        assert "Completed database setup" in result
+
+    def test_format_preserves_content(self, sample_memory: MockMemory)...
