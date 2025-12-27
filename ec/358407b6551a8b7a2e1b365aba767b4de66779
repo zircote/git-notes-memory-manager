@@ -1481,3 +1481,20 @@ tags:
                     "LLM request completed",
                     provider=provider_name,
                     model=response.model,...
+
+---
+type: progress
+timestamp: '2025-12-27T12:36:09.535895+00:00'
+summary: '...agent_confidence_avg", avg_confidence)'
+tags:
+- auto-captured
+- post-tool-use
+- file:implicit_capture_agent.py
+---
+
+...agent_confidence_avg", avg_confidence)
+
+            logger.info(
+                "Transcript analysis completed",
+                chunks_processed=len(chunks),
+                memories_extracted=len(all_memories...
