@@ -7207,3 +7207,17 @@ tags:
 
 ...structured logging (model, provider, truncated content) | done | 2025-12-27 | 2025-12-27 | Completed |
 | 4.4.6 | Unit tests with mock LLM client | done | 2025-12-27 | 2025-12-27 | 18 tests pass |
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:09.278925+00:00'
+summary: '...`run_consolidation(full, dry_run, checkpoint_id)` orchestrator | done
+  | 2025-12-27 | 2025-12-27 |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...`run_consolidation(full, dry_run, checkpoint_id)` orchestrator | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.1.3 | Implement `_phase_scan()` - load memories, compute retention | done | 2025-12-27...
