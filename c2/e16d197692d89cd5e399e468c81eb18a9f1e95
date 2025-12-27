@@ -577,3 +577,22 @@ tags:
         phase_completed: Last phase that completed successfully.
         memories_scanned: Total memories processed in SCAN phase.
         clusters_found...
+
+---
+type: progress
+timestamp: '2025-12-27T15:48:20.138527+00:00'
+summary: '...None'
+tags:
+- auto-captured
+- post-tool-use
+- file:models.py
+---
+
+...None
+
+    @property
+    def success(self) -> bool:
+        """Whether the consolidation run completed successfully."""
+        return (
+            self.completed_at is not None
+            and...
