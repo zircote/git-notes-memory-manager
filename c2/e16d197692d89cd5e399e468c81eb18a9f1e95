@@ -247,3 +247,19 @@ tags:
 - `/memory:capture <namespace> <content>` - Explicit capture
 
 Available...
+
+---
+type: decisions
+timestamp: '2025-12-27T17:17:14.535084+00:00'
+summary: '..."abc1234"'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_service.py
+---
+
+..."abc1234"
+    namespace: str = "decisions"
+    summary: str = "Test decision"
+    content: str = "We decided to use PostgreSQL for the database."
+    timestamp: datetime = field(default_factory=lambda:...
