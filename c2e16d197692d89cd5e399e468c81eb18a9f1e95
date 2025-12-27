@@ -427,3 +427,15 @@ The `▶ namespace` blocks Claude outputs are structured guidance for review - t
 ## Related Files
 - src/git_notes_memory/hooks/stop_handler.py (session-end capture)
 - src/git_notes_memory/subconsciousness/implicit_capture_agent.py (LLM extraction)
+
+---
+type: learnings
+timestamp: '2025-12-27T16:42:59.045241+00:00'
+summary: Now I understand the schema structure. For Task 2.5, I need to extend the
+  index schema to support...
+tags:
+- auto-captured
+- pre-compact
+---
+
+Now I understand the schema structure. For Task 2.5, I need to extend the index schema to support consolidation...
