@@ -3321,3 +3321,34 @@ Created a single-pane-of-glass dashboard that brings together all observability 
 
 ## Related Files
 - docker/grafana/dashboards/observability-overview.json
+
+---
+type: progress
+timestamp: '2025-12-27T16:53:30.548299+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed $HOME directory creation bug - paths now e...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed $HOME directory creation bug - paths now expand shell variables
+## Summary
+The code was creating literal `$HOME/` directories instead of expanding the shell variable because Python's `Path.expanduser()` only expands `~`, not `$HOME`.
+
+## Changes Made
+- **src/git_notes_memory/config.py:261-264**: Added `os.path.expandvars()` to expand `$HOME` before `expanduser()` in `get_data_path()`
+- **src/git_notes_memory/observability/config.py:213-214**: Added `os.path.expandvars()` when parsing values from the env file
+
+## Root Cause
+Your `~/.local/share/memory-plugin/env` has:
+```
+export MEMORY_PLUGIN_DATA_DIR="$HOME/.local/share/memory-plugin"
+```
+
+The code was using only `.expanduser()` which expands `~` but NOT `$HOME`. When the path wasn't expanded, the embedding model (xet) created directories relative to cwd, resulting in literal `$HOME/` folders.
+
+## Related Files
+- src/git_notes_memory/config.py:261-264
+- src/git_notes_memory/observability/config.py:213-214
