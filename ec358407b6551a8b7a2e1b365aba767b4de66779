@@ -124,3 +124,19 @@ tags:
 2. Check if reasoning needed (pattern match or --reason flag)
 3. Retrieve memories with RecallService
 4. Format memories with explicit...
+
+---
+type: patterns
+timestamp: '2025-12-27T15:25:24.594418+00:00'
+summary: '...pyproject.toml`)'
+tags:
+- auto-captured
+- post-tool-use
+- file:IMPLEMENTATION_PLAN.md
+---
+
+...pyproject.toml`)
+- [ ] 6.5.1 Add `[consolidation]` optional dependencies
+- [ ] 6.5.2 Implement lazy import pattern for consolidation module
+- [ ] 6.5.3 Implement `NotImplementedError` with helpful message
+-...
