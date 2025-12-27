@@ -564,3 +564,21 @@ tags:
     def test_pattern_no_match_without_block(self) -> None:
         """Test that pattern doesn't match without block."""
         context = "<memory_context>No summaries here</memory_context...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:55:23.273943+00:00'
+summary: '...create_mock_summary('
+tags:
+- auto-captured
+- post-tool-use
+- file:test_summary_injector.py
+---
+
+...create_mock_summary(
+                summary_id="patterns:summary:0",
+                content="Reusable coding pattern",
+                tier=MemoryTier.WARM,
+            ),
+        ]
+        injector.set...
