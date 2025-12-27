@@ -227,3 +227,21 @@ tags:
             assert pattern in TEMPORAL_PATTERNS, f"Missing {pattern}"
 
 # =============...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:02:45.696149+00:00'
+summary: '...saturday",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_temporal.py
+---
+
+...saturday",
+            "last_sunday",
+        ]
+        for pattern in weekdays:
+            assert pattern in TEMPORAL_PATTERNS, f"Missing {pattern}"
+
+# =====================================================...
