@@ -7052,3 +7052,17 @@ tags:
 
 ...Create `REASONING_SYSTEM_PROMPT` for temporal reasoning | done | 2025-12-27 | 2025-12-27 | Completed |
 | 4.2.2 | Create `REASONING_USER_PROMPT` template | done | 2025-12-27 | 2025-12-27 | Completed...
+
+---
+type: progress
+timestamp: '2025-12-27T18:12:16.622083+00:00'
+summary: '...Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Completed |
+| 4.2.2 | Create `REASONING_USER_PROMPT` template | done | 2025-12-27 | 2025-12-27 | Completed |
+| 4.2.3 | Create response parser for `ReasonedAnswer` | done | 2025-12-27 | 2025-12-27 |...
