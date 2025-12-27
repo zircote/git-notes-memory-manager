@@ -7431,3 +7431,17 @@ tags:
 ...tests pass |
 | 5.1.19 | Integration tests for full pipeline | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.1.20 | Property tests: consolidation is idempotent | done | 2025-12-27 | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:09.715796+00:00'
+summary: '...|'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...|
+| 5.1.20 | Property tests: consolidation is idempotent | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.2.1 | Create `ReasonedRecallService` dataclass with dependencies | done | 2025-12-27...
