@@ -7615,3 +7615,18 @@ tags:
 
 ...5.3.6 | Implement activation count increment on retrieval | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.3.7 | Add `_query_needs_reasoning(query)` heuristic | done | 2025-12-27 | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:10.058757+00:00'
+summary: '...| Add metrics (recalls by mode, activation increments) | done | 2025-12-27
+  | 2025-12-27 | Complet'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...| Add metrics (recalls by mode, activation increments) | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.3.10 | Add structured logging | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.3.11...
