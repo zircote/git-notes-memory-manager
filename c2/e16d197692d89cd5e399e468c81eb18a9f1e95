@@ -5931,3 +5931,31 @@ Phase 2 (Storage Layer) is now complete. Created 4 git notes-based stores plus i
 - src/git_notes_memory/subconsciousness/consolidation/stores/run_store.py:1-341
 - src/git_notes_memory/subconsciousness/consolidation/stores/index_extension.py:1-309
 - tests/subconsciousness/consolidation/stores/*.py
+
+---
+type: progress
+timestamp: '2025-12-27T17:56:58.099532+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 5.3: RecallService Extension wit...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 5.3: RecallService Extension with 47 tests
+## Summary
+Implemented the ExtendedRecallService that wraps the core RecallService with consolidation-aware features.
+
+## Changes Made
+- Created `recall_extension.py` with ExtendedRecallService
+- Added TIER_ALLOWED_BY_MODE mapping for retrieval modes to memory tiers
+- Implemented `query_needs_reasoning()` temporal pattern detection
+- Added new observability constants: TIER_FILTER span, RECALLS_BY_MODE and ACTIVATION_INCREMENTS metrics
+- Created 47 tests covering config, factory, tier mapping, search, filtering, activation tracking, and temporal detection
+- Updated consolidation `__init__.py` to export new classes
+
+## Related Files
+- src/git_notes_memory/subconsciousness/consolidation/recall_extension.py:1-371
+- src/git_notes_memory/subconsciousness/consolidation/observability.py:116-119, 264-267
+- tests/subconsciousness/consolidation/test_recall_extension.py:1-315
