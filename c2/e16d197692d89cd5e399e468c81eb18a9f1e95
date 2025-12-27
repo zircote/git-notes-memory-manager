@@ -7559,3 +7559,17 @@ tags:
 ...| Create `reset_reasoned_recall_service()` for testing | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.2.11 | Unit tests with mock LLM | done | 2025-12-27 | 2025-12-27 | 26 tests pass |
 |...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:09.955456+00:00'
+summary: '...5.2.12 | Integration tests for temporal resolution accuracy | done |
+  2025-12-27 | 2025-12-27 | Co'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...5.2.12 | Integration tests for temporal resolution accuracy | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.3.1 | Add `RetrievalMode` enum to models | done | 2025-12-27 | 2025-12-27 | In models.py...
