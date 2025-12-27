@@ -212,3 +212,18 @@ tags:
             "answer": "We decided on the database on January 14, 2024.",
             "confidence": 0.9,
             "reasoning":...
+
+---
+type: decisions
+timestamp: '2025-12-27T17:06:50.431879+00:00'
+summary: '...namespace="decisions",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_llm.py
+---
+
+...namespace="decisions",
+            summary="Use PostgreSQL",
+            content="We decided to use PostgreSQL for persistence.",
+            timestamp=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC...
