@@ -61,3 +61,20 @@ tags:
 # Pattern definitions: (pattern, offset_days, description)
 # offset_days can be:
 #   - int: fixed offset...
+
+---
+type: patterns
+timestamp: '2025-12-27T16:59:17.713590+00:00'
+summary: '...matched temporal reference in text.'
+tags:
+- auto-captured
+- post-tool-use
+- file:temporal.py
+---
+
+...matched temporal reference in text.
+
+    Attributes:
+        pattern_name: Name of the matched pattern (e.g., "yesterday").
+        matched_text: The actual text that matched.
+        start_pos:...
