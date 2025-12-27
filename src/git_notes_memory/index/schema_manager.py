@@ -29,7 +29,7 @@ __all__ = ["SchemaManager", "SCHEMA_VERSION"]
 # =============================================================================
 
 # Schema version for migrations
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 # SQL statements for schema creation
 _CREATE_MEMORIES_TABLE = """
@@ -122,6 +122,59 @@ _MIGRATIONS = {
             VALUES (new.rowid, new.id, new.summary, new.content);
         END
         """,
+    ],
+    5: [
+        # RET-H-001: Entity extraction and indexing for hybrid search
+        # Entities table - stores unique entity references
+        """
+        CREATE TABLE IF NOT EXISTS entities (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            text TEXT NOT NULL,
+            type TEXT NOT NULL,
+            canonical_form TEXT,
+            first_seen TEXT NOT NULL,
+            mention_count INTEGER DEFAULT 1,
+            UNIQUE(text, type)
+        )
+        """,
+        # Index for entity lookups
+        "CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(type)",
+        "CREATE INDEX IF NOT EXISTS idx_entities_text ON entities(text)",
+        "CREATE INDEX IF NOT EXISTS idx_entities_canonical ON entities(canonical_form)",
+        # Memory-entity mapping table
+        """
+        CREATE TABLE IF NOT EXISTS memory_entities (
+            memory_id TEXT NOT NULL,
+            entity_id INTEGER NOT NULL,
+            span_start INTEGER,
+            span_end INTEGER,
+            confidence REAL DEFAULT 1.0,
+            PRIMARY KEY (memory_id, entity_id),
+            FOREIGN KEY (memory_id) REFERENCES memories(id) ON DELETE CASCADE,
+            FOREIGN KEY (entity_id) REFERENCES entities(id) ON DELETE CASCADE
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_memory_entities_memory ON memory_entities(memory_id)",
+        "CREATE INDEX IF NOT EXISTS idx_memory_entities_entity ON memory_entities(entity_id)",
+        # RET-H-002: Temporal reference extraction and indexing
+        """
+        CREATE TABLE IF NOT EXISTS temporal_refs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            memory_id TEXT NOT NULL,
+            text TEXT NOT NULL,
+            start_date TEXT,
+            end_date TEXT,
+            granularity TEXT,
+            span_start INTEGER,
+            span_end INTEGER,
+            confidence REAL DEFAULT 1.0,
+            FOREIGN KEY (memory_id) REFERENCES memories(id) ON DELETE CASCADE
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_temporal_refs_memory ON temporal_refs(memory_id)",
+        "CREATE INDEX IF NOT EXISTS idx_temporal_refs_start ON temporal_refs(start_date)",
+        "CREATE INDEX IF NOT EXISTS idx_temporal_refs_end ON temporal_refs(end_date)",
+        "CREATE INDEX IF NOT EXISTS idx_temporal_refs_dates ON temporal_refs(start_date, end_date)",
     ],
 }
 
@@ -249,7 +302,9 @@ class SchemaManager:
             cursor.execute(_CREATE_METADATA_TABLE)
 
             # Run migrations if needed
-            if 0 < current_version < SCHEMA_VERSION:
+            # For existing databases (version > 0): migrate from current version
+            # For new databases (version 0): run all migrations to create optional tables
+            if current_version < SCHEMA_VERSION:
                 self.run_migrations(current_version, SCHEMA_VERSION)
 
             # Set schema version

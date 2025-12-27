@@ -33,6 +33,7 @@ from git_notes_memory.models import (
     MemoryResult,
     SpecContext,
 )
+from git_notes_memory.retrieval.config import HybridSearchConfig, SearchMode
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -40,6 +41,10 @@ if TYPE_CHECKING:
     from git_notes_memory.embedding import EmbeddingService
     from git_notes_memory.git_ops import GitOps
     from git_notes_memory.index import IndexService
+    from git_notes_memory.index.hybrid_search import (
+        HybridSearchEngine,
+        HybridSearchResult,
+    )
 
 __all__ = [
     "RecallService",
@@ -82,6 +87,7 @@ class RecallService:
         index_service: IndexService | None = None,
         embedding_service: EmbeddingService | None = None,
         git_ops: GitOps | None = None,
+        hybrid_config: HybridSearchConfig | None = None,
     ) -> None:
         """Initialize the recall service.
 
@@ -94,15 +100,21 @@ class RecallService:
                 If not provided, one will be created lazily.
             git_ops: Optional pre-configured GitOps instance.
                 If not provided, one will be created lazily.
+            hybrid_config: Optional hybrid search configuration.
+                If not provided, one will be created from environment variables.
         """
         # Use project-specific index for per-repository isolation
         self._index_path = index_path or get_project_index_path()
         self._index_service = index_service
         self._embedding_service = embedding_service
         self._git_ops = git_ops
+        self._hybrid_config = hybrid_config
         # RES-M-001: Lock for thread-safe user index initialization
         self._user_index_lock = threading.Lock()
         self._user_index_service: IndexService | None = None
+        # RET-H-002: Lazy-initialized hybrid search engine
+        self._hybrid_engine: HybridSearchEngine | None = None
+        self._hybrid_engine_lock = threading.Lock()
 
     @property
     def index_path(self) -> Path:
@@ -158,6 +170,54 @@ class RecallService:
         if memory.is_user_domain:
             return self._get_user_git_ops()
         return self._get_git_ops()
+
+    def _get_hybrid_engine(self) -> HybridSearchEngine:
+        """Get or create the HybridSearchEngine instance.
+
+        RET-H-002: Thread-safe lazy initialization using double-checked locking.
+
+        Returns:
+            HybridSearchEngine configured for hybrid search.
+        """
+        # Fast path: return existing instance without lock
+        if self._hybrid_engine is not None:
+            return self._hybrid_engine
+
+        # Slow path: acquire lock and create if still None
+        with self._hybrid_engine_lock:
+            if self._hybrid_engine is None:
+                from git_notes_memory.index.hybrid_search import HybridSearchEngine
+
+                # Get or create hybrid config
+                config = self._hybrid_config or HybridSearchConfig.from_env()
+
+                # Create embedding function from embedding service
+                embedding_service = self._get_embedding()
+
+                def embed_fn(text: str) -> list[float]:
+                    return list(embedding_service.embed(text))
+
+                # Get search engine from index service
+                index = self._get_index()
+                # Access internal search engine (guaranteed non-None after initialize())
+                search_engine = index._search_engine
+                if search_engine is None:
+                    msg = "SearchEngine not initialized"
+                    raise RecallError(msg, "Call index.initialize() first")
+
+                self._hybrid_engine = HybridSearchEngine(
+                    search_engine=search_engine,
+                    embed_fn=embed_fn,
+                    config=config,
+                )
+        return self._hybrid_engine
+
+    @property
+    def hybrid_config(self) -> HybridSearchConfig:
+        """Get the hybrid search configuration."""
+        if self._hybrid_config is None:
+            self._hybrid_config = HybridSearchConfig.from_env()
+        return self._hybrid_config
 
     # -------------------------------------------------------------------------
     # Search Operations
@@ -256,6 +316,88 @@ class RecallService:
         except Exception as e:
             raise RecallError(
                 f"Search failed: {e}",
+                "Check query text and try again",
+            ) from e
+
+    def search_hybrid(
+        self,
+        query: str,
+        k: int = 10,
+        *,
+        mode: SearchMode | None = None,
+        namespace: str | None = None,
+        spec: str | None = None,
+        domain: Domain | None = None,
+    ) -> list[HybridSearchResult]:
+        """Search for memories using hybrid vector + BM25 strategy with RRF fusion.
+
+        RET-H-002: Uses Reciprocal Rank Fusion to combine vector similarity
+        and BM25 text search results for improved retrieval accuracy.
+
+        Args:
+            query: The search query text.
+            k: Maximum number of results to return.
+            mode: Search mode. Options:
+                - "hybrid": Combine vector and BM25 with RRF (default)
+                - "vector": Vector search only
+                - "bm25": BM25 text search only
+            namespace: Optional namespace to filter results.
+            spec: Optional specification to filter results.
+            domain: Optional domain filter. Currently only supports project domain.
+                User domain hybrid search is not yet supported.
+
+        Returns:
+            List of HybridSearchResult objects sorted by RRF score descending.
+
+        Raises:
+            RecallError: If the search operation fails.
+
+        Examples:
+            >>> results = service.search_hybrid("authentication flow")
+            >>> for r in results:
+            ...     print(f"[{r.rank}] {r.memory.summary} (RRF: {r.rrf_score:.4f})")
+            ...     print(f"  Sources: {r.sources}")
+
+            >>> # Vector-only mode
+            >>> results = service.search_hybrid("API design", mode="vector")
+
+            >>> # BM25-only mode
+            >>> results = service.search_hybrid("PostgreSQL", mode="bm25")
+        """
+        if not query or not query.strip():
+            return []
+
+        try:
+
+            # Get the hybrid search engine
+            engine = self._get_hybrid_engine()
+
+            # Perform hybrid search (currently project domain only)
+            domain_str = domain.value if domain else None
+
+            results = engine.search(
+                query=query,
+                limit=k,
+                mode=mode,
+                namespace=namespace,
+                spec=spec,
+                domain=domain_str,
+            )
+
+            logger.debug(
+                "Hybrid search for '%s' returned %d results (k=%d, mode=%s, namespace=%s)",
+                query[:50],
+                len(results),
+                k,
+                mode or engine.config.mode,
+                namespace,
+            )
+
+            return results
+
+        except Exception as e:
+            raise RecallError(
+                f"Hybrid search failed: {e}",
                 "Check query text and try again",
             ) from e
 

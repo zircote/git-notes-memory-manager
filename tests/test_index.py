@@ -153,7 +153,7 @@ class TestInitialization:
         cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
         row = cursor.fetchone()
         assert row is not None
-        assert row[0] == "4"  # Schema v4 adds FTS5 full-text search
+        assert row[0] == "5"  # Schema v5 adds entity/temporal tables
 
         service.close()
 
@@ -248,10 +248,10 @@ class TestSchemaMigration:
         columns = {row["name"] for row in cursor.fetchall()}
         assert "domain" in columns
 
-        # Check schema version updated to 4 (latest)
+        # Check schema version updated to 5 (latest)
         cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
         row = cursor.fetchone()
-        assert row[0] == "4"
+        assert row[0] == "5"
 
         # Check index exists
         cursor.execute(
@@ -270,6 +270,145 @@ class TestSchemaMigration:
         cursor.execute("PRAGMA table_info(memories)")
         columns = {row["name"] for row in cursor.fetchall()}
         assert "domain" in columns
+
+        service.close()
+
+    def test_new_database_has_entity_tables(self, db_path: Path) -> None:
+        """Test a fresh database has entity tables from schema v5."""
+        service = IndexService(db_path)
+        service.initialize()
+
+        cursor = service._conn.cursor()
+
+        # Check entities table exists
+        cursor.execute("PRAGMA table_info(entities)")
+        columns = {row["name"] for row in cursor.fetchall()}
+        assert "id" in columns
+        assert "text" in columns
+        assert "type" in columns
+        assert "canonical_form" in columns
+        assert "first_seen" in columns
+        assert "mention_count" in columns
+
+        # Check memory_entities table exists
+        cursor.execute("PRAGMA table_info(memory_entities)")
+        columns = {row["name"] for row in cursor.fetchall()}
+        assert "memory_id" in columns
+        assert "entity_id" in columns
+        assert "span_start" in columns
+        assert "span_end" in columns
+        assert "confidence" in columns
+
+        service.close()
+
+    def test_new_database_has_temporal_refs_table(self, db_path: Path) -> None:
+        """Test a fresh database has temporal_refs table from schema v5."""
+        service = IndexService(db_path)
+        service.initialize()
+
+        cursor = service._conn.cursor()
+
+        # Check temporal_refs table exists
+        cursor.execute("PRAGMA table_info(temporal_refs)")
+        columns = {row["name"] for row in cursor.fetchall()}
+        assert "id" in columns
+        assert "memory_id" in columns
+        assert "text" in columns
+        assert "start_date" in columns
+        assert "end_date" in columns
+        assert "granularity" in columns
+        assert "span_start" in columns
+        assert "span_end" in columns
+        assert "confidence" in columns
+
+        service.close()
+
+    def test_migration_from_v4_to_v5_adds_entity_tables(self, db_path: Path) -> None:
+        """Test migration from v4 to v5 adds entity and temporal tables."""
+        import sqlite3
+
+        import sqlite_vec
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        conn.enable_load_extension(True)
+        sqlite_vec.load(conn)
+        conn.enable_load_extension(False)
+
+        # Create v4 schema (with FTS5 but without entity tables)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS memories (
+                id TEXT PRIMARY KEY,
+                commit_sha TEXT NOT NULL,
+                namespace TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                content TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                domain TEXT DEFAULT 'project',
+                repo_path TEXT,
+                spec TEXT,
+                phase TEXT,
+                tags TEXT,
+                status TEXT DEFAULT 'active',
+                relates_to TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        """)
+        conn.execute("INSERT INTO metadata (key, value) VALUES ('schema_version', '4')")
+        conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_memories USING vec0(
+                id TEXT PRIMARY KEY,
+                embedding FLOAT[384]
+            )
+        """)
+        # Add FTS5 table to simulate v4
+        conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts USING fts5(
+                id UNINDEXED,
+                summary,
+                content,
+                content='memories',
+                content_rowid='rowid'
+            )
+        """)
+        conn.commit()
+        conn.close()
+
+        # Now initialize IndexService - it should run migration
+        service = IndexService(db_path)
+        service.initialize()
+
+        cursor = service._conn.cursor()
+
+        # Check entities table was created
+        cursor.execute("PRAGMA table_info(entities)")
+        entity_columns = {row["name"] for row in cursor.fetchall()}
+        assert "text" in entity_columns
+        assert "type" in entity_columns
+
+        # Check memory_entities table was created
+        cursor.execute("PRAGMA table_info(memory_entities)")
+        me_columns = {row["name"] for row in cursor.fetchall()}
+        assert "memory_id" in me_columns
+        assert "entity_id" in me_columns
+
+        # Check temporal_refs table was created
+        cursor.execute("PRAGMA table_info(temporal_refs)")
+        tr_columns = {row["name"] for row in cursor.fetchall()}
+        assert "memory_id" in tr_columns
+        assert "start_date" in tr_columns
+
+        # Check schema version updated to 5
+        cursor.execute("SELECT value FROM metadata WHERE key = 'schema_version'")
+        row = cursor.fetchone()
+        assert row[0] == "5"
 
         service.close()
 
