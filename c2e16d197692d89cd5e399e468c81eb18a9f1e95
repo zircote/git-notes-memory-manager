@@ -439,3 +439,21 @@ tags:
             "What is the best practice for logging?",
             "Show me the user model",
             "Find all API endpoints",...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:48:08.444486+00:00'
+summary: '...reasoning(query) is False'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_recall_extension.py
+---
+
+...reasoning(query) is False
+
+    def test_case_insensitive_detection(self) -> None:
+        """Test that pattern matching is case insensitive."""
+        service = ExtendedRecallService()
+
+        assert...
