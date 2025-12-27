@@ -180,3 +180,19 @@ tags:
             summary="Database choice decision",
             content="We decided to use PostgreSQL yesterday.",
             timestamp=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),...
+
+---
+type: decisions
+timestamp: '2025-12-27T17:01:03.448426+00:00'
+summary: '...our database.",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_prompts.py
+---
+
+...our database.",
+            "confidence": 0.95,
+            "reasoning": "Memory 1 states 'We decided to use PostgreSQL'.",
+            "temporal_resolutions": [],
+            "source_memory_indices":...
