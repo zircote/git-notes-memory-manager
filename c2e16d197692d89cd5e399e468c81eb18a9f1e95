@@ -112,3 +112,20 @@ tags:
 # =============================================================================
 
 class...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:02:45.537748+00:00'
+summary: '...TEMPORAL_PATTERNS dictionary."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_temporal.py
+---
+
+...TEMPORAL_PATTERNS dictionary."""
+
+    def test_patterns_not_empty(self) -> None:
+        """Should have pattern definitions."""
+        assert TEMPORAL_PATTERNS
+        assert len(TEMPORAL_PATTERNS) > 10...
