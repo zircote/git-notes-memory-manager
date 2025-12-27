@@ -6639,3 +6639,39 @@ Implemented the ExtendedRecallService that wraps the core RecallService with con
 - src/git_notes_memory/subconsciousness/consolidation/recall_extension.py:1-371
 - src/git_notes_memory/subconsciousness/consolidation/observability.py:116-119, 264-267
 - tests/subconsciousness/consolidation/test_recall_extension.py:1-315
+
+---
+type: progress
+timestamp: '2025-12-27T18:09:13.931087+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 6.1: Session Summary Injector wi...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 6.1: Session Summary Injector with 32 tests
+## Summary
+Implemented the SessionStartSummaryInjector for injecting consolidated memory summaries into Claude Code session context.
+
+## Changes Made
+- Created `session/summary_injector.py` with:
+  - `SummaryInjectionConfig` - configuration for token budget, max summaries, tier priority
+  - `SummaryInjectionResult` - result dataclass with success/error tracking
+  - `SessionStartSummaryInjector` - main injector class with idempotent block replacement
+  - Regex-based block removal for idempotency
+  - Summary scoring based on tier, recency, and project relevance
+  - Token budget enforcement
+  - XML formatting with topic extraction
+- Created session package `__init__.py` with lazy imports
+- Created 32 comprehensive tests covering all functionality
+
+## Test Count
+- Session injector: 32 tests
+- Total subconsciousness: 1098 passed, 3 failed (pre-existing provider issues)
+
+## Related Files
+- src/git_notes_memory/subconsciousness/consolidation/session/__init__.py:1-43
+- src/git_notes_memory/subconsciousness/consolidation/session/summary_injector.py:1-474
+- tests/subconsciousness/consolidation/session/test_summary_injector.py:1-385
