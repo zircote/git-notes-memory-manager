@@ -482,3 +482,16 @@ summary: '...using markers anywhere in your messages:'
 - `/memory:capture <namespace> <content>` - Explicit capture
 
 Available...
+
+---
+type: decisions
+timestamp: '2025-12-27T20:21:40.313597+00:00'
+summary: '...using markers anywhere in your messages:'
+---
+
+...using markers anywhere in your messages:
+- `[remember] <insight>` - Captures a learning
+- `[decision] <choice>` - Captures a decision
+- `/memory:capture <namespace> <content>` - Explicit capture
+
+Available...
