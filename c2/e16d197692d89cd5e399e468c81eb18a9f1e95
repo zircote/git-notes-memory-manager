@@ -7981,3 +7981,17 @@ tags:
 ...2025-12-27 | Completed |
 | 6.2.7 | Add structured logging | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.2.8 | Unit tests for feature gating | done | 2025-12-27 | 2025-12-27 | 31 tests pass...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:01.016001+00:00'
+summary: '...tests pass |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...tests pass |
+| 6.2.9 | Integration tests for hook flow | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.3.1 | Create `ConsolidationHook` class | done | 2025-12-27 | 2025-12-27 | In hook.py...
