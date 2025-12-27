@@ -8069,3 +8069,21 @@ tags:
 ...print(f'| Status | {\"Success\" if result.success else \"Failed\"} |')
     print(f'| Phase Completed | {result.phase_completed.value if result.phase_completed else \"N/A\"} |')
     print(f'|...
+
+---
+type: progress
+timestamp: '2025-12-27T18:16:54.841837+00:00'
+summary: '...print(f''- {error}'')'
+tags:
+- auto-captured
+- post-tool-use
+- file:consolidate.md
+---
+
+...print(f'- {error}')
+        print('')
+
+    if result.success:
+        print('Consolidation completed successfully.')
+    else:
+        print('Consolidation completed with errors. Check the logs...
