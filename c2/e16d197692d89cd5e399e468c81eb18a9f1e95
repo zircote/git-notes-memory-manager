@@ -7882,3 +7882,17 @@ tags:
 ...tests pass |
 | 6.1.18 | Unit tests for summary selection | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.1.19 | Unit tests for token budget enforcement | done | 2025-12-27 | 2025-12-27 | Completed...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.825900+00:00'
+summary: '...Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Completed |
+| 6.1.19 | Unit tests for token budget enforcement | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.1.20 | Integration tests: multiple Start events don't accumulate | done | 2025-12-27...
