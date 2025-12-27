@@ -474,3 +474,23 @@ tags:
             assert isinstance(pattern, str)
 
     def test_key_patterns_included...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:53:18.155104+00:00'
+summary: '..."get_summary_injector",'
+tags:
+- auto-captured
+- post-tool-use
+- file:summary_injector.py
+---
+
+..."get_summary_injector",
+    "reset_summary_injector",
+]
+
+logger = get_logger(__name__)
+
+# Regex pattern for the consolidated summaries block
+SUMMARIES_BLOCK_PATTERN = re.compile(
+    r"<memory_consolidated...
