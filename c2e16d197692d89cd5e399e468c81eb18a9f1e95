@@ -320,3 +320,15 @@ tags:
 ---
 
 ...including "yesterday", so it doesn't overlap with the "yesterday" match. I need to fix the pattern to require "yesterday" to be in the match:
+
+---
+type: patterns
+timestamp: '2025-12-27T17:17:25.355456+00:00'
+summary: '...issue is that "the day before yesterday" is being matched by both the
+  `day_before_yesterday` p...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...issue is that "the day before yesterday" is being matched by both the `day_before_yesterday` pattern and the `yesterday` pattern because they don't overlap. Let me fix the test to reflect the...
