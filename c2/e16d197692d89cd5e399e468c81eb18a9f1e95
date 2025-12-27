@@ -150,3 +150,18 @@ tags:
 - `/memory:capture <namespace> <content>` - Explicit capture
 
 Available...
+
+---
+type: decisions
+timestamp: '2025-12-27T16:56:15.155413+00:00'
+summary: '...namespace="decisions",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_prompts.py
+---
+
+...namespace="decisions",
+            summary="Use PostgreSQL for persistence",
+            content="We decided to use PostgreSQL for its reliability.",
+            timestamp=datetime(2024, 1, 15, 10, 30,...
