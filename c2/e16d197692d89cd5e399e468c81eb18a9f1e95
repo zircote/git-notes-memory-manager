@@ -662,3 +662,75 @@ Implemented full tracing, metrics, and structured logging across the entire subc
 - src/git_notes_memory/subconsciousness/implicit_capture_agent.py:17-40, 109-216, 218-282, 284-383
 - src/git_notes_memory/subconsciousness/implicit_capture_service.py:22-52, 140-336
 - src/git_notes_memory/subconsciousness/providers/openai.py:16-47, 145-291, 373-545
+
+---
+type: progress
+timestamp: '2025-12-27T15:54:00.786544+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Enhanced Grafana dashboard and subconsciousness ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Enhanced Grafana dashboard and subconsciousness prompts with all namespaces
+## Summary
+Completed comprehensive observability dashboard and fixed namespace coverage for LLM memory extraction.
+
+## Changes Made
+
+### 1. Grafana Dashboard (`docker/grafana/dashboards/subconsciousness.json`)
+Enhanced from metrics-only to full observability with all three pillars:
+
+**Metrics (Prometheus):**
+- LLM Overview: Requests, Errors, Memories, Tokens, Cost, Rate Limits
+- LLM Performance: Latency, Token Usage, Cost by Model, Errors by Type
+- Agent Performance: Analysis Duration, Confidence, Chunks vs Memories
+- Provider & Circuit Breaker: Requests by Provider, Circuit Events, Fallbacks
+- Capture Service: Memory Disposition, Duration, Approved by Namespace
+- Adversarial Detection: Blocked count, Detections by Level
+
+**Tracing (Tempo):**
+- Subconsciousness Traces search panel
+- LLM Provider Traces with TraceQL queries
+- Agent & Service Traces
+- LLM Request Duration Distribution
+- Error Traces panel
+
+**Logging (Loki):**
+- Subconsciousness Logs stream
+- LLM Provider Logs
+- Agent & Capture Logs
+- Error Log Count stat
+- Warning Log Count stat
+- Log Volume by Level timeseries
+- Error & Exception Logs panel
+- Logs with Trace Context (correlated)
+- Logs by Session for debugging
+- RED Metrics and Health Ratios
+
+### 2. Subconsciousness Prompts (`src/git_notes_memory/subconsciousness/prompts.py`)
+Updated from 5 namespaces to all 10:
+
+| Namespace | Purpose |
+|-----------|---------|
+| `inception` | Project initialization and setup |
+| `elicitation` | Requirements gathering and user needs |
+| `research` | Investigation findings and background |
+| `decisions` | Architecture and design choices |
+| `progress` | Milestones and task completions |
+| `blockers` | Problems that blocked progress |
+| `reviews` | Code review feedback and assessments |
+| `learnings` | New understanding and insights |
+| `retrospective` | Reflection on what worked/didn't |
+| `patterns` | Reusable approaches and solutions |
+
+### 3. Test Updates (`tests/subconsciousness/test_prompts.py`)
+Updated namespace enum test to match new 10-namespace list.
+
+## Related Files
+- `docker/grafana/dashboards/subconsciousness.json`
+- `src/git_notes_memory/subconsciousness/prompts.py:33-55` (schema)
+- `src/git_notes_memory/subconsciousness/prompts.py:158-201` (prompt)
+- `tests/subconsciousness/test_prompts.py:41-52`
