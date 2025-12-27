@@ -274,3 +274,117 @@ class SearchEngine:
             return [self._row_to_memory(row) for row in cursor.fetchall()]
         finally:
             cursor.close()
+
+    # =========================================================================
+    # Ranked Search Methods (for RRF fusion)
+    # =========================================================================
+
+    @measure_duration("index_search_vector_ranked")
+    def search_vector_ranked(
+        self,
+        query_embedding: Sequence[float],
+        k: int = 100,
+        namespace: str | None = None,
+        spec: str | None = None,
+        domain: str | None = None,
+    ) -> list[tuple[Memory, int, float]]:
+        """Search for similar memories and return with ranks.
+
+        RET-H-002: Returns ranked results suitable for RRF fusion.
+        Ranks are 1-indexed (first result has rank 1).
+
+        Args:
+            query_embedding: The query embedding vector.
+            k: Maximum number of results.
+            namespace: Optional namespace filter.
+            spec: Optional specification filter.
+            domain: Optional domain filter.
+
+        Returns:
+            List of (Memory, rank, distance) tuples sorted by distance ascending.
+            Rank is 1-indexed. Lower distance means more similar.
+        """
+        results = self.search_vector(
+            query_embedding, k=k, namespace=namespace, spec=spec, domain=domain
+        )
+        # Add 1-indexed ranks
+        return [(memory, idx + 1, distance) for idx, (memory, distance) in enumerate(results)]
+
+    @measure_duration("index_search_text_ranked")
+    def search_text_ranked(
+        self,
+        query: str,
+        limit: int = 100,
+        namespace: str | None = None,
+        spec: str | None = None,
+        domain: str | None = None,
+    ) -> list[tuple[Memory, int, float]]:
+        """Search memories by text and return with BM25 ranks.
+
+        RET-H-002: Returns ranked results suitable for RRF fusion.
+        Ranks are 1-indexed (first result has rank 1).
+
+        Args:
+            query: Text to search for.
+            limit: Maximum number of results.
+            namespace: Optional namespace filter.
+            spec: Optional specification filter.
+            domain: Optional domain filter.
+
+        Returns:
+            List of (Memory, rank, bm25_score) tuples sorted by relevance.
+            Rank is 1-indexed. Lower BM25 score means more relevant.
+        """
+        try:
+            return self._search_text_fts5_ranked(query, limit, namespace, spec, domain)
+        except sqlite3.OperationalError:
+            # FTS5 table doesn't exist - fall back to LIKE (no real scores)
+            memories = self._search_text_like(query, limit, namespace, spec, domain)
+            # Assign synthetic scores based on position
+            return [(memory, idx + 1, float(idx + 1)) for idx, memory in enumerate(memories)]
+
+    def _search_text_fts5_ranked(
+        self,
+        query: str,
+        limit: int,
+        namespace: str | None,
+        spec: str | None,
+        domain: str | None,
+    ) -> list[tuple[Memory, int, float]]:
+        """FTS5-based text search returning ranks and BM25 scores."""
+        fts_query = f'"{query}"'
+
+        sql = """
+            SELECT m.*, bm25(memories_fts) as bm25_score
+            FROM memories m
+            INNER JOIN memories_fts fts ON m.id = fts.id
+            WHERE memories_fts MATCH ?
+        """
+        params: list[object] = [fts_query]
+
+        if namespace is not None:
+            sql += " AND m.namespace = ?"
+            params.append(namespace)
+
+        if spec is not None:
+            sql += " AND m.spec = ?"
+            params.append(spec)
+
+        if domain is not None:
+            sql += " AND m.domain = ?"
+            params.append(domain)
+
+        sql += " ORDER BY bm25(memories_fts) LIMIT ?"
+        params.append(limit)
+
+        cursor = self._conn.cursor()
+        try:
+            cursor.execute(sql, params)
+            results: list[tuple[Memory, int, float]] = []
+            for idx, row in enumerate(cursor.fetchall()):
+                memory = self._row_to_memory(row)
+                bm25_score = row["bm25_score"]
+                results.append((memory, idx + 1, bm25_score))
+            return results
+        finally:
+            cursor.close()
