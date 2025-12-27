@@ -3773,3 +3773,23 @@ tags:
 class TierTransition:
     memory_id: str
     from_tier:...
+
+---
+type: progress
+timestamp: '2025-12-27T15:21:33.012673+00:00'
+summary: '...SUPERSESSION = "supersession"'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...SUPERSESSION = "supersession"
+    TIER = "tier"
+    PERSIST = "persist"
+    COMPLETED = "completed"
+
+@dataclass(frozen=True)
+class TierTransition:
+    memory_id: str
+    from_tier: MemoryTier...
