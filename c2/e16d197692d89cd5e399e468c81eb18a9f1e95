@@ -7417,3 +7417,17 @@ tags:
 
 ...5.1.17 | Create `reset_consolidation_service()` for testing | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.1.18 | Unit tests with mocked dependencies | done | 2025-12-27 | 2025-12-27 | 18 tests...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:09.689486+00:00'
+summary: '...tests pass |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...tests pass |
+| 5.1.19 | Integration tests for full pipeline | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.1.20 | Property tests: consolidation is idempotent | done | 2025-12-27 | 2025-12-27...
