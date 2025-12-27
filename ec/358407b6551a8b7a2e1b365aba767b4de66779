@@ -1667,3 +1667,22 @@ Implemented full tracing, metrics, and structured logging across the entire subc
 - src/git_notes_memory/subconsciousness/implicit_capture_agent.py:17-40, 109-216, 218-282, 284-383
 - src/git_notes_memory/subconsciousness/implicit_capture_service.py:22-52, 140-336
 - src/git_notes_memory/subconsciousness/providers/openai.py:16-47, 145-291, 373-545
+
+---
+type: progress
+timestamp: '2025-12-27T12:49:26.901527+00:00'
+summary: '...Logging:**
+
+  ```
+
+  12:45:00.428 DEBU [git_notes_memory.subconsciousness.llm_client] LLM request co...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Logging:**
+```
+12:45:00.428 DEBU [git_notes_memory.subconsciousness.llm_client] LLM request completed
+  provider=openai model=gpt-5-mini latency_ms=24738.81 prompt_tokens=663
+  completion_tokens=1415...
