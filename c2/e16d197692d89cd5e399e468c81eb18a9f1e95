@@ -1193,3 +1193,48 @@ Updated namespace enum test to match new 10-namespace list.
 - `src/git_notes_memory/subconsciousness/prompts.py:33-55` (schema)
 - `src/git_notes_memory/subconsciousness/prompts.py:158-201` (prompt)
 - `tests/subconsciousness/test_prompts.py:41-52`
+
+---
+type: progress
+timestamp: '2025-12-27T16:05:51.953449+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Installed subconsciousness dashboard to Grafana
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Installed subconsciousness dashboard to Grafana
+## Summary
+Deployed the complete observability dashboard to the running Grafana instance.
+
+## Access URLs
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| **Subconsciousness Dashboard** | http://localhost:3000/d/subconsciousness | admin/admin |
+| Grafana | http://localhost:3000 | admin/admin |
+| Prometheus | http://localhost:9090 | - |
+| Tempo (traces) | http://localhost:3200 | - |
+| Loki (logs) | http://localhost:3100 | - |
+
+## Dashboard Sections
+1. **LLM Overview** - Requests, Errors, Memories, Tokens, Cost, Rate Limits
+2. **LLM Performance** - Latency, Token Usage, Cost by Model, Errors
+3. **Agent Performance** - Analysis Duration, Confidence, Chunks
+4. **Provider & Circuit Breaker** - Provider distribution, circuit events
+5. **Capture Service** - Memory disposition, duration, namespaces
+6. **Adversarial Detection** - Blocked count, threat levels
+7. **Distributed Tracing (Tempo)** - LLM and agent traces
+8. **Structured Logs (Loki)** - Provider and capture logs
+9. **Correlated Observability** - Logs with trace context, RED metrics
+
+## Metrics Status
+- 76 subconsciousness metrics being collected by Prometheus
+- All three datasources configured: Prometheus, Tempo, Loki
+
+## Related Files
+- `docker/grafana/dashboards/subconsciousness.json`
+- `docker/grafana/provisioning/datasources/datasources.yaml`
