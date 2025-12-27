@@ -7601,3 +7601,17 @@ tags:
 ...Completed |
 | 5.3.5 | Implement summary result merging | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.3.6 | Implement activation count increment on retrieval | done | 2025-12-27 | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:10.033917+00:00'
+summary: '...5.3.6 | Implement activation count increment on retrieval | done | 2025-12-27
+  | 2025-12-27 | Comp'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...5.3.6 | Implement activation count increment on retrieval | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.3.7 | Add `_query_needs_reasoning(query)` heuristic | done | 2025-12-27 | 2025-12-27...
