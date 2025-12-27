@@ -308,3 +308,15 @@ tags:
 ---
 
 ...yesterday" is being matched by both the `day_before_yesterday` pattern and the `yesterday` pattern because they don't overlap. Let me fix the test to reflect the actual behavior (or fix the pattern):
+
+---
+type: patterns
+timestamp: '2025-12-27T17:17:25.063776+00:00'
+summary: '...including "yesterday", so it doesn''t overlap with the "yesterday" match.
+  I need to fix the pat...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...including "yesterday", so it doesn't overlap with the "yesterday" match. I need to fix the pattern to require "yesterday" to be in the match:
