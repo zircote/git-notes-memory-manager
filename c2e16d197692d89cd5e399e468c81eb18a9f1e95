@@ -356,3 +356,21 @@ tags:
 ---
 
 ...yesterday" is being matched by both the `day_before_yesterday` pattern and the `yesterday` pattern because they don't overlap. Let me fix the test to reflect the actual behavior (or fix the pattern):
+
+---
+type: patterns
+timestamp: '2025-12-27T17:42:43.082630+00:00'
+summary: '...if not query:'
+tags:
+- auto-captured
+- post-tool-use
+- file:recall_extension.py
+---
+
+...if not query:
+            return False
+
+        # Check for temporal patterns
+        for pattern in _TEMPORAL_PATTERNS:
+            if pattern.search(query):
+                logger.debug(...
