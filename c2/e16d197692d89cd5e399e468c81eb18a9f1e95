@@ -7137,3 +7137,17 @@ tags:
 
 ...| Handle edge cases (month boundaries, year boundaries) | done | 2025-12-27 | 2025-12-27 | Completed |
 | 4.3.5 | Add tracing for resolution operations | done | 2025-12-27 | 2025-12-27 | @traced...
+
+---
+type: progress
+timestamp: '2025-12-27T18:12:16.784516+00:00'
+summary: '...|'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...|
+| 4.3.6 | Add metrics for temporal patterns detected | done | 2025-12-27 | 2025-12-27 | Completed |
+| 4.3.7 | Unit tests for all temporal patterns | done | 2025-12-27 | 2025-12-27 | 83 tests...
