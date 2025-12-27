@@ -7741,3 +7741,17 @@ tags:
 
 ...Implement `_remove_existing_block(context)` regex-based removal | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.1.7 | Implement `_select_summaries(session_context)` with scoring | done | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.566266+00:00'
+summary: '...Implement `_select_summaries(session_context)` with scoring | done |
+  2025-12-27 | 2025-12-27 | Co'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Implement `_select_summaries(session_context)` with scoring | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.1.8 | Implement `_compute_session_relevance(summary, context)` scoring | done | 2025-12-27...
