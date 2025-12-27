@@ -93,3 +93,22 @@ tags:
             # Check if pattern captures a number
             captured_number: int | None = None
             if match.groups():...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:02:45.500541+00:00'
+summary: '...temporal_reference,'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_temporal.py
+---
+
+...temporal_reference,
+)
+
+# =============================================================================
+# Pattern Definition Tests
+# =============================================================================
+
+class...
