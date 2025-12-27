@@ -66,3 +66,19 @@ tags:
 
 10. **patterns**: Reusable approaches, techniques, or solutions
     - Look for: "whenever we X, we should Y", repeated...
+
+---
+type: patterns
+timestamp: '2025-12-27T15:21:33.045700+00:00'
+summary: '...| None) -> tuple[str, bool]:'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...| None) -> tuple[str, bool]:
+        if not context:
+            return "", False
+        pattern = rf"<memory_consolidated_summaries.*?>.*?</memory_consolidated_summaries>"
+        cleaned,...
