@@ -145,3 +145,19 @@ tags:
     def test_all_patterns_have_tuple(self) -> None:
         """Each pattern should have (regex, offset, description) tuple."""
         for name, value in TEMPORAL_PATTERNS.items...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:02:45.582874+00:00'
+summary: '...essential = ["today", "yesterday", "tomorrow", "last_week", "last_month"]'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_temporal.py
+---
+
+...essential = ["today", "yesterday", "tomorrow", "last_week", "last_month"]
+        for pattern in essential:
+            assert pattern in TEMPORAL_PATTERNS, f"Missing {pattern}"
+
+    def...
