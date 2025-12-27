@@ -3752,3 +3752,24 @@ tags:
 ## Solution Overview
 
 Extend the existing subconsciousness module with a memory consolidation pipeline...
+
+---
+type: progress
+timestamp: '2025-12-27T15:21:32.939610+00:00'
+summary: '..."summarize"'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+..."summarize"
+    SUPERSESSION = "supersession"
+    TIER = "tier"
+    PERSIST = "persist"
+    COMPLETED = "completed"
+
+@dataclass(frozen=True)
+class TierTransition:
+    memory_id: str
+    from_tier:...
