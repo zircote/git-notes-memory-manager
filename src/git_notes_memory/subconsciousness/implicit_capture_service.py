@@ -21,9 +21,12 @@ Configuration Thresholds:
 
 from __future__ import annotations
 
-import logging
+import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
+
+# Observability imports
+from git_notes_memory.observability import get_logger, get_metrics, trace_operation
 
 from .adversarial_detector import AdversarialDetector
 from .capture_store import CaptureStore, create_capture
@@ -45,7 +48,8 @@ __all__ = [
     "reset_implicit_capture_service",
 ]
 
-logger = logging.getLogger(__name__)
+# Structured logger with trace context injection
+logger = get_logger(__name__)
 
 
 # =============================================================================
@@ -160,111 +164,178 @@ class ImplicitCaptureService:
             CaptureServiceResult with captured, auto-approved, blocked, and
             discarded memories.
         """
-        errors: list[str] = []
+        metrics = get_metrics()
+        start_time = time.time()
 
-        # Step 1: Extract memories from transcript
-        extraction = await self.capture_agent.analyze_transcript(
-            transcript,
-            existing_summaries=existing_summaries,
-        )
+        with trace_operation(
+            "service.capture_from_transcript",
+            transcript_length=len(transcript),
+            session_id=session_id or "none",
+            skip_screening=skip_screening,
+            auto_approve=auto_approve,
+        ) as span:
+            errors: list[str] = []
 
-        if not extraction.success:
-            errors.extend(extraction.errors)
-
-        if not extraction.memories:
-            return CaptureServiceResult(
-                captured=(),
-                blocked=(),
-                total_extracted=0,
-                chunks_processed=extraction.chunks_processed,
-                errors=tuple(errors),
+            # Step 1: Extract memories from transcript
+            extraction = await self.capture_agent.analyze_transcript(
+                transcript,
+                existing_summaries=existing_summaries,
             )
+            span.set_tag("extraction_memories", len(extraction.memories))
+            span.set_tag("chunks_processed", extraction.chunks_processed)
 
-        # Step 2: Process each memory with screening and confidence handling
-        captured: list[ImplicitCapture] = []
-        auto_approved: list[ImplicitCapture] = []
-        blocked: list[ImplicitCapture] = []
-        discarded: list[ImplicitCapture] = []
+            if not extraction.success:
+                errors.extend(extraction.errors)
 
-        for memory in extraction.memories:
-            try:
-                # Check confidence threshold before processing
-                confidence = memory.confidence.overall
-                if confidence < self.review_threshold:
-                    # Discard low-confidence memories
-                    capture = create_capture(
-                        memory=memory,
-                        threat_detection=ThreatDetection.safe(),
-                        session_id=session_id,
-                        expiration_days=self.expiration_days,
-                    )
-                    discarded.append(capture)
-                    logger.debug(
-                        "Discarded low-confidence memory (%.2f < %.2f): %s",
-                        confidence,
-                        self.review_threshold,
-                        memory.summary[:50],
-                    )
-                    continue
-
-                # Screen for adversarial content
-                capture = await self._process_memory(
-                    memory,
-                    session_id=session_id,
-                    skip_screening=skip_screening,
+            if not extraction.memories:
+                logger.info(
+                    "No memories extracted from transcript",
+                    transcript_length=len(transcript),
+                    chunks_processed=extraction.chunks_processed,
+                )
+                return CaptureServiceResult(
+                    captured=(),
+                    blocked=(),
+                    total_extracted=0,
+                    chunks_processed=extraction.chunks_processed,
+                    errors=tuple(errors),
                 )
 
-                if capture.threat_detection.should_block:
-                    blocked.append(capture)
-                    logger.info(
-                        "Blocked memory (threat=%s): %s",
-                        capture.threat_detection.level.value,
-                        memory.summary[:50],
-                    )
-                elif auto_approve and confidence >= self.auto_capture_threshold:
-                    # Auto-approve high-confidence captures
-                    approved_capture = ImplicitCapture(
-                        id=capture.id,
-                        memory=capture.memory,
-                        status=ReviewStatus.APPROVED,
-                        threat_detection=capture.threat_detection,
-                        created_at=capture.created_at,
-                        expires_at=capture.expires_at,
-                        session_id=capture.session_id,
-                        reviewed_at=capture.created_at,  # Auto-reviewed now
-                    )
-                    self.store.save(approved_capture)
-                    auto_approved.append(approved_capture)
-                    captured.append(approved_capture)
-                    logger.info(
-                        "Auto-approved memory (confidence=%.2f): %s",
-                        confidence,
-                        memory.summary[:50],
-                    )
-                else:
-                    # Queue for review (pending status)
-                    self.store.save(capture)
-                    captured.append(capture)
-                    logger.debug(
-                        "Queued memory for review (confidence=%.2f): %s",
-                        confidence,
-                        memory.summary[:50],
+            # Step 2: Process each memory with screening and confidence handling
+            captured: list[ImplicitCapture] = []
+            auto_approved: list[ImplicitCapture] = []
+            blocked: list[ImplicitCapture] = []
+            discarded: list[ImplicitCapture] = []
+
+            for memory in extraction.memories:
+                try:
+                    # Check confidence threshold before processing
+                    confidence = memory.confidence.overall
+                    if confidence < self.review_threshold:
+                        # Discard low-confidence memories
+                        capture = create_capture(
+                            memory=memory,
+                            threat_detection=ThreatDetection.safe(),
+                            session_id=session_id,
+                            expiration_days=self.expiration_days,
+                        )
+                        discarded.append(capture)
+                        logger.debug(
+                            "Discarded low-confidence memory",
+                            confidence=round(confidence, 3),
+                            threshold=self.review_threshold,
+                            summary=memory.summary[:50],
+                        )
+                        metrics.increment(
+                            "service_memory_discarded",
+                            labels={"reason": "low_confidence"},
+                        )
+                        continue
+
+                    # Screen for adversarial content
+                    capture = await self._process_memory(
+                        memory,
+                        session_id=session_id,
+                        skip_screening=skip_screening,
                     )
 
-            except Exception as e:
-                error_msg = f"Error processing memory '{memory.summary[:30]}': {e}"
-                logger.warning(error_msg)
-                errors.append(error_msg)
+                    if capture.threat_detection.should_block:
+                        blocked.append(capture)
+                        logger.info(
+                            "Blocked memory",
+                            threat_level=capture.threat_detection.level.value,
+                            summary=memory.summary[:50],
+                        )
+                        metrics.increment(
+                            "service_memory_blocked",
+                            labels={
+                                "threat_level": capture.threat_detection.level.value
+                            },
+                        )
+                    elif auto_approve and confidence >= self.auto_capture_threshold:
+                        # Auto-approve high-confidence captures
+                        approved_capture = ImplicitCapture(
+                            id=capture.id,
+                            memory=capture.memory,
+                            status=ReviewStatus.APPROVED,
+                            threat_detection=capture.threat_detection,
+                            created_at=capture.created_at,
+                            expires_at=capture.expires_at,
+                            session_id=capture.session_id,
+                            reviewed_at=capture.created_at,  # Auto-reviewed now
+                        )
+                        self.store.save(approved_capture)
+                        auto_approved.append(approved_capture)
+                        captured.append(approved_capture)
+                        logger.info(
+                            "Auto-approved memory",
+                            confidence=round(confidence, 3),
+                            namespace=memory.namespace,
+                            summary=memory.summary[:50],
+                        )
+                        metrics.increment(
+                            "service_memory_approved",
+                            labels={"method": "auto", "namespace": memory.namespace},
+                        )
+                    else:
+                        # Queue for review (pending status)
+                        self.store.save(capture)
+                        captured.append(capture)
+                        logger.debug(
+                            "Queued memory for review",
+                            confidence=round(confidence, 3),
+                            namespace=memory.namespace,
+                            summary=memory.summary[:50],
+                        )
+                        metrics.increment(
+                            "service_memory_queued",
+                            labels={"namespace": memory.namespace},
+                        )
 
-        return CaptureServiceResult(
-            captured=tuple(captured),
-            blocked=tuple(blocked),
-            total_extracted=len(extraction.memories),
-            chunks_processed=extraction.chunks_processed,
-            auto_approved=tuple(auto_approved),
-            discarded=tuple(discarded),
-            errors=tuple(errors),
-        )
+                except Exception as e:
+                    error_msg = f"Error processing memory '{memory.summary[:30]}': {e}"
+                    logger.warning(
+                        "Memory processing failed",
+                        summary=memory.summary[:30],
+                        error=str(e),
+                    )
+                    errors.append(error_msg)
+                    metrics.increment(
+                        "service_memory_errors",
+                        labels={"error_type": type(e).__name__},
+                    )
+
+            # Record final metrics
+            duration_ms = (time.time() - start_time) * 1000
+            metrics.observe("service_capture_duration_ms", duration_ms)
+            metrics.increment("service_capture_total", len(captured))
+
+            span.set_tag("captured_count", len(captured))
+            span.set_tag("auto_approved_count", len(auto_approved))
+            span.set_tag("blocked_count", len(blocked))
+            span.set_tag("discarded_count", len(discarded))
+            span.set_tag("errors_count", len(errors))
+            span.set_tag("duration_ms", duration_ms)
+
+            logger.info(
+                "Transcript capture completed",
+                captured=len(captured),
+                auto_approved=len(auto_approved),
+                blocked=len(blocked),
+                discarded=len(discarded),
+                total_extracted=len(extraction.memories),
+                duration_ms=round(duration_ms, 2),
+            )
+
+            return CaptureServiceResult(
+                captured=tuple(captured),
+                blocked=tuple(blocked),
+                total_extracted=len(extraction.memories),
+                chunks_processed=extraction.chunks_processed,
+                auto_approved=tuple(auto_approved),
+                discarded=tuple(discarded),
+                errors=tuple(errors),
+            )
 
     async def _process_memory(
         self,

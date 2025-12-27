@@ -15,9 +15,12 @@ The agent is designed for async operation to allow parallel chunk processing.
 from __future__ import annotations
 
 import json
-import logging
+import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
+
+# Observability imports
+from git_notes_memory.observability import get_logger, get_metrics, trace_operation
 
 from .models import CaptureConfidence, ImplicitMemory
 from .prompts import get_extraction_prompt
@@ -33,7 +36,8 @@ __all__ = [
     "get_implicit_capture_agent",
 ]
 
-logger = logging.getLogger(__name__)
+# Structured logger with trace context injection
+logger = get_logger(__name__)
 
 
 # =============================================================================
@@ -117,46 +121,99 @@ class ImplicitCaptureAgent:
         Returns:
             ExtractionResult with extracted memories.
         """
-        # Reset seen hashes for this extraction
-        self._seen_hashes = set()
+        metrics = get_metrics()
+        start_time = time.time()
 
-        # Chunk the transcript
-        chunks = chunk_transcript(
-            transcript,
-            max_tokens=self.max_tokens_per_chunk,
-            overlap_turns=self.overlap_turns,
-        )
+        with trace_operation(
+            "agent.analyze_transcript",
+            transcript_length=len(transcript),
+            existing_summaries_count=len(existing_summaries or []),
+        ) as span:
+            # Reset seen hashes for this extraction
+            self._seen_hashes = set()
 
-        if not chunks:
-            return ExtractionResult(
-                memories=(),
-                chunks_processed=0,
+            # Chunk the transcript
+            chunks = chunk_transcript(
+                transcript,
+                max_tokens=self.max_tokens_per_chunk,
+                overlap_turns=self.overlap_turns,
+            )
+            span.set_tag("chunks_count", len(chunks))
+
+            if not chunks:
+                logger.debug(
+                    "No chunks to process",
+                    transcript_length=len(transcript),
+                )
+                return ExtractionResult(
+                    memories=(),
+                    chunks_processed=0,
+                )
+
+            # Process each chunk
+            all_memories: list[ImplicitMemory] = []
+            errors: list[str] = []
+
+            for chunk in chunks:
+                try:
+                    memories = await self._process_chunk(
+                        chunk,
+                        existing_summaries=existing_summaries,
+                    )
+                    all_memories.extend(memories)
+                except Exception as e:
+                    error_msg = f"Error processing chunk {chunk.chunk_index}: {e}"
+                    logger.warning(
+                        "Chunk processing failed",
+                        chunk_index=chunk.chunk_index,
+                        error=str(e),
+                    )
+                    errors.append(error_msg)
+                    metrics.increment(
+                        "agent_chunk_errors_total",
+                        labels={"error_type": type(e).__name__},
+                    )
+
+            # Sort by confidence (highest first)
+            all_memories.sort(key=lambda m: m.confidence.overall, reverse=True)
+
+            # Record metrics
+            duration_ms = (time.time() - start_time) * 1000
+            metrics.observe("agent_analyze_duration_ms", duration_ms)
+            metrics.increment(
+                "agent_memories_extracted_total",
+                len(all_memories),
+            )
+            metrics.increment(
+                "agent_chunks_processed_total",
+                len(chunks),
             )
 
-        # Process each chunk
-        all_memories: list[ImplicitMemory] = []
-        errors: list[str] = []
+            # Set span tags
+            span.set_tag("memories_extracted", len(all_memories))
+            span.set_tag("errors_count", len(errors))
+            span.set_tag("duration_ms", duration_ms)
 
-        for chunk in chunks:
-            try:
-                memories = await self._process_chunk(
-                    chunk,
-                    existing_summaries=existing_summaries,
+            if all_memories:
+                avg_confidence = sum(m.confidence.overall for m in all_memories) / len(
+                    all_memories
                 )
-                all_memories.extend(memories)
-            except Exception as e:
-                error_msg = f"Error processing chunk {chunk.chunk_index}: {e}"
-                logger.warning(error_msg)
-                errors.append(error_msg)
+                span.set_tag("avg_confidence", round(avg_confidence, 3))
+                metrics.observe("agent_confidence_avg", avg_confidence)
 
-        # Sort by confidence (highest first)
-        all_memories.sort(key=lambda m: m.confidence.overall, reverse=True)
+            logger.info(
+                "Transcript analysis completed",
+                chunks_processed=len(chunks),
+                memories_extracted=len(all_memories),
+                errors_count=len(errors),
+                duration_ms=round(duration_ms, 2),
+            )
 
-        return ExtractionResult(
-            memories=tuple(all_memories),
-            chunks_processed=len(chunks),
-            errors=tuple(errors),
-        )
+            return ExtractionResult(
+                memories=tuple(all_memories),
+                chunks_processed=len(chunks),
+                errors=tuple(errors),
+            )
 
     async def _process_chunk(
         self,
@@ -173,28 +230,56 @@ class ImplicitCaptureAgent:
         Returns:
             List of extracted memories from this chunk.
         """
-        # Build the prompt
-        prompt = get_extraction_prompt(
-            chunk.to_text(),
-            project_context=self.project_context,
-            existing_summaries=existing_summaries,
-        )
+        metrics = get_metrics()
 
-        # Call LLM with JSON mode enabled
-        response = await self.llm_client.complete(
-            prompt.user,
-            system=prompt.system,
-            json_mode=True,
-        )
+        with trace_operation(
+            "agent.process_chunk",
+            chunk_index=chunk.chunk_index,
+            chunk_size=len(chunk.to_text()),
+            turn_count=len(chunk.turns),
+        ) as span:
+            # Build the prompt
+            prompt = get_extraction_prompt(
+                chunk.to_text(),
+                project_context=self.project_context,
+                existing_summaries=existing_summaries,
+            )
 
-        # Parse response
-        memories = self._parse_response(response.content, chunk)
+            # Call LLM with JSON mode enabled
+            response = await self.llm_client.complete(
+                prompt.user,
+                system=prompt.system,
+                json_mode=True,
+            )
 
-        # CRIT-004: Screen memories for adversarial content
-        if self.adversarial_detector and memories:
-            memories = await self._screen_memories(memories)
+            # Parse response
+            memories = self._parse_response(response.content, chunk)
+            span.set_tag("memories_parsed", len(memories))
+            metrics.increment(
+                "agent_chunk_memories_parsed",
+                len(memories),
+                labels={"chunk_index": str(chunk.chunk_index)},
+            )
 
-        return memories
+            # CRIT-004: Screen memories for adversarial content
+            if self.adversarial_detector and memories:
+                pre_screen_count = len(memories)
+                memories = await self._screen_memories(memories)
+                blocked_count = pre_screen_count - len(memories)
+                span.set_tag("adversarial_blocked", blocked_count)
+                if blocked_count > 0:
+                    metrics.increment(
+                        "agent_adversarial_blocked_total",
+                        blocked_count,
+                    )
+
+            logger.debug(
+                "Chunk processed",
+                chunk_index=chunk.chunk_index,
+                memories_extracted=len(memories),
+            )
+
+            return memories
 
     async def _screen_memories(
         self,
@@ -214,49 +299,88 @@ class ImplicitCaptureAgent:
         if not self.adversarial_detector:
             return memories
 
-        screened: list[ImplicitMemory] = []
-        for memory in memories:
-            try:
-                # Analyze both summary and content for threats
-                combined = f"{memory.summary}\n\n{memory.content}"
-                result = await self.adversarial_detector.analyze(combined)
+        metrics = get_metrics()
 
-                if result.should_block and self.block_on_adversarial:
-                    logger.warning(
-                        "Blocked adversarial memory (level=%s, patterns=%s): %s",
-                        result.detection.level.value,
-                        result.detection.patterns_found,
-                        memory.summary[:50],
-                    )
-                    continue
+        with trace_operation(
+            "agent.screen_memories",
+            memory_count=len(memories),
+            block_on_adversarial=self.block_on_adversarial,
+        ) as span:
+            screened: list[ImplicitMemory] = []
+            blocked_count = 0
+            detected_count = 0
 
-                # Log warnings for non-blocking detections
-                if result.detection.level.value not in ("none", "low"):
-                    logger.info(
-                        "Adversarial screening detected (level=%s): %s",
-                        result.detection.level.value,
-                        memory.summary[:50],
-                    )
+            for memory in memories:
+                try:
+                    # Analyze both summary and content for threats
+                    combined = f"{memory.summary}\n\n{memory.content}"
+                    result = await self.adversarial_detector.analyze(combined)
 
-                screened.append(memory)
+                    if result.should_block and self.block_on_adversarial:
+                        blocked_count += 1
+                        logger.warning(
+                            "Blocked adversarial memory",
+                            level=result.detection.level.value,
+                            patterns=result.detection.patterns_found,
+                            summary=memory.summary[:50],
+                        )
+                        metrics.increment(
+                            "agent_adversarial_detection",
+                            labels={
+                                "action": "blocked",
+                                "level": result.detection.level.value,
+                            },
+                        )
+                        continue
 
-            except Exception as e:
-                # On screening error, fail closed (block) or open based on config
-                if self.block_on_adversarial:
-                    logger.warning(
-                        "Screening error, blocking memory as precaution: %s - %s",
-                        memory.summary[:50],
-                        e,
-                    )
-                else:
-                    logger.warning(
-                        "Screening error, allowing memory: %s - %s",
-                        memory.summary[:50],
-                        e,
-                    )
+                    # Log warnings for non-blocking detections
+                    if result.detection.level.value not in ("none", "low"):
+                        detected_count += 1
+                        logger.info(
+                            "Adversarial screening detected",
+                            level=result.detection.level.value,
+                            summary=memory.summary[:50],
+                        )
+                        metrics.increment(
+                            "agent_adversarial_detection",
+                            labels={
+                                "action": "allowed",
+                                "level": result.detection.level.value,
+                            },
+                        )
+
                     screened.append(memory)
 
-        return screened
+                except Exception as e:
+                    # On screening error, fail closed (block) or open based on config
+                    if self.block_on_adversarial:
+                        blocked_count += 1
+                        logger.warning(
+                            "Screening error, blocking memory as precaution",
+                            summary=memory.summary[:50],
+                            error=str(e),
+                        )
+                        metrics.increment(
+                            "agent_adversarial_errors",
+                            labels={"action": "blocked"},
+                        )
+                    else:
+                        logger.warning(
+                            "Screening error, allowing memory",
+                            summary=memory.summary[:50],
+                            error=str(e),
+                        )
+                        metrics.increment(
+                            "agent_adversarial_errors",
+                            labels={"action": "allowed"},
+                        )
+                        screened.append(memory)
+
+            span.set_tag("blocked_count", blocked_count)
+            span.set_tag("detected_count", detected_count)
+            span.set_tag("passed_count", len(screened))
+
+            return screened
 
     def _parse_response(
         self,
@@ -309,10 +433,13 @@ class ImplicitCaptureAgent:
             ImplicitMemory or None if invalid/duplicate.
         """
         # Validate required fields
-        namespace = item.get("namespace")
+        # LLM may return "type" or "namespace" for the memory type
+        namespace = item.get("namespace") or item.get("type")
         summary_raw = item.get("summary")
-        content_raw = item.get("content")
-        confidence_data = item.get("confidence", {})
+        # LLM may return "content" or "details" for the body
+        content_raw = item.get("content") or item.get("details")
+        # LLM may return "confidence" or "confidence_scores"
+        confidence_data = item.get("confidence") or item.get("confidence_scores", {})
 
         if not all([namespace, summary_raw, content_raw]):
             return None

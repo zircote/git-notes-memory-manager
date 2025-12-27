@@ -38,7 +38,18 @@ class TestExtractionSchema:
             "namespace"
         ]
 
-        expected = ["decisions", "learnings", "patterns", "blockers", "progress"]
+        expected = [
+            "inception",
+            "elicitation",
+            "research",
+            "decisions",
+            "progress",
+            "blockers",
+            "reviews",
+            "learnings",
+            "retrospective",
+            "patterns",
+        ]
         assert namespace["enum"] == expected
 
     def test_summary_max_length(self) -> None:

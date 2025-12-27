@@ -17,9 +17,13 @@ from __future__ import annotations
 
 import asyncio
 import random
+import re
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
+
+# Observability imports
+from git_notes_memory.observability import get_logger, get_metrics, trace_operation
 
 from ..config import LLMProvider as LLMProviderEnum
 from ..config import get_llm_api_key, get_llm_model
@@ -39,12 +43,13 @@ if TYPE_CHECKING:
 
 __all__ = ["OpenAIProvider"]
 
+# Structured logger with trace context injection
+logger = get_logger(__name__)
+
 
 # =============================================================================
 # Security Helpers
 # =============================================================================
-
-import re
 
 # SEC-H-002: Patterns that may indicate sensitive data in error messages
 _SENSITIVE_PATTERNS = [
@@ -152,66 +157,137 @@ class OpenAIProvider:
             LLMConnectionError: If connection fails.
             LLMProviderError: For other provider errors.
         """
-        # Lazy import to avoid loading SDK if not used
-        try:
-            import openai
-        except ImportError as e:
-            msg = "openai package not installed. Install with: pip install openai"
-            raise LLMProviderError(msg, provider=self.name, original_error=e) from e
+        metrics = get_metrics()
 
-        if not self.api_key:
-            msg = (
-                "OpenAI API key not configured. "
-                "Set OPENAI_API_KEY or MEMORY_LLM_API_KEY environment variable."
-            )
-            raise LLMAuthenticationError(msg, provider=self.name)
-
-        # Build messages
-        messages = self._build_messages(request)
-
-        # Determine model
+        # Determine model early for tracing
         model = request.model or self.model or "gpt-4o"
 
-        # Determine timeout
-        timeout_ms = request.timeout_ms or self.timeout_ms
-
-        # Build request kwargs
-        kwargs: dict[str, Any] = {
-            "model": model,
-            "messages": messages,
-            "max_tokens": request.max_tokens,
-            "temperature": request.temperature,
-        }
-
-        # Add JSON mode if requested
-        if request.json_mode:
-            kwargs["response_format"] = {"type": "json_object"}
-
-        # Execute with retry
-        start_time = time.monotonic()
-        response = await self._execute_with_retry(
-            openai.AsyncOpenAI(api_key=self.api_key),
-            kwargs,
-            timeout_ms,
-        )
-        latency_ms = int((time.monotonic() - start_time) * 1000)
-
-        # Extract content
-        content = response.choices[0].message.content or ""
-
-        # Calculate usage
-        usage = self._calculate_usage(response, model)
-
-        return LLMResponse(
-            content=content,
+        with trace_operation(
+            "provider.openai.complete",
             model=model,
-            usage=usage,
-            latency_ms=latency_ms,
-            request_id=request.request_id,
-            raw_response=response.model_dump()
-            if hasattr(response, "model_dump")
-            else None,
-        )
+            json_mode=request.json_mode,
+        ) as span:
+            # Lazy import to avoid loading SDK if not used
+            try:
+                import openai
+            except ImportError as e:
+                msg = "openai package not installed. Install with: pip install openai"
+                metrics.increment(
+                    "provider_errors_total",
+                    labels={"provider": "openai", "error_type": "import_error"},
+                )
+                raise LLMProviderError(msg, provider=self.name, original_error=e) from e
+
+            if not self.api_key:
+                msg = (
+                    "OpenAI API key not configured. "
+                    "Set OPENAI_API_KEY or MEMORY_LLM_API_KEY environment variable."
+                )
+                metrics.increment(
+                    "provider_errors_total",
+                    labels={"provider": "openai", "error_type": "auth_error"},
+                )
+                raise LLMAuthenticationError(msg, provider=self.name)
+
+            # Build messages
+            messages = self._build_messages(request)
+            span.set_tag("message_count", len(messages))
+
+            # Determine timeout
+            timeout_ms = request.timeout_ms or self.timeout_ms
+            span.set_tag("timeout_ms", timeout_ms)
+
+            # Build request kwargs
+            kwargs: dict[str, Any] = {
+                "model": model,
+                "messages": messages,
+            }
+
+            # OpenAI o1/o3 models and some newer models have different parameter requirements:
+            # - Use max_completion_tokens instead of max_tokens
+            # - Don't support temperature parameter (only default=1 allowed)
+            is_reasoning_model = model.startswith(("o1", "o3", "gpt-5"))
+            span.set_tag("is_reasoning_model", is_reasoning_model)
+            if is_reasoning_model:
+                kwargs["max_completion_tokens"] = request.max_tokens
+                # These models don't support temperature, skip it
+            else:
+                kwargs["max_tokens"] = request.max_tokens
+                kwargs["temperature"] = request.temperature
+
+            # Add JSON mode if requested
+            if request.json_mode:
+                kwargs["response_format"] = {"type": "json_object"}
+
+            # Execute with retry
+            start_time = time.monotonic()
+            logger.debug(
+                "Sending OpenAI request",
+                model=model,
+                message_count=len(messages),
+                json_mode=request.json_mode,
+            )
+
+            response = await self._execute_with_retry(
+                openai.AsyncOpenAI(api_key=self.api_key),
+                kwargs,
+                timeout_ms,
+            )
+            latency_ms = int((time.monotonic() - start_time) * 1000)
+
+            # Extract content
+            content = response.choices[0].message.content or ""
+
+            # Calculate usage
+            usage = self._calculate_usage(response, model)
+
+            # Record metrics
+            metrics.observe(
+                "provider_request_duration_ms",
+                latency_ms,
+                labels={"provider": "openai", "model": model},
+            )
+            metrics.increment(
+                "provider_tokens_total",
+                usage.prompt_tokens,
+                labels={"provider": "openai", "type": "prompt"},
+            )
+            metrics.increment(
+                "provider_tokens_total",
+                usage.completion_tokens,
+                labels={"provider": "openai", "type": "completion"},
+            )
+            metrics.increment(
+                "provider_requests_total",
+                labels={"provider": "openai", "model": model, "status": "success"},
+            )
+
+            # Set span tags
+            span.set_tag("latency_ms", latency_ms)
+            span.set_tag("prompt_tokens", usage.prompt_tokens)
+            span.set_tag("completion_tokens", usage.completion_tokens)
+            span.set_tag("cost_usd", usage.estimated_cost_usd)
+            span.set_tag("content_length", len(content))
+
+            logger.debug(
+                "OpenAI request completed",
+                model=model,
+                latency_ms=latency_ms,
+                prompt_tokens=usage.prompt_tokens,
+                completion_tokens=usage.completion_tokens,
+                cost_usd=usage.estimated_cost_usd,
+            )
+
+            return LLMResponse(
+                content=content,
+                model=model,
+                usage=usage,
+                latency_ms=latency_ms,
+                request_id=request.request_id,
+                raw_response=response.model_dump()
+                if hasattr(response, "model_dump")
+                else None,
+            )
 
     async def complete_batch(
         self,
@@ -314,6 +390,7 @@ class OpenAIProvider:
         """
         import openai
 
+        metrics = get_metrics()
         last_error: Exception | None = None
         backoff_ms = DEFAULT_INITIAL_BACKOFF_MS
 
@@ -323,11 +400,30 @@ class OpenAIProvider:
                     client.chat.completions.create(**kwargs),
                     timeout=timeout_ms / 1000,
                 )
+                if attempt > 0:
+                    logger.info(
+                        "OpenAI request succeeded after retry",
+                        attempt=attempt + 1,
+                        max_retries=self.max_retries,
+                    )
+                    metrics.increment(
+                        "provider_retries_succeeded",
+                        labels={"provider": "openai", "attempt": str(attempt + 1)},
+                    )
                 return response
 
             except TimeoutError as e:
                 last_error = e
                 msg = f"Request timed out after {timeout_ms}ms"
+                logger.warning(
+                    "OpenAI request timed out",
+                    timeout_ms=timeout_ms,
+                    attempt=attempt + 1,
+                )
+                metrics.increment(
+                    "provider_errors_total",
+                    labels={"provider": "openai", "error_type": "timeout"},
+                )
                 raise LLMTimeoutError(
                     msg,
                     provider=self.name,
@@ -337,17 +433,32 @@ class OpenAIProvider:
             except openai.RateLimitError as e:
                 last_error = e
                 retry_after = self._parse_retry_after(e)
+                metrics.increment(
+                    "provider_rate_limits_total",
+                    labels={"provider": "openai"},
+                )
                 if attempt < self.max_retries - 1:
                     # ARCH-H-006: Add jitter to prevent "thundering herd" on rate limits
                     # Note: random.random() is intentional here - not for crypto
                     jitter_factor = 0.5 + random.random()  # noqa: S311
                     jittered_retry = int(retry_after * jitter_factor)
+                    logger.warning(
+                        "OpenAI rate limited, retrying",
+                        retry_after_ms=jittered_retry,
+                        attempt=attempt + 1,
+                        max_retries=self.max_retries,
+                    )
                     await asyncio.sleep(jittered_retry / 1000)
                     backoff_ms = min(
                         int(backoff_ms * BACKOFF_MULTIPLIER),
                         DEFAULT_MAX_BACKOFF_MS,
                     )
                     continue
+                logger.error(
+                    "OpenAI rate limit exhausted all retries",
+                    retry_after_ms=retry_after,
+                    attempts=self.max_retries,
+                )
                 raise LLMRateLimitError(
                     str(e),
                     provider=self.name,
@@ -357,15 +468,30 @@ class OpenAIProvider:
             except openai.AuthenticationError as e:
                 # SEC-H-002: Sanitize error to prevent API key exposure
                 msg = f"Authentication failed: {_sanitize_error_message(e)}"
+                logger.error("OpenAI authentication failed")
+                metrics.increment(
+                    "provider_errors_total",
+                    labels={"provider": "openai", "error_type": "auth_error"},
+                )
                 raise LLMAuthenticationError(msg, provider=self.name) from e
 
             except openai.APIConnectionError as e:
                 last_error = e
+                metrics.increment(
+                    "provider_connection_errors_total",
+                    labels={"provider": "openai"},
+                )
                 if attempt < self.max_retries - 1:
                     # ARCH-H-006: Add jitter to prevent "thundering herd" on connection errors
                     # Note: random.random() is intentional here - not for crypto
                     jitter_factor = 0.5 + random.random()  # noqa: S311
                     jittered_backoff = int(backoff_ms * jitter_factor)
+                    logger.warning(
+                        "OpenAI connection error, retrying",
+                        backoff_ms=jittered_backoff,
+                        attempt=attempt + 1,
+                        max_retries=self.max_retries,
+                    )
                     await asyncio.sleep(jittered_backoff / 1000)
                     backoff_ms = min(
                         int(backoff_ms * BACKOFF_MULTIPLIER),
@@ -374,12 +500,29 @@ class OpenAIProvider:
                     continue
                 # SEC-H-002: Sanitize error to prevent API key exposure
                 msg = f"Connection failed: {_sanitize_error_message(e)}"
+                logger.error(
+                    "OpenAI connection failed after all retries",
+                    attempts=self.max_retries,
+                )
                 raise LLMConnectionError(msg, provider=self.name) from e
 
             except openai.APIStatusError as e:
                 last_error = e
                 # SEC-H-002: Sanitize error to prevent API key exposure
                 msg = f"API error: {_sanitize_error_message(e)}"
+                logger.error(
+                    "OpenAI API error",
+                    status_code=e.status_code,
+                    retryable=e.status_code >= 500,
+                )
+                metrics.increment(
+                    "provider_errors_total",
+                    labels={
+                        "provider": "openai",
+                        "error_type": "api_error",
+                        "status_code": str(e.status_code),
+                    },
+                )
                 raise LLMProviderError(
                     msg,
                     provider=self.name,
@@ -389,6 +532,10 @@ class OpenAIProvider:
 
         # Should not reach here, but handle gracefully
         msg = f"All {self.max_retries} retry attempts failed"
+        logger.error(
+            "OpenAI request failed after all retries",
+            attempts=self.max_retries,
+        )
         raise LLMProviderError(
             msg,
             provider=self.name,

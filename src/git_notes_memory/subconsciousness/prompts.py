@@ -41,11 +41,16 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
                     "namespace": {
                         "type": "string",
                         "enum": [
+                            "inception",
+                            "elicitation",
+                            "research",
                             "decisions",
-                            "learnings",
-                            "patterns",
-                            "blockers",
                             "progress",
+                            "blockers",
+                            "reviews",
+                            "learnings",
+                            "retrospective",
+                            "patterns",
                         ],
                     },
                     "summary": {
@@ -155,25 +160,45 @@ Your task is to identify content worth preserving as long-term memories.
 
 ## Memory Types to Extract
 
-1. **decisions**: Explicit choices made about architecture, technology, approach, or design
+1. **inception**: Project initialization and setup information
+   - Look for: Project kickoff, initial goals, scope definitions, stakeholder identification
+   - High value: Foundation-setting context that defines the project's purpose and boundaries
+
+2. **elicitation**: Requirements gathering and user needs
+   - Look for: Feature requests, user stories, constraints, acceptance criteria, "the requirement is"
+   - High value: Clear requirements with context on priority and dependencies
+
+3. **research**: Investigation findings and background knowledge
+   - Look for: Technology evaluation, competitive analysis, "I investigated", documentation review
+   - High value: Research with conclusions and recommendations
+
+4. **decisions**: Explicit choices made about architecture, technology, approach, or design
    - Look for: "we decided", "let's go with", "the solution is", explicit trade-off analysis
    - High value: Decisions with documented rationale and rejected alternatives
-
-2. **learnings**: New understanding gained through the conversation
-   - Look for: "I learned", "turns out", realizations, corrections to misconceptions
-   - High value: Insights that change future behavior or understanding
-
-3. **patterns**: Reusable approaches, techniques, or solutions
-   - Look for: "whenever we X, we should Y", repeated solutions, established workflows
-   - High value: Generalizable patterns with clear applicability
-
-4. **blockers**: Problems encountered that blocked progress
-   - Look for: Errors, obstacles, "we're stuck", debugging sessions with resolution
-   - High value: Blockers with documented resolution or workaround
 
 5. **progress**: Significant milestones or task completions
    - Look for: "completed", "finished", phase transitions, deliverables
    - High value: Clear milestones with measurable outcomes
+
+6. **blockers**: Problems encountered that blocked progress
+   - Look for: Errors, obstacles, "we're stuck", debugging sessions with resolution
+   - High value: Blockers with documented resolution or workaround
+
+7. **reviews**: Code review feedback and quality assessments
+   - Look for: Review comments, suggested improvements, "the reviewer noted", merge decisions
+   - High value: Actionable feedback with specific file/line references
+
+8. **learnings**: New understanding gained through the conversation
+   - Look for: "I learned", "turns out", realizations, corrections to misconceptions
+   - High value: Insights that change future behavior or understanding
+
+9. **retrospective**: Reflection on what worked and what didn't
+   - Look for: Post-mortem analysis, "in hindsight", lessons learned, process improvements
+   - High value: Actionable retrospective items with clear improvement paths
+
+10. **patterns**: Reusable approaches, techniques, or solutions
+    - Look for: "whenever we X, we should Y", repeated solutions, established workflows
+    - High value: Generalizable patterns with clear applicability
 
 ## Confidence Scoring (0.0 to 1.0)
 

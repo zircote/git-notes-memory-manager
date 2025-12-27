@@ -17,11 +17,14 @@ Example:
 from __future__ import annotations
 
 import asyncio
-import logging
+import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING
+
+# Observability imports
+from git_notes_memory.observability import get_logger, get_metrics, trace_operation
 
 # CRIT-002: Import secrets filtering service for LLM prompt sanitization
 from git_notes_memory.security.service import (
@@ -65,7 +68,8 @@ __all__ = [
     "UsageTracker",
 ]
 
-logger = logging.getLogger(__name__)
+# Structured logger with trace context injection
+logger = get_logger(__name__)
 
 
 # =============================================================================
@@ -465,31 +469,120 @@ class LLMClient:
         Raises:
             LLMError: If the request fails.
         """
-        # CRIT-002: Filter secrets from messages before sending to external LLM
-        if self._secrets_service and self._secrets_service.enabled:
-            request = self._filter_request_secrets(request)
+        metrics = get_metrics()
+        start_time = time.time()
+        provider_name = self.primary_provider.name
+        model = request.model or "default"
 
-        # Check usage limits
-        if self.usage_tracker:
-            self.usage_tracker.check_limits()
+        with trace_operation(
+            "llm.complete_request",
+            provider=provider_name,
+            model=model,
+        ) as span:
+            try:
+                # CRIT-002: Filter secrets from messages before sending to external LLM
+                if self._secrets_service and self._secrets_service.enabled:
+                    request = self._filter_request_secrets(request)
 
-        # Acquire rate limit
-        if self.rate_limiter:
-            # Estimate tokens (rough: 4 chars per token)
-            estimated_tokens = sum(len(m.content) // 4 for m in request.messages)
-            await self.rate_limiter.acquire(tokens=estimated_tokens)
+                # Check usage limits
+                if self.usage_tracker:
+                    self.usage_tracker.check_limits()
 
-        # Submit via batcher (guaranteed initialized after __post_init__)
-        if self._batcher is None:
-            msg = "Batcher not initialized"
-            raise RuntimeError(msg)
-        response = await self._batcher.submit(request)
+                # Acquire rate limit
+                if self.rate_limiter:
+                    # Estimate tokens (rough: 4 chars per token)
+                    estimated_tokens = sum(
+                        len(m.content) // 4 for m in request.messages
+                    )
+                    await self.rate_limiter.acquire(tokens=estimated_tokens)
+                    span.set_tag("estimated_tokens", estimated_tokens)
 
-        # Record usage
-        if self.usage_tracker:
-            self.usage_tracker.record(response.usage)
+                # Submit via batcher (guaranteed initialized after __post_init__)
+                if self._batcher is None:
+                    msg = "Batcher not initialized"
+                    raise RuntimeError(msg)
+                response = await self._batcher.submit(request)
 
-        return response
+                # Record usage
+                if self.usage_tracker:
+                    self.usage_tracker.record(response.usage)
+
+                # Record metrics
+                latency_ms = (time.time() - start_time) * 1000
+                metrics.observe(
+                    "llm_request_duration_ms",
+                    latency_ms,
+                    labels={"provider": provider_name, "model": response.model},
+                )
+                metrics.increment(
+                    "llm_tokens_total",
+                    response.usage.prompt_tokens,
+                    labels={"provider": provider_name, "type": "prompt"},
+                )
+                metrics.increment(
+                    "llm_tokens_total",
+                    response.usage.completion_tokens,
+                    labels={"provider": provider_name, "type": "completion"},
+                )
+                metrics.observe(
+                    "llm_cost_usd",
+                    response.usage.estimated_cost_usd,
+                    labels={"provider": provider_name, "model": response.model},
+                )
+                metrics.increment(
+                    "llm_requests_total",
+                    labels={"provider": provider_name, "status": "success"},
+                )
+
+                # Set span tags for tracing
+                span.set_tag("latency_ms", latency_ms)
+                span.set_tag("prompt_tokens", response.usage.prompt_tokens)
+                span.set_tag("completion_tokens", response.usage.completion_tokens)
+                span.set_tag("cost_usd", response.usage.estimated_cost_usd)
+                span.set_tag("response_model", response.model)
+
+                logger.debug(
+                    "LLM request completed",
+                    provider=provider_name,
+                    model=response.model,
+                    latency_ms=round(latency_ms, 2),
+                    prompt_tokens=response.usage.prompt_tokens,
+                    completion_tokens=response.usage.completion_tokens,
+                    cost_usd=response.usage.estimated_cost_usd,
+                )
+
+                return response
+
+            except Exception as e:
+                # Record error metrics
+                latency_ms = (time.time() - start_time) * 1000
+                error_type = type(e).__name__
+                metrics.increment(
+                    "llm_requests_total",
+                    labels={"provider": provider_name, "status": "error"},
+                )
+                metrics.increment(
+                    "llm_errors_total",
+                    labels={"provider": provider_name, "error_type": error_type},
+                )
+                metrics.observe(
+                    "llm_request_duration_ms",
+                    latency_ms,
+                    labels={"provider": provider_name, "model": model},
+                )
+
+                span.set_tag("error_type", error_type)
+                span.set_status("error", str(e))
+
+                logger.error(
+                    "LLM request failed",
+                    provider=provider_name,
+                    model=model,
+                    error_type=error_type,
+                    error=str(e),
+                    latency_ms=round(latency_ms, 2),
+                )
+                raise
 
     def _filter_request_secrets(self, request: LLMRequest) -> LLMRequest:
         """Filter secrets from all messages in a request.
@@ -573,79 +666,140 @@ class LLMClient:
             LLMAuthenticationError: If authentication fails.
             LLMError: If request fails and no fallback available.
         """
-        # Check primary circuit breaker
-        primary_allowed = (
-            self._primary_circuit.allow_request() if self._primary_circuit else True
-        )
+        metrics = get_metrics()
 
-        if primary_allowed:
-            try:
-                response = await self._execute_with_timeout(
-                    self.primary_provider,
-                    request,
-                )
-                # Record success
-                if self._primary_circuit:
-                    self._primary_circuit.record_success()
-                return response
-            except LLMAuthenticationError:
-                # Don't fallback on auth errors, don't count as circuit failure
-                raise
-            except LLMError as e:
-                # Record failure in circuit breaker
-                if self._primary_circuit:
-                    self._primary_circuit.record_failure()
-
-                if not e.retryable and self.fallback_provider is None:
-                    raise
-
-                # Fall through to try fallback
-                logger.warning(
-                    "Primary provider failed, trying fallback: %s",
-                    e,
-                )
-        else:
-            logger.warning("Primary provider circuit is open, trying fallback")
-
-        # Try fallback provider if available
-        if self.fallback_provider:
-            fallback_allowed = (
-                self._fallback_circuit.allow_request()
-                if self._fallback_circuit
-                else True
+        with trace_operation(
+            "llm.execute_single",
+            primary_provider=self.primary_provider.name,
+            has_fallback=self.fallback_provider is not None,
+        ) as span:
+            # Check primary circuit breaker
+            primary_allowed = (
+                self._primary_circuit.allow_request() if self._primary_circuit else True
             )
+            span.set_tag("primary_circuit_allowed", primary_allowed)
 
-            if fallback_allowed:
+            if primary_allowed:
                 try:
-                    response = await self._execute_with_timeout(
-                        self.fallback_provider,
-                        request,
-                    )
+                    with trace_operation(
+                        "llm.provider_call",
+                        provider=self.primary_provider.name,
+                        is_fallback=False,
+                    ):
+                        response = await self._execute_with_timeout(
+                            self.primary_provider,
+                            request,
+                        )
                     # Record success
-                    if self._fallback_circuit:
-                        self._fallback_circuit.record_success()
+                    if self._primary_circuit:
+                        self._primary_circuit.record_success()
+                    span.set_tag("provider_used", self.primary_provider.name)
+                    metrics.increment(
+                        "llm_circuit_breaker_success",
+                        labels={"provider": self.primary_provider.name},
+                    )
                     return response
-                except LLMError:
-                    if self._fallback_circuit:
-                        self._fallback_circuit.record_failure()
+                except LLMAuthenticationError:
+                    # Don't fallback on auth errors, don't count as circuit failure
+                    metrics.increment(
+                        "llm_auth_errors_total",
+                        labels={"provider": self.primary_provider.name},
+                    )
                     raise
+                except LLMError as e:
+                    # Record failure in circuit breaker
+                    if self._primary_circuit:
+                        self._primary_circuit.record_failure()
+                    metrics.increment(
+                        "llm_circuit_breaker_failure",
+                        labels={"provider": self.primary_provider.name},
+                    )
+
+                    if not e.retryable and self.fallback_provider is None:
+                        raise
+
+                    # Fall through to try fallback
+                    span.set_tag("primary_failed", True)
+                    span.set_tag("primary_error", str(e))
+                    logger.warning(
+                        "Primary provider failed, trying fallback",
+                        provider=self.primary_provider.name,
+                        error=str(e),
+                    )
             else:
-                # Both circuits are open
+                span.set_tag("primary_circuit_open", True)
+                metrics.increment(
+                    "llm_circuit_breaker_open",
+                    labels={"provider": self.primary_provider.name},
+                )
+                logger.warning(
+                    "Primary provider circuit is open, trying fallback",
+                    provider=self.primary_provider.name,
+                )
+
+            # Try fallback provider if available
+            if self.fallback_provider:
+                fallback_allowed = (
+                    self._fallback_circuit.allow_request()
+                    if self._fallback_circuit
+                    else True
+                )
+                span.set_tag("fallback_circuit_allowed", fallback_allowed)
+
+                if fallback_allowed:
+                    try:
+                        with trace_operation(
+                            "llm.provider_call",
+                            provider=self.fallback_provider.name,
+                            is_fallback=True,
+                        ):
+                            response = await self._execute_with_timeout(
+                                self.fallback_provider,
+                                request,
+                            )
+                        # Record success
+                        if self._fallback_circuit:
+                            self._fallback_circuit.record_success()
+                        span.set_tag("provider_used", self.fallback_provider.name)
+                        span.set_tag("used_fallback", True)
+                        metrics.increment(
+                            "llm_fallback_used",
+                            labels={"fallback_provider": self.fallback_provider.name},
+                        )
+                        logger.info(
+                            "Fallback provider succeeded",
+                            provider=self.fallback_provider.name,
+                        )
+                        return response
+                    except LLMError:
+                        if self._fallback_circuit:
+                            self._fallback_circuit.record_failure()
+                        metrics.increment(
+                            "llm_circuit_breaker_failure",
+                            labels={"provider": self.fallback_provider.name},
+                        )
+                        raise
+                else:
+                    # Both circuits are open
+                    metrics.increment(
+                        "llm_circuit_breaker_open",
+                        labels={"provider": self.fallback_provider.name},
+                    )
+                    raise CircuitOpenError(
+                        provider=f"{self.primary_provider.name}/{self.fallback_provider.name}",
+                        state=CircuitState.OPEN,
+                    )
+
+            # No fallback, primary circuit was open
+            if not primary_allowed:
                 raise CircuitOpenError(
-                    provider=f"{self.primary_provider.name}/{self.fallback_provider.name}",
+                    provider=self.primary_provider.name,
                     state=CircuitState.OPEN,
                 )
 
-        # No fallback, primary circuit was open
-        if not primary_allowed:
-            raise CircuitOpenError(
-                provider=self.primary_provider.name,
-                state=CircuitState.OPEN,
-            )
-
-        # This shouldn't be reached, but satisfy type checker
-        msg = "Request failed with no fallback available"
-        raise LLMError(msg, retryable=False)
+            # This shouldn't be reached, but satisfy type checker
+            msg = "Request failed with no fallback available"
+            raise LLMError(msg, retryable=False)
 
     async def _execute_batch(
         self,

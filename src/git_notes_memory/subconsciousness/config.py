@@ -117,9 +117,9 @@ class LLMProvider(Enum):
 # =============================================================================
 
 # Provider defaults
-DEFAULT_LLM_PROVIDER = LLMProvider.ANTHROPIC
+DEFAULT_LLM_PROVIDER = LLMProvider.OPENAI
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
-DEFAULT_OPENAI_MODEL = "gpt-4o"
+DEFAULT_OPENAI_MODEL = "gpt-5-mini"
 DEFAULT_OLLAMA_MODEL = "llama3.2"
 
 # Threshold defaults
@@ -180,7 +180,7 @@ class SubconsciousnessConfig:
     # Core settings
     enabled: bool = False
     provider: LLMProvider = DEFAULT_LLM_PROVIDER
-    model: str = DEFAULT_ANTHROPIC_MODEL
+    model: str = DEFAULT_OPENAI_MODEL
     api_key: str | None = None
 
     # Thresholds
