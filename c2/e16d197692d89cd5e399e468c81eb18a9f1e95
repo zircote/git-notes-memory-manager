@@ -283,3 +283,21 @@ tags:
 - `/memory:capture <namespace> <content>` - Explicit capture
 
 Available...
+
+---
+type: decisions
+timestamp: '2025-12-27T17:37:24.415518+00:00'
+summary: '...abc1234:0",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_service.py
+---
+
+...abc1234:0",
+    namespace: str = "decisions",
+    summary: str = "Test decision",
+    content: str = "We decided to use Python.",
+    timestamp: datetime | None = None,
+) -> Memory:
+    """Create a mock Memory...
