@@ -1040,3 +1040,18 @@ tags:
         success: Whether the run completed successfully.
         duration_ms: Total duration in milliseconds.
         phases_completed:...
+
+---
+type: progress
+timestamp: '2025-12-27T16:02:54.584543+00:00'
+summary: '...duration_ms: Total duration in milliseconds.'
+tags:
+- auto-captured
+- post-tool-use
+- file:observability.py
+---
+
+...duration_ms: Total duration in milliseconds.
+        phases_completed: Number of phases completed.
+        memories_processed: Number of memories processed.
+        dry_run: Whether this was...
