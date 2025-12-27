@@ -7179,3 +7179,17 @@ tags:
 
 ...4.4.2 | Implement `get_consolidation_llm_client()` factory | done | 2025-12-27 | 2025-12-27 | Completed |
 | 4.4.3 | Add tracing spans for LLM calls | done | 2025-12-27 | 2025-12-27 | @traced decorator...
+
+---
+type: progress
+timestamp: '2025-12-27T18:12:16.866606+00:00'
+summary: '...decorator |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...decorator |
+| 4.4.4 | Add metrics (requests, tokens, latency) | done | 2025-12-27 | 2025-12-27 | Completed |
+| 4.4.5 | Add structured logging (model, provider, truncated content) | done | 2025-12-27...
