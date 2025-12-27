@@ -8160,3 +8160,27 @@ tags:
     print(f'| Status | Dry Run |')
     print(f'| Phase Completed | {result.phase_completed.value if result.phase_completed else \"N/A\"} |')
     print(f'|...
+
+---
+type: progress
+timestamp: '2025-12-27T18:19:29.203556+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed subconsciousness OpenAI provider and parse...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed subconsciousness OpenAI provider and parser bugs
+## Summary
+Fixed multiple bugs preventing the LLM subconsciousness from working with OpenAI.
+
+## Changes Made
+- Fixed OpenAI provider to use `max_completion_tokens` for o1/o3/gpt-5 models
+- Fixed OpenAI provider to skip `temperature` param for reasoning models
+- Fixed agent parser to accept `type`/`details` fields from LLM response (not just `namespace`/`content`)
+
+## Related Files
+- src/git_notes_memory/subconsciousness/providers/openai.py:178-193
+- src/git_notes_memory/subconsciousness/implicit_capture_agent.py:311-318
