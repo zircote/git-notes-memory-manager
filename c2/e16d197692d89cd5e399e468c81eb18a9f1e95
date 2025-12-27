@@ -7644,3 +7644,17 @@ tags:
 ...2025-12-27 | Completed |
 | 5.3.10 | Add structured logging | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.3.11 | Unit tests for tier filtering | done | 2025-12-27 | 2025-12-27 | 47 tests pass...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:10.107370+00:00'
+summary: '...tests pass |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...tests pass |
+| 5.3.12 | Unit tests for activation tracking | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.3.13 | Integration tests with real index | done | 2025-12-27 | 2025-12-27 | Completed |
