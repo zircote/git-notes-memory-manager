@@ -245,3 +245,18 @@ tags:
             assert pattern in TEMPORAL_PATTERNS, f"Missing {pattern}"
 
 # =====================================================...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:02:45.745454+00:00'
+summary: '...test_resolve_unknown_pattern(self, reference_date: datetime) -> None:'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_temporal.py
+---
+
+...test_resolve_unknown_pattern(self, reference_date: datetime) -> None:
+        """Should handle unknown pattern with low confidence."""
+        match = TemporalMatch(
+            pattern_name="unknown_pattern",...
