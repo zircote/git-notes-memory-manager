@@ -1734,3 +1734,19 @@ tags:
    - High value: Clear milestones with measurable outcomes
 
 6....
+
+---
+type: progress
+timestamp: '2025-12-27T12:56:07.618190+00:00'
+summary: '...debugging sessions with resolution'
+tags:
+- auto-captured
+- post-tool-use
+- file:prompts.py
+---
+
+...debugging sessions with resolution
+   - High value: Blockers with documented resolution or workaround
+
+7. **reviews**: Code review feedback and quality assessments
+   - Look for: Review comments,...
