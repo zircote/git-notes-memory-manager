@@ -1700,3 +1700,19 @@ tags:
 ...architecture, technology, approach, or design
    - Look for: "we decided", "let's go with", "the solution is", explicit trade-off analysis
    - High value: Decisions with documented rationale and rejected...
+
+---
+type: progress
+timestamp: '2025-12-27T12:56:07.578353+00:00'
+summary: '...alternatives'
+tags:
+- auto-captured
+- post-tool-use
+- file:prompts.py
+---
+
+...alternatives
+
+5. **progress**: Significant milestones or task completions
+   - Look for: "completed", "finished", phase transitions, deliverables
+   - High value: Clear milestones with measurable...
