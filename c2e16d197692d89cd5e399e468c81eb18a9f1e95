@@ -695,3 +695,21 @@ tags:
 ---
 
 Now I understand the schema structure. For Task 2.5, I need to extend the index schema to support consolidation...
+
+---
+type: learnings
+timestamp: '2025-12-27T17:55:23.226531+00:00'
+summary: '...create_mock_summary()'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_summary_injector.py
+---
+
+...create_mock_summary()
+        injector.set_summaries([summary])
+
+        context = "<memory_context>Important content</memory_context>"
+        result = injector.inject_summaries(context)
+
+        assert...
