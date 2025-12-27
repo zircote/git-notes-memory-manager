@@ -715,3 +715,22 @@ tags:
   - `detect_temporal_references()` pattern matching
   - `resolve_temporal_reference()` datetime calculation
   - Edge case handling for...
+
+---
+type: patterns
+timestamp: '2025-12-27T18:15:01.391831+00:00'
+summary: '...(`_check_idle_threshold`)'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...(`_check_idle_threshold`)
+  - `execute()` method with `asyncio.run()` wrapper
+  - Singleton factory pattern
+- Added `CONSOLIDATION_TRIGGERS` metric
+- 32 tests pass
+
+#### Files Created (Session 3-5)
+-...
