@@ -3439,3 +3439,35 @@ Completed Phase 1 Foundation with all observability infrastructure. Now beginnin
 - src/git_notes_memory/subconsciousness/consolidation/observability.py:1-657
 - tests/subconsciousness/consolidation/test_observability.py:1-475
 - docs/spec/active/2025-12-27-memory-consolidation/PROGRESS.md:54-59, 288
+
+---
+type: progress
+timestamp: '2025-12-27T16:53:30.735039+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Completed Phase 2: Storage Layer with all 43 tas...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Completed Phase 2: Storage Layer with all 43 tasks and 193 tests
+## Summary
+Phase 2 (Storage Layer) is now complete. Created 4 git notes-based stores plus index schema extensions for memory consolidation.
+
+## Changes Made
+- Created MetadataStore with git notes backend (32 tests)
+- Created SummaryStore matching actual model structure (38 tests)
+- Created EdgeStore with secondary indices (35 tests)
+- Created RunStore for consolidation history (28 tests)
+- Created ConsolidationIndexExtension with SQLite schema (20 tests)
+- Added missing SpanNames (EDGE_GET, RUN_GET) and MetricNames (EDGE_READS, RUN_READS, RUN_WRITES)
+- Updated stores/__init__.py with lazy imports for all stores
+
+## Related Files
+- src/git_notes_memory/subconsciousness/consolidation/stores/metadata_store.py:1-541
+- src/git_notes_memory/subconsciousness/consolidation/stores/summary_store.py:1-456
+- src/git_notes_memory/subconsciousness/consolidation/stores/edge_store.py:1-534
+- src/git_notes_memory/subconsciousness/consolidation/stores/run_store.py:1-341
+- src/git_notes_memory/subconsciousness/consolidation/stores/index_extension.py:1-309
+- tests/subconsciousness/consolidation/stores/*.py
