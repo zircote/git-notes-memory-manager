@@ -8087,3 +8087,23 @@ tags:
         print('Consolidation completed successfully.')
     else:
         print('Consolidation completed with errors. Check the logs...
+
+---
+type: progress
+timestamp: '2025-12-27T18:16:54.868555+00:00'
+summary: '...print(''Consolidation completed successfully.'')'
+tags:
+- auto-captured
+- post-tool-use
+- file:consolidate.md
+---
+
+...print('Consolidation completed successfully.')
+    else:
+        print('Consolidation completed with errors. Check the logs for details.')
+
+asyncio.run(run())
+"
+```
+
+**Full Consolidation**...
