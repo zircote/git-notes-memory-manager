@@ -1686,3 +1686,17 @@ tags:
 12:45:00.428 DEBU [git_notes_memory.subconsciousness.llm_client] LLM request completed
   provider=openai model=gpt-5-mini latency_ms=24738.81 prompt_tokens=663
   completion_tokens=1415...
+
+---
+type: progress
+timestamp: '2025-12-27T12:56:07.557767+00:00'
+summary: '...architecture, technology, approach, or design'
+tags:
+- auto-captured
+- post-tool-use
+- file:prompts.py
+---
+
+...architecture, technology, approach, or design
+   - Look for: "we decided", "let's go with", "the solution is", explicit trade-off analysis
+   - High value: Decisions with documented rationale and rejected...
