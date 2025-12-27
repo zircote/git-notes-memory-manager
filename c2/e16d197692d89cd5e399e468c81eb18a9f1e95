@@ -7587,3 +7587,17 @@ tags:
 
 ...| Extend `search()` with `include_summaries` parameter | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.3.5 | Implement summary result merging | done | 2025-12-27 | 2025-12-27 | Completed...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:10.009254+00:00'
+summary: '...Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Completed |
+| 5.3.5 | Implement summary result merging | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.3.6 | Implement activation count increment on retrieval | done | 2025-12-27 | 2025-12-27...
