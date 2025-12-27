@@ -6168,3 +6168,20 @@ tags:
                 "Consolidation completed",
                 extra={
                     "success": result.success,...
+
+---
+type: progress
+timestamp: '2025-12-27T18:07:30.964806+00:00'
+summary: '...metrics.increment(MetricNames.CONSOLIDATION_RUNS)'
+tags:
+- auto-captured
+- post-tool-use
+- file:hook.py
+---
+
+...metrics.increment(MetricNames.CONSOLIDATION_RUNS)
+
+            logger.info(
+                "Consolidation completed",
+                extra={
+                    "success": result.success,...
