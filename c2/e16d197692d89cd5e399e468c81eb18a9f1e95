@@ -5485,3 +5485,21 @@ tags:
     # Placeholder types until storage module is implemented
     metadata_store: Any = None
     summary_store: Any = None
+
+---
+type: progress
+timestamp: '2025-12-27T17:45:54.423232+00:00'
+summary: '...results to filter.'
+tags:
+- auto-captured
+- post-tool-use
+- file:recall_extension.py
+---
+
+...results to filter.
+            _allowed_tiers: Set of allowed tiers (unused until storage implemented).
+
+        Returns:
+            Filtered results.
+        """
+        if self.metadata_store...
