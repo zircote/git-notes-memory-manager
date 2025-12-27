@@ -24,3 +24,16 @@ summary: '...(`▶ learned ───`) → just formatted text, not processed'
 **What WOULD work:**
 - If YOU write `[decision] Use sync_notes_with_remote` in your message, the hook captures it
 - My blocks are just visual...
+
+---
+type: decisions
+timestamp: '2025-12-27T01:17:58.601882+00:00'
+summary: '...using markers anywhere in your messages:'
+---
+
+...using markers anywhere in your messages:
+- `[remember] <insight>` - Captures a learning
+- `[decision] <choice>` - Captures a decision
+- `/memory:capture <namespace> <content>` - Explicit capture
+
+Available...
