@@ -7924,3 +7924,17 @@ tags:
 
 ...6.1.21 | Integration tests: non-summary context preserved | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.2.1 | Add `is_consolidation_available()` feature detection | done | 2025-12-27 | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.906444+00:00'
+summary: '...| Extend SessionStart handler to call summary injector | done | 2025-12-27
+  | 2025-12-27 | Complet'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...| Extend SessionStart handler to call summary injector | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.2.3 | Create `SessionContext` from SessionStart event | done | 2025-12-27 | 2025-12-27...
