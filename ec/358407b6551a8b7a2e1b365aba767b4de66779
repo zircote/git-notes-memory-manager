@@ -1716,3 +1716,21 @@ tags:
 5. **progress**: Significant milestones or task completions
    - Look for: "completed", "finished", phase transitions, deliverables
    - High value: Clear milestones with measurable...
+
+---
+type: progress
+timestamp: '2025-12-27T12:56:07.598630+00:00'
+summary: '...alternatives'
+tags:
+- auto-captured
+- post-tool-use
+- file:prompts.py
+---
+
+...alternatives
+
+5. **progress**: Significant milestones or task completions
+   - Look for: "completed", "finished", phase transitions, deliverables
+   - High value: Clear milestones with measurable outcomes
+
+6....
