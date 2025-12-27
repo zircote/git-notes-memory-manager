@@ -1985,3 +1985,18 @@ tags:
             "outcome": "Implemented successfully",
             "source_memory_id": "decisions:abc1234:0",
             "timestamp":...
+
+---
+type: progress
+timestamp: '2025-12-27T16:21:40.602138+00:00'
+summary: '...assert result.rationale == "ACID compliance needed"'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_summary_store.py
+---
+
+...assert result.rationale == "ACID compliance needed"
+        assert result.outcome == "Implemented successfully"
+        assert result.source_memory_id == "decisions:abc1234:0"
+        assert...
