@@ -8376,3 +8376,46 @@ The dashboard broke because template variables had `current.value` set to dataso
 ## Related Files
 - docker/grafana/dashboards/subconsciousness.json:1674-1718
 - docker/grafana/provisioning/datasources/datasources.yaml:5-58
+
+---
+type: progress
+timestamp: '2025-12-27T18:19:29.467328+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Created unified Observability Overview dashboard...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Created unified Observability Overview dashboard
+## Summary
+Created a single-pane-of-glass dashboard that brings together all observability pillars in one place.
+
+## Dashboard Layout
+
+**Row 1: System Health** (6 stat panels)
+- Service status (Memory Plugin, Prometheus)
+- Error rate, Latency p95, Operations count
+- Error count from logs
+
+**Row 2: Key Metrics** (5 panels)
+- Operations rate by type (capture/recall/search)
+- Operation latency (p50/p95)
+- Hook executions and latency
+- Memory distribution by namespace (pie)
+
+**Row 3: Distributed Traces**
+- Recent traces from Tempo with service filter
+
+**Row 4: Logs**
+- Error logs (filtered)
+- All logs (structured JSON formatted)
+
+**Row 5: LLM / Subconsciousness**
+- LLM requests, errors, latency
+- Memories extracted, pending approval, avg confidence
+- LLM requests by provider, extractions by namespace
+
+## Related Files
+- docker/grafana/dashboards/observability-overview.json
