@@ -807,3 +807,19 @@ tags:
 ...done | 2025-12-27 | 2025-12-27 | pyproject.toml updated |
 | 6.5.2 | Implement lazy import pattern for consolidation module | done | 2025-12-27 | 2025-12-27 | Already in __init__.py |
 | 6.5.3...
+
+---
+type: patterns
+timestamp: '2025-12-27T18:27:12.503742+00:00'
+summary: '...dependencies to pyproject.toml:'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...dependencies to pyproject.toml:
+  - `scikit-learn>=1.5.0`
+  - `numpy>=2.0.0`
+- Lazy import pattern already implemented in `consolidation/__init__.py`
+- Helpful error message in `_require_consolidation...
