@@ -259,7 +259,9 @@ def get_data_path() -> Path:
     """
     override = os.environ.get("MEMORY_PLUGIN_DATA_DIR")
     if override:
-        return Path(override).expanduser()
+        # Expand both shell variables ($HOME) and user paths (~)
+        expanded = os.path.expandvars(override)
+        return Path(expanded).expanduser()
 
     xdg_data_home = os.environ.get("XDG_DATA_HOME")
     if xdg_data_home:
