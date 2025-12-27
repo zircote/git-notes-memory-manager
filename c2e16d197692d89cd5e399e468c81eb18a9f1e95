@@ -78,3 +78,18 @@ tags:
         pattern_name: Name of the matched pattern (e.g., "yesterday").
         matched_text: The actual text that matched.
         start_pos:...
+
+---
+type: patterns
+timestamp: '2025-12-27T16:59:17.737765+00:00'
+summary: '...for match in re.finditer(regex, content_lower, re.IGNORECASE):'
+tags:
+- auto-captured
+- post-tool-use
+- file:temporal.py
+---
+
+...for match in re.finditer(regex, content_lower, re.IGNORECASE):
+            # Check if pattern captures a number
+            captured_number: int | None = None
+            if match.groups():...
