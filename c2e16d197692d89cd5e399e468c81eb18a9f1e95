@@ -11,3 +11,19 @@ tags:
 ...`[consolidation]` optional dependencies | pending | | | |
 | 6.5.2 | Implement lazy import pattern for consolidation module | pending | | | |
 | 6.5.3 | Implement `NotImplementedError` with helpful...
+
+---
+type: patterns
+timestamp: '2025-12-27T16:37:09.865271+00:00'
+summary: '...learning'
+tags:
+- auto-captured
+- post-tool-use
+- file:retention.py
+---
+
+...learning
+    "learnings": 0.85,  # Learnings stay relevant
+    "patterns": 0.85,  # Patterns are reusable knowledge
+    # Medium importance (0.7): Project context
+    "progress": 0.7,  # Progress...
