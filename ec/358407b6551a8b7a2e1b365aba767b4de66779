@@ -3793,3 +3793,18 @@ tags:
 class TierTransition:
     memory_id: str
     from_tier: MemoryTier...
+
+---
+type: progress
+timestamp: '2025-12-27T15:22:39.255997+00:00'
+summary: '...metrics.histogram("consolidation.duration_seconds", duration)'
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...metrics.histogram("consolidation.duration_seconds", duration)
+            logger.info("Consolidation completed", duration_seconds=duration)
+
+    @tracer.start_as_current_span("consolidation.scan")...
