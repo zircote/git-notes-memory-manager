@@ -291,3 +291,20 @@ tags:
 ---
 
 Now I understand the schema structure. For Task 2.5, I need to extend the index schema to support consolidation...
+
+---
+type: learnings
+timestamp: '2025-12-27T16:37:09.828560+00:00'
+summary: '...consolidation.'
+tags:
+- auto-captured
+- post-tool-use
+- file:retention.py
+---
+
+...consolidation.
+
+This module implements the retention scoring algorithm that determines
+how important a memory is to keep in the active (hot/warm) tiers.
+
+The retention score is a weighted combination...
