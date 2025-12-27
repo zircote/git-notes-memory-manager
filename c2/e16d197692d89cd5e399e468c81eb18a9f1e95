@@ -7727,3 +7727,17 @@ tags:
 
 ...inject_summaries(existing_context, session_context)` main method | done | 2025-12-27 | 2025-12-27 | Completed |
 | 6.1.6 | Implement `_remove_existing_block(context)` regex-based removal | done | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:14:00.541113+00:00'
+summary: '...Implement `_remove_existing_block(context)` regex-based removal | done
+  | 2025-12-27 | 2025-12-27 '
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Implement `_remove_existing_block(context)` regex-based removal | done | 2025-12-27 | 2025-12-27 | Completed |
+| 6.1.7 | Implement `_select_summaries(session_context)` with scoring | done | 2025-12-27...
