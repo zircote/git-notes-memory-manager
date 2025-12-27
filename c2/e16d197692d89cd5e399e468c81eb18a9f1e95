@@ -7193,3 +7193,17 @@ tags:
 ...decorator |
 | 4.4.4 | Add metrics (requests, tokens, latency) | done | 2025-12-27 | 2025-12-27 | Completed |
 | 4.4.5 | Add structured logging (model, provider, truncated content) | done | 2025-12-27...
+
+---
+type: progress
+timestamp: '2025-12-27T18:12:16.894097+00:00'
+summary: '...structured logging (model, provider, truncated content) | done | 2025-12-27
+  | 2025-12-27 | Comple'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...structured logging (model, provider, truncated content) | done | 2025-12-27 | 2025-12-27 | Completed |
+| 4.4.6 | Unit tests with mock LLM client | done | 2025-12-27 | 2025-12-27 | 18 tests pass |
