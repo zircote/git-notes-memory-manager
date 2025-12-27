@@ -1,0 +1,13 @@
+---
+type: patterns
+timestamp: '2025-12-27T15:44:22.437478+00:00'
+summary: '...`[consolidation]` optional dependencies | pending | | | |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...`[consolidation]` optional dependencies | pending | | | |
+| 6.5.2 | Implement lazy import pattern for consolidation module | pending | | | |
+| 6.5.3 | Implement `NotImplementedError` with helpful...
