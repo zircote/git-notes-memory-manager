@@ -82,3 +82,27 @@ tags:
             return "", False
         pattern = rf"<memory_consolidated_summaries.*?>.*?</memory_consolidated_summaries>"
         cleaned,...
+
+---
+type: patterns
+timestamp: '2025-12-27T15:21:33.074413+00:00'
+summary: '...= ['
+tags:
+- auto-captured
+- post-tool-use
+- file:ARCHITECTURE.md
+---
+
+...= [
+    "scikit-learn>=1.3",
+    "openai>=1.0",
+    "httpx>=0.25",
+]
+```
+
+### Lazy Import Pattern
+
+```python
+def get_consolidation_service() -> ConsolidationService:
+    try:
+        from .consolidation...
