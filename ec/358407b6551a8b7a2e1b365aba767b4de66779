@@ -1318,3 +1318,13 @@ summary: 'Let me check if the test hook finished and verify the OTLP export happ
 ---
 
 Let me check if the test hook finished and verify the OTLP export happened:
+
+---
+type: progress
+timestamp: '2025-12-27T01:15:27.437621+00:00'
+summary: '...that doesn''t inherit your shell''s environment variables like `MEMORY_PLUGIN_OTLP_ENDPOINT`.'
+---
+
+...that doesn't inherit your shell's environment variables like `MEMORY_PLUGIN_OTLP_ENDPOINT`.
+
+The fix is to source your shell profile in `run-hook.sh` or read config from a file. Let me add support...
