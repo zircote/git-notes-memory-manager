@@ -865,3 +865,17 @@ The OTLP telemetry pipeline is fully functional. Metrics were appearing empty be
 - src/git_notes_memory/hooks/hook_utils.py:329-387 (timed_hook_execution context manager)
 - src/git_notes_memory/observability/exporters/otlp.py:152-566 (OTLPExporter)
 - src/git_notes_memory/observability/persistent_metrics.py:1-150 (persistence layer)
+
+---
+type: learnings
+timestamp: '2025-12-27T12:56:07.638432+00:00'
+summary: '...**learnings**: New understanding gained through the conversation'
+tags:
+- auto-captured
+- post-tool-use
+- file:prompts.py
+---
+
+...**learnings**: New understanding gained through the conversation
+   - Look for: "I learned", "turns out", realizations, corrections to misconceptions
+   - High value: Insights that change future...
