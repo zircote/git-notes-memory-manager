@@ -3012,3 +3012,15 @@ All 220 tasks will be completed. No work is deferred to "future phases" or "opti
 ---
 
 The spec project...
+
+---
+type: progress
+timestamp: '2025-12-27T16:42:58.855760+00:00'
+summary: '...Phase 2 shows as "pending" (0%), but according to the context summary,
+  I''ve actually already c...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+...Phase 2 shows as "pending" (0%), but according to the context summary, I've actually already completed Phase 2 with all stores (MetadataStore, SummaryStore, EdgeStore, RunStore, and ConsolidationIndexExtension...
