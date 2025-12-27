@@ -7319,3 +7319,17 @@ tags:
 
 ...Implement `incremental_consolidation()` - since last run | done | 2025-12-27 | 2025-12-27 | Completed |
 | 5.1.10 | Implement checkpoint/resume logic | done | 2025-12-27 | 2025-12-27 | Completed...
+
+---
+type: progress
+timestamp: '2025-12-27T18:13:09.503851+00:00'
+summary: '...Completed |'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...Completed |
+| 5.1.10 | Implement checkpoint/resume logic | done | 2025-12-27 | 2025-12-27 | Completed |
+| 5.1.11 | Implement dry-run mode (compute without persist) | done | 2025-12-27 | 2025-12-27...
