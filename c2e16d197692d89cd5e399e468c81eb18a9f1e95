@@ -700,3 +700,18 @@ tags:
 ---
 
 Let me check the existing context builder to understand the pattern:
+
+---
+type: patterns
+timestamp: '2025-12-27T18:15:01.368891+00:00'
+summary: '...temporal patterns (yesterday, last week, last month, etc.)'
+tags:
+- auto-captured
+- post-tool-use
+- file:PROGRESS.md
+---
+
+...temporal patterns (yesterday, last week, last month, etc.)
+  - `detect_temporal_references()` pattern matching
+  - `resolve_temporal_reference()` datetime calculation
+  - Edge case handling for...
