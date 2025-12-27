@@ -402,3 +402,28 @@ The OTLP telemetry pipeline is fully functional. Metrics were appearing empty be
 - src/git_notes_memory/hooks/hook_utils.py:329-387 (timed_hook_execution context manager)
 - src/git_notes_memory/observability/exporters/otlp.py:152-566 (OTLPExporter)
 - src/git_notes_memory/observability/persistent_metrics.py:1-150 (persistence layer)
+
+---
+type: learnings
+timestamp: '2025-12-27T16:42:58.400136+00:00'
+summary: '▶ learned ─────────────────────────────────────
+
+  Memory blocks in Claude responses are output guid...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Memory blocks in Claude responses are output guidance, not automatic captures
+## Summary
+The `▶ namespace` blocks Claude outputs are structured guidance for review - they don't automatically trigger memory capture or telemetry. Actual capture happens through explicit commands, hooks at session end, or the implicit capture agent.
+
+## Key Points
+- `▶ progress/decision/learned` blocks = formatting for human review
+- Telemetry fires on: `/memory:capture`, Stop hook, implicit agent
+- OTEL pipeline verified working: test metric appeared in Prometheus
+- Dashboard queries now use correct `memory_*` prefixed metric names
+
+## Related Files
+- src/git_notes_memory/hooks/stop_handler.py (session-end capture)
+- src/git_notes_memory/subconsciousness/implicit_capture_agent.py (LLM extraction)
