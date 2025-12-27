@@ -907,3 +907,34 @@ export MEMORY_PLUGIN_OTLP_ALLOW_INTERNAL=true
 - `src/git_notes_memory/observability/config.py:209-211` (bug fix)
 - `hooks/run-hook.sh:26-45` (env sourcing)
 - `~/.local/share/memory-plugin/env` (config file)
+
+---
+type: progress
+timestamp: '2025-12-27T01:12:36.191053+00:00'
+summary: Fixed OTLP telemetry pipeline with persistent metrics for ephemeral hook
+  processes
+---
+
+Fixed OTLP telemetry pipeline with persistent metrics for ephemeral hook processes
+## Summary
+The original issue was that hook execution counters weren't accumulating because each hook runs as a separate Python process with in-memory counters that reset. Added persistent metrics storage to maintain cumulative counters across process invocations.
+
+## Changes Made
+- Fixed inline comment parsing bug in `config.py` (previous session - values like `true  # comment` were not being parsed correctly)
+- Added `persistent_metrics.py` module with file-based counter persistence using JSON and file locking
+- Integrated persistent metrics loading at hook entry and saving at hook exit in `timed_hook_execution` context manager
+- Reverted DELTA temporality back to CUMULATIVE (Prometheus requires cumulative counters)
+
+## Verification
+- Counter accumulates correctly: After 4 hook runs, `memory_hook_executions_total` = 4
+- Metrics flow through entire pipeline:
+  - ✅ Hooks → OTLP HTTP (port 4318)
+  - ✅ OTel Collector → Prometheus endpoint (port 8889)
+  - ✅ Prometheus scrapes data (port 9090)
+  - ✅ Grafana can query via datasource proxy
+- All 138 observability tests + 71 hook utils tests pass
+
+## Related Files
+- src/git_notes_memory/observability/persistent_metrics.py (new)
+- src/git_notes_memory/observability/config.py:209-211
+- src/git_notes_memory/hooks/hook_utils.py:329-342, 379-387
