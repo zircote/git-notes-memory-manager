@@ -846,3 +846,22 @@ tags:
         original = "<memory_context>Important content</memory_context>"
 
         result = get_session_start_additional_context(...
+
+---
+type: learnings
+timestamp: '2025-12-27T18:04:24.033467+00:00'
+summary: '...event_data={"cwd": "/path"},'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_hook_integration.py
+---
+
+...event_data={"cwd": "/path"},
+            project="test",
+        )
+
+        assert "Important content" in result
+
+    def test_with_spec_id(self) -> None:
+        """Test function with...
