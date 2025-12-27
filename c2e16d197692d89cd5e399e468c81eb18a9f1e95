@@ -689,3 +689,14 @@ tags:
 ---
 
 ...yesterday" is being matched by both the `day_before_yesterday` pattern and the `yesterday` pattern because they don't overlap. Let me fix the test to reflect the actual behavior (or fix the pattern):
+
+---
+type: patterns
+timestamp: '2025-12-27T18:09:14.728887+00:00'
+summary: 'Let me check the existing context builder to understand the pattern:'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Let me check the existing context builder to understand the pattern:
