@@ -1238,3 +1238,36 @@ Deployed the complete observability dashboard to the running Grafana instance.
 ## Related Files
 - `docker/grafana/dashboards/subconsciousness.json`
 - `docker/grafana/provisioning/datasources/datasources.yaml`
+
+---
+type: progress
+timestamp: '2025-12-27T16:05:51.999976+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Fixed Grafana dashboard template variable UIDs
+
+  ...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Fixed Grafana dashboard template variable UIDs
+## Summary
+The dashboard broke because template variables had `current.value` set to datasource names ("Prometheus", "Tempo", "Loki") instead of UIDs ("prometheus", "tempo", "loki"). This mismatch occurred after adding explicit UIDs to datasources.yaml.
+
+## Changes Made
+- Updated `docker/grafana/dashboards/subconsciousness.json`:
+  - Line 1675: Changed `"value": "Prometheus"` to `"value": "prometheus"`
+  - Line 1690: Changed `"value": "Tempo"` to `"value": "tempo"`
+  - Line 1705: Changed `"value": "Loki"` to `"value": "loki"`
+
+## Verification
+- Dashboard loads: Git Notes Memory - Subconsciousness
+- Template variables resolve to correct UIDs
+- Prometheus queries execute successfully
+- No "Data source not found" errors after restart
+
+## Related Files
+- docker/grafana/dashboards/subconsciousness.json:1674-1718
+- docker/grafana/provisioning/datasources/datasources.yaml:5-58
