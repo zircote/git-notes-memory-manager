@@ -3844,3 +3844,21 @@ tags:
 A 6-phase background pipeline:
 1. **SCAN** - Load memories, compute retention scores
 2. **CLUSTER**...
+
+---
+type: progress
+timestamp: '2025-12-27T15:26:06.146843+00:00'
+summary: '...accurate'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...accurate
+
+## Related
+
+- Research: `docs/research/CognitiveSubstrate/memory-consolidation-*.md`
+- Completed: `docs/spec/completed/2025-12-25-llm-subconsciousness/` (LLM foundation)
+- Completed: `docs/spec/completed...
