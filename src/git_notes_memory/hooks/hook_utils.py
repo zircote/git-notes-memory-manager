@@ -328,6 +328,16 @@ class timed_hook_execution:
 
     def __enter__(self) -> timed_hook_execution:
         """Enter the context: start timing and tracing."""
+        # Load persistent metrics from previous hook invocations
+        try:
+            from git_notes_memory.observability.persistent_metrics import (
+                load_persistent_metrics,
+            )
+
+            load_persistent_metrics()
+        except Exception as e:
+            logging.debug("Persistent metrics load failed (non-blocking): %s", e)
+
         self._start_time = time.perf_counter()
         return self
 
@@ -355,6 +365,26 @@ class timed_hook_execution:
             "hook_executions_total",
             labels={"hook": self._hook_name, "status": self._status},
         )
+
+        # Push metrics to OTLP if configured
+        try:
+            from git_notes_memory.observability.exporters.otlp import (
+                export_metrics_if_configured,
+            )
+
+            export_metrics_if_configured()
+        except Exception as e:
+            logging.debug("OTLP export failed (non-blocking): %s", e)
+
+        # Save metrics to persistent storage for future hook invocations
+        try:
+            from git_notes_memory.observability.persistent_metrics import (
+                save_persistent_metrics,
+            )
+
+            save_persistent_metrics()
+        except Exception as e:
+            logging.debug("Persistent metrics save failed (non-blocking): %s", e)
 
 
 def read_json_input(

@@ -50,6 +50,7 @@ from git_notes_memory.hooks.hook_utils import (
     read_json_input,
     setup_logging,
     setup_timeout,
+    timed_hook_execution,
 )
 from git_notes_memory.hooks.models import CaptureSignal
 
@@ -388,236 +389,245 @@ def main() -> None:
     timeout = config.timeout or HOOK_STOP_TIMEOUT
     setup_timeout(timeout, hook_name="Stop")
 
-    try:
-        # QUAL-001: Use hook_utils.read_json_input with fallback
-        input_data = _read_input_with_fallback()
-        logger.debug("Received stop hook input: %s", list(input_data.keys()))
+    with timed_hook_execution("Stop"):
+        try:
+            # QUAL-001: Use hook_utils.read_json_input with fallback
+            input_data = _read_input_with_fallback()
+            logger.debug("Received stop hook input: %s", list(input_data.keys()))
 
-        # Log full input to file for debugging
-        log_hook_input("Stop", input_data)
-        hook_logger.info(
-            "Config: stop_auto_capture=%s, stop_prompt_uncaptured=%s, stop_sync_index=%s",
-            config.stop_auto_capture,
-            config.stop_prompt_uncaptured,
-            config.stop_sync_index,
-        )
-
-        # Analyze session transcript for uncaptured content
-        detected_signals: list[CaptureSignal] = []
-        if config.stop_prompt_uncaptured or config.stop_auto_capture:
-            transcript_path = input_data.get("transcript_path")
-            hook_logger.info("Analyzing transcript: %s", transcript_path)
-            detected_signals = _analyze_session(transcript_path)
-            hook_logger.info("Found %d signals in transcript", len(detected_signals))
-            for sig in detected_signals[:5]:  # Log first 5
-                hook_logger.info(
-                    "  Signal: type=%s, ns=%s, conf=%.2f, match=%s...",
-                    sig.type.value,
-                    sig.suggested_namespace,
-                    sig.confidence,
-                    sig.match[:50],
-                )
-        else:
+            # Log full input to file for debugging
+            log_hook_input("Stop", input_data)
             hook_logger.info(
-                "Skipping transcript analysis (auto_capture=%s, prompt_uncaptured=%s)",
+                "Config: stop_auto_capture=%s, stop_prompt_uncaptured=%s, stop_sync_index=%s",
                 config.stop_auto_capture,
                 config.stop_prompt_uncaptured,
+                config.stop_sync_index,
             )
 
-        # Auto-capture high-confidence signals
-        captured: list[dict[str, Any]] = []
-        uncaptured: list[CaptureSignal] = detected_signals
-        if config.stop_auto_capture and detected_signals:
-            hook_logger.info(
-                "Auto-capturing signals (min_conf=%.2f, max=%d)",
-                config.stop_auto_capture_min_confidence,
-                config.stop_max_captures,
-            )
-            captured, uncaptured = _auto_capture_signals(
-                detected_signals,
-                min_confidence=config.stop_auto_capture_min_confidence,
-                max_captures=config.stop_max_captures,
-            )
-            hook_logger.info(
-                "Auto-capture result: %d captured, %d remaining",
-                len(captured),
-                len(uncaptured),
-            )
-            for c in captured:
-                hook_logger.info("  Captured: %s", c)
-            logger.debug(
-                "Auto-capture: %d captured, %d remaining",
-                len(captured),
-                len(uncaptured),
-            )
-        else:
-            hook_logger.info(
-                "Auto-capture skipped (auto_capture=%s, signals=%d)",
-                config.stop_auto_capture,
-                len(detected_signals),
-            )
-
-        # Sync index if enabled (after auto-capture to include new memories)
-        sync_result: dict[str, Any] | None = None
-        if config.stop_sync_index:
-            sync_result = _sync_index()
-            if sync_result.get("success") and not sync_result.get("skipped"):
-                stats = sync_result.get("stats", {})
-                logger.info(
-                    "Index synced: %d memories indexed",
-                    stats.get("indexed", 0),
+            # Analyze session transcript for uncaptured content
+            detected_signals: list[CaptureSignal] = []
+            if config.stop_prompt_uncaptured or config.stop_auto_capture:
+                transcript_path = input_data.get("transcript_path")
+                hook_logger.info("Analyzing transcript: %s", transcript_path)
+                detected_signals = _analyze_session(transcript_path)
+                hook_logger.info(
+                    "Found %d signals in transcript", len(detected_signals)
                 )
-            elif not sync_result.get("success"):
-                logger.warning("Index sync failed: %s", sync_result.get("error"))
+                for sig in detected_signals[:5]:  # Log first 5
+                    hook_logger.info(
+                        "  Signal: type=%s, ns=%s, conf=%.2f, match=%s...",
+                        sig.type.value,
+                        sig.suggested_namespace,
+                        sig.confidence,
+                        sig.match[:50],
+                    )
+            else:
+                hook_logger.info(
+                    "Skipping transcript analysis (auto_capture=%s, prompt_uncaptured=%s)",
+                    config.stop_auto_capture,
+                    config.stop_prompt_uncaptured,
+                )
 
-        # Sync notes with remote if enabled (opt-in via env var)
-        # Uses fetch→merge→push to avoid race conditions in multi-worktree
-        # environments (Issue #28: prevents non-fast-forward push failures)
-        if config.stop_push_remote:
-            cwd = input_data.get("cwd")
-            if cwd:
+            # Auto-capture high-confidence signals
+            captured: list[dict[str, Any]] = []
+            uncaptured: list[CaptureSignal] = detected_signals
+            if config.stop_auto_capture and detected_signals:
+                hook_logger.info(
+                    "Auto-capturing signals (min_conf=%.2f, max=%d)",
+                    config.stop_auto_capture_min_confidence,
+                    config.stop_max_captures,
+                )
+                captured, uncaptured = _auto_capture_signals(
+                    detected_signals,
+                    min_confidence=config.stop_auto_capture_min_confidence,
+                    max_captures=config.stop_max_captures,
+                )
+                hook_logger.info(
+                    "Auto-capture result: %d captured, %d remaining",
+                    len(captured),
+                    len(uncaptured),
+                )
+                for c in captured:
+                    hook_logger.info("  Captured: %s", c)
+                logger.debug(
+                    "Auto-capture: %d captured, %d remaining",
+                    len(captured),
+                    len(uncaptured),
+                )
+            else:
+                hook_logger.info(
+                    "Auto-capture skipped (auto_capture=%s, signals=%d)",
+                    config.stop_auto_capture,
+                    len(detected_signals),
+                )
+
+            # Sync index if enabled (after auto-capture to include new memories)
+            sync_result: dict[str, Any] | None = None
+            if config.stop_sync_index:
+                sync_result = _sync_index()
+                if sync_result.get("success") and not sync_result.get("skipped"):
+                    stats = sync_result.get("stats", {})
+                    logger.info(
+                        "Index synced: %d memories indexed",
+                        stats.get("indexed", 0),
+                    )
+                elif not sync_result.get("success"):
+                    logger.warning("Index sync failed: %s", sync_result.get("error"))
+
+            # Sync notes with remote if enabled (opt-in via env var)
+            # Uses fetch→merge→push to avoid race conditions in multi-worktree
+            # environments (Issue #28: prevents non-fast-forward push failures)
+            if config.stop_push_remote:
+                cwd = input_data.get("cwd")
+                if cwd:
+                    try:
+                        from git_notes_memory.git_ops import GitOps
+
+                        git_ops = GitOps(repo_path=cwd)
+                        sync_result = git_ops.sync_notes_with_remote(push=True)
+                        if any(sync_result.values()):
+                            logger.debug(
+                                "Synced notes with remote on session stop: %s",
+                                sync_result,
+                            )
+                        else:
+                            logger.debug("Sync with remote had no changes")
+                    except Exception as e:
+                        logger.debug("Remote sync on stop skipped: %s", e)
+
+            # Push user memories to remote if enabled (opt-in via env var)
+            if config.stop_push_user_remote:
                 try:
-                    from git_notes_memory.git_ops import GitOps
+                    from git_notes_memory.config import get_user_memories_remote
 
-                    git_ops = GitOps(repo_path=cwd)
-                    sync_result = git_ops.sync_notes_with_remote(push=True)
-                    if any(sync_result.values()):
-                        logger.debug(
-                            "Synced notes with remote on session stop: %s", sync_result
-                        )
-                    else:
-                        logger.debug("Sync with remote had no changes")
+                    if get_user_memories_remote():
+                        cwd = input_data.get("cwd")
+                        from git_notes_memory.sync import get_sync_service as get_sync
+
+                        sync_service = get_sync(repo_path=cwd if cwd else None)
+                        sync_service.sync_user_memories_with_remote(push=True)
+                        logger.debug("Pushed user memories to remote on session stop")
                 except Exception as e:
-                    logger.debug("Remote sync on stop skipped: %s", e)
+                    # Don't block session - just log and continue
+                    logger.debug("User memory remote push skipped: %s", e)
 
-        # Push user memories to remote if enabled (opt-in via env var)
-        if config.stop_push_user_remote:
+            # Export metrics, traces, and logs to OTLP collector before session ends
             try:
-                from git_notes_memory.config import get_user_memories_remote
+                from git_notes_memory.observability.exporters import (
+                    LogRecord,
+                    export_logs_if_configured,
+                    export_metrics_if_configured,
+                    export_traces_if_configured,
+                )
+                from git_notes_memory.observability.exporters.otlp import (
+                    get_otlp_exporter,
+                )
+                from git_notes_memory.observability.tracing import get_completed_spans
 
-                if get_user_memories_remote():
-                    cwd = input_data.get("cwd")
-                    from git_notes_memory.sync import get_sync_service as get_sync
+                exporter = get_otlp_exporter()
+                hook_logger.info(
+                    "OTLP export: enabled=%s, endpoint=%s",
+                    exporter.enabled,
+                    exporter.endpoint,
+                )
 
-                    sync_service = get_sync(repo_path=cwd if cwd else None)
-                    sync_service.sync_user_memories_with_remote(push=True)
-                    logger.debug("Pushed user memories to remote on session stop")
+                # Export any collected traces
+                completed_spans = get_completed_spans()
+                traces_ok = False
+                if completed_spans:
+                    traces_ok = export_traces_if_configured(completed_spans)
+                    hook_logger.info(
+                        "OTLP traces export: success=%s, count=%d",
+                        traces_ok,
+                        len(completed_spans),
+                    )
+                else:
+                    hook_logger.info("OTLP traces export: no spans to export")
+
+                # Export metrics
+                metrics_ok = export_metrics_if_configured()
+                hook_logger.info("OTLP metrics export: success=%s", metrics_ok)
+
+                # Export session summary logs
+                logs: list[LogRecord] = []
+
+                # Log session end with capture stats
+                if captured:
+                    logs.append(
+                        LogRecord(
+                            body=f"Session ended with {len(captured)} memories captured",
+                            severity="INFO",
+                            attributes={
+                                "event": "session_end",
+                                "memories_captured": len(captured),
+                                "namespaces": ", ".join(
+                                    sorted(
+                                        {
+                                            m.get("namespace", "unknown")
+                                            for m in captured
+                                        }
+                                    )
+                                ),
+                            },
+                        )
+                    )
+
+                # Log each captured memory
+                for memory in captured:
+                    logs.append(
+                        LogRecord(
+                            body=f"Memory captured: {memory.get('summary', 'No summary')[:100]}",
+                            severity="INFO",
+                            attributes={
+                                "event": "memory_captured",
+                                "namespace": memory.get("namespace", "unknown"),
+                                "memory_id": memory.get("id", "unknown"),
+                            },
+                        )
+                    )
+
+                # Log uncaptured content warnings
+                if uncaptured:
+                    logs.append(
+                        LogRecord(
+                            body=f"Session ended with {len(uncaptured)} uncaptured items",
+                            severity="WARN",
+                            attributes={
+                                "event": "uncaptured_content",
+                                "count": len(uncaptured),
+                            },
+                        )
+                    )
+
+                if logs:
+                    logs_ok = export_logs_if_configured(logs)
+                    hook_logger.info(
+                        "OTLP logs export: success=%s, count=%d", logs_ok, len(logs)
+                    )
+                else:
+                    hook_logger.info("OTLP logs export: no logs to export")
+
             except Exception as e:
-                # Don't block session - just log and continue
-                logger.debug("User memory remote push skipped: %s", e)
+                # Don't block session - telemetry export is best-effort
+                hook_logger.info("OTLP export error: %s", e)
+                logger.debug("OTLP export skipped: %s", e)
 
-        # Export metrics, traces, and logs to OTLP collector before session ends
-        try:
-            from git_notes_memory.observability.exporters import (
-                LogRecord,
-                export_logs_if_configured,
-                export_metrics_if_configured,
-                export_traces_if_configured,
-            )
-            from git_notes_memory.observability.exporters.otlp import get_otlp_exporter
-            from git_notes_memory.observability.tracing import get_completed_spans
-
-            exporter = get_otlp_exporter()
-            hook_logger.info(
-                "OTLP export: enabled=%s, endpoint=%s",
-                exporter.enabled,
-                exporter.endpoint,
+            # Output result
+            _write_output(
+                uncaptured=uncaptured,
+                captured=captured,
+                sync_result=sync_result,
+                prompt_uncaptured=config.stop_prompt_uncaptured,
             )
 
-            # Export any collected traces
-            completed_spans = get_completed_spans()
-            traces_ok = False
-            if completed_spans:
-                traces_ok = export_traces_if_configured(completed_spans)
-                hook_logger.info(
-                    "OTLP traces export: success=%s, count=%d",
-                    traces_ok,
-                    len(completed_spans),
-                )
-            else:
-                hook_logger.info("OTLP traces export: no spans to export")
-
-            # Export metrics
-            metrics_ok = export_metrics_if_configured()
-            hook_logger.info("OTLP metrics export: success=%s", metrics_ok)
-
-            # Export session summary logs
-            logs: list[LogRecord] = []
-
-            # Log session end with capture stats
-            if captured:
-                logs.append(
-                    LogRecord(
-                        body=f"Session ended with {len(captured)} memories captured",
-                        severity="INFO",
-                        attributes={
-                            "event": "session_end",
-                            "memories_captured": len(captured),
-                            "namespaces": ", ".join(
-                                sorted(
-                                    {m.get("namespace", "unknown") for m in captured}
-                                )
-                            ),
-                        },
-                    )
-                )
-
-            # Log each captured memory
-            for memory in captured:
-                logs.append(
-                    LogRecord(
-                        body=f"Memory captured: {memory.get('summary', 'No summary')[:100]}",
-                        severity="INFO",
-                        attributes={
-                            "event": "memory_captured",
-                            "namespace": memory.get("namespace", "unknown"),
-                            "memory_id": memory.get("id", "unknown"),
-                        },
-                    )
-                )
-
-            # Log uncaptured content warnings
-            if uncaptured:
-                logs.append(
-                    LogRecord(
-                        body=f"Session ended with {len(uncaptured)} uncaptured items",
-                        severity="WARN",
-                        attributes={
-                            "event": "uncaptured_content",
-                            "count": len(uncaptured),
-                        },
-                    )
-                )
-
-            if logs:
-                logs_ok = export_logs_if_configured(logs)
-                hook_logger.info(
-                    "OTLP logs export: success=%s, count=%d", logs_ok, len(logs)
-                )
-            else:
-                hook_logger.info("OTLP logs export: no logs to export")
-
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse hook input: %s", e)
+            print(json.dumps({"continue": True}))
         except Exception as e:
-            # Don't block session - telemetry export is best-effort
-            hook_logger.info("OTLP export error: %s", e)
-            logger.debug("OTLP export skipped: %s", e)
-
-        # Output result
-        _write_output(
-            uncaptured=uncaptured,
-            captured=captured,
-            sync_result=sync_result,
-            prompt_uncaptured=config.stop_prompt_uncaptured,
-        )
-
-    except json.JSONDecodeError as e:
-        logger.error("Failed to parse hook input: %s", e)
-        print(json.dumps({"continue": True}))
-    except Exception as e:
-        logger.exception("Stop hook error: %s", e)
-        print(json.dumps({"continue": True}))
-    finally:
-        cancel_timeout()
+            logger.exception("Stop hook error: %s", e)
+            print(json.dumps({"continue": True}))
+        finally:
+            cancel_timeout()
 
     sys.exit(0)
 
