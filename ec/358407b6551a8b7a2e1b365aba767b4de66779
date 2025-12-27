@@ -3720,3 +3720,18 @@ All tests pass. Let me provide a summary of what was completed:
 
 ▶ progress ─────────────────────────────────────
 Enhanced Grafana dashboard and subconsciousness...
+
+---
+type: progress
+timestamp: '2025-12-27T15:19:10.826867+00:00'
+summary: '...toggles for consolidation, forgetting, surfacing, and linking - but these
+  features are not implem'
+tags:
+- auto-captured
+- post-tool-use
+- file:REQUIREMENTS.md
+---
+
+...toggles for consolidation, forgetting, surfacing, and linking - but these features are not implemented. Without memory consolidation:
+
+1. **Unbounded memory growth** - Early memories pollute search...
