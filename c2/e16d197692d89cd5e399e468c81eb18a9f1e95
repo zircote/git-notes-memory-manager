@@ -3699,3 +3699,18 @@ tags:
             ],
             "superseded_facts": [],
             "confidence":...
+
+---
+type: progress
+timestamp: '2025-12-27T17:01:03.426534+00:00'
+summary: '...namespace="progress",'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_prompts.py
+---
+
+...namespace="progress",
+            summary="Database setup complete",
+            content="Completed database setup last week.",
+            timestamp=datetime(2024, 1, 20, 14, 0, 0, tzinfo=UTC),...
