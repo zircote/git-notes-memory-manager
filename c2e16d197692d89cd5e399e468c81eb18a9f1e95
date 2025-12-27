@@ -177,3 +177,18 @@ tags:
             assert pattern in TEMPORAL_PATTERNS, f"Missing {pattern}"
 
     def test_ago_patterns_exist(self) -> None:...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:02:45.630708+00:00'
+summary: '...patterns."""'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_temporal.py
+---
+
+...patterns."""
+        ago_patterns = ["n_days_ago", "n_weeks_ago", "n_months_ago"]
+        for pattern in ago_patterns:
+            assert pattern in TEMPORAL_PATTERNS, f"Missing {pattern}"...
