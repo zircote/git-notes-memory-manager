@@ -3411,3 +3411,31 @@ Migrated research documents from `docs/research/CognitiveSubstrate/` into formal
 - docs/spec/active/2025-12-27-memory-consolidation/ARCHITECTURE.md
 - docs/spec/active/2025-12-27-memory-consolidation/IMPLEMENTATION_PLAN.md
 - docs/spec/active/2025-12-27-memory-consolidation/README.md
+
+---
+type: progress
+timestamp: '2025-12-27T16:53:30.687248+00:00'
+summary: '▶ progress ─────────────────────────────────────
+
+  Phase 1 Foundation complete (31/31 tasks), start...'
+tags:
+- auto-captured
+- pre-compact
+---
+
+Phase 1 Foundation complete (31/31 tasks), starting Phase 2: Storage Layer
+## Summary
+Completed Phase 1 Foundation with all observability infrastructure. Now beginning Phase 2: Storage Layer.
+
+## Changes Made
+- Created `consolidation/__init__.py` with feature detection (`is_consolidation_available()`)
+- Created `consolidation/observability.py` (650+ lines) with SpanNames, MetricNames, @traced, @timed_histogram decorators
+- Added 40 tests for observability (all pass)
+- Fixed config caching issue with `reset_config()` in autouse fixture
+- Updated PROGRESS.md - Phase 1 now 100% complete
+
+## Related Files
+- src/git_notes_memory/subconsciousness/consolidation/__init__.py:1-69
+- src/git_notes_memory/subconsciousness/consolidation/observability.py:1-657
+- tests/subconsciousness/consolidation/test_observability.py:1-475
+- docs/spec/active/2025-12-27-memory-consolidation/PROGRESS.md:54-59, 288
