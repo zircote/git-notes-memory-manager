@@ -531,3 +531,20 @@ tags:
 <memory_context>
 Some content here
 <memory_consolidated...
+
+---
+type: patterns
+timestamp: '2025-12-27T17:55:23.178829+00:00'
+summary: '...match is not None'
+tags:
+- auto-captured
+- post-tool-use
+- file:test_summary_injector.py
+---
+
+...match is not None
+
+    def test_pattern_matches_multiline(self) -> None:
+        """Test that pattern matches multiline blocks."""
+        context = """<memory_consolidated_summaries>
+  <summary...
